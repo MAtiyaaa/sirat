@@ -308,18 +308,22 @@ const Hadith = () => {
                         <p className="text-lg leading-relaxed text-right font-arabic">
                           {hadith.hadithArabic}
                         </p>
-                        <p className="text-base text-muted-foreground">
-                          {hadith.hadithEnglish}
-                        </p>
+                        {settings.translationEnabled && (
+                          <p className="text-base text-muted-foreground">
+                            {hadith.hadithEnglish}
+                          </p>
+                        )}
                       </>
                     ) : (
                       <>
                         <p className="text-base leading-relaxed">
                           {hadith.hadithEnglish}
                         </p>
-                        <p className="text-lg font-arabic text-right text-muted-foreground">
-                          {hadith.hadithArabic}
-                        </p>
+                        {settings.translationEnabled && (
+                          <p className="text-lg font-arabic text-right text-muted-foreground">
+                            {hadith.hadithArabic}
+                          </p>
+                        )}
                       </>
                     )}
                   </div>
