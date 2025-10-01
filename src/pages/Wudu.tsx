@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Card } from '@/components/ui/card';
-import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight } from 'lucide-react';
+import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface PrayerTimes {
   Fajr: string;
@@ -18,7 +23,8 @@ const Wudu = () => {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [location, setLocation] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string } | null>(null);
+  const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string; time: string } | null>(null);
+  const [isPrayerTimesOpen, setIsPrayerTimesOpen] = useState(false);
 
   useEffect(() => {
     fetchPrayerTimes();
@@ -50,6 +56,7 @@ const Wudu = () => {
           setNextPrayer({
             name: prayerNames[prayer.name as keyof PrayerTimes],
             timeLeft: `${hoursLeft}h ${minutesLeft}m`,
+            time: prayer.time,
           });
           return;
         }
@@ -64,6 +71,7 @@ const Wudu = () => {
       setNextPrayer({
         name: prayerNames.Fajr,
         timeLeft: `${hoursLeft}h ${minutesLeft}m`,
+        time: prayerTimes.Fajr,
       });
     };
 
@@ -150,43 +158,69 @@ const Wudu = () => {
   return (
     <div className="space-y-8">
       {/* Prayer Times Section */}
-      <div className="glass-effect rounded-3xl p-6 border border-border/50">
-        <div className="flex items-center gap-2 mb-4">
-          <HandHeart className="h-5 w-5 text-primary" />
-          <h2 className="text-2xl font-bold">
-            {settings.language === 'ar' ? 'أوقات الصلاة' : 'Prayer Times'}
-          </h2>
+      <Collapsible open={isPrayerTimesOpen} onOpenChange={setIsPrayerTimesOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <HandHeart className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === 'ar' ? 'أوقات الصلاة' : 'Prayer Times'}
+                    </h2>
+                    {location && (
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span>{location}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                ) : nextPrayer ? (
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">
+                        {settings.language === 'ar' ? 'القادمة' : 'Next'}
+                      </div>
+                      <div className="text-xl font-bold text-primary">
+                        {nextPrayer.name}
+                      </div>
+                      <div className="text-lg font-semibold">
+                        {nextPrayer.time}
+                      </div>
+                    </div>
+                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isPrayerTimesOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                ) : null}
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            {prayerTimes && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {Object.entries(prayerTimes).map(([prayer, time]) => (
+                  <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
+                    <div className="text-sm font-semibold text-muted-foreground mb-1">
+                      {prayerNames[prayer as keyof PrayerTimes]}
+                    </div>
+                    <div className="text-lg font-bold text-primary">
+                      {time}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CollapsibleContent>
         </div>
-
-        {location && (
-          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" />
-            <span>{location}</span>
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : prayerTimes ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {Object.entries(prayerTimes).map(([prayer, time]) => (
-              <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
-                <div className="text-sm font-semibold text-muted-foreground mb-1">
-                  {prayerNames[prayer as keyof PrayerTimes]}
-                </div>
-                <div className="text-lg font-bold text-primary">
-                  {time}
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : null}
-      </div>
+      </Collapsible>
 
       {/* Next Prayer Countdown */}
-      {nextPrayer && (
+      {nextPrayer && isPrayerTimesOpen && (
         <div className="glass-effect rounded-2xl p-5 border border-primary/20 bg-primary/5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
