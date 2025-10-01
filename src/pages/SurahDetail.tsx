@@ -10,6 +10,7 @@ import {
   getSurahAudioUrl,
   WordData 
 } from '@/lib/quran-api';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { 
   Play, 
@@ -41,6 +42,7 @@ const SurahDetail = () => {
   const [wordData, setWordData] = useState<Record<number, WordData[]>>({});
   const [tafsirData, setTafsirData] = useState<Record<number, string>>({});
   const [openTafsir, setOpenTafsir] = useState<number | null>(null);
+  const [lastVisibleAyah, setLastVisibleAyah] = useState<number>(1);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const surahAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -48,6 +50,51 @@ const SurahDetail = () => {
   useEffect(() => {
     loadSurah();
   }, [surahNumber]);
+
+  // Track scroll progress and save to database
+  useEffect(() => {
+    if (!surahData) return;
+
+    const handleScroll = () => {
+      const ayahElements = document.querySelectorAll('[data-ayah]');
+      let maxVisible = 1;
+
+      ayahElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          const ayahNum = parseInt(el.getAttribute('data-ayah') || '1');
+          if (ayahNum > maxVisible) maxVisible = ayahNum;
+        }
+      });
+
+      setLastVisibleAyah(maxVisible);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [surahData]);
+
+  // Save progress to database
+  useEffect(() => {
+    const saveProgress = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user || !surahNumber) return;
+
+      await supabase
+        .from('reading_progress')
+        .upsert({
+          user_id: session.user.id,
+          surah_number: parseInt(surahNumber),
+          ayah_number: lastVisibleAyah,
+          progress_type: 'scroll',
+        });
+    };
+
+    const timeoutId = setTimeout(saveProgress, 2000); // Debounce saves
+    return () => clearTimeout(timeoutId);
+  }, [lastVisibleAyah, surahNumber]);
 
   const loadSurah = async () => {
     if (!surahNumber) return;
@@ -244,6 +291,7 @@ const SurahDetail = () => {
         {surahData.ayahs.map((ayah: any, index: number) => (
           <div
             key={ayah.number}
+            data-ayah={ayah.numberInSurah}
             className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
               currentPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
             }`}

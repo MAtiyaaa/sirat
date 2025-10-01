@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reading_progress: {
+        Row: {
+          ayah_number: number
+          created_at: string | null
+          id: string
+          progress_type: string | null
+          surah_number: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ayah_number: number
+          created_at?: string | null
+          id?: string
+          progress_type?: string | null
+          surah_number: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ayah_number?: number
+          created_at?: string | null
+          id?: string
+          progress_type?: string | null
+          surah_number?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          font_type: string | null
+          id: string
+          language: string | null
+          qari: string | null
+          tafsir_source: string | null
+          tajweed_enabled: boolean | null
+          theme: string | null
+          translation_enabled: boolean | null
+          transliteration_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          font_type?: string | null
+          id?: string
+          language?: string | null
+          qari?: string | null
+          tafsir_source?: string | null
+          tajweed_enabled?: boolean | null
+          theme?: string | null
+          translation_enabled?: boolean | null
+          transliteration_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          font_type?: string | null
+          id?: string
+          language?: string | null
+          qari?: string | null
+          tafsir_source?: string | null
+          tajweed_enabled?: boolean | null
+          theme?: string | null
+          translation_enabled?: boolean | null
+          transliteration_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
