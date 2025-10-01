@@ -29,18 +29,18 @@ import {
 } from "@/components/ui/collapsible";
 import AyahChatDialog from '@/components/AyahChatDialog';
 import { toast } from 'sonner';
+import { useAudio } from '@/contexts/AudioContext';
 
 const SurahDetail = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const { playingSurah, playingAyah: globalPlayingAyah, isPlaying, playSurah: playGlobalSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
   
   const [surahData, setSurahData] = useState<any>(null);
   const [translation, setTranslation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
-  const [playingSurah, setPlayingSurah] = useState(false);
-  const [currentPlayingAyah, setCurrentPlayingAyah] = useState<number | null>(null);
   const [openWordPopover, setOpenWordPopover] = useState<string | null>(null);
   const [wordData, setWordData] = useState<Record<number, WordData[]>>({});
   const [tafsirData, setTafsirData] = useState<Record<number, string>>({});
@@ -53,7 +53,6 @@ const SurahDetail = () => {
   const [user, setUser] = useState<any>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const surahAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     loadSurah();
@@ -471,59 +470,27 @@ const SurahDetail = () => {
   };
 
   const playSurah = () => {
-    if (playingSurah) {
-      surahAudioRef.current?.pause();
-      setPlayingSurah(false);
-      setCurrentPlayingAyah(null);
+    const currentSurahNumber = parseInt(surahNumber!);
+    
+    // If this surah is already playing globally
+    if (playingSurah === currentSurahNumber) {
+      if (isPlaying) {
+        pauseSurah();
+      } else {
+        resumeSurah();
+      }
       return;
+    }
+
+    // If another surah is playing, stop it first
+    if (playingSurah && playingSurah !== currentSurahNumber) {
+      stopSurah();
     }
 
     if (!surahData) return;
     
-    setPlayingSurah(true);
-    setCurrentPlayingAyah(1);
-    
-    // Play ayahs sequentially for accurate tracking
-    const playNextAyah = (ayahIndex: number) => {
-      if (ayahIndex > surahData.numberOfAyahs) {
-        setPlayingSurah(false);
-        setCurrentPlayingAyah(null);
-        return;
-      }
-      
-      const audioUrl = getAyahAudioUrl(settings.qari, parseInt(surahNumber!), ayahIndex);
-      
-      if (surahAudioRef.current) {
-        surahAudioRef.current.pause();
-      }
-      
-      surahAudioRef.current = new Audio(audioUrl);
-      setCurrentPlayingAyah(ayahIndex);
-      
-      // Auto-scroll to current ayah
-      const element = document.querySelector(`[data-ayah="${ayahIndex}"]`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      
-      surahAudioRef.current.play()
-        .catch(error => {
-          console.error('Error playing ayah:', error);
-          setPlayingSurah(false);
-          setCurrentPlayingAyah(null);
-        });
-      
-      surahAudioRef.current.onended = () => {
-        playNextAyah(ayahIndex + 1);
-      };
-      
-      surahAudioRef.current.onerror = () => {
-        console.error('Error loading ayah audio');
-        playNextAyah(ayahIndex + 1);
-      };
-    };
-    
-    playNextAyah(1);
+    // Start playing this surah through global context
+    playGlobalSurah(currentSurahNumber, surahData.numberOfAyahs);
   };
 
   const handleWordClick = async (ayahNumber: number, wordIndex: number) => {
@@ -595,9 +562,15 @@ const SurahDetail = () => {
             className="rounded-full px-6 py-6 shadow-lg hover:shadow-xl smooth-transition"
             size="lg"
           >
-            {playingSurah ? <Pause className="h-5 w-5 mr-2" /> : <Play className="h-5 w-5 mr-2" />}
+            {playingSurah === parseInt(surahNumber!) && isPlaying ? (
+              <Pause className="h-5 w-5 mr-2" />
+            ) : (
+              <Play className="h-5 w-5 mr-2" />
+            )}
             <span className="font-semibold">
-              {settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah'}
+              {playingSurah === parseInt(surahNumber!) && isPlaying
+                ? (settings.language === 'ar' ? 'إيقاف مؤقت' : 'Pause')
+                : (settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah')}
             </span>
           </Button>
 
@@ -629,7 +602,7 @@ const SurahDetail = () => {
             key={ayah.number}
             data-ayah={ayah.numberInSurah}
             className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
-              currentPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
+              playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
             }`}
           >
             {/* Ayah Number & Play */}

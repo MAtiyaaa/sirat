@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Bookmark } from 'lucide-react';
+import { Book, Bookmark, Volume2, Pause, Play } from 'lucide-react';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
+import { useAudio } from '@/contexts/AudioContext';
+import { Button } from '@/components/ui/button';
 
 const Quran = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const { playingSurah, isPlaying, playSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<Record<number, number>>({});
@@ -114,10 +117,9 @@ const Quran = () => {
       {lastViewedSurah && surahs.length > 0 && (
         <div 
           className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition"
-          onClick={() => navigate(`/quran/${lastViewedSurah}`)}
         >
           <div className="flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1" onClick={() => navigate(`/quran/${lastViewedSurah}`)}>
               <p className="text-sm text-muted-foreground mb-2">
                 {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
               </p>
@@ -132,7 +134,25 @@ const Quran = () => {
                 </p>
               )}
             </div>
-            <Book className="h-8 w-8 text-primary" />
+            <div className="flex items-center gap-3">
+              {playingSurah === lastViewedSurah && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    isPlaying ? pauseSurah() : resumeSurah();
+                  }}
+                >
+                  {isPlaying ? (
+                    <Pause className="h-6 w-6 text-primary" />
+                  ) : (
+                    <Play className="h-6 w-6 text-primary" />
+                  )}
+                </Button>
+              )}
+              <Book className="h-8 w-8 text-primary" />
+            </div>
           </div>
         </div>
       )}
@@ -174,6 +194,24 @@ const Quran = () => {
                         {settings.language === 'ar' ? surah.name : surah.englishName}
                       </h3>
                       <div className="flex items-center gap-2">
+                        {playingSurah === surah.number && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              isPlaying ? pauseSurah() : resumeSurah();
+                            }}
+                          >
+                            {isPlaying ? (
+                              <Pause className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Play className="h-5 w-5 text-primary" />
+                            )}
+                          </Button>
+                        )}
                         {bookmarkedSurahs.has(surah.number) && (
                           <Bookmark className="h-5 w-5 text-primary fill-primary" />
                         )}
