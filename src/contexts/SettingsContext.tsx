@@ -80,68 +80,107 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Load settings from database or localStorage
   useEffect(() => {
+    let isSubscribed = true;
+
     const loadSettings = async () => {
-      console.log('[Settings] Loading settings...');
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUserId = session?.user?.id || null;
-      console.log('[Settings] User ID:', currentUserId);
-      setUserId(currentUserId);
-
-      if (currentUserId) {
-        console.log('[Settings] Fetching from database for user:', currentUserId);
-        // Load from database for logged-in users
-        const { data, error } = await supabase
-          .from('user_settings')
-          .select('*')
-          .eq('user_id', currentUserId)
-          .maybeSingle();
-
-        if (error) {
-          console.error('[Settings] Error loading from database:', error);
+      try {
+        console.log('[Settings] Loading settings...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('[Settings] Error getting session:', sessionError);
+          setIsLoaded(true);
+          return;
         }
 
-        if (data && !error) {
-          console.log('[Settings] Loaded from database:', data);
-          const dbSettings = {
-            language: (data.language as Language) || defaultSettings.language,
-            theme: (data.theme as Theme) || defaultSettings.theme,
-            qari: data.qari || defaultSettings.qari,
-            translationEnabled: data.translation_enabled ?? defaultSettings.translationEnabled,
-            transliterationEnabled: data.transliteration_enabled ?? defaultSettings.transliterationEnabled,
-            fontType: (data.font_type as FontType) || defaultSettings.fontType,
-            tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
-            prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
-            readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
-          };
-          console.log('[Settings] Setting state to DB settings:', dbSettings);
-          setSettings(dbSettings);
-          // Also update localStorage to keep them in sync
-          try {
-            localStorage.setItem('sirat-settings', JSON.stringify(dbSettings));
-            console.log('[Settings] Synced to localStorage');
-          } catch (error) {
-            console.error('[Settings] Error syncing to localStorage:', error);
+        if (!isSubscribed) {
+          console.log('[Settings] Component unmounted, aborting load');
+          return;
+        }
+
+        const currentUserId = session?.user?.id || null;
+        console.log('[Settings] User ID:', currentUserId);
+        setUserId(currentUserId);
+
+        if (currentUserId) {
+          console.log('[Settings] Fetching from database for user:', currentUserId);
+          
+          const { data, error } = await supabase
+            .from('user_settings')
+            .select('*')
+            .eq('user_id', currentUserId)
+            .maybeSingle();
+
+          if (error) {
+            console.error('[Settings] Error loading from database:', error);
+            setIsLoaded(true);
+            return;
+          }
+
+          if (!isSubscribed) {
+            console.log('[Settings] Component unmounted after DB fetch, aborting');
+            return;
+          }
+
+          if (data) {
+            console.log('[Settings] Loaded from database:', data);
+            const dbSettings: Settings = {
+              language: (data.language as Language) || defaultSettings.language,
+              theme: (data.theme as Theme) || defaultSettings.theme,
+              qari: data.qari || defaultSettings.qari,
+              translationEnabled: data.translation_enabled ?? defaultSettings.translationEnabled,
+              transliterationEnabled: data.transliteration_enabled ?? defaultSettings.transliterationEnabled,
+              fontType: (data.font_type as FontType) || defaultSettings.fontType,
+              tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
+              prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
+              readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
+            };
+            console.log('[Settings] Setting state to DB settings:', dbSettings);
+            setSettings(dbSettings);
+            
+            // Also update localStorage
+            try {
+              localStorage.setItem('sirat-settings', JSON.stringify(dbSettings));
+              console.log('[Settings] Synced to localStorage');
+            } catch (error) {
+              console.error('[Settings] Error syncing to localStorage:', error);
+            }
+          } else {
+            console.log('[Settings] No settings in database, using localStorage/defaults');
           }
         } else {
-          console.log('[Settings] No settings in database, using localStorage/defaults');
+          console.log('[Settings] No user logged in, using localStorage');
         }
-      } else {
-        console.log('[Settings] No user logged in, using localStorage');
+        
+        setIsLoaded(true);
+        console.log('[Settings] Load complete, isLoaded=true');
+      } catch (error) {
+        console.error('[Settings] Unexpected error in loadSettings:', error);
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
-      console.log('[Settings] Load complete, isLoaded=true');
     };
 
     loadSettings();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!isSubscribed) return;
+      
       console.log('[Settings] Auth state changed:', event, 'User:', session?.user?.id);
       setUserId(session?.user?.id || null);
       setIsLoaded(false);
-      await loadSettings();
+      
+      // Use setTimeout to break out of the auth callback context
+      setTimeout(() => {
+        if (isSubscribed) {
+          loadSettings();
+        }
+      }, 0);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isSubscribed = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
