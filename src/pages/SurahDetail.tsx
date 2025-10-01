@@ -37,6 +37,7 @@ const SurahDetail = () => {
   const { settings } = useSettings();
   const { playingSurah, playingAyah: globalPlayingAyah, isPlaying, playSurah: playGlobalSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
   
+  // State management
   const [surahData, setSurahData] = useState<any>(null);
   const [translation, setTranslation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
