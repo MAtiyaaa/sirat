@@ -4,7 +4,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  Clock,
   BookOpen, 
   User, 
   Settings as SettingsIcon,
@@ -20,7 +19,6 @@ const MoreDialog = () => {
   const content = {
     ar: {
       more: 'المزيد',
-      prayerTimes: 'أوقات الصلاة',
       duas: 'الأدعية',
       stories: 'قصص الأنبياء',
       account: 'الحساب',
@@ -28,7 +26,6 @@ const MoreDialog = () => {
     },
     en: {
       more: 'More',
-      prayerTimes: 'Prayer Times',
       duas: 'Duas',
       stories: 'Prophet Stories',
       account: 'Account',
@@ -39,7 +36,6 @@ const MoreDialog = () => {
   const t = content[settings.language];
 
   const menuItems = [
-    { icon: Clock, label: t.prayerTimes, path: '/info' },
     { icon: BookOpen, label: t.duas, path: '/duas' },
     { icon: BookOpen, label: t.stories, path: '/prophet-stories' },
     { icon: User, label: t.account, path: '/account' },
