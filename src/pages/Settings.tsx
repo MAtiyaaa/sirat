@@ -1,11 +1,40 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LogOut, User } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Settings = () => {
   const { settings, updateSettings } = useSettings();
+  const navigate = useNavigate();
+  const [user, setUser] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success(settings.language === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully');
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.message || (settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred'));
+    }
+  };
 
   const content = {
     ar: {
@@ -18,6 +47,9 @@ const Settings = () => {
       transliteration: 'إظهار النطق',
       fontType: 'نوع الخط',
       tafsirSource: 'مصدر التفسير',
+      account: 'الحساب',
+      signOut: 'تسجيل الخروج',
+      signIn: 'تسجيل الدخول',
       themes: {
         light: 'فاتح',
         dark: 'داكن',
@@ -39,6 +71,9 @@ const Settings = () => {
       transliteration: 'Show Transliteration',
       fontType: 'Font Type',
       tafsirSource: 'Tafsir Source',
+      account: 'Account',
+      signOut: 'Sign Out',
+      signIn: 'Sign In',
       themes: {
         light: 'Light',
         dark: 'Dark',
@@ -66,6 +101,41 @@ const Settings = () => {
       </div>
 
       <div className="space-y-6">
+        {/* Account Section */}
+        <div className="glass-effect rounded-2xl p-6 space-y-4">
+          <Label className="text-base font-semibold">{t.account}</Label>
+          {user ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">{user.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.user_metadata?.full_name || 'User'}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="w-full"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {t.signOut}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => navigate('/auth')}
+              className="w-full"
+            >
+              {t.signIn}
+            </Button>
+          )}
+        </div>
+
         {/* Language */}
         <div className="glass-effect rounded-2xl p-6 space-y-4">
           <Label className="text-base font-semibold">{t.language}</Label>

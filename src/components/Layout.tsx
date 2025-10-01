@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, Droplet, Home, MessageSquare, Settings } from 'lucide-react';
+import { Book, Info as InfoIcon, Home, MessageSquare, Settings } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -14,9 +14,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       label: { ar: 'القرآن', en: 'Quran' } 
     },
     { 
-      path: '/wudu', 
-      icon: Droplet, 
-      label: { ar: 'الوضوء', en: 'Wudu' } 
+      path: '/info', 
+      icon: InfoIcon, 
+      label: { ar: 'معلومات', en: 'Info' } 
     },
     { 
       path: '/', 

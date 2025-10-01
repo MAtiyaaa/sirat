@@ -36,6 +36,7 @@ const SurahDetail = () => {
   const [loading, setLoading] = useState(true);
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [playingSurah, setPlayingSurah] = useState(false);
+  const [currentPlayingAyah, setCurrentPlayingAyah] = useState<number | null>(null);
   const [selectedWord, setSelectedWord] = useState<{ ayahIndex: number; word: WordData } | null>(null);
   const [wordData, setWordData] = useState<Record<number, WordData[]>>({});
   const [tafsirData, setTafsirData] = useState<Record<number, string>>({});
@@ -108,10 +109,19 @@ const SurahDetail = () => {
     }
     
     audioRef.current = new Audio(audioUrl);
-    audioRef.current.play();
+    audioRef.current.play()
+      .catch(error => {
+        console.error('Error playing ayah audio:', error);
+        toast.error('Failed to play audio');
+      });
     setPlayingAyah(ayahNumber);
     
     audioRef.current.onended = () => {
+      setPlayingAyah(null);
+    };
+    
+    audioRef.current.onerror = () => {
+      toast.error('Error loading audio');
       setPlayingAyah(null);
     };
   };
@@ -120,6 +130,7 @@ const SurahDetail = () => {
     if (playingSurah) {
       surahAudioRef.current?.pause();
       setPlayingSurah(false);
+      setCurrentPlayingAyah(null);
       return;
     }
 
@@ -130,16 +141,40 @@ const SurahDetail = () => {
     }
     
     surahAudioRef.current = new Audio(audioUrl);
-    surahAudioRef.current.play();
+    surahAudioRef.current.play()
+      .catch(error => {
+        console.error('Error playing surah audio:', error);
+        toast.error('Failed to play surah');
+      });
     setPlayingSurah(true);
+    setCurrentPlayingAyah(1);
+    
+    // Estimate ayah timing (rough approximation)
+    let currentAyahIndex = 0;
+    const ayahDuration = 15000; // Roughly 15 seconds per ayah (adjust based on actual audio)
+    
+    const interval = setInterval(() => {
+      if (currentAyahIndex < surahData.numberOfAyahs - 1) {
+        currentAyahIndex++;
+        setCurrentPlayingAyah(currentAyahIndex + 1);
+      }
+    }, ayahDuration);
     
     surahAudioRef.current.onended = () => {
       setPlayingSurah(false);
+      setCurrentPlayingAyah(null);
+      clearInterval(interval);
+    };
+    
+    surahAudioRef.current.onerror = () => {
+      toast.error('Error loading surah audio');
+      setPlayingSurah(false);
+      setCurrentPlayingAyah(null);
+      clearInterval(interval);
     };
   };
 
-  const handleWordClick = async (ayahIndex: number, word: WordData) => {
-    await loadWordByWord(ayahIndex + 1);
+  const handleWordClick = (ayahIndex: number, word: WordData) => {
     setSelectedWord({ ayahIndex, word });
   };
 
@@ -209,7 +244,9 @@ const SurahDetail = () => {
         {surahData.ayahs.map((ayah: any, index: number) => (
           <div
             key={ayah.number}
-            className="glass-effect rounded-2xl p-6 space-y-4"
+            className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
+              currentPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
+            }`}
           >
             {/* Ayah Number & Play */}
             <div className="flex items-center justify-between mb-4">
@@ -273,8 +310,10 @@ const SurahDetail = () => {
                 </div>
               ) : (
                 <span
-                  onClick={() => loadWordByWord(ayah.numberInSurah)}
-                  className="cursor-pointer"
+                  onClick={() => {
+                    loadWordByWord(ayah.numberInSurah);
+                  }}
+                  className="cursor-pointer hover:text-primary smooth-transition"
                 >
                   {ayah.text}
                 </span>

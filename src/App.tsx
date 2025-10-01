@@ -9,6 +9,8 @@ import Home from "./pages/Home";
 import Quran from "./pages/Quran";
 import SurahDetail from "./pages/SurahDetail";
 import Wudu from "./pages/Wudu";
+import Auth from "./pages/Auth";
+import Info from "./pages/Info";
 import Qalam from "./pages/Qalam";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -24,14 +26,15 @@ const App = () => (
         <BrowserRouter>
           <Layout>
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/quran" element={<Quran />} />
-              <Route path="/quran/:surahNumber" element={<SurahDetail />} />
-              <Route path="/wudu" element={<Wudu />} />
-              <Route path="/qalam" element={<Qalam />} />
-              <Route path="/settings" element={<Settings />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/quran" element={<Quran />} />
+          <Route path="/quran/:surahNumber" element={<SurahDetail />} />
+          <Route path="/qalam" element={<Qalam />} />
+          <Route path="/wudu" element={<Wudu />} />
+          <Route path="/info" element={<Info />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
         </BrowserRouter>
