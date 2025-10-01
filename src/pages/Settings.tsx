@@ -57,6 +57,7 @@ const Settings = () => {
         dark: 'داكن',
         gold: 'ذهبي',
         pink: 'وردي',
+        system: 'حسب النظام',
       },
       fonts: {
         quran: 'خط المصحف',
@@ -101,6 +102,7 @@ const Settings = () => {
         dark: 'Dark',
         gold: 'Gold',
         pink: 'Pink',
+        system: 'System',
       },
       fonts: {
         quran: 'Quran Font',
@@ -223,6 +225,7 @@ const Settings = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="system">{t.themes.system}</SelectItem>
               <SelectItem value="light">{t.themes.light}</SelectItem>
               <SelectItem value="dark">{t.themes.dark}</SelectItem>
               <SelectItem value="gold">{t.themes.gold}</SelectItem>

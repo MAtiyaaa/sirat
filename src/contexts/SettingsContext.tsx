@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
-export type Theme = 'light' | 'dark' | 'gold' | 'pink';
+export type Theme = 'light' | 'dark' | 'gold' | 'pink' | 'system';
 export type FontType = 'quran' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
 
@@ -92,7 +92,24 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     // Apply theme
     document.documentElement.classList.remove('light', 'dark', 'gold', 'pink');
-    document.documentElement.classList.add(settings.theme);
+    
+    if (settings.theme === 'system') {
+      // Detect system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
+      
+      // Listen for system theme changes
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => {
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(e.matches ? 'dark' : 'light');
+      };
+      
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } else {
+      document.documentElement.classList.add(settings.theme);
+    }
     
     // Apply direction
     document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
