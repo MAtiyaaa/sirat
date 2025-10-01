@@ -672,13 +672,13 @@ const SurahDetail = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       {/* Floating Back Button */}
       {showBackButton && (
         <Button
           onClick={scrollToTop}
           size="icon"
-          className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 shadow-lg hover:shadow-xl smooth-transition"
+          className="fixed bottom-24 right-6 z-[60] rounded-full w-12 h-12 shadow-lg hover:shadow-xl smooth-transition bg-primary text-primary-foreground hover:bg-primary/90"
           title={settings.language === 'ar' ? 'العودة للأعلى' : 'Back to top'}
         >
           <ChevronUp className="h-5 w-5" />
