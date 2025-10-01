@@ -71,16 +71,61 @@ const SurahDetail = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user || !surahNumber) return;
 
-      const { data } = await supabase
-        .from('reading_progress')
-        .select('ayah_number')
-        .eq('user_id', session.user.id)
-        .eq('surah_number', parseInt(surahNumber))
-        .single();
+      let ayahNumber: number | null = null;
 
-      if (data?.ayah_number) {
+      // Determine which tracking mode to use
+      const trackingMode = settings.readingTrackingMode;
+
+      if (trackingMode === 'scroll') {
+        // Get from reading progress (scroll position)
+        const { data } = await supabase
+          .from('reading_progress')
+          .select('ayah_number')
+          .eq('user_id', session.user.id)
+          .eq('surah_number', parseInt(surahNumber))
+          .maybeSingle();
+        ayahNumber = data?.ayah_number || null;
+      } else if (trackingMode === 'bookmark') {
+        // Get last bookmarked ayah
+        const { data } = await supabase
+          .from('bookmarks')
+          .select('ayah_number')
+          .eq('user_id', session.user.id)
+          .eq('surah_number', parseInt(surahNumber))
+          .eq('bookmark_type', 'ayah')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        ayahNumber = data?.ayah_number || null;
+      } else if (trackingMode === 'reciting') {
+        // Get last recited ayah
+        const { data } = await supabase
+          .from('ayah_interactions')
+          .select('ayah_number')
+          .eq('user_id', session.user.id)
+          .eq('surah_number', parseInt(surahNumber))
+          .eq('interaction_type', 'recite')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        ayahNumber = data?.ayah_number || null;
+      } else if (trackingMode === 'click') {
+        // Get last clicked/interacted ayah
+        const { data } = await supabase
+          .from('ayah_interactions')
+          .select('ayah_number')
+          .eq('user_id', session.user.id)
+          .eq('surah_number', parseInt(surahNumber))
+          .eq('interaction_type', 'click')
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        ayahNumber = data?.ayah_number || null;
+      }
+
+      if (ayahNumber) {
         setTimeout(() => {
-          const element = document.querySelector(`[data-ayah="${data.ayah_number}"]`);
+          const element = document.querySelector(`[data-ayah="${ayahNumber}"]`);
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setHasRestoredScroll(true);
@@ -92,7 +137,7 @@ const SurahDetail = () => {
     };
 
     restoreScroll();
-  }, [surahData, surahNumber, hasRestoredScroll]);
+  }, [surahData, surahNumber, hasRestoredScroll, settings.readingTrackingMode]);
 
   // Track scroll progress and save to database
   useEffect(() => {
@@ -247,6 +292,7 @@ const SurahDetail = () => {
         });
         toast.success(settings.language === 'ar' ? 'تم إزالة الإشارة المرجعية' : 'Bookmark removed');
       } else {
+        // Add bookmark
         await supabase
           .from('bookmarks')
           .insert({
@@ -256,6 +302,19 @@ const SurahDetail = () => {
             bookmark_type: 'ayah'
           });
         
+        // Track bookmark interaction
+        await supabase
+          .from('ayah_interactions')
+          .upsert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: ayahNumber,
+            interaction_type: 'bookmark',
+          }, {
+            onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+            ignoreDuplicates: false,
+          });
+        
         setBookmarkedAyahs(prev => new Set([...prev, ayahNumber]));
         toast.success(settings.language === 'ar' ? 'تمت الإضافة للإشارات المرجعية' : 'Added to bookmarks');
       }
@@ -263,6 +322,24 @@ const SurahDetail = () => {
       console.error('Error toggling bookmark:', error);
       toast.error(settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred');
     }
+  };
+
+  const handleAyahChat = async (ayah: any) => {
+    // Track click interaction
+    if (user && surahNumber) {
+      await supabase
+        .from('ayah_interactions')
+        .upsert({
+          user_id: user.id,
+          surah_number: parseInt(surahNumber),
+          ayah_number: ayah.numberInSurah,
+          interaction_type: 'click',
+        }, {
+          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+          ignoreDuplicates: false,
+        });
+    }
+    setChatAyah({ text: ayah.text, number: ayah.numberInSurah });
   };
 
   const loadSurah = async () => {
@@ -319,6 +396,21 @@ const SurahDetail = () => {
 
   const loadTafsir = async (ayahNumber: number) => {
     if (tafsirData[ayahNumber]) return;
+
+    // Track click interaction
+    if (user && surahNumber) {
+      await supabase
+        .from('ayah_interactions')
+        .upsert({
+          user_id: user.id,
+          surah_number: parseInt(surahNumber),
+          ayah_number: ayahNumber,
+          interaction_type: 'click',
+        }, {
+          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+          ignoreDuplicates: false,
+        });
+    }
     
     try {
       const tafsir = await fetchTafsir(
@@ -332,11 +424,26 @@ const SurahDetail = () => {
     }
   };
 
-  const playAyah = (ayahNumber: number) => {
+  const playAyah = async (ayahNumber: number) => {
     if (playingAyah === ayahNumber) {
       audioRef.current?.pause();
       setPlayingAyah(null);
       return;
+    }
+
+    // Track reciting interaction
+    if (user && surahNumber) {
+      await supabase
+        .from('ayah_interactions')
+        .upsert({
+          user_id: user.id,
+          surah_number: parseInt(surahNumber),
+          ayah_number: ayahNumber,
+          interaction_type: 'recite',
+        }, {
+          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+          ignoreDuplicates: false,
+        });
     }
 
     const audioUrl = getAyahAudioUrl(settings.qari, parseInt(surahNumber!), ayahNumber);
@@ -419,9 +526,24 @@ const SurahDetail = () => {
     playNextAyah(1);
   };
 
-  const handleWordClick = (ayahNumber: number, wordIndex: number) => {
+  const handleWordClick = async (ayahNumber: number, wordIndex: number) => {
     const key = `${ayahNumber}-${wordIndex}`;
     setOpenWordPopover(openWordPopover === key ? null : key);
+
+    // Track click interaction
+    if (user && surahNumber) {
+      await supabase
+        .from('ayah_interactions')
+        .upsert({
+          user_id: user.id,
+          surah_number: parseInt(surahNumber),
+          ayah_number: ayahNumber,
+          interaction_type: 'click',
+        }, {
+          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+          ignoreDuplicates: false,
+        });
+    }
   };
 
   const playWordAudio = (word: WordData) => {
@@ -535,7 +657,7 @@ const SurahDetail = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setChatAyah({ text: ayah.text, number: ayah.numberInSurah })}
+                  onClick={() => handleAyahChat(ayah)}
                   className="rounded-full"
                   title={settings.language === 'ar' ? 'اسأل عن هذه الآية' : 'Ask about this ayah'}
                 >

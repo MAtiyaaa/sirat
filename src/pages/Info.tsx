@@ -20,17 +20,24 @@ const Info = () => {
 
   useEffect(() => {
     fetchPrayerTimes();
-  }, []);
+  }, [settings.prayerTimeRegion]);
 
   const fetchPrayerTimes = async () => {
     setLoading(true);
     try {
-      // Get user's location
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
+      let latitude, longitude;
 
-      const { latitude, longitude } = position.coords;
+      if (settings.prayerTimeRegion) {
+        // Use manual region
+        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+      } else {
+        // Get user's location
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+      }
 
       // Fetch prayer times from Aladhan API
       const response = await fetch(

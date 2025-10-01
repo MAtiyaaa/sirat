@@ -73,6 +73,36 @@ export type Database = {
           },
         ]
       }
+      ayah_interactions: {
+        Row: {
+          ayah_number: number
+          created_at: string
+          id: string
+          interaction_type: string
+          surah_number: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ayah_number: number
+          created_at?: string
+          id?: string
+          interaction_type: string
+          surah_number: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ayah_number?: number
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          surah_number?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           ayah_number: number | null
@@ -181,7 +211,9 @@ export type Database = {
           font_type: string | null
           id: string
           language: string | null
+          prayer_time_region: string | null
           qari: string | null
+          reading_tracking_mode: string | null
           tafsir_source: string | null
           tajweed_enabled: boolean | null
           theme: string | null
@@ -195,7 +227,9 @@ export type Database = {
           font_type?: string | null
           id?: string
           language?: string | null
+          prayer_time_region?: string | null
           qari?: string | null
+          reading_tracking_mode?: string | null
           tafsir_source?: string | null
           tajweed_enabled?: boolean | null
           theme?: string | null
@@ -209,7 +243,9 @@ export type Database = {
           font_type?: string | null
           id?: string
           language?: string | null
+          prayer_time_region?: string | null
           qari?: string | null
+          reading_tracking_mode?: string | null
           tafsir_source?: string | null
           tajweed_enabled?: boolean | null
           theme?: string | null

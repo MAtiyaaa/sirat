@@ -28,7 +28,7 @@ const Wudu = () => {
 
   useEffect(() => {
     fetchPrayerTimes();
-  }, []);
+  }, [settings.prayerTimeRegion]);
 
   useEffect(() => {
     if (!prayerTimes) return;
@@ -84,11 +84,19 @@ const Wudu = () => {
   const fetchPrayerTimes = async () => {
     setLoading(true);
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
-      });
+      let latitude, longitude;
 
-      const { latitude, longitude } = position.coords;
+      if (settings.prayerTimeRegion) {
+        // Use manual region
+        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+      } else {
+        // Use geolocation
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+      }
 
       const response = await fetch(
         `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`

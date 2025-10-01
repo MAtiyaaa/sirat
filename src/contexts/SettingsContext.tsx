@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export type Language = 'ar' | 'en';
 export type Theme = 'light' | 'dark' | 'gold' | 'pink';
 export type FontType = 'quran' | 'normal';
+export type ReadingTrackingMode = 'scroll' | 'bookmark' | 'reciting' | 'click';
 
 interface Settings {
   language: Language;
@@ -13,6 +14,8 @@ interface Settings {
   transliterationEnabled: boolean;
   fontType: FontType;
   tafsirSource: string;
+  prayerTimeRegion: string | null;
+  readingTrackingMode: ReadingTrackingMode;
 }
 
 interface SettingsContextType {
@@ -28,6 +31,8 @@ const defaultSettings: Settings = {
   transliterationEnabled: true,
   fontType: 'quran',
   tafsirSource: 'en-tafisr-ibn-kathir',
+  prayerTimeRegion: null,
+  readingTrackingMode: 'scroll',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -59,6 +64,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             transliterationEnabled: data.transliteration_enabled ?? defaultSettings.transliterationEnabled,
             fontType: (data.font_type as FontType) || defaultSettings.fontType,
             tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
+            prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
+            readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
           });
         }
       } else {
@@ -105,6 +112,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           transliteration_enabled: settings.transliterationEnabled,
           font_type: settings.fontType,
           tafsir_source: settings.tafsirSource,
+          prayer_time_region: settings.prayerTimeRegion,
+          reading_tracking_mode: settings.readingTrackingMode,
         })
         .then(() => {});
     } else {
