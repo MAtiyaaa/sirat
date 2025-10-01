@@ -157,7 +157,7 @@ const Home = () => {
         )}
 
         {/* Features Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 mt-32">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
