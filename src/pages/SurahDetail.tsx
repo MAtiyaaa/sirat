@@ -288,8 +288,10 @@ const SurahDetail = () => {
 
       {/* Bismillah */}
       {surahData.number !== 1 && surahData.number !== 9 && (
-        <div className="text-center py-8 glass-effect rounded-2xl">
-          <p className="text-2xl quran-font">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+        <div className="text-center py-12 glass-effect rounded-3xl border border-border/50 backdrop-blur-xl apple-shadow">
+          <p className="text-3xl md:text-4xl quran-font bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+          </p>
         </div>
       )}
 
