@@ -369,7 +369,7 @@ const Qalam = () => {
       </div>
 
       {/* Input */}
-      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-4">
+      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-8">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
