@@ -171,24 +171,24 @@ const Home = () => {
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-3xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
                 
-                <div className="relative glass-effect rounded-3xl p-8 md:p-10 h-full border border-border/50 hover:border-border smooth-transition backdrop-blur-xl">
-                  <div className="space-y-6">
-                    <div className={`inline-flex w-16 h-16 rounded-2xl ${feature.iconBg} items-center justify-center group-hover:scale-110 smooth-transition`}>
-                      <Icon className={`h-8 w-8 ${feature.iconColor}`} />
+                <div className="relative glass-effect rounded-2xl p-6 md:p-8 h-full border border-border/30 hover:border-border/50 smooth-transition backdrop-blur-xl">
+                  <div className="space-y-5">
+                    <div className={`inline-flex w-14 h-14 rounded-xl ${feature.iconBg} items-center justify-center group-hover:scale-105 smooth-transition`}>
+                      <Icon className={`h-7 w-7 ${feature.iconColor}`} />
                     </div>
                     
-                    <div className="space-y-3">
-                      <h3 className="text-2xl font-semibold tracking-tight">
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-semibold tracking-tight">
                         {feature.title[settings.language]}
                       </h3>
                       
-                      <p className="text-muted-foreground leading-relaxed">
+                      <p className="text-muted-foreground text-sm leading-relaxed">
                         {feature.description[settings.language]}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2 text-primary font-medium group-hover:gap-3 smooth-transition">
-                      <span className="text-sm">
+                    <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 smooth-transition">
+                      <span>
                         {settings.language === 'ar' ? 'استكشف' : 'Explore'}
                       </span>
                       <ArrowRight className="h-4 w-4" />
