@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link } from 'react-router-dom';
-import { Book } from 'lucide-react';
+import { Book, Loader2 } from 'lucide-react';
+import { fetchSurahs, Surah } from '@/lib/quran-api';
+import { toast } from 'sonner';
 
 const Quran = () => {
   const { settings } = useSettings();
+  const [surahs, setSurahs] = useState<Surah[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sample surahs data (will be replaced with API data later)
-  const surahs = [
-    { number: 1, name: 'الفاتحة', transliteration: 'Al-Fatihah', translation: 'The Opening', verses: 7, revelation: 'Meccan' },
-    { number: 2, name: 'البقرة', transliteration: 'Al-Baqarah', translation: 'The Cow', verses: 286, revelation: 'Medinan' },
-    { number: 3, name: 'آل عمران', transliteration: 'Ali \'Imran', translation: 'Family of Imran', verses: 200, revelation: 'Medinan' },
-  ];
+  useEffect(() => {
+    loadSurahs();
+  }, []);
+
+  const loadSurahs = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchSurahs();
+      setSurahs(data);
+    } catch (error) {
+      console.error('Error loading surahs:', error);
+      toast.error('Failed to load surahs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -42,22 +64,26 @@ const Quran = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className={`text-xl font-semibold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
-                      {settings.language === 'ar' ? surah.name : surah.transliteration}
+                      {settings.language === 'ar' ? surah.name : surah.englishName}
                     </h3>
                     <Book className="h-5 w-5 text-muted-foreground" />
                   </div>
                   
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {settings.language === 'ar' ? surah.englishName : surah.englishNameTranslation}
+                  </p>
+                  
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <span>
                       {settings.language === 'ar' 
-                        ? `${surah.verses} آية`
-                        : `${surah.verses} verses`}
+                        ? `${surah.numberOfAyahs} آية`
+                        : `${surah.numberOfAyahs} verses`}
                     </span>
                     <span>•</span>
                     <span>
                       {settings.language === 'ar' 
-                        ? (surah.revelation === 'Meccan' ? 'مكية' : 'مدنية')
-                        : surah.revelation}
+                        ? (surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية')
+                        : surah.revelationType}
                     </span>
                   </div>
                 </div>

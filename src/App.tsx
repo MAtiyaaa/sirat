@@ -7,6 +7,7 @@ import { SettingsProvider } from "./contexts/SettingsContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Quran from "./pages/Quran";
+import SurahDetail from "./pages/SurahDetail";
 import Wudu from "./pages/Wudu";
 import Qalam from "./pages/Qalam";
 import Settings from "./pages/Settings";
@@ -25,6 +26,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/quran" element={<Quran />} />
+              <Route path="/quran/:surahNumber" element={<SurahDetail />} />
               <Route path="/wudu" element={<Wudu />} />
               <Route path="/qalam" element={<Qalam />} />
               <Route path="/settings" element={<Settings />} />
