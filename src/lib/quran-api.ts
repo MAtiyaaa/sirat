@@ -69,19 +69,22 @@ export async function fetchTafsir(surahNumber: number, ayahNumber: number, tafsi
 }
 
 // Fetch word by word data
-export async function fetchWordByWord(surahNumber: number, ayahNumber: number) {
+export async function fetchWordByWord(surahNumber: number, ayahNumber: number): Promise<WordData[]> {
   try {
-    const response = await fetch(`${QURAN_COM_BASE}/verses/by_key/${surahNumber}:${ayahNumber}?words=true&translations=131&fields=text_uthmani`);
+    const response = await fetch(
+      `${QURAN_COM_BASE}/verses/by_key/${surahNumber}:${ayahNumber}?words=true&translations=131&word_fields=text_uthmani,text_imlaei,translation,transliteration&translation_fields=resource_name,text`
+    );
     const data = await response.json();
     
-    if (!data.verse?.words) return [];
-    
-    return data.verse.words.map((word: any) => ({
-      text: word.text_uthmani || word.text,
-      translation: word.translation?.text || '',
-      transliteration: word.transliteration?.text || '',
-      audio: word.audio?.url || '',
-    }));
+    if (data.verse && data.verse.words) {
+      return data.verse.words.map((word: any) => ({
+        text: word.text_uthmani || word.text_imlaei,
+        translation: word.translation?.text || '',
+        transliteration: word.transliteration?.text || '',
+        audio: word.audio?.url || null,
+      }));
+    }
+    return [];
   } catch (error) {
     console.error('Error fetching word by word:', error);
     return [];

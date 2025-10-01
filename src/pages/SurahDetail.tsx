@@ -310,8 +310,10 @@ const SurahDetail = () => {
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-4">
-                <div className="glass-effect rounded-xl p-4 text-sm text-muted-foreground">
-                  {tafsirData[ayah.numberInSurah] || (
+                <div className="glass-effect rounded-xl p-4 text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert">
+                  {tafsirData[ayah.numberInSurah] ? (
+                    <div dangerouslySetInnerHTML={{ __html: tafsirData[ayah.numberInSurah] }} />
+                  ) : (
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Loading tafsir...
