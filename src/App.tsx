@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { AudioProvider } from "./contexts/AudioContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Quran from "./pages/Quran";
@@ -26,13 +27,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <SettingsProvider>
-      <AudioProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Layout>
+    <AuthProvider>
+      <SettingsProvider>
+        <AudioProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Layout>
               <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/quran" element={<Quran />} />
@@ -51,11 +53,12 @@ const App = () => (
             <Route path="/bookmarks" element={<Bookmarks />} />
             <Route path="*" element={<NotFound />} />
               </Routes>
-            </Layout>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AudioProvider>
-    </SettingsProvider>
+              </Layout>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AudioProvider>
+      </SettingsProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
