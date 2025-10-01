@@ -12,6 +12,7 @@ import {
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Play, 
   Pause, 
@@ -40,7 +41,7 @@ const SurahDetail = () => {
   const [playingAyah, setPlayingAyah] = useState<number | null>(null);
   const [playingSurah, setPlayingSurah] = useState(false);
   const [currentPlayingAyah, setCurrentPlayingAyah] = useState<number | null>(null);
-  const [selectedWord, setSelectedWord] = useState<{ ayahIndex: number; word: WordData } | null>(null);
+  const [openWordPopover, setOpenWordPopover] = useState<string | null>(null);
   const [wordData, setWordData] = useState<Record<number, WordData[]>>({});
   const [tafsirData, setTafsirData] = useState<Record<number, string>>({});
   const [openTafsir, setOpenTafsir] = useState<number | null>(null);
@@ -257,8 +258,9 @@ const SurahDetail = () => {
     };
   };
 
-  const handleWordClick = (ayahIndex: number, word: WordData) => {
-    setSelectedWord({ ayahIndex, word });
+  const handleWordClick = (ayahNumber: number, wordIndex: number) => {
+    const key = `${ayahNumber}-${wordIndex}`;
+    setOpenWordPopover(openWordPopover === key ? null : key);
   };
 
   const playWordAudio = (word: WordData) => {
@@ -377,28 +379,34 @@ const SurahDetail = () => {
               dir="rtl"
             >
               {wordData[ayah.numberInSurah] ? (
-                <div className="flex flex-wrap gap-2 justify-end relative">
-                  {wordData[ayah.numberInSurah].map((word, wordIndex) => (
-                    <div key={wordIndex} className="relative">
-                      <span
-                        onClick={() => handleWordClick(index, word)}
-                        className="cursor-pointer hover:text-primary smooth-transition inline-block"
+                <div className="flex flex-wrap gap-2 justify-end">
+                  {wordData[ayah.numberInSurah].map((word, wordIndex) => {
+                    const popoverKey = `${ayah.numberInSurah}-${wordIndex}`;
+                    return (
+                      <Popover 
+                        key={wordIndex}
+                        open={openWordPopover === popoverKey}
+                        onOpenChange={(open) => {
+                          if (!open) setOpenWordPopover(null);
+                        }}
                       >
-                        {word.text}
-                      </span>
-                      {selectedWord?.ayahIndex === index && selectedWord.word === word && (
-                        <div 
-                          className="fixed glass-effect rounded-xl p-4 min-w-[250px] z-50 shadow-xl border border-border/50 backdrop-blur-xl"
-                          style={{
-                            left: '50%',
-                            top: '50%',
-                            transform: 'translate(-50%, -50%)'
-                          }}
+                        <PopoverTrigger asChild>
+                          <span
+                            onClick={() => handleWordClick(ayah.numberInSurah, wordIndex)}
+                            className="cursor-pointer hover:text-primary smooth-transition inline-block"
+                          >
+                            {word.text}
+                          </span>
+                        </PopoverTrigger>
+                        <PopoverContent 
+                          className="w-[280px] p-4 glass-effect backdrop-blur-xl border-border/50"
+                          side="top"
+                          align="center"
                         >
-                          <div className="text-sm space-y-3 text-left" dir="ltr">
+                          <div className="space-y-3 text-left" dir="ltr">
                             <div>
                               <p className="font-semibold text-foreground text-base mb-1">{word.translation}</p>
-                              <p className="text-muted-foreground italic">{word.transliteration}</p>
+                              <p className="text-muted-foreground italic text-sm">{word.transliteration}</p>
                             </div>
                             {word.audio && (
                               <Button
@@ -415,10 +423,10 @@ const SurahDetail = () => {
                               </Button>
                             )}
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        </PopoverContent>
+                      </Popover>
+                    );
+                  })}
                 </div>
               ) : (
                 <span
