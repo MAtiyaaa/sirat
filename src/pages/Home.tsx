@@ -14,6 +14,7 @@ const Home = () => {
   const { settings } = useSettings();
   const [user, setUser] = React.useState<any>(null);
   const [surahOfDay, setSurahOfDay] = useState<any>(null);
+  const [continueReading, setContinueReading] = useState<any>(null);
 
   useEffect(() => {
     // Fetch Surah of the Day
@@ -38,6 +39,50 @@ const Home = () => {
 
     fetchSurahOfDay();
   }, []);
+
+  useEffect(() => {
+    const loadContinueReading = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+
+      // Get last viewed surah
+      const { data: lastViewed } = await supabase
+        .from('last_viewed_surah')
+        .select('surah_number')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (lastViewed?.surah_number) {
+        // Get progress for that surah
+        const { data: progress } = await supabase
+          .from('reading_progress')
+          .select('ayah_number')
+          .eq('user_id', session.user.id)
+          .eq('surah_number', lastViewed.surah_number)
+          .maybeSingle();
+
+        // Fetch surah details
+        try {
+          const response = await fetch(`https://api.alquran.cloud/v1/surah/${lastViewed.surah_number}`);
+          const data = await response.json();
+          if (data.code === 200) {
+            setContinueReading({
+              number: data.data.number,
+              name: data.data.name,
+              englishName: data.data.englishName,
+              englishNameTranslation: data.data.englishNameTranslation,
+              numberOfAyahs: data.data.numberOfAyahs,
+              ayahNumber: progress?.ayah_number || 1,
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching continue reading:', error);
+        }
+      }
+    };
+
+    loadContinueReading();
+  }, [user]);
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -148,6 +193,48 @@ const Home = () => {
                 <div className="mt-3 flex items-center gap-1.5 text-primary text-xs font-semibold group-hover:gap-2.5 smooth-transition">
                   <span>
                     {settings.language === 'ar' ? 'اقرأ الآن' : 'Read Now'}
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </div>
+              </div>
+            </div>
+          </Link>
+        )}
+
+        {/* Continue Reading */}
+        {continueReading && (
+          <Link 
+            to={`/quran/${continueReading.number}`}
+            className="block group animate-fade-in max-w-2xl mx-auto"
+          >
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+              
+              <div className="relative glass-effect rounded-2xl p-4 md:p-5 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Book className="h-4 w-4 text-primary" />
+                    <span className="text-xs font-semibold text-primary tracking-wide uppercase">
+                      {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
+                    </span>
+                  </div>
+                  <div className="text-lg font-bold text-primary/70">
+                    {continueReading.number}
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <h3 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+                    {settings.language === 'ar' ? continueReading.name : continueReading.englishName}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {continueReading.englishNameTranslation} • {settings.language === 'ar' ? `الآية ${continueReading.ayahNumber}` : `Ayah ${continueReading.ayahNumber}`}
+                  </p>
+                </div>
+
+                <div className="mt-3 flex items-center gap-1.5 text-primary text-xs font-semibold group-hover:gap-2.5 smooth-transition">
+                  <span>
+                    {settings.language === 'ar' ? 'استمر' : 'Continue'}
                   </span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </div>

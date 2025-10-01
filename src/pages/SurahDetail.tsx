@@ -17,7 +17,6 @@ import {
   Pause, 
   ArrowLeft, 
   ChevronDown, 
-  ChevronUp,
   Volume2,
   MessageSquare,
   Bookmark
@@ -53,7 +52,6 @@ const SurahDetail = () => {
   const [isSurahBookmarked, setIsSurahBookmarked] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(new Set());
   const [user, setUser] = useState<any>(null);
-  const [showBackButton, setShowBackButton] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -218,9 +216,6 @@ const SurahDetail = () => {
       });
 
       setLastVisibleAyah(maxVisible);
-      
-      // Show/hide back button based on scroll position
-      setShowBackButton(window.scrollY > 200);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -667,36 +662,22 @@ const SurahDetail = () => {
     );
   }
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <div className="space-y-6 relative">
-      {/* Floating Back Button */}
-      {showBackButton && (
-        <Button
-          onClick={scrollToTop}
-          size="icon"
-          className="fixed bottom-24 right-6 z-[60] rounded-full w-12 h-12 shadow-lg hover:shadow-xl smooth-transition bg-primary text-primary-foreground hover:bg-primary/90"
-          title={settings.language === 'ar' ? 'العودة للأعلى' : 'Back to top'}
-        >
-          <ChevronUp className="h-5 w-5" />
-        </Button>
-      )}
+      {/* Back to Quran List Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate('/quran')}
+        className="fixed top-6 left-6 z-[60] rounded-full w-8 h-8 hover:bg-background/80"
+        title={settings.language === 'ar' ? 'العودة للقائمة' : 'Back to list'}
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
 
       {/* Header */}
       <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/quran')}
-            className="rounded-full"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          
           <div className="flex-1">
             <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
               <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
