@@ -201,7 +201,7 @@ const Home = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
           {[
             { value: '114', label: settings.language === 'ar' ? 'سورة' : 'Surahs' },
             { value: '6,236', label: settings.language === 'ar' ? 'آية' : 'Verses' },
@@ -209,13 +209,13 @@ const Home = () => {
           ].map((stat, i) => (
             <div 
               key={i} 
-              className="text-center glass-effect rounded-2xl p-6 border border-border/50 animate-fade-in"
+              className="text-center glass-effect rounded-2xl p-4 md:p-6 border border-border/50 animate-fade-in"
               style={{ animationDelay: `${(i + 2) * 100}ms` }}
             >
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent mb-2">
+              <div className="text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent mb-2 whitespace-nowrap">
                 {stat.value}
               </div>
-              <div className="text-sm text-muted-foreground font-medium">
+              <div className="text-xs md:text-sm text-muted-foreground font-medium">
                 {stat.label}
               </div>
             </div>
