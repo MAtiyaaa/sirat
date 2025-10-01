@@ -7,7 +7,8 @@ import {
   BookOpen, 
   User, 
   Settings as SettingsIcon,
-  MoreHorizontal
+  MoreHorizontal,
+  Bookmark
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -21,6 +22,7 @@ const MoreDialog = () => {
       more: 'المزيد',
       duas: 'الأدعية',
       stories: 'قصص الأنبياء',
+      bookmarks: 'الإشارات المرجعية',
       account: 'الحساب',
       settings: 'الإعدادات',
     },
@@ -28,6 +30,7 @@ const MoreDialog = () => {
       more: 'More',
       duas: 'Duas',
       stories: 'Prophet Stories',
+      bookmarks: 'Bookmarks',
       account: 'Account',
       settings: 'Settings',
     },
@@ -38,6 +41,7 @@ const MoreDialog = () => {
   const menuItems = [
     { icon: BookOpen, label: t.duas, path: '/duas' },
     { icon: BookOpen, label: t.stories, path: '/prophet-stories' },
+    { icon: Bookmark, label: t.bookmarks, path: '/bookmarks' },
     { icon: User, label: t.account, path: '/account' },
     { icon: SettingsIcon, label: t.settings, path: '/settings' },
   ];

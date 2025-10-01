@@ -73,6 +73,54 @@ export type Database = {
           },
         ]
       }
+      bookmarks: {
+        Row: {
+          ayah_number: number | null
+          bookmark_type: string
+          created_at: string
+          id: string
+          surah_number: number
+          user_id: string
+        }
+        Insert: {
+          ayah_number?: number | null
+          bookmark_type: string
+          created_at?: string
+          id?: string
+          surah_number: number
+          user_id: string
+        }
+        Update: {
+          ayah_number?: number | null
+          bookmark_type?: string
+          created_at?: string
+          id?: string
+          surah_number?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      last_viewed_surah: {
+        Row: {
+          id: string
+          surah_number: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          surah_number: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          surah_number?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null

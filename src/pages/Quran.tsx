@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Link } from 'react-router-dom';
-import { Book, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Book, Loader2, Bookmark } from 'lucide-react';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -9,14 +9,20 @@ import { Progress } from '@/components/ui/progress';
 
 const Quran = () => {
   const { settings } = useSettings();
+  const navigate = useNavigate();
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<Record<number, number>>({});
   const [overallProgress, setOverallProgress] = useState(0);
+  const [bookmarkedSurahs, setBookmarkedSurahs] = useState<Set<number>>(new Set());
+  const [lastViewedSurah, setLastViewedSurah] = useState<number | null>(null);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   useEffect(() => {
     loadSurahs();
     loadProgress();
+    loadBookmarks();
+    loadLastViewed();
   }, []);
 
   const loadSurahs = async () => {
@@ -55,6 +61,48 @@ const Quran = () => {
       setOverallProgress((completedAyahs / totalAyahs) * 100);
     }
   };
+
+  const loadBookmarks = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const { data } = await supabase
+      .from('bookmarks')
+      .select('surah_number')
+      .eq('user_id', session.user.id)
+      .eq('bookmark_type', 'surah');
+
+    if (data) {
+      setBookmarkedSurahs(new Set(data.map(b => b.surah_number)));
+    }
+  };
+
+  const loadLastViewed = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+
+    const { data } = await supabase
+      .from('last_viewed_surah')
+      .select('surah_number')
+      .eq('user_id', session.user.id)
+      .single();
+
+    if (data?.surah_number) {
+      setLastViewedSurah(data.surah_number);
+    }
+  };
+
+  // Auto-navigate to last viewed surah once
+  useEffect(() => {
+    if (lastViewedSurah && !hasNavigated && surahs.length > 0) {
+      const timer = setTimeout(() => {
+        navigate(`/quran/${lastViewedSurah}`);
+        setHasNavigated(true);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [lastViewedSurah, hasNavigated, surahs, navigate]);
 
   if (loading) {
     return (
@@ -115,7 +163,12 @@ const Quran = () => {
                       <h3 className={`text-xl font-semibold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
                         {settings.language === 'ar' ? surah.name : surah.englishName}
                       </h3>
-                      <Book className="h-5 w-5 text-muted-foreground" />
+                      <div className="flex items-center gap-2">
+                        {bookmarkedSurahs.has(surah.number) && (
+                          <Bookmark className="h-5 w-5 text-primary fill-primary" />
+                        )}
+                        <Book className="h-5 w-5 text-muted-foreground" />
+                      </div>
                     </div>
                     
                     <p className="text-sm text-muted-foreground mb-2">

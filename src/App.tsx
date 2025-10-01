@@ -17,6 +17,7 @@ import ChatHistory from "./pages/ChatHistory";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
 import Wudu from "./pages/Wudu";
+import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

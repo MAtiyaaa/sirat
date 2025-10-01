@@ -19,7 +19,8 @@ import {
   ChevronDown, 
   Volume2,
   Loader2,
-  MessageSquare
+  MessageSquare,
+  Bookmark
 } from 'lucide-react';
 import {
   Collapsible,
@@ -47,6 +48,9 @@ const SurahDetail = () => {
   const [lastVisibleAyah, setLastVisibleAyah] = useState<number>(1);
   const [chatAyah, setChatAyah] = useState<{ text: string; number: number } | null>(null);
   const [hasRestoredScroll, setHasRestoredScroll] = useState(false);
+  const [isSurahBookmarked, setIsSurahBookmarked] = useState(false);
+  const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(new Set());
+  const [user, setUser] = useState<any>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const surahAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -54,6 +58,9 @@ const SurahDetail = () => {
   useEffect(() => {
     loadSurah();
     setHasRestoredScroll(false);
+    loadUser();
+    loadBookmarks();
+    saveLastViewed();
   }, [surahNumber]);
 
   // Restore scroll position after data loads
@@ -131,6 +138,132 @@ const SurahDetail = () => {
     const timeoutId = setTimeout(saveProgress, 2000); // Debounce saves
     return () => clearTimeout(timeoutId);
   }, [lastVisibleAyah, surahNumber]);
+
+  const loadUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user ?? null);
+  };
+
+  const loadBookmarks = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user || !surahNumber) return;
+
+    // Load surah bookmark
+    const { data: surahBookmark } = await supabase
+      .from('bookmarks')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('surah_number', parseInt(surahNumber))
+      .eq('bookmark_type', 'surah')
+      .maybeSingle();
+
+    setIsSurahBookmarked(!!surahBookmark);
+
+    // Load ayah bookmarks
+    const { data: ayahBookmarks } = await supabase
+      .from('bookmarks')
+      .select('ayah_number')
+      .eq('user_id', session.user.id)
+      .eq('surah_number', parseInt(surahNumber))
+      .eq('bookmark_type', 'ayah');
+
+    if (ayahBookmarks) {
+      setBookmarkedAyahs(new Set(ayahBookmarks.map(b => b.ayah_number).filter(Boolean) as number[]));
+    }
+  };
+
+  const saveLastViewed = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user || !surahNumber) return;
+
+    await supabase
+      .from('last_viewed_surah')
+      .upsert({
+        user_id: session.user.id,
+        surah_number: parseInt(surahNumber),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      });
+  };
+
+  const toggleSurahBookmark = async () => {
+    if (!user || !surahNumber) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+
+    try {
+      if (isSurahBookmarked) {
+        await supabase
+          .from('bookmarks')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('surah_number', parseInt(surahNumber))
+          .eq('bookmark_type', 'surah');
+        
+        setIsSurahBookmarked(false);
+        toast.success(settings.language === 'ar' ? 'تم إزالة الإشارة المرجعية' : 'Bookmark removed');
+      } else {
+        await supabase
+          .from('bookmarks')
+          .insert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            bookmark_type: 'surah'
+          });
+        
+        setIsSurahBookmarked(true);
+        toast.success(settings.language === 'ar' ? 'تمت الإضافة للإشارات المرجعية' : 'Added to bookmarks');
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast.error(settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
+  const toggleAyahBookmark = async (ayahNumber: number) => {
+    if (!user || !surahNumber) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+
+    try {
+      const isBookmarked = bookmarkedAyahs.has(ayahNumber);
+      
+      if (isBookmarked) {
+        await supabase
+          .from('bookmarks')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('surah_number', parseInt(surahNumber))
+          .eq('ayah_number', ayahNumber)
+          .eq('bookmark_type', 'ayah');
+        
+        setBookmarkedAyahs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(ayahNumber);
+          return newSet;
+        });
+        toast.success(settings.language === 'ar' ? 'تم إزالة الإشارة المرجعية' : 'Bookmark removed');
+      } else {
+        await supabase
+          .from('bookmarks')
+          .insert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: ayahNumber,
+            bookmark_type: 'ayah'
+          });
+        
+        setBookmarkedAyahs(prev => new Set([...prev, ayahNumber]));
+        toast.success(settings.language === 'ar' ? 'تمت الإضافة للإشارات المرجعية' : 'Added to bookmarks');
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast.error(settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
 
   const loadSurah = async () => {
     if (!surahNumber) return;
@@ -349,6 +482,16 @@ const SurahDetail = () => {
               {settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah'}
             </span>
           </Button>
+
+          <Button
+            onClick={toggleSurahBookmark}
+            variant="outline"
+            size="icon"
+            className="rounded-full w-12 h-12"
+            title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
+          >
+            <Bookmark className={`h-5 w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
+          </Button>
         </div>
       </div>
 
@@ -397,6 +540,15 @@ const SurahDetail = () => {
                   title={settings.language === 'ar' ? 'اسأل عن هذه الآية' : 'Ask about this ayah'}
                 >
                   <MessageSquare className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => toggleAyahBookmark(ayah.numberInSurah)}
+                  className="rounded-full"
+                  title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark ayah'}
+                >
+                  <Bookmark className={`h-4 w-4 ${bookmarkedAyahs.has(ayah.numberInSurah) ? 'fill-primary text-primary' : ''}`} />
                 </Button>
               </div>
             </div>
