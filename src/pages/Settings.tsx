@@ -148,17 +148,32 @@ const Settings = () => {
           <Label className="text-base font-semibold">{t.account}</Label>
           {user ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" />
+              <Link to="/account">
+                <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors cursor-pointer">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium">{user.email}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.user_metadata?.full_name || 'User'}
+                    </p>
+                  </div>
+                  <svg
+                    className="w-5 h-5 text-muted-foreground"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium">{user.email}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.user_metadata?.full_name || 'User'}
-                  </p>
-                </div>
-              </div>
+              </Link>
               <Button
                 variant="outline"
                 onClick={handleSignOut}
