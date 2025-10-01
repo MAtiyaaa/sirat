@@ -16,7 +16,6 @@ const Quran = () => {
   const [overallProgress, setOverallProgress] = useState(0);
   const [bookmarkedSurahs, setBookmarkedSurahs] = useState<Set<number>>(new Set());
   const [lastViewedSurah, setLastViewedSurah] = useState<number | null>(null);
-  const [hasNavigated, setHasNavigated] = useState(false);
 
   useEffect(() => {
     loadSurahs();
@@ -85,24 +84,12 @@ const Quran = () => {
       .from('last_viewed_surah')
       .select('surah_number')
       .eq('user_id', session.user.id)
-      .single();
+      .maybeSingle();
 
     if (data?.surah_number) {
       setLastViewedSurah(data.surah_number);
     }
   };
-
-  // Auto-navigate to last viewed surah once
-  useEffect(() => {
-    if (lastViewedSurah && !hasNavigated && surahs.length > 0) {
-      const timer = setTimeout(() => {
-        navigate(`/quran/${lastViewedSurah}`);
-        setHasNavigated(true);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [lastViewedSurah, hasNavigated, surahs, navigate]);
 
   if (loading) {
     return (
@@ -126,6 +113,32 @@ const Quran = () => {
             : 'Select a surah to read'}
         </p>
       </div>
+
+      {lastViewedSurah && surahs.length > 0 && (
+        <div 
+          className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition"
+          onClick={() => navigate(`/quran/${lastViewedSurah}`)}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground mb-2">
+                {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
+              </p>
+              <h3 className="text-2xl font-bold">
+                {surahs.find(s => s.number === lastViewedSurah)?.englishName || ''}
+              </h3>
+              {progress[lastViewedSurah] && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {settings.language === 'ar' 
+                    ? `الآية ${progress[lastViewedSurah]}`
+                    : `Ayah ${progress[lastViewedSurah]}`}
+                </p>
+              )}
+            </div>
+            <Book className="h-8 w-8 text-primary" />
+          </div>
+        </div>
+      )}
 
       {overallProgress > 0 && (
         <div className="glass-effect rounded-3xl p-8 space-y-4 border border-border/50 apple-shadow">
