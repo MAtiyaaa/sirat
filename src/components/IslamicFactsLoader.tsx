@@ -30,7 +30,7 @@ const islamicFacts: IslamicFact[] = [
   },
   {
     ar: 'السورة الوحيدة التي لا تبدأ بالبسملة هي سورة التوبة',
-    en: 'At-Tawbah is the only surah that doesn\'t begin with Bismillah'
+    en: 'At-Tawbah is the only surah that does not begin with Bismillah'
   },
   {
     ar: 'القرآن يذكر 25 نبياً ورسولاً',
@@ -87,12 +87,244 @@ const islamicFacts: IslamicFact[] = [
   {
     ar: 'كل حرف من القرآن بحسنة والحسنة بعشر أمثالها',
     en: 'Every letter of the Quran brings ten rewards'
+  },
+  {
+    ar: 'النبي محمد ﷺ ولد في مكة المكرمة عام 570 ميلادية',
+    en: 'Prophet Muhammad (PBUH) was born in Makkah in 570 CE'
+  },
+  {
+    ar: 'أول من آمن بالنبي محمد ﷺ كانت زوجته خديجة رضي الله عنها',
+    en: 'The first person to believe in Prophet Muhammad (PBUH) was his wife Khadijah'
+  },
+  {
+    ar: 'الإسراء والمعراج معجزة عظيمة حدثت في السنة العاشرة من البعثة',
+    en: 'Isra and Miraj was a miraculous journey in the 10th year of Prophethood'
+  },
+  {
+    ar: 'الصلوات الخمس فرضت ليلة الإسراء والمعراج',
+    en: 'The five daily prayers were ordained during the Night Journey'
+  },
+  {
+    ar: 'الكعبة المشرفة هي أول بيت وضع للناس',
+    en: 'The Kaaba is the first house of worship established for mankind'
+  },
+  {
+    ar: 'الحجر الأسود من حجارة الجنة',
+    en: 'The Black Stone is from the stones of Paradise'
+  },
+  {
+    ar: 'بئر زمزم ماء مبارك نبع منذ أكثر من 4000 سنة',
+    en: 'Zamzam well is blessed water that has been flowing for over 4000 years'
+  },
+  {
+    ar: 'الصيام في رمضان هو الركن الرابع من أركان الإسلام',
+    en: 'Fasting in Ramadan is the fourth pillar of Islam'
+  },
+  {
+    ar: 'ليلة القدر خير من ألف شهر',
+    en: 'The Night of Decree is better than a thousand months'
+  },
+  {
+    ar: 'الزكاة حق الفقراء والمساكين في مال الأغنياء',
+    en: 'Zakat is the right of the poor and needy in the wealth of the rich'
+  },
+  {
+    ar: 'الحج يمحو الذنوب ويجعل الإنسان كيوم ولدته أمه',
+    en: 'Hajj erases sins and returns one to the purity of a newborn'
+  },
+  {
+    ar: 'يوم عرفة أعظم أيام السنة وصيامه يكفر سنتين',
+    en: 'The Day of Arafah is the greatest day of the year, fasting it expiates two years'
+  },
+  {
+    ar: 'صلاة الجماعة تفضل صلاة الفذ بسبع وعشرين درجة',
+    en: 'Congregational prayer is 27 times more rewarding than praying alone'
+  },
+  {
+    ar: 'المسجد الأقصى هو أولى القبلتين وثالث الحرمين الشريفين',
+    en: 'Al-Aqsa Mosque is the first of the two Qiblahs and the third holiest site'
+  },
+  {
+    ar: 'المسجد النبوي في المدينة المنورة يحتوي على قبر النبي محمد ﷺ',
+    en: 'The Prophet\'s Mosque in Madinah contains the grave of Prophet Muhammad (PBUH)'
+  },
+  {
+    ar: 'الجنة تحت أقدام الأمهات',
+    en: 'Paradise lies beneath the feet of mothers'
+  },
+  {
+    ar: 'بر الوالدين من أعظم العبادات وأحبها إلى الله',
+    en: 'Being dutiful to parents is among the greatest and most beloved acts to Allah'
+  },
+  {
+    ar: 'الصدقة تطفئ الخطيئة كما يطفئ الماء النار',
+    en: 'Charity extinguishes sin as water extinguishes fire'
+  },
+  {
+    ar: 'الابتسامة في وجه أخيك صدقة',
+    en: 'Smiling at your brother is charity'
+  },
+  {
+    ar: 'أحب الأعمال إلى الله أدومها وإن قل',
+    en: 'The most beloved deed to Allah is the most consistent, even if little'
+  },
+  {
+    ar: 'الدعاء هو العبادة وسلاح المؤمن',
+    en: 'Supplication is worship and the weapon of the believer'
+  },
+  {
+    ar: 'ساعة الإجابة يوم الجمعة فيها يستجاب الدعاء',
+    en: 'Friday has an hour when supplications are answered'
+  },
+  {
+    ar: 'الثلث الأخير من الليل وقت استجابة الدعاء',
+    en: 'The last third of the night is a time when supplications are answered'
+  },
+  {
+    ar: 'صلاة الفجر في جماعة كمن قام الليل كله',
+    en: 'Praying Fajr in congregation is like praying the whole night'
+  },
+  {
+    ar: 'من صلى البردين دخل الجنة',
+    en: 'Whoever prays the two cool prayers (Fajr and Asr) enters Paradise'
+  },
+  {
+    ar: 'الصبر نصف الإيمان',
+    en: 'Patience is half of faith'
+  },
+  {
+    ar: 'التوكل على الله من أعظم العبادات',
+    en: 'Reliance upon Allah is among the greatest acts of worship'
+  },
+  {
+    ar: 'الشكر سبب لزيادة النعم',
+    en: 'Gratitude is a cause for increase in blessings'
+  },
+  {
+    ar: 'ذكر الله تطمئن به القلوب',
+    en: 'By the remembrance of Allah, hearts find tranquility'
+  },
+  {
+    ar: 'سبحان الله والحمد لله ولا إله إلا الله والله أكبر خير من الدنيا وما فيها',
+    en: 'Glorifying Allah is better than the world and what is in it'
+  },
+  {
+    ar: 'الاستغفار سبب لنزول الرزق والبركة',
+    en: 'Seeking forgiveness is a cause for provision and blessings'
+  },
+  {
+    ar: 'من قال لا إله إلا الله دخل الجنة',
+    en: 'Whoever says there is no god but Allah will enter Paradise'
+  },
+  {
+    ar: 'أفضل الذكر لا إله إلا الله',
+    en: 'The best remembrance is "There is no god but Allah"'
+  },
+  {
+    ar: 'العلم فريضة على كل مسلم ومسلمة',
+    en: 'Seeking knowledge is obligatory upon every Muslim'
+  },
+  {
+    ar: 'من سلك طريقاً يلتمس فيه علماً سهل الله له طريقاً إلى الجنة',
+    en: 'Whoever takes a path seeking knowledge, Allah makes easy a path to Paradise'
+  },
+  {
+    ar: 'خيركم من تعلم القرآن وعلمه',
+    en: 'The best among you are those who learn the Quran and teach it'
+  },
+  {
+    ar: 'الجهاد في سبيل الله ذروة سنام الإسلام',
+    en: 'Striving in the path of Allah is the peak of Islam'
+  },
+  {
+    ar: 'المؤمن القوي خير وأحب إلى الله من المؤمن الضعيف',
+    en: 'The strong believer is better and more beloved to Allah than the weak believer'
+  },
+  {
+    ar: 'حسن الخلق من أثقل ما يوضع في الميزان',
+    en: 'Good character is the heaviest thing on the scales'
+  },
+  {
+    ar: 'الكلمة الطيبة صدقة',
+    en: 'A good word is charity'
+  },
+  {
+    ar: 'من كان يؤمن بالله واليوم الآخر فليقل خيراً أو ليصمت',
+    en: 'Whoever believes in Allah and the Last Day should speak good or remain silent'
+  },
+  {
+    ar: 'لا يدخل الجنة من كان في قلبه مثقال ذرة من كبر',
+    en: 'No one with an atom\'s weight of pride in their heart will enter Paradise'
+  },
+  {
+    ar: 'التواضع من صفات المؤمنين',
+    en: 'Humility is among the characteristics of believers'
+  },
+  {
+    ar: 'الحياء من الإيمان',
+    en: 'Modesty is part of faith'
+  },
+  {
+    ar: 'المسلم من سلم المسلمون من لسانه ويده',
+    en: 'A Muslim is one from whose tongue and hand Muslims are safe'
+  },
+  {
+    ar: 'الإيمان بضع وسبعون شعبة',
+    en: 'Faith has seventy-odd branches'
+  },
+  {
+    ar: 'أكمل المؤمنين إيماناً أحسنهم خلقاً',
+    en: 'The most perfect believers in faith are those with the best character'
+  },
+  {
+    ar: 'الجار له حق عظيم في الإسلام',
+    en: 'The neighbor has great rights in Islam'
+  },
+  {
+    ar: 'صلة الرحم تزيد في العمر وتبارك في الرزق',
+    en: 'Maintaining family ties increases lifespan and blesses provision'
+  },
+  {
+    ar: 'العدل أساس الملك',
+    en: 'Justice is the foundation of governance'
+  },
+  {
+    ar: 'الإسلام دين الرحمة والسلام',
+    en: 'Islam is the religion of mercy and peace'
+  },
+  {
+    ar: 'المؤمنون كالجسد الواحد',
+    en: 'The believers are like one body'
+  },
+  {
+    ar: 'التعاون على البر والتقوى من أعظم القربات',
+    en: 'Cooperating in righteousness and piety is among the greatest acts'
+  },
+  {
+    ar: 'النظافة من الإيمان',
+    en: 'Cleanliness is part of faith'
+  },
+  {
+    ar: 'الوضوء يمحو الخطايا',
+    en: 'Ablution washes away sins'
+  },
+  {
+    ar: 'السواك مطهرة للفم ومرضاة للرب',
+    en: 'The miswak cleanses the mouth and pleases the Lord'
+  },
+  {
+    ar: 'الطهارة شطر الإيمان',
+    en: 'Purity is half of faith'
   }
 ];
 
 export const IslamicFactsLoader = () => {
   const { settings } = useSettings();
-  const [currentFact, setCurrentFact] = useState(islamicFacts[0]);
+  const [currentFact, setCurrentFact] = useState(() => {
+    // Start with a random fact
+    const randomIndex = Math.floor(Math.random() * islamicFacts.length);
+    return islamicFacts[randomIndex];
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
