@@ -130,6 +130,48 @@ export type Database = {
         }
         Relationships: []
       }
+      hadith_bookmarks: {
+        Row: {
+          book_name: string | null
+          book_slug: string
+          chapter_arabic: string | null
+          chapter_english: string | null
+          created_at: string
+          hadith_arabic: string | null
+          hadith_english: string | null
+          hadith_number: number
+          id: string
+          narrator: string | null
+          user_id: string
+        }
+        Insert: {
+          book_name?: string | null
+          book_slug: string
+          chapter_arabic?: string | null
+          chapter_english?: string | null
+          created_at?: string
+          hadith_arabic?: string | null
+          hadith_english?: string | null
+          hadith_number: number
+          id?: string
+          narrator?: string | null
+          user_id: string
+        }
+        Update: {
+          book_name?: string | null
+          book_slug?: string
+          chapter_arabic?: string | null
+          chapter_english?: string | null
+          created_at?: string
+          hadith_arabic?: string | null
+          hadith_english?: string | null
+          hadith_number?: number
+          id?: string
+          narrator?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       last_viewed_surah: {
         Row: {
           id: string

@@ -11,6 +11,7 @@ import {
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   Play, 
@@ -19,7 +20,8 @@ import {
   ChevronDown, 
   Volume2,
   MessageSquare,
-  Bookmark
+  Bookmark,
+  Search
 } from 'lucide-react';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import {
@@ -52,6 +54,7 @@ const SurahDetail = () => {
   const [isSurahBookmarked, setIsSurahBookmarked] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(new Set());
   const [user, setUser] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -727,9 +730,31 @@ const SurahDetail = () => {
         </div>
       )}
 
+      {/* Search Bar */}
+      <div className="glass-effect rounded-2xl p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder={settings.language === 'ar' ? 'بحث في الآيات...' : 'Search in ayahs...'}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 rounded-2xl border-border/50 bg-background/50"
+          />
+        </div>
+      </div>
+
       {/* Ayahs */}
       <div className="space-y-6">
-        {surahData.ayahs.map((ayah: any, index: number) => (
+        {surahData.ayahs
+          .filter((ayah: any, index: number) => {
+            if (!searchTerm.trim()) return true;
+            const search = searchTerm.toLowerCase();
+            const arabicText = ayah.text?.toLowerCase() || '';
+            const translationText = translation?.ayahs[index]?.text?.toLowerCase() || '';
+            return arabicText.includes(search) || translationText.includes(search);
+          })
+          .map((ayah: any, index: number) => (
           <div
             key={ayah.number}
             data-ayah={ayah.numberInSurah}

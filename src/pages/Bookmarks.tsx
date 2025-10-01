@@ -17,10 +17,24 @@ interface BookmarkData {
   created_at: string;
 }
 
+interface HadithBookmark {
+  id: string;
+  hadith_number: number;
+  book_slug: string;
+  book_name: string;
+  hadith_english: string;
+  hadith_arabic: string;
+  narrator: string;
+  chapter_english: string;
+  chapter_arabic: string;
+  created_at: string;
+}
+
 const Bookmarks = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [bookmarks, setBookmarks] = useState<BookmarkData[]>([]);
+  const [hadithBookmarks, setHadithBookmarks] = useState<HadithBookmark[]>([]);
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -40,10 +54,15 @@ const Bookmarks = () => {
         return;
       }
 
-      // Load bookmarks and surahs in parallel
-      const [bookmarksResult, surahsData] = await Promise.all([
+      // Load bookmarks, hadith bookmarks, and surahs in parallel
+      const [bookmarksResult, hadithResult, surahsData] = await Promise.all([
         supabase
           .from('bookmarks')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('hadith_bookmarks')
           .select('*')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false }),
@@ -52,6 +71,9 @@ const Bookmarks = () => {
 
       if (bookmarksResult.data) {
         setBookmarks(bookmarksResult.data as BookmarkData[]);
+      }
+      if (hadithResult.data) {
+        setHadithBookmarks(hadithResult.data as HadithBookmark[]);
       }
       setSurahs(surahsData);
     } catch (error) {
@@ -62,10 +84,15 @@ const Bookmarks = () => {
     }
   };
 
-  const removeBookmark = async (bookmarkId: string) => {
+  const removeBookmark = async (bookmarkId: string, isHadith: boolean = false) => {
     try {
-      await supabase.from('bookmarks').delete().eq('id', bookmarkId);
-      setBookmarks(prev => prev.filter(b => b.id !== bookmarkId));
+      if (isHadith) {
+        await supabase.from('hadith_bookmarks').delete().eq('id', bookmarkId);
+        setHadithBookmarks(prev => prev.filter(b => b.id !== bookmarkId));
+      } else {
+        await supabase.from('bookmarks').delete().eq('id', bookmarkId);
+        setBookmarks(prev => prev.filter(b => b.id !== bookmarkId));
+      }
       toast.success(settings.language === 'ar' ? 'تم الحذف' : 'Bookmark removed');
     } catch (error) {
       console.error('Error removing bookmark:', error);
@@ -124,20 +151,23 @@ const Bookmarks = () => {
           </h1>
           <p className="text-muted-foreground mt-2">
             {settings.language === 'ar' 
-              ? 'الآيات والسور المحفوظة'
-              : 'Your saved ayahs and surahs'}
+              ? 'الآيات والسور والأحاديث المحفوظة'
+              : 'Your saved ayahs, surahs, and hadiths'}
           </p>
         </div>
       </div>
 
       {/* Tabs */}
       <Tabs defaultValue="ayahs" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="ayahs">
             {settings.language === 'ar' ? `الآيات (${ayahBookmarks.length})` : `Ayahs (${ayahBookmarks.length})`}
           </TabsTrigger>
           <TabsTrigger value="surahs">
             {settings.language === 'ar' ? `السور (${surahBookmarks.length})` : `Surahs (${surahBookmarks.length})`}
+          </TabsTrigger>
+          <TabsTrigger value="hadiths">
+            {settings.language === 'ar' ? `الأحاديث (${hadithBookmarks.length})` : `Hadiths (${hadithBookmarks.length})`}
           </TabsTrigger>
         </TabsList>
 
@@ -237,6 +267,75 @@ const Bookmarks = () => {
                 </Card>
               );
             })
+          )}
+        </TabsContent>
+
+        <TabsContent value="hadiths" className="space-y-4 mt-6">
+          {hadithBookmarks.length === 0 ? (
+            <div className="text-center py-12">
+              <Bookmark className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground">
+                {settings.language === 'ar' 
+                  ? 'لا توجد أحاديث محفوظة'
+                  : 'No bookmarked hadiths yet'}
+              </p>
+            </div>
+          ) : (
+            hadithBookmarks.map(bookmark => (
+              <Card
+                key={bookmark.id}
+                className="glass-effect p-6 border border-border/50 hover:border-primary/50 smooth-transition"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <h3 className="font-semibold">{bookmark.book_name}</h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {settings.language === 'ar' 
+                          ? `حديث رقم ${bookmark.hadith_number}`
+                          : `Hadith ${bookmark.hadith_number}`}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeBookmark(bookmark.id, true)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {settings.language === 'ar' ? (
+                      <>
+                        <p className="text-base font-arabic text-right">
+                          {bookmark.hadith_arabic}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {bookmark.hadith_english}
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-base">
+                          {bookmark.hadith_english}
+                        </p>
+                        <p className="text-sm font-arabic text-right text-muted-foreground">
+                          {bookmark.hadith_arabic}
+                        </p>
+                      </>
+                    )}
+                    <p className="text-xs text-muted-foreground pt-2">
+                      {settings.language === 'ar' ? 'الراوي: ' : 'Narrator: '}{bookmark.narrator}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            ))
           )}
         </TabsContent>
       </Tabs>
