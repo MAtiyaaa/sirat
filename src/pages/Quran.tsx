@@ -29,25 +29,10 @@ const Quran = () => {
     loadProgress();
     loadBookmarks();
     loadLastViewed();
-
-    // Restore last position if navigating from elsewhere
-    const savedPosition = localStorage.getItem('quran_last_position');
-    if (savedPosition) {
-      try {
-        const { surahNumber, ayahNumber } = JSON.parse(savedPosition);
-        if (surahNumber && window.location.pathname === '/quran') {
-          // If we have a saved position, navigate to it
-          setTimeout(() => {
-            navigate(`/quran/${surahNumber}${ayahNumber ? `?ayah=${ayahNumber}` : ''}`);
-            // Clear it after navigation to avoid loops
-            localStorage.removeItem('quran_last_position');
-          }, 100);
-        }
-      } catch (error) {
-        console.error('Error parsing saved position:', error);
-      }
-    }
-  }, [navigate]);
+    
+    // Clear saved position when viewing Quran home
+    localStorage.removeItem('quran_last_position');
+  }, []);
 
   useEffect(() => {
     if (searchTerm.trim()) {
