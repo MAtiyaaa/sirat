@@ -82,6 +82,38 @@ const Home = () => {
     <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
       <div className="w-full max-w-5xl mx-auto px-6 py-16 space-y-16">
         
+        {/* Hero Section */}
+        <div className="text-center space-y-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect border border-border/50">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">
+              {settings.language === 'ar' ? 'بسم الله الرحمن الرحيم' : 'In the name of Allah, the Most Gracious'}
+            </span>
+          </div>
+          
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
+            <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+              Sirat
+            </span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light">
+            {settings.language === 'ar' 
+              ? 'رفيقك في رحلة تعلم القرآن الكريم'
+              : 'Your companion in the journey of learning the Quran'}
+          </p>
+
+          {!user && (
+            <Link 
+              to="/auth"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 smooth-transition"
+            >
+              {settings.language === 'ar' ? 'ابدأ الآن' : 'Get Started'}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+
         {/* Surah of the Day */}
         {surahOfDay && (
           <Link 
@@ -123,38 +155,6 @@ const Home = () => {
             </div>
           </Link>
         )}
-
-        {/* Hero Section */}
-        <div className="text-center space-y-6 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect border border-border/50">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">
-              {settings.language === 'ar' ? 'بسم الله الرحمن الرحيم' : 'In the name of Allah, the Most Gracious'}
-            </span>
-          </div>
-          
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
-            <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-              Sirat
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light">
-            {settings.language === 'ar' 
-              ? 'رفيقك في رحلة تعلم القرآن الكريم'
-              : 'Your companion in the journey of learning the Quran'}
-          </p>
-
-          {!user && (
-            <Link 
-              to="/auth"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 smooth-transition"
-            >
-              {settings.language === 'ar' ? 'ابدأ الآن' : 'Get Started'}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          )}
-        </div>
 
         {/* Features Grid */}
         <div className="grid gap-6 md:grid-cols-2">

@@ -1,9 +1,73 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Check } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Loader2, MapPin, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface PrayerTimes {
+  Fajr: string;
+  Dhuhr: string;
+  Asr: string;
+  Maghrib: string;
+  Isha: string;
+}
 
 const Wudu = () => {
   const { settings } = useSettings();
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
+  const [location, setLocation] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPrayerTimes();
+  }, []);
+
+  const fetchPrayerTimes = async () => {
+    setLoading(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject);
+      });
+
+      const { latitude, longitude } = position.coords;
+
+      const response = await fetch(
+        `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`
+      );
+      const data = await response.json();
+
+      if (data.code === 200) {
+        setPrayerTimes({
+          Fajr: data.data.timings.Fajr,
+          Dhuhr: data.data.timings.Dhuhr,
+          Asr: data.data.timings.Asr,
+          Maghrib: data.data.timings.Maghrib,
+          Isha: data.data.timings.Isha,
+        });
+        setLocation(`${data.data.meta.timezone}`);
+      }
+    } catch (error) {
+      console.error('Error fetching prayer times:', error);
+      setPrayerTimes({
+        Fajr: '05:00',
+        Dhuhr: '12:30',
+        Asr: '15:45',
+        Maghrib: '18:15',
+        Isha: '19:30',
+      });
+      setLocation(settings.language === 'ar' ? 'الموقع غير متاح' : 'Location unavailable');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const prayerNames = {
+    Fajr: settings.language === 'ar' ? 'الفجر' : 'Fajr',
+    Dhuhr: settings.language === 'ar' ? 'الظهر' : 'Dhuhr',
+    Asr: settings.language === 'ar' ? 'العصر' : 'Asr',
+    Maghrib: settings.language === 'ar' ? 'المغرب' : 'Maghrib',
+    Isha: settings.language === 'ar' ? 'العشاء' : 'Isha',
+  };
 
   const steps = {
     ar: [
@@ -34,9 +98,46 @@ const Wudu = () => {
 
   return (
     <div className="space-y-8">
+      {/* Prayer Times Section */}
+      <div className="glass-effect rounded-3xl p-6 border border-border/50">
+        <div className="flex items-center gap-2 mb-4">
+          <Clock className="h-5 w-5 text-primary" />
+          <h2 className="text-2xl font-bold">
+            {settings.language === 'ar' ? 'أوقات الصلاة' : 'Prayer Times'}
+          </h2>
+        </div>
+
+        {location && (
+          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            <span>{location}</span>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : prayerTimes ? (
+          <div className="grid grid-cols-5 gap-3">
+            {Object.entries(prayerTimes).map(([prayer, time]) => (
+              <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
+                <div className="text-sm font-semibold text-muted-foreground mb-1">
+                  {prayerNames[prayer as keyof PrayerTimes]}
+                </div>
+                <div className="text-lg font-bold text-primary">
+                  {time}
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      {/* Wudu Steps Section */}
       <div className="text-center py-6">
         <h1 className="text-4xl font-bold mb-2">
-          {settings.language === 'ar' ? 'خطوات الوضوء' : 'Prayer (Wudu)'}
+          {settings.language === 'ar' ? 'خطوات الوضوء' : 'Wudu Steps'}
         </h1>
         <p className="text-muted-foreground">
           {settings.language === 'ar' 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, BookOpen, Home, MessageSquare } from 'lucide-react';
+import { Book, HandHeart, Home, MessageSquare } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import MoreDialog from './MoreDialog';
 
@@ -15,9 +15,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       label: { ar: 'القرآن', en: 'Quran' } 
     },
     { 
-      path: '/duas', 
-      icon: BookOpen, 
-      label: { ar: 'أدعية', en: 'Duas' } 
+      path: '/prayer', 
+      icon: HandHeart, 
+      label: { ar: 'الصلاة', en: 'Prayer' } 
     },
     { 
       path: '/', 
