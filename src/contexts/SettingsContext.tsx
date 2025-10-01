@@ -192,8 +192,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           tafsir_source: settings.tafsirSource,
           prayer_time_region: settings.prayerTimeRegion,
           reading_tracking_mode: settings.readingTrackingMode,
+        }, {
+          onConflict: 'user_id'
         })
-        .then(() => {});
+        .then(({ error }) => {
+          if (error) {
+            console.error('Error saving settings to database:', error);
+          }
+        });
     }
   }, [settings, userId, isLoaded]);
 
