@@ -80,16 +80,16 @@ const Quran = () => {
       </div>
 
       {overallProgress > 0 && (
-        <div className="glass-effect rounded-2xl p-6 space-y-3">
+        <div className="glass-effect rounded-3xl p-8 space-y-4 border border-border/50 apple-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">
+            <span className="text-base font-semibold">
               {settings.language === 'ar' ? 'التقدم الإجمالي' : 'Overall Progress'}
             </span>
-            <span className="text-sm font-bold text-primary">
+            <span className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
               {overallProgress.toFixed(1)}%
             </span>
           </div>
-          <Progress value={overallProgress} className="h-3" />
+          <Progress value={overallProgress} className="h-4" />
         </div>
       )}
 
