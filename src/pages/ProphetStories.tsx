@@ -272,11 +272,11 @@ const ProphetStories = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">
+      <div className="text-center py-6">
+        <h1 className="text-3xl md:text-4xl font-bold mb-3 bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
           {settings.language === 'ar' ? 'قصص الأنبياء' : 'Prophet Stories'}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto">
           {settings.language === 'ar' 
             ? 'قصص الأنبياء والرسل عليهم السلام'
             : 'Stories of the Prophets and Messengers (peace be upon them)'}
