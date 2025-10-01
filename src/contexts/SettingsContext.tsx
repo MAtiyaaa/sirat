@@ -25,7 +25,7 @@ interface SettingsContextType {
 
 const defaultSettings: Settings = {
   language: 'en',
-  theme: 'system',
+  theme: 'system', // System is default
   qari: 'ar.alafasy',
   translationEnabled: true,
   transliterationEnabled: true,
@@ -69,6 +69,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [settings, setSettings] = useState<Settings>(initialSettings);
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Apply theme immediately on mount
   React.useEffect(() => {
@@ -80,18 +81,27 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Load settings from database or localStorage
   useEffect(() => {
     const loadSettings = async () => {
+      console.log('[Settings] Loading settings...');
       const { data: { session } } = await supabase.auth.getSession();
-      setUserId(session?.user?.id || null);
+      const currentUserId = session?.user?.id || null;
+      console.log('[Settings] User ID:', currentUserId);
+      setUserId(currentUserId);
 
-      if (session?.user?.id) {
+      if (currentUserId) {
+        console.log('[Settings] Fetching from database for user:', currentUserId);
         // Load from database for logged-in users
         const { data, error } = await supabase
           .from('user_settings')
           .select('*')
-          .eq('user_id', session.user.id)
+          .eq('user_id', currentUserId)
           .maybeSingle();
 
+        if (error) {
+          console.error('[Settings] Error loading from database:', error);
+        }
+
         if (data && !error) {
+          console.log('[Settings] Loaded from database:', data);
           const dbSettings = {
             language: (data.language as Language) || defaultSettings.language,
             theme: (data.theme as Theme) || defaultSettings.theme,
@@ -103,43 +113,32 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
             readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
           };
+          console.log('[Settings] Setting state to DB settings:', dbSettings);
           setSettings(dbSettings);
           // Also update localStorage to keep them in sync
           try {
             localStorage.setItem('sirat-settings', JSON.stringify(dbSettings));
+            console.log('[Settings] Synced to localStorage');
           } catch (error) {
-            console.error('Error syncing settings to localStorage:', error);
+            console.error('[Settings] Error syncing to localStorage:', error);
           }
+        } else {
+          console.log('[Settings] No settings in database, using localStorage/defaults');
         }
+      } else {
+        console.log('[Settings] No user logged in, using localStorage');
       }
-      // Note: We don't need to load from localStorage here since it's already loaded in initial state
       setIsLoaded(true);
+      console.log('[Settings] Load complete, isLoaded=true');
     };
 
     loadSettings();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Settings] Auth state changed:', event, 'User:', session?.user?.id);
       setUserId(session?.user?.id || null);
       setIsLoaded(false);
-      if (session?.user?.id) {
-        // User just signed in - load from database
-        await loadSettings();
-      } else {
-        // User just signed out - reload from localStorage
-        const stored = localStorage.getItem('sirat-settings');
-        if (stored) {
-          try {
-            const parsedSettings = JSON.parse(stored);
-            setSettings({ ...defaultSettings, ...parsedSettings });
-          } catch (error) {
-            console.error('Error parsing settings from localStorage:', error);
-            setSettings(defaultSettings);
-          }
-        } else {
-          setSettings(defaultSettings);
-        }
-        setIsLoaded(true);
-      }
+      await loadSettings();
     });
 
     return () => subscription.unsubscribe();
@@ -168,40 +167,63 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     // Don't save settings until they've been loaded initially
-    if (!isLoaded) return;
+    if (!isLoaded) {
+      console.log('[Settings] Skipping save - not loaded yet');
+      return;
+    }
+    
+    if (isSaving) {
+      console.log('[Settings] Skipping save - already saving');
+      return;
+    }
+
+    console.log('[Settings] Save triggered. UserId:', userId, 'Settings:', settings);
 
     // Always save to localStorage for instant availability on refresh
     try {
       localStorage.setItem('sirat-settings', JSON.stringify(settings));
+      console.log('[Settings] Saved to localStorage');
     } catch (error) {
-      console.error('Error saving settings to localStorage:', error);
+      console.error('[Settings] Error saving to localStorage:', error);
     }
 
     // Also save to database if logged in
     if (userId) {
+      console.log('[Settings] Saving to database for user:', userId);
+      setIsSaving(true);
+      
+      const settingsData = {
+        user_id: userId,
+        language: settings.language,
+        theme: settings.theme,
+        qari: settings.qari,
+        translation_enabled: settings.translationEnabled,
+        transliteration_enabled: settings.transliterationEnabled,
+        font_type: settings.fontType,
+        tafsir_source: settings.tafsirSource,
+        prayer_time_region: settings.prayerTimeRegion,
+        reading_tracking_mode: settings.readingTrackingMode,
+      };
+      
+      console.log('[Settings] Upserting data:', settingsData);
+      
       supabase
         .from('user_settings')
-        .upsert({
-          user_id: userId,
-          language: settings.language,
-          theme: settings.theme,
-          qari: settings.qari,
-          translation_enabled: settings.translationEnabled,
-          transliteration_enabled: settings.transliterationEnabled,
-          font_type: settings.fontType,
-          tafsir_source: settings.tafsirSource,
-          prayer_time_region: settings.prayerTimeRegion,
-          reading_tracking_mode: settings.readingTrackingMode,
-        }, {
+        .upsert(settingsData, {
           onConflict: 'user_id'
         })
-        .then(({ error }) => {
+        .then(({ data, error }) => {
+          setIsSaving(false);
           if (error) {
-            console.error('Error saving settings to database:', error);
+            console.error('[Settings] Database save ERROR:', error);
+          } else {
+            console.log('[Settings] Database save SUCCESS:', data);
           }
         });
+    } else {
+      console.log('[Settings] Not saving to database - no user logged in');
     }
-  }, [settings, userId, isLoaded]);
+  }, [settings, userId, isLoaded, isSaving]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
