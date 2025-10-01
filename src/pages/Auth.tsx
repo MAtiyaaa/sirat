@@ -46,10 +46,10 @@ const Auth = () => {
         if (error) throw error;
         toast.success(
           settings.language === 'ar' 
-            ? 'تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك.' 
-            : 'Account created! Please check your email to confirm your account.'
+            ? 'تم إنشاء الحساب بنجاح!' 
+            : 'Account created successfully!'
         );
-        setIsSignUp(false);
+        navigate('/');
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
