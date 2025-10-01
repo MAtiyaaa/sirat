@@ -23,17 +23,28 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const currentPath = location.pathname;
     const lastSurahPath = localStorage.getItem('lastSurahPath');
     
-    // If we're already in a surah and clicking Quran tab, go to list
+    // If we're in a surah and clicking Quran tab, go to list
     if (currentPath.startsWith('/quran/') && currentPath !== '/quran') {
       // Clear the saved path since they explicitly want to go to list
       localStorage.removeItem('lastSurahPath');
       return; // Let Link navigate normally to /quran
     }
     
-    // If we're coming from a different tab and have a saved surah, restore it
-    if (!currentPath.startsWith('/quran') && lastSurahPath) {
+    // If we have a saved surah and we're not already viewing it, restore it
+    if (lastSurahPath && currentPath !== lastSurahPath) {
       e.preventDefault();
       navigate(lastSurahPath);
+    }
+  };
+
+  const handleOtherTabClick = (path: string) => (e: React.MouseEvent) => {
+    const currentPath = location.pathname;
+    
+    // If we're in a surah, the useEffect will save it
+    // Just navigate normally
+    if (currentPath.startsWith('/quran/') && currentPath !== '/quran') {
+      // Path is already being saved by useEffect
+      return;
     }
   };
 
