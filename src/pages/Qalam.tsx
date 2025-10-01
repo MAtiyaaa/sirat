@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Sparkles, Loader2, Trash2, Plus } from 'lucide-react';
+import { Send, Sparkles, Loader2, Trash2, Plus, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 interface Message {
   id?: string;
@@ -27,11 +28,36 @@ const Qalam = () => {
     }
   }, [messages]);
 
+  // Save current state to sessionStorage
+  useEffect(() => {
+    if (messages.length > 0 || conversationId) {
+      sessionStorage.setItem('qalam_state', JSON.stringify({
+        messages,
+        conversationId
+      }));
+    }
+  }, [messages, conversationId]);
+
   // Load user and conversation
   useEffect(() => {
     const loadData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      
+      // Try to restore from sessionStorage first
+      const savedState = sessionStorage.getItem('qalam_state');
+      if (savedState) {
+        try {
+          const { messages: savedMessages, conversationId: savedConvId } = JSON.parse(savedState);
+          if (savedMessages && savedMessages.length > 0) {
+            setMessages(savedMessages);
+            setConversationId(savedConvId);
+            return; // Use saved state, don't load from DB
+          }
+        } catch (e) {
+          console.error('Error restoring chat state:', e);
+        }
+      }
       
       if (session?.user) {
         // Load most recent general AI conversation (not ayah-specific)
@@ -72,6 +98,7 @@ const Qalam = () => {
     
     setMessages([]);
     setConversationId(null);
+    sessionStorage.removeItem('qalam_state');
     toast.success(settings.language === 'ar' ? 'محادثة جديدة' : 'New chat started');
   };
 
@@ -231,14 +258,26 @@ const Qalam = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] relative">
       {user && (
-        <Button
-          onClick={createNewChat}
-          size="icon"
-          variant="outline"
-          className="absolute top-4 right-4 rounded-full w-10 h-10 z-10"
-        >
-          <Plus className="h-5 w-5" />
-        </Button>
+        <>
+          <Link to="/chat-history">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute top-4 left-4 rounded-full w-9 h-9 z-10"
+            >
+              <History className="h-4 w-4" />
+            </Button>
+          </Link>
+          
+          <Button
+            onClick={createNewChat}
+            size="icon"
+            variant="outline"
+            className="absolute top-4 right-4 rounded-full w-10 h-10 z-10"
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
+        </>
       )}
       
       <div className="text-center py-6">
