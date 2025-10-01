@@ -21,7 +21,7 @@ const Hadith = () => {
   const [hadiths, setHadiths] = useState<Hadith[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedBook, setSelectedBook] = useState('bukhari');
+  const [selectedBook, setSelectedBook] = useState('sahih-bukhari');
   const [page, setPage] = useState(1);
 
   const content = {
@@ -62,12 +62,12 @@ const Hadith = () => {
   const t = content[settings.language];
 
   const books = [
-    { value: 'bukhari', label: t.bukhari },
-    { value: 'muslim', label: t.muslim },
-    { value: 'abudawud', label: t.abudawud },
-    { value: 'tirmidhi', label: t.tirmidhi },
-    { value: 'nasai', label: t.nasai },
-    { value: 'ibnmajah', label: t.ibnmajah },
+    { value: 'sahih-bukhari', label: t.bukhari },
+    { value: 'sahih-muslim', label: t.muslim },
+    { value: 'abu-dawood', label: t.abudawud },
+    { value: 'al-tirmidhi', label: t.tirmidhi },
+    { value: 'sunan-nasai', label: t.nasai },
+    { value: 'ibn-e-majah', label: t.ibnmajah },
   ];
 
   const fetchHadiths = async (bookName: string, pageNum: number = 1) => {
