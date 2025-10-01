@@ -7,13 +7,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, BookOpen, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface Book {
+  id: number;
+  bookName: string;
+  writerName: string;
+  aboutWriter: string;
+  writerDeath: string;
+  bookSlug: string;
+}
+
+interface Chapter {
+  id: number;
+  chapterNumber: string;
+  chapterEnglish: string;
+  chapterUrdu: string;
+  chapterArabic: string;
+  bookSlug: string;
+}
+
 interface Hadith {
   hadithNumber: number;
   englishNarrator: string;
   hadithEnglish: string;
   hadithArabic: string;
-  book: string;
-  chapter: string;
+  book: Book;
+  chapter: Chapter;
 }
 
 const Hadith = () => {
@@ -171,12 +189,12 @@ const Hadith = () => {
                     <span>
                       {t.hadithNumber}: {hadith.hadithNumber}
                     </span>
-                    <span>{hadith.book}</span>
+                    <span>{hadith.book?.bookName || ''}</span>
                   </div>
 
                   {hadith.chapter && (
                     <div className="text-sm text-muted-foreground">
-                      {t.chapter}: {hadith.chapter}
+                      {t.chapter}: {settings.language === 'ar' ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
                     </div>
                   )}
 
