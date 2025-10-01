@@ -170,7 +170,7 @@ const Wudu = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : prayerTimes ? (
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {Object.entries(prayerTimes).map(([prayer, time]) => (
               <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
                 <div className="text-sm font-semibold text-muted-foreground mb-1">
