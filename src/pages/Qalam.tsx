@@ -132,6 +132,46 @@ const Qalam = () => {
     loadData();
   }, []);
 
+  // Load conversation from navigation state (from chat history)
+  useEffect(() => {
+    const loadConversationFromNav = async () => {
+      const state = window.history.state?.usr;
+      if (state?.conversationId) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        // Save current conversation if it has messages
+        if (messages.length > 0 && conversationId) {
+          sessionStorage.setItem('qalam_previous', JSON.stringify({
+            messages,
+            conversationId
+          }));
+        }
+
+        // Load the selected conversation
+        const { data: msgs } = await supabase
+          .from('ai_messages')
+          .select('*')
+          .eq('conversation_id', state.conversationId)
+          .order('created_at', { ascending: true });
+        
+        if (msgs) {
+          setMessages(msgs.map(m => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content })));
+          setConversationId(state.conversationId);
+          sessionStorage.setItem('qalam_state', JSON.stringify({
+            messages: msgs.map(m => ({ id: m.id, role: m.role, content: m.content })),
+            conversationId: state.conversationId
+          }));
+        }
+        
+        // Clear navigation state
+        window.history.replaceState({}, document.title);
+      }
+    };
+
+    loadConversationFromNav();
+  }, []);
+
   const createNewChat = async () => {
     if (!user) {
       toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Bookmark, Volume2, Pause, Play } from 'lucide-react';
+import { Book, Bookmark, Volume2, Pause, Play, Search } from 'lucide-react';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import { useAudio } from '@/contexts/AudioContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const Quran = () => {
   const { settings } = useSettings();
@@ -20,6 +21,8 @@ const Quran = () => {
   const [overallProgress, setOverallProgress] = useState(0);
   const [bookmarkedSurahs, setBookmarkedSurahs] = useState<Set<number>>(new Set());
   const [lastViewedSurah, setLastViewedSurah] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredSurahs, setFilteredSurahs] = useState<Surah[]>([]);
 
   useEffect(() => {
     loadSurahs();
@@ -27,6 +30,19 @@ const Quran = () => {
     loadBookmarks();
     loadLastViewed();
   }, []);
+
+  useEffect(() => {
+    if (searchTerm.trim()) {
+      const filtered = surahs.filter(s =>
+        s.englishName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.name.includes(searchTerm) ||
+        s.englishNameTranslation.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredSurahs(filtered);
+    } else {
+      setFilteredSurahs(surahs);
+    }
+  }, [searchTerm, surahs]);
 
   const loadSurahs = async () => {
     setLoading(true);
@@ -100,23 +116,36 @@ const Quran = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-4 py-8">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+    <div className="space-y-6 pb-6">
+      <div className="text-center space-y-4 py-6 px-4">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
           <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
             {settings.language === 'ar' ? 'القرآن الكريم' : 'The Holy Quran'}
           </span>
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
+        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
           {settings.language === 'ar' 
             ? 'اختر سورة للقراءة'
             : 'Select a surah to read'}
         </p>
       </div>
 
+      {/* Search Bar */}
+      <div className="px-4">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder={settings.language === 'ar' ? 'ابحث عن سورة...' : 'Search for a surah...'}
+            className="pl-12 h-14 rounded-2xl glass-effect border-border/50 text-base"
+          />
+        </div>
+      </div>
+
       {lastViewedSurah && surahs.length > 0 && (
         <div 
-          className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition"
+          className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition mx-4"
         >
           <div className="flex items-center justify-between">
             <div className="flex-1" onClick={() => navigate(`/quran/${lastViewedSurah}`)}>
@@ -158,7 +187,7 @@ const Quran = () => {
       )}
 
       {overallProgress > 0 && (
-        <div className="glass-effect rounded-3xl p-8 space-y-4 border border-border/50 apple-shadow">
+        <div className="glass-effect rounded-3xl p-8 space-y-4 border border-border/50 apple-shadow mx-4">
           <div className="flex items-center justify-between">
             <span className="text-base font-semibold">
               {settings.language === 'ar' ? 'التقدم الإجمالي' : 'Overall Progress'}
@@ -171,8 +200,8 @@ const Quran = () => {
         </div>
       )}
 
-      <div className="space-y-3">
-        {surahs.map((surah) => {
+      <div className="space-y-3 px-4">
+        {filteredSurahs.map((surah) => {
           const surahProgress = progress[surah.number] || 0;
           const surahProgressPercent = (surahProgress / surah.numberOfAyahs) * 100;
 
