@@ -129,12 +129,12 @@ const Info = () => {
             {Object.entries(prayerTimes).map(([prayer, time]) => (
               <div
                 key={prayer}
-                className="glass-effect rounded-2xl p-3 md:p-6 text-center space-y-1 md:space-y-2 hover:scale-105 smooth-transition"
+                className="glass-effect rounded-2xl p-3 md:p-6 text-center space-y-1 md:space-y-2 hover:scale-105 smooth-transition min-w-0"
               >
-                <p className="text-sm md:text-lg font-semibold">
+                <p className="text-xs md:text-lg font-semibold truncate">
                   {prayerNames[prayer as keyof PrayerTimes]}
                 </p>
-                <p className="text-xl md:text-3xl font-bold text-primary">{time}</p>
+                <p className="text-lg md:text-3xl font-bold text-primary break-all">{time}</p>
               </div>
             ))}
           </div>
