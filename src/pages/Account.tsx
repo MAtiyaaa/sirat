@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Mail, Lock, Trash2, LogOut, AlertTriangle } from 'lucide-react';
+import { User, Mail, Lock, Trash2, LogOut, AlertTriangle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -65,6 +65,9 @@ const Account = () => {
       confirmPassword: 'تأكيد كلمة المرور',
       updatePassword: 'تحديث كلمة المرور',
       dangerZone: 'منطقة الخطر',
+      clearAllData: 'مسح جميع البيانات',
+      clearDataWarning: 'سيؤدي هذا إلى مسح جميع بياناتك (الدردشات، الإشارات المرجعية، سجل القراءة، الإعدادات) بشكل دائم.',
+      clearDataConfirm: 'هل أنت متأكد أنك تريد مسح جميع بياناتك؟ لا يمكن التراجع عن هذا الإجراء.',
       deleteAccount: 'حذف الحساب',
       deleteWarning: 'سيؤدي هذا إلى حذف حسابك وجميع بياناتك بشكل دائم.',
       deleteConfirm: 'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
@@ -75,6 +78,7 @@ const Account = () => {
       passwordUpdated: 'تم تحديث كلمة المرور',
       passwordMismatch: 'كلمات المرور غير متطابقة',
       accountDeleted: 'تم حذف الحساب',
+      dataCleared: 'تم مسح جميع البيانات بنجاح',
       error: 'حدث خطأ',
       signedOut: 'تم تسجيل الخروج بنجاح',
       signInRequired: 'يجب تسجيل الدخول أولاً',
@@ -92,6 +96,9 @@ const Account = () => {
       confirmPassword: 'Confirm Password',
       updatePassword: 'Update Password',
       dangerZone: 'Danger Zone',
+      clearAllData: 'Clear All Data',
+      clearDataWarning: 'This will permanently clear all your data (chats, bookmarks, reading history, settings).',
+      clearDataConfirm: 'Are you sure you want to clear all your data? This action cannot be undone.',
       deleteAccount: 'Delete Account',
       deleteWarning: 'This will permanently delete your account and all your data.',
       deleteConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
@@ -102,6 +109,7 @@ const Account = () => {
       passwordUpdated: 'Password updated successfully',
       passwordMismatch: 'Passwords do not match',
       accountDeleted: 'Account deleted successfully',
+      dataCleared: 'All data cleared successfully',
       error: 'An error occurred',
       signedOut: 'Signed out successfully',
       signInRequired: 'Please sign in first',
@@ -168,6 +176,66 @@ const Account = () => {
     } catch (error) {
       console.error('Delete error:', error);
       toast.error(t.error);
+    }
+  };
+
+  const handleClearAllData = async () => {
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      // Get all conversation IDs first to properly delete messages
+      const { data: conversations } = await supabase
+        .from('ai_conversations')
+        .select('id')
+        .eq('user_id', user.id);
+
+      // Delete all AI messages first
+      if (conversations && conversations.length > 0) {
+        const conversationIds = conversations.map(c => c.id);
+        await supabase
+          .from('ai_messages')
+          .delete()
+          .in('conversation_id', conversationIds);
+      }
+      
+      // Delete all other user data
+      await Promise.all([
+        supabase.from('ai_conversations').delete().eq('user_id', user.id),
+        supabase.from('bookmarks').delete().eq('user_id', user.id),
+        supabase.from('reading_progress').delete().eq('user_id', user.id),
+        supabase.from('last_viewed_surah').delete().eq('user_id', user.id),
+        supabase.from('ayah_interactions').delete().eq('user_id', user.id),
+      ]);
+      
+      // Reset user settings to defaults
+      await supabase
+        .from('user_settings')
+        .update({
+          language: 'en',
+          theme: 'light',
+          qari: 'ar.alafasy',
+          font_type: 'quran',
+          tafsir_source: 'en-tafisr-ibn-kathir',
+          tajweed_enabled: false,
+          translation_enabled: true,
+          transliteration_enabled: true,
+          reading_tracking_mode: 'auto',
+          prayer_time_region: null,
+        })
+        .eq('user_id', user.id);
+      
+      toast.success(t.dataCleared);
+      
+      // Reload the page to refresh all contexts
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error('Clear data error:', error);
+      toast.error(t.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -296,39 +364,74 @@ const Account = () => {
       </div>
 
       {/* Danger Zone */}
-      <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-destructive/50 bg-destructive/5">
+      <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-6 border border-destructive/50 bg-destructive/5">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-destructive" />
           <h2 className="text-xl font-semibold text-destructive">{t.dangerZone}</h2>
         </div>
         
-        <p className="text-sm text-muted-foreground">{t.deleteWarning}</p>
-        
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="w-full">
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t.deleteAccount}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t.deleteAccount}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t.deleteConfirm}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDeleteAccount}
-                className="bg-destructive hover:bg-destructive/90"
-              >
-                {t.confirm}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Clear All Data */}
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">{t.clearDataWarning}</p>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive/10">
+                <RotateCcw className="h-4 w-4 mr-2" />
+                {t.clearAllData}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.clearAllData}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t.clearDataConfirm}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleClearAllData}
+                  className="bg-destructive hover:bg-destructive/90"
+                  disabled={isLoading}
+                >
+                  {t.confirm}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+
+        {/* Delete Account */}
+        <div className="space-y-4 pt-4 border-t border-destructive/20">
+          <p className="text-sm text-muted-foreground">{t.deleteWarning}</p>
+          
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full">
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t.deleteAccount}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.deleteAccount}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t.deleteConfirm}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  {t.confirm}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </div>
   );
