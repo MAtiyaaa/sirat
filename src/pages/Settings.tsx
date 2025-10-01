@@ -91,18 +91,22 @@ const Settings = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">{t.title}</h1>
-        <p className="text-muted-foreground">
+      <div className="text-center space-y-4 py-8">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+            {t.title}
+          </span>
+        </h1>
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
           {settings.language === 'ar' 
             ? 'خصص تجربتك في قراءة القرآن'
             : 'Customize your Quran reading experience'}
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 max-w-2xl mx-auto">
         {/* Account Section */}
-        <div className="glass-effect rounded-2xl p-6 space-y-4">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-6 border border-border/50 backdrop-blur-xl">
           <Label className="text-base font-semibold">{t.account}</Label>
           {user ? (
             <div className="space-y-4">
@@ -137,7 +141,7 @@ const Settings = () => {
         </div>
 
         {/* Language */}
-        <div className="glass-effect rounded-2xl p-6 space-y-4">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
           <Label className="text-base font-semibold">{t.language}</Label>
           <Select
             value={settings.language}
@@ -154,7 +158,7 @@ const Settings = () => {
         </div>
 
         {/* Theme */}
-        <div className="glass-effect rounded-2xl p-6 space-y-4">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
           <Label className="text-base font-semibold">{t.theme}</Label>
           <Select
             value={settings.theme}
@@ -173,7 +177,7 @@ const Settings = () => {
         </div>
 
         {/* Font Type */}
-        <div className="glass-effect rounded-2xl p-6 space-y-4">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
           <Label className="text-base font-semibold">{t.fontType}</Label>
           <Select
             value={settings.fontType}
@@ -190,7 +194,7 @@ const Settings = () => {
         </div>
 
         {/* Qari */}
-        <div className="glass-effect rounded-2xl p-6 space-y-4">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
           <Label className="text-base font-semibold">{t.qari}</Label>
           <Select
             value={settings.qari}
@@ -209,7 +213,7 @@ const Settings = () => {
         </div>
 
         {/* Tafsir Source */}
-        <div className="glass-effect rounded-2xl p-6 space-y-4">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
           <Label className="text-base font-semibold">{t.tafsirSource}</Label>
           <Select
             value={settings.tafsirSource}
@@ -228,7 +232,7 @@ const Settings = () => {
         </div>
 
         {/* Toggle Settings */}
-        <div className="glass-effect rounded-2xl p-6 space-y-6">
+        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-6 border border-border/50 backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <Label className="text-base font-medium">{t.tajweed}</Label>
             <Switch
