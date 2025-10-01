@@ -349,6 +349,20 @@ const Qalam = () => {
                 </div>
               </div>
             ))}
+            
+            {/* Typing Indicator */}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="glass-effect rounded-2xl p-4 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={scrollRef} />
           </>
         )}
