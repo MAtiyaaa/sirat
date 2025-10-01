@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Card } from '@/components/ui/card';
-import { Loader2, MapPin, Clock } from 'lucide-react';
+import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 interface PrayerTimes {
   Fajr: string;
@@ -17,10 +18,60 @@ const Wudu = () => {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [location, setLocation] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string } | null>(null);
 
   useEffect(() => {
     fetchPrayerTimes();
   }, []);
+
+  useEffect(() => {
+    if (!prayerTimes) return;
+
+    const calculateNextPrayer = () => {
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      const prayers = [
+        { name: 'Fajr', time: prayerTimes.Fajr },
+        { name: 'Dhuhr', time: prayerTimes.Dhuhr },
+        { name: 'Asr', time: prayerTimes.Asr },
+        { name: 'Maghrib', time: prayerTimes.Maghrib },
+        { name: 'Isha', time: prayerTimes.Isha },
+      ];
+
+      for (const prayer of prayers) {
+        const [hours, minutes] = prayer.time.split(':').map(Number);
+        const prayerTime = hours * 60 + minutes;
+
+        if (prayerTime > currentTime) {
+          const diff = prayerTime - currentTime;
+          const hoursLeft = Math.floor(diff / 60);
+          const minutesLeft = diff % 60;
+          setNextPrayer({
+            name: prayerNames[prayer.name as keyof PrayerTimes],
+            timeLeft: `${hoursLeft}h ${minutesLeft}m`,
+          });
+          return;
+        }
+      }
+
+      // If no prayer is left today, next is Fajr tomorrow
+      const [fajrHours, fajrMinutes] = prayerTimes.Fajr.split(':').map(Number);
+      const fajrTime = fajrHours * 60 + fajrMinutes;
+      const diff = 24 * 60 - currentTime + fajrTime;
+      const hoursLeft = Math.floor(diff / 60);
+      const minutesLeft = diff % 60;
+      setNextPrayer({
+        name: prayerNames.Fajr,
+        timeLeft: `${hoursLeft}h ${minutesLeft}m`,
+      });
+    };
+
+    calculateNextPrayer();
+    const interval = setInterval(calculateNextPrayer, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [prayerTimes, settings.language]);
 
   const fetchPrayerTimes = async () => {
     setLoading(true);
@@ -101,7 +152,7 @@ const Wudu = () => {
       {/* Prayer Times Section */}
       <div className="glass-effect rounded-3xl p-6 border border-border/50">
         <div className="flex items-center gap-2 mb-4">
-          <Clock className="h-5 w-5 text-primary" />
+          <HandHeart className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-bold">
             {settings.language === 'ar' ? 'أوقات الصلاة' : 'Prayer Times'}
           </h2>
@@ -133,6 +184,30 @@ const Wudu = () => {
           </div>
         ) : null}
       </div>
+
+      {/* Next Prayer Countdown */}
+      {nextPrayer && (
+        <div className="glass-effect rounded-2xl p-5 border border-primary/20 bg-primary/5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {settings.language === 'ar' ? 'الوقت المتبقي حتى' : 'Time till'}
+                </p>
+                <p className="text-xl font-bold text-primary">
+                  {nextPrayer.name}
+                </p>
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-primary">
+              {nextPrayer.timeLeft}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Wudu Steps Section */}
       <div className="text-center py-6">
@@ -186,6 +261,34 @@ const Wudu = () => {
             : 'After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger'}
         </p>
       </div>
+
+      {/* Duas Card */}
+      <Link to="/duas" className="block group">
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-400/10 to-rose-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+          
+          <div className="relative glass-effect rounded-3xl p-8 border border-border/50 hover:border-primary/30 smooth-transition">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center group-hover:scale-110 smooth-transition">
+                  <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-1">
+                    {settings.language === 'ar' ? 'الأدعية' : "Dua's"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {settings.language === 'ar' 
+                      ? 'زيارة صفحة الأدعية للمزيد'
+                      : 'Visit duas for more'}
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-6 w-6 text-primary group-hover:translate-x-1 smooth-transition" />
+            </div>
+          </div>
+        </div>
+      </Link>
     </div>
   );
 };
