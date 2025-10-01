@@ -163,9 +163,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Don't save settings until they've been loaded initially
     if (!isLoaded) return;
 
-    // Save settings
+    // Always save to localStorage for instant availability on refresh
+    try {
+      localStorage.setItem('sirat-settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Error saving settings to localStorage:', error);
+    }
+
+    // Also save to database if logged in
     if (userId) {
-      // Save to database
       supabase
         .from('user_settings')
         .upsert({
@@ -181,13 +187,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           reading_tracking_mode: settings.readingTrackingMode,
         })
         .then(() => {});
-    } else {
-      // Save to localStorage
-      try {
-        localStorage.setItem('sirat-settings', JSON.stringify(settings));
-      } catch (error) {
-        console.error('Error saving settings to localStorage:', error);
-      }
     }
   }, [settings, userId, isLoaded]);
 
