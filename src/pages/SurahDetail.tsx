@@ -145,6 +145,27 @@ const SurahDetail = () => {
       
       setSurahData(arabic);
       setTranslation(trans);
+      
+      // Auto-load word-by-word for all ayahs
+      if (arabic?.ayahs) {
+        const wordPromises = arabic.ayahs.map((ayah: any) => 
+          fetchWordByWord(parseInt(surahNumber), ayah.numberInSurah)
+            .then(words => ({ ayahNumber: ayah.numberInSurah, words }))
+            .catch(error => {
+              console.error(`Error loading word by word for ayah ${ayah.numberInSurah}:`, error);
+              return null;
+            })
+        );
+        
+        const wordResults = await Promise.all(wordPromises);
+        const newWordData: Record<number, any[]> = {};
+        wordResults.forEach(result => {
+          if (result) {
+            newWordData[result.ayahNumber] = result.words;
+          }
+        });
+        setWordData(newWordData);
+      }
     } catch (error) {
       console.error('Error loading surah:', error);
       toast.error('Failed to load surah');
@@ -391,17 +412,19 @@ const SurahDetail = () => {
                         }}
                       >
                         <PopoverTrigger asChild>
-                          <span
+                          <button
                             onClick={() => handleWordClick(ayah.numberInSurah, wordIndex)}
-                            className="cursor-pointer hover:text-primary smooth-transition inline-block"
+                            className="cursor-pointer hover:text-primary smooth-transition inline-block bg-transparent border-0 p-0 m-0 font-inherit"
+                            style={{ font: 'inherit' }}
                           >
                             {word.text}
-                          </span>
+                          </button>
                         </PopoverTrigger>
                         <PopoverContent 
                           className="w-[280px] p-4 glass-effect backdrop-blur-xl border-border/50"
                           side="top"
                           align="center"
+                          sideOffset={8}
                         >
                           <div className="space-y-3 text-left" dir="ltr">
                             <div>
@@ -429,14 +452,7 @@ const SurahDetail = () => {
                   })}
                 </div>
               ) : (
-                <span
-                  onClick={() => {
-                    loadWordByWord(ayah.numberInSurah);
-                  }}
-                  className="cursor-pointer hover:text-primary smooth-transition"
-                >
-                  {ayah.text}
-                </span>
+                <span>{ayah.text}</span>
               )}
             </div>
 
