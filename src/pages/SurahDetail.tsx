@@ -762,12 +762,20 @@ const SurahDetail = () => {
           .filter((ayah: any, index: number) => {
             if (!searchTerm.trim()) return true;
             
-            // Remove diacritics from Arabic text for better matching
-            const removeDiacritics = (text: string) => 
-              text.replace(/[\u064B-\u065F\u0670]/g, '').toLowerCase();
+            // Normalize Arabic text for better matching
+            const normalizeArabic = (text: string) => {
+              return text
+                .normalize('NFKC')
+                .replace(/[\u064B-\u065F\u0670]/g, '')
+                .replace(/[ًٌٍَُِّْٰ]/g, '')
+                .replace(/أ|إ|آ/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .trim()
+                .toLowerCase();
+            };
             
-            const search = removeDiacritics(searchTerm);
-            const arabicText = removeDiacritics(ayah.text || '');
+            const search = normalizeArabic(searchTerm);
+            const arabicText = normalizeArabic(ayah.text || '');
             const translationText = (translation?.ayahs[index]?.text || '').toLowerCase();
             
             return arabicText.includes(search) || translationText.includes(search);
@@ -791,10 +799,13 @@ const SurahDetail = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const element = document.querySelector(`[data-ayah="${ayah.numberInSurah}"]`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }
+                      setSearchTerm('');
+                      setTimeout(() => {
+                        const element = document.querySelector(`[data-ayah="${ayah.numberInSurah}"]`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }, 100);
                     }}
                     className="rounded-full gap-1.5"
                   >
