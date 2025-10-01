@@ -6,12 +6,52 @@ import { Send, Sparkles, Loader2, Trash2, Plus, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
+import NavigationCard from '@/components/NavigationCard';
 
 interface Message {
   id?: string;
   role: 'user' | 'assistant';
   content: string;
 }
+
+interface NavCardData {
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history';
+  data?: {
+    surahNumber?: number;
+    ayahNumber?: number;
+    surahName?: string;
+    ayahText?: string;
+  };
+}
+
+const parseNavigationCards = (text: string): { text: string; cards: NavCardData[] } => {
+  const cards: NavCardData[] = [];
+  const cardRegex = /\[NAV:(surah|ayah|prayer|stories|account|settings|bookmarks|history)\|?([^\]]*)\]/g;
+  
+  const cleanText = text.replace(cardRegex, (match, type, dataStr) => {
+    const cardData: NavCardData = { type };
+    
+    if (dataStr) {
+      const pairs = dataStr.split(',').map(p => p.trim());
+      cardData.data = {};
+      pairs.forEach(pair => {
+        const [key, value] = pair.split(':').map(s => s.trim());
+        if (key === 'number' || key === 'surah' || key === 'ayah') {
+          cardData.data![key === 'number' ? 'surahNumber' : key === 'surah' ? 'surahNumber' : 'ayahNumber'] = parseInt(value);
+        } else if (key === 'name') {
+          cardData.data!.surahName = value;
+        } else if (key === 'text') {
+          cardData.data!.ayahText = value;
+        }
+      });
+    }
+    
+    cards.push(cardData);
+    return ''; // Remove the card syntax from text
+  });
+  
+  return { text: cleanText.trim(), cards };
+};
 
 const Qalam = () => {
   const { settings } = useSettings();
@@ -311,44 +351,59 @@ const Qalam = () => {
           </div>
         ) : (
           <>
-            {messages.map((message, index) => (
-              <div
-                key={message.id || index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
-              >
-                <div className="flex items-start gap-2 max-w-[85%]">
-                  {message.role === 'user' && message.id && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                      onClick={() => deleteMessage(message.id!)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  )}
-                  <div
-                    className={`rounded-2xl p-4 ${
-                      message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'glass-effect'
-                    }`}
-                  >
-                    {message.content}
+            {messages.map((message, index) => {
+              const { text, cards } = message.role === 'assistant' 
+                ? parseNavigationCards(message.content)
+                : { text: message.content, cards: [] };
+              
+              return (
+                <div
+                  key={message.id || index}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
+                >
+                  <div className="flex items-start gap-2 max-w-[85%]">
+                    {message.role === 'user' && message.id && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 flex-shrink-0"
+                        onClick={() => deleteMessage(message.id!)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div
+                        className={`rounded-2xl p-4 ${
+                          message.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'glass-effect'
+                        }`}
+                      >
+                        {text}
+                      </div>
+                      {cards.length > 0 && (
+                        <div className="mt-2 space-y-2">
+                          {cards.map((card, cardIndex) => (
+                            <NavigationCard key={cardIndex} type={card.type} data={card.data} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {message.role === 'assistant' && message.id && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 flex-shrink-0"
+                        onClick={() => deleteMessage(message.id!)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
-                  {message.role === 'assistant' && message.id && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                      onClick={() => deleteMessage(message.id!)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             
             {/* Typing Indicator */}
             {isLoading && (
