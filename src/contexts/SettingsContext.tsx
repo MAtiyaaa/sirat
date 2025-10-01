@@ -92,7 +92,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           .maybeSingle();
 
         if (data && !error) {
-          setSettings({
+          const dbSettings = {
             language: (data.language as Language) || defaultSettings.language,
             theme: (data.theme as Theme) || defaultSettings.theme,
             qari: data.qari || defaultSettings.qari,
@@ -102,7 +102,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
             prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
             readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
-          });
+          };
+          setSettings(dbSettings);
+          // Also update localStorage to keep them in sync
+          try {
+            localStorage.setItem('sirat-settings', JSON.stringify(dbSettings));
+          } catch (error) {
+            console.error('Error syncing settings to localStorage:', error);
+          }
         }
       }
       // Note: We don't need to load from localStorage here since it's already loaded in initial state
