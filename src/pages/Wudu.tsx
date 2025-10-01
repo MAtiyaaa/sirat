@@ -254,12 +254,22 @@ const Wudu = () => {
         ))}
       </div>
 
-      <div className="glass-effect rounded-2xl p-6 bg-primary/5 border-primary/20">
-        <p className="text-center text-sm text-muted-foreground">
-          {settings.language === 'ar'
-            ? 'بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله'
-            : 'After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger'}
-        </p>
+      <div className="glass-effect rounded-2xl p-6 border border-border/50">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Sparkles className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-base font-semibold mb-2">
+              {settings.language === 'ar' ? 'دعاء بعد الوضوء' : 'Dua After Wudu'}
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {settings.language === 'ar'
+                ? 'بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله'
+                : 'After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger'}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Duas Card */}
