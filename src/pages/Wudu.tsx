@@ -136,6 +136,14 @@ const Wudu = () => {
     Isha: settings.language === 'ar' ? 'العشاء' : 'Isha',
   };
 
+  const prayerRakaas = {
+    Fajr: { fard: 2, sunnah: 2 },
+    Dhuhr: { fard: 4, sunnah: 4 },
+    Asr: { fard: 4, sunnah: 0 },
+    Maghrib: { fard: 3, sunnah: 2 },
+    Isha: { fard: 4, sunnah: 2 },
+  };
+
   const steps = {
     ar: [
       { title: 'النية', count: null, description: 'انوِ في قلبك الوضوء لله تعالى' },
@@ -211,16 +219,29 @@ const Wudu = () => {
           <CollapsibleContent className="mt-6">
             {prayerTimes && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {Object.entries(prayerTimes).map(([prayer, time]) => (
-                  <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
-                    <div className="text-sm font-semibold text-muted-foreground mb-1">
-                      {prayerNames[prayer as keyof PrayerTimes]}
-                    </div>
-                    <div className="text-lg font-bold text-primary">
-                      {time}
-                    </div>
-                  </Card>
-                ))}
+                {Object.entries(prayerTimes).map(([prayer, time]) => {
+                  const rakaas = prayerRakaas[prayer as keyof PrayerTimes];
+                  return (
+                    <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {prayerNames[prayer as keyof PrayerTimes]}
+                      </div>
+                      <div className="text-lg font-bold text-primary mb-2">
+                        {time}
+                      </div>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <div>
+                          {settings.language === 'ar' ? 'فرض' : 'Fard'}: {rakaas.fard}
+                        </div>
+                        {rakaas.sunnah > 0 && (
+                          <div>
+                            {settings.language === 'ar' ? 'سنة' : 'Sunnah'}: {rakaas.sunnah}
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </CollapsibleContent>

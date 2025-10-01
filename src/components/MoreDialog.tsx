@@ -21,6 +21,7 @@ const MoreDialog = () => {
     ar: {
       more: 'المزيد',
       duas: 'الأدعية',
+      hadith: 'الأحاديث',
       stories: 'قصص الأنبياء',
       bookmarks: 'الإشارات المرجعية',
       account: 'الحساب',
@@ -29,6 +30,7 @@ const MoreDialog = () => {
     en: {
       more: 'More',
       duas: 'Duas',
+      hadith: 'Hadith',
       stories: 'Prophet Stories',
       bookmarks: 'Bookmarks',
       account: 'Account',
@@ -40,6 +42,7 @@ const MoreDialog = () => {
 
   const menuItems = [
     { icon: BookOpen, label: t.duas, path: '/duas' },
+    { icon: BookOpen, label: t.hadith, path: '/hadith' },
     { icon: BookOpen, label: t.stories, path: '/prophet-stories' },
     { icon: Bookmark, label: t.bookmarks, path: '/bookmarks' },
     { icon: User, label: t.account, path: '/account' },
