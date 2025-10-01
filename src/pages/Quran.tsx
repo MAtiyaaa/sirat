@@ -104,7 +104,7 @@ const Quran = () => {
               to={`/quran/${surah.number}`}
               className="block"
             >
-              <div className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.02] apple-shadow hover:shadow-xl">
+              <div className="glass-effect rounded-3xl p-6 md:p-8 smooth-transition hover:scale-[1.02] apple-shadow hover:shadow-xl border border-border/50 hover:border-border backdrop-blur-xl">
                 <div className="flex items-center gap-4 mb-3">
                   <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                     <span className="text-primary font-bold">{surah.number}</span>
