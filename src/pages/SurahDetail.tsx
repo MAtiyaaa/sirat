@@ -400,7 +400,7 @@ const SurahDetail = () => {
               dir="rtl"
             >
               {wordData[ayah.numberInSurah] ? (
-                <div className="flex flex-wrap gap-2 justify-end">
+                <div className="flex flex-wrap gap-2 justify-end text-right" dir="rtl">
                   {wordData[ayah.numberInSurah].map((word, wordIndex) => {
                     const popoverKey = `${ayah.numberInSurah}-${wordIndex}`;
                     return (
