@@ -76,7 +76,67 @@ const SurahDetail = () => {
       // Determine which tracking mode to use
       const trackingMode = settings.readingTrackingMode;
 
-      if (trackingMode === 'scroll') {
+      if (trackingMode === 'auto') {
+        // Get the most recent ayah from all tracking methods
+        const promises = [
+          // Scroll position
+          supabase
+            .from('reading_progress')
+            .select('ayah_number, updated_at')
+            .eq('user_id', session.user.id)
+            .eq('surah_number', parseInt(surahNumber))
+            .maybeSingle(),
+          // Bookmarks
+          supabase
+            .from('bookmarks')
+            .select('ayah_number, created_at')
+            .eq('user_id', session.user.id)
+            .eq('surah_number', parseInt(surahNumber))
+            .eq('bookmark_type', 'ayah')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          // Reciting
+          supabase
+            .from('ayah_interactions')
+            .select('ayah_number, updated_at')
+            .eq('user_id', session.user.id)
+            .eq('surah_number', parseInt(surahNumber))
+            .eq('interaction_type', 'recite')
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          // Click
+          supabase
+            .from('ayah_interactions')
+            .select('ayah_number, updated_at')
+            .eq('user_id', session.user.id)
+            .eq('surah_number', parseInt(surahNumber))
+            .eq('interaction_type', 'click')
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ];
+
+        const results = await Promise.all(promises);
+        
+        // Find the most recent entry
+        let mostRecent: { ayah: number; time: string } | null = null;
+        
+        results.forEach((result, index) => {
+          if (result.data) {
+            const timeField = index === 0 || index === 2 || index === 3 ? 'updated_at' : 'created_at';
+            const time = result.data[timeField] as string;
+            const ayah = result.data.ayah_number;
+            
+            if (!mostRecent || new Date(time) > new Date(mostRecent.time)) {
+              mostRecent = { ayah, time };
+            }
+          }
+        });
+        
+        ayahNumber = mostRecent?.ayah || null;
+      } else if (trackingMode === 'scroll') {
         // Get from reading progress (scroll position)
         const { data } = await supabase
           .from('reading_progress')

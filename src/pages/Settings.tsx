@@ -63,6 +63,7 @@ const Settings = () => {
         normal: 'خط عادي',
       },
       trackingModes: {
+        auto: 'تلقائي (موصى به) - يستخدم آخر موضع من أي طريقة',
         scroll: 'حسب التمرير (آخر موضع قمت بالتمرير إليه)',
         bookmark: 'حسب الإشارة المرجعية (آخر آية أضفتها للإشارات)',
         reciting: 'حسب التلاوة (آخر آية قمت بتشغيلها)',
@@ -106,6 +107,7 @@ const Settings = () => {
         normal: 'Normal Font',
       },
       trackingModes: {
+        auto: 'Auto (Recommended) - uses most recent from any method',
         scroll: 'By Scroll (last position you scrolled to)',
         bookmark: 'By Bookmark (last ayah you bookmarked)',
         reciting: 'By Reciting (last ayah you played)',
@@ -345,6 +347,7 @@ const Settings = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="auto">{t.trackingModes.auto}</SelectItem>
               <SelectItem value="scroll">{t.trackingModes.scroll}</SelectItem>
               <SelectItem value="bookmark">{t.trackingModes.bookmark}</SelectItem>
               <SelectItem value="reciting">{t.trackingModes.reciting}</SelectItem>

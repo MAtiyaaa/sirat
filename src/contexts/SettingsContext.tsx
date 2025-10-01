@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export type Language = 'ar' | 'en';
 export type Theme = 'light' | 'dark' | 'gold' | 'pink';
 export type FontType = 'quran' | 'normal';
-export type ReadingTrackingMode = 'scroll' | 'bookmark' | 'reciting' | 'click';
+export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
 
 interface Settings {
   language: Language;
@@ -32,7 +32,7 @@ const defaultSettings: Settings = {
   fontType: 'quran',
   tafsirSource: 'en-tafisr-ibn-kathir',
   prayerTimeRegion: null,
-  readingTrackingMode: 'scroll',
+  readingTrackingMode: 'auto',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
