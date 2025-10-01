@@ -139,16 +139,16 @@ const Quran = () => {
                 </div>
 
                 {surahProgressPercent > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>
+                  <div className="mt-4 pt-4 border-t border-border/30 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground font-medium">
                         {settings.language === 'ar' 
                           ? `الآية ${surahProgress} من ${surah.numberOfAyahs}`
                           : `Ayah ${surahProgress} of ${surah.numberOfAyahs}`}
                       </span>
-                      <span className="font-medium">{surahProgressPercent.toFixed(0)}%</span>
+                      <span className="text-primary font-semibold">{surahProgressPercent.toFixed(0)}%</span>
                     </div>
-                    <Progress value={surahProgressPercent} className="h-2" />
+                    <Progress value={surahProgressPercent} className="h-1.5" />
                   </div>
                 )}
               </div>
