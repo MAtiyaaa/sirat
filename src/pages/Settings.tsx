@@ -1,12 +1,12 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Settings = () => {
@@ -233,6 +233,10 @@ const Settings = () => {
 
         {/* Toggle Settings */}
         <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-6 border border-border/50 backdrop-blur-xl">
+          <Label className="text-lg font-semibold mb-4 block">
+            {settings.language === 'ar' ? 'خيارات العرض' : 'Display Options'}
+          </Label>
+
           <div className="flex items-center justify-between">
             <Label className="text-base font-medium">{t.tajweed}</Label>
             <Switch
@@ -256,6 +260,21 @@ const Settings = () => {
               onCheckedChange={(checked) => updateSettings({ transliterationEnabled: checked })}
             />
           </div>
+        </div>
+
+        {/* Chat History Link */}
+        <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            <Label className="text-lg font-semibold">
+              {settings.language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Assistant'}
+            </Label>
+          </div>
+          <Link to="/chat-history">
+            <Button variant="outline" className="w-full">
+              {settings.language === 'ar' ? 'عرض سجل المحادثات' : 'View Chat History'}
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

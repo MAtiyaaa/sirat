@@ -18,13 +18,15 @@ import {
   ArrowLeft, 
   ChevronDown, 
   Volume2,
-  Loader2 
+  Loader2,
+  MessageSquare
 } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import AyahChatDialog from '@/components/AyahChatDialog';
 import { toast } from 'sonner';
 
 const SurahDetail = () => {
@@ -43,13 +45,47 @@ const SurahDetail = () => {
   const [tafsirData, setTafsirData] = useState<Record<number, string>>({});
   const [openTafsir, setOpenTafsir] = useState<number | null>(null);
   const [lastVisibleAyah, setLastVisibleAyah] = useState<number>(1);
+  const [chatAyah, setChatAyah] = useState<{ text: string; number: number } | null>(null);
+  const [hasRestoredScroll, setHasRestoredScroll] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const surahAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     loadSurah();
+    setHasRestoredScroll(false);
   }, [surahNumber]);
+
+  // Restore scroll position after data loads
+  useEffect(() => {
+    if (!surahData || hasRestoredScroll) return;
+
+    const restoreScroll = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user || !surahNumber) return;
+
+      const { data } = await supabase
+        .from('reading_progress')
+        .select('ayah_number')
+        .eq('user_id', session.user.id)
+        .eq('surah_number', parseInt(surahNumber))
+        .single();
+
+      if (data?.ayah_number) {
+        setTimeout(() => {
+          const element = document.querySelector(`[data-ayah="${data.ayah_number}"]`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setHasRestoredScroll(true);
+          }
+        }, 500);
+      } else {
+        setHasRestoredScroll(true);
+      }
+    };
+
+    restoreScroll();
+  }, [surahData, surahNumber, hasRestoredScroll]);
 
   // Track scroll progress and save to database
   useEffect(() => {
@@ -323,6 +359,15 @@ const SurahDetail = () => {
                     <Play className="h-4 w-4" />
                   )}
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setChatAyah({ text: ayah.text, number: ayah.numberInSurah })}
+                  className="rounded-full"
+                  title={settings.language === 'ar' ? 'اسأل عن هذه الآية' : 'Ask about this ayah'}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
@@ -332,23 +377,33 @@ const SurahDetail = () => {
               dir="rtl"
             >
               {wordData[ayah.numberInSurah] ? (
-                <div className="flex flex-wrap gap-2 justify-end">
+                <div className="flex flex-wrap gap-2 justify-end relative">
                   {wordData[ayah.numberInSurah].map((word, wordIndex) => (
-                    <span
-                      key={wordIndex}
-                      onClick={() => handleWordClick(index, word)}
-                      className="cursor-pointer hover:text-primary smooth-transition relative group"
-                    >
-                      {word.text}
+                    <div key={wordIndex} className="relative">
+                      <span
+                        onClick={() => handleWordClick(index, word)}
+                        className="cursor-pointer hover:text-primary smooth-transition inline-block"
+                      >
+                        {word.text}
+                      </span>
                       {selectedWord?.ayahIndex === index && selectedWord.word === word && (
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 glass-effect rounded-xl p-4 min-w-[200px] z-10 shadow-xl">
-                          <div className="text-sm space-y-2 text-left" dir="ltr">
-                            <p className="font-semibold text-foreground">{word.translation}</p>
-                            <p className="text-muted-foreground italic">{word.transliteration}</p>
+                        <div 
+                          className="fixed glass-effect rounded-xl p-4 min-w-[250px] z-50 shadow-xl border border-border/50 backdrop-blur-xl"
+                          style={{
+                            left: '50%',
+                            top: '50%',
+                            transform: 'translate(-50%, -50%)'
+                          }}
+                        >
+                          <div className="text-sm space-y-3 text-left" dir="ltr">
+                            <div>
+                              <p className="font-semibold text-foreground text-base mb-1">{word.translation}</p>
+                              <p className="text-muted-foreground italic">{word.transliteration}</p>
+                            </div>
                             {word.audio && (
                               <Button
                                 size="sm"
-                                variant="ghost"
+                                variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   playWordAudio(word);
@@ -356,13 +411,13 @@ const SurahDetail = () => {
                                 className="w-full"
                               >
                                 <Volume2 className="h-3 w-3 mr-2" />
-                                Play
+                                {settings.language === 'ar' ? 'تشغيل' : 'Play'}
                               </Button>
                             )}
                           </div>
                         </div>
                       )}
-                    </span>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -421,6 +476,14 @@ const SurahDetail = () => {
           </div>
         ))}
       </div>
+
+      <AyahChatDialog
+        open={!!chatAyah}
+        onOpenChange={(open) => !open && setChatAyah(null)}
+        ayahText={chatAyah?.text || ''}
+        ayahNumber={chatAyah?.number || 0}
+        surahName={surahData?.englishName || ''}
+      />
     </div>
   );
 };

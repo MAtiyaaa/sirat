@@ -22,7 +22,7 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  language: 'ar',
+  language: 'en',
   theme: 'light',
   qari: 'ar.alafasy',
   tajweedEnabled: false,

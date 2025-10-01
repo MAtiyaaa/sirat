@@ -13,6 +13,7 @@ import Info from "./pages/Info";
 import Duas from "./pages/Duas";
 import ProphetStories from "./pages/ProphetStories";
 import Qalam from "./pages/Qalam";
+import ChatHistory from "./pages/ChatHistory";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/quran" element={<Quran />} />
           <Route path="/quran/:surahNumber" element={<SurahDetail />} />
           <Route path="/qalam" element={<Qalam />} />
+          <Route path="/chat-history" element={<ChatHistory />} />
           <Route path="/info" element={<Info />} />
           <Route path="/duas" element={<Duas />} />
           <Route path="/prophet-stories" element={<ProphetStories />} />
