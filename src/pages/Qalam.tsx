@@ -229,7 +229,18 @@ const Qalam = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex flex-col h-[calc(100vh-12rem)] relative">
+      {user && (
+        <Button
+          onClick={createNewChat}
+          size="icon"
+          variant="outline"
+          className="absolute top-4 right-4 rounded-full w-10 h-10 z-10"
+        >
+          <Plus className="h-5 w-5" />
+        </Button>
+      )}
+      
       <div className="text-center py-6">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
@@ -238,17 +249,6 @@ const Qalam = () => {
               {settings.language === 'ar' ? 'قلم - المساعد الذكي' : 'Qalam - AI Assistant'}
             </span>
           </div>
-          {user && (
-            <Button
-              onClick={createNewChat}
-              size="sm"
-              variant="outline"
-              className="rounded-full"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              {settings.language === 'ar' ? 'جديد' : 'New'}
-            </Button>
-          )}
         </div>
         <p className="text-muted-foreground">
           {settings.language === 'ar' 
