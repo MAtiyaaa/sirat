@@ -251,32 +251,36 @@ const SurahDetail = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/quran')}
-          className="rounded-full"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        
-        <div className="flex-1">
-          <h1 className={`text-3xl font-bold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
-            {settings.language === 'ar' ? surahData.name : surahData.englishName}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {surahData.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'} • {surahData.revelationType}
-          </p>
-        </div>
+      <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/quran')}
+            className="rounded-full"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          
+          <div className="flex-1">
+            <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+                {settings.language === 'ar' ? surahData.name : surahData.englishName}
+              </span>
+            </h1>
+            <p className="text-base text-muted-foreground mt-2">
+              {surahData.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'} • {surahData.revelationType}
+            </p>
+          </div>
 
-        <Button
-          onClick={playSurah}
-          className="rounded-full"
-        >
-          {playingSurah ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-          {settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah'}
-        </Button>
+          <Button
+            onClick={playSurah}
+            className="rounded-full px-6"
+          >
+            {playingSurah ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+            {settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah'}
+          </Button>
+        </div>
       </div>
 
       {/* Bismillah */}
