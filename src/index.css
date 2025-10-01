@@ -184,6 +184,18 @@ All colors MUST be HSL.
   .quran-font {
     font-family: 'Amiri', 'Traditional Arabic', serif;
   }
+  
+  .arabic-regal {
+    font-family: 'Tajawal', 'SF Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  
+  .ios-26-style {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
 }
 
 @layer utilities {

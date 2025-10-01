@@ -761,9 +761,15 @@ const SurahDetail = () => {
         {surahData.ayahs
           .filter((ayah: any, index: number) => {
             if (!searchTerm.trim()) return true;
-            const search = searchTerm.toLowerCase();
-            const arabicText = ayah.text?.toLowerCase() || '';
-            const translationText = translation?.ayahs[index]?.text?.toLowerCase() || '';
+            
+            // Remove diacritics from Arabic text for better matching
+            const removeDiacritics = (text: string) => 
+              text.replace(/[\u064B-\u065F\u0670]/g, '').toLowerCase();
+            
+            const search = removeDiacritics(searchTerm);
+            const arabicText = removeDiacritics(ayah.text || '');
+            const translationText = (translation?.ayahs[index]?.text || '').toLowerCase();
+            
             return arabicText.includes(search) || translationText.includes(search);
           })
           .map((ayah: any, index: number) => (
@@ -785,7 +791,6 @@ const SurahDetail = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setSearchTerm('');
                       const element = document.querySelector(`[data-ayah="${ayah.numberInSurah}"]`);
                       if (element) {
                         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -794,7 +799,7 @@ const SurahDetail = () => {
                     className="rounded-full gap-1.5"
                   >
                     <Eye className="h-3.5 w-3.5" />
-                    {settings.language === 'ar' ? 'اذهب إلى' : 'Go to'}
+                    {settings.language === 'ar' ? 'اذهب إلى' : 'View'}
                   </Button>
                 )}
                 <Button

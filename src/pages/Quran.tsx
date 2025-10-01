@@ -33,13 +33,24 @@ const Quran = () => {
 
   useEffect(() => {
     if (searchTerm.trim()) {
-      const lowerSearch = searchTerm.toLowerCase();
-      const filtered = surahs.filter(s =>
-        s.englishName.toLowerCase().includes(lowerSearch) ||
-        s.name.includes(searchTerm) ||
-        s.englishNameTranslation.toLowerCase().includes(lowerSearch) ||
-        s.number.toString() === searchTerm
-      );
+      // Remove diacritics for better Arabic matching
+      const removeDiacritics = (text: string) => 
+        text.replace(/[\u064B-\u065F\u0670]/g, '').toLowerCase();
+      
+      const lowerSearch = removeDiacritics(searchTerm);
+      
+      const filtered = surahs.filter(s => {
+        const englishName = s.englishName.toLowerCase();
+        const arabicName = removeDiacritics(s.name);
+        const translation = s.englishNameTranslation.toLowerCase();
+        const numberMatch = s.number.toString() === searchTerm;
+        
+        return englishName.includes(lowerSearch) ||
+               arabicName.includes(lowerSearch) ||
+               translation.includes(lowerSearch) ||
+               numberMatch;
+      });
+      
       setFilteredSurahs(filtered);
     } else {
       setFilteredSurahs(surahs);

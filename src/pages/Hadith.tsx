@@ -219,42 +219,46 @@ const Hadith = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 pb-24">
+    <div className="min-h-screen pb-24">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-3">
-            <BookOpen className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">{t.title}</h1>
+        <div className="text-center space-y-4 py-6">
+          <div className="flex flex-col items-center justify-center gap-3">
+            <BookOpen className="h-12 w-12 text-primary" />
+            <h1 className="text-4xl md:text-5xl font-bold ios-26-style tracking-tight">
+              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+                {t.title}
+              </span>
+            </h1>
           </div>
         </div>
 
         {/* Search and Filter */}
-        <Card className="glass-effect p-4 space-y-4">
-          <div className="flex gap-2">
+        <Card className="glass-effect rounded-3xl p-6 space-y-4 border border-border/50 apple-shadow">
+          <div className="flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder={t.search}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="pl-10 rounded-2xl border-border/50 bg-background/50"
+                className="pl-12 h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style"
               />
             </div>
-            <Button onClick={handleSearch} className="rounded-2xl">
-              <Search className="h-4 w-4" />
+            <Button onClick={handleSearch} className="rounded-2xl h-14 px-6 ios-26-style">
+              <Search className="h-5 w-5" />
             </Button>
           </div>
 
           <Select value={selectedBook} onValueChange={setSelectedBook}>
-            <SelectTrigger className="rounded-2xl border-border/50 bg-background/50">
+            <SelectTrigger className="h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {books.map((book) => (
-                <SelectItem key={book.value} value={book.value}>
+                <SelectItem key={book.value} value={book.value} className="text-base">
                   {book.label}
                 </SelectItem>
               ))}
@@ -277,82 +281,83 @@ const Hadith = () => {
                 return (
                   <Card
                     key={`${hadith.hadithNumber}-${index}`}
-                    className="glass-effect p-6 space-y-4 rounded-2xl smooth-transition hover:scale-[1.01]"
+                    className="glass-effect rounded-3xl p-8 space-y-5 smooth-transition hover:scale-[1.01] border border-border/50 apple-shadow"
                   >
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground ios-26-style">
+                      <span className="font-medium">
                         {t.hadithNumber}: {hadith.hadithNumber}
                       </span>
-                      <div className="flex items-center gap-3">
-                        <span>{hadith.book?.bookName || ''}</span>
+                      <div className="flex items-center gap-4">
+                        <span className="font-medium">{hadith.book?.bookName || ''}</span>
                         <button
                           onClick={() => toggleBookmark(hadith)}
-                          className="smooth-transition hover:scale-110"
+                          className="smooth-transition hover:scale-110 p-1"
                         >
                           <Bookmark
-                            className={`h-5 w-5 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                            className={`h-6 w-6 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
                           />
                         </button>
                       </div>
                     </div>
 
-                  {hadith.chapter && (
-                    <div className="text-sm text-muted-foreground">
-                      {t.chapter}: {settings.language === 'ar' ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
-                    </div>
-                  )}
+                   {hadith.chapter && (
+                     <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl ios-26-style">
+                       {t.chapter}: {settings.language === 'ar' ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
+                     </div>
+                   )}
 
-                  <div className="space-y-4">
-                    {settings.language === 'ar' ? (
-                      <>
-                        <p className="text-lg leading-relaxed text-right font-arabic">
-                          {hadith.hadithArabic}
-                        </p>
-                        {settings.translationEnabled && (
-                          <p className="text-base text-muted-foreground">
-                            {hadith.hadithEnglish}
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-base leading-relaxed">
-                          {hadith.hadithEnglish}
-                        </p>
-                        {settings.translationEnabled && (
-                          <p className="text-lg font-arabic text-right text-muted-foreground">
-                            {hadith.hadithArabic}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
+                   <div className="space-y-5">
+                     {settings.language === 'ar' ? (
+                       <>
+                         <p className="text-xl leading-loose text-right font-arabic">
+                           {hadith.hadithArabic}
+                         </p>
+                         {settings.translationEnabled && (
+                           <p className="text-base leading-relaxed text-muted-foreground ios-26-style">
+                             {hadith.hadithEnglish}
+                           </p>
+                         )}
+                       </>
+                     ) : (
+                       <>
+                         <p className="text-base leading-relaxed ios-26-style">
+                           {hadith.hadithEnglish}
+                         </p>
+                         {settings.translationEnabled && (
+                           <p className="text-xl font-arabic text-right leading-loose text-muted-foreground">
+                             {hadith.hadithArabic}
+                           </p>
+                         )}
+                       </>
+                     )}
+                   </div>
 
-                    <div className="pt-2 text-sm text-muted-foreground">
-                      {t.narrator}: {hadith.englishNarrator}
-                    </div>
-                  </Card>
-                );
-              })}
+                     <div className="pt-3 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl ios-26-style">
+                       {t.narrator}: {hadith.englishNarrator}
+                     </div>
+                   </Card>
+                 );
+               })}
 
-              {hadiths.length > 0 && (
-                <div className="flex justify-center pt-4">
-                  <Button
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                    className="rounded-2xl px-8"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        {t.loading}
-                      </>
-                    ) : (
-                      t.loadMore
-                    )}
-                  </Button>
-                </div>
-              )}
+               {hadiths.length > 0 && (
+                 <div className="flex justify-center pt-6">
+                   <Button
+                     onClick={handleLoadMore}
+                     disabled={loading}
+                     className="rounded-2xl px-10 h-14 text-base ios-26-style"
+                     size="lg"
+                   >
+                     {loading ? (
+                       <>
+                         <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                         {t.loading}
+                       </>
+                     ) : (
+                       t.loadMore
+                     )}
+                   </Button>
+                 </div>
+               )}
             </>
           )}
         </div>

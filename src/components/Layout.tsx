@@ -9,6 +9,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { settings } = useSettings();
+  
+  const appName = settings.language === 'ar' 
+    ? <span className="arabic-regal text-3xl">صراط</span>
+    : 'Sirat';
 
   // Track when user leaves a surah to remember position
   useEffect(() => {
@@ -106,6 +110,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
+      {/* App Header */}
+      <header className="sticky top-0 z-50 glass-effect border-b border-border/50">
+        <div className="container mx-auto px-4 py-4 max-w-4xl">
+          <div className="flex items-center justify-center">
+            <h1 className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+              {appName}
+            </h1>
+          </div>
+        </div>
+      </header>
+      
       <main className="container mx-auto px-4 py-6 max-w-4xl">
         {children}
       </main>
