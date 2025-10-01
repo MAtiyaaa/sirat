@@ -40,6 +40,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Load settings from database or localStorage
   useEffect(() => {
@@ -72,17 +73,36 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Load from localStorage
         const stored = localStorage.getItem('sirat-settings');
         if (stored) {
-          setSettings({ ...defaultSettings, ...JSON.parse(stored) });
+          try {
+            const parsedSettings = JSON.parse(stored);
+            setSettings({ ...defaultSettings, ...parsedSettings });
+          } catch (error) {
+            console.error('Error parsing settings from localStorage:', error);
+          }
         }
       }
+      setIsLoaded(true);
     };
 
     loadSettings();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUserId(session?.user?.id || null);
+      setIsLoaded(false);
       if (session?.user?.id) {
-        loadSettings();
+        await loadSettings();
+      } else {
+        // Load from localStorage when signed out
+        const stored = localStorage.getItem('sirat-settings');
+        if (stored) {
+          try {
+            const parsedSettings = JSON.parse(stored);
+            setSettings({ ...defaultSettings, ...parsedSettings });
+          } catch (error) {
+            console.error('Error parsing settings from localStorage:', error);
+          }
+        }
+        setIsLoaded(true);
       }
     });
 
@@ -90,6 +110,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   useEffect(() => {
+    // Don't save settings until they've been loaded initially
+    if (!isLoaded) return;
+
     // Apply theme
     document.documentElement.classList.remove('light', 'dark', 'gold', 'pink');
     
@@ -135,9 +158,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .then(() => {});
     } else {
       // Save to localStorage
-      localStorage.setItem('sirat-settings', JSON.stringify(settings));
+      try {
+        localStorage.setItem('sirat-settings', JSON.stringify(settings));
+      } catch (error) {
+        console.error('Error saving settings to localStorage:', error);
+      }
     }
-  }, [settings, userId]);
+  }, [settings, userId, isLoaded]);
 
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
