@@ -125,16 +125,16 @@ const Info = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : prayerTimes ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
             {Object.entries(prayerTimes).map(([prayer, time]) => (
               <div
                 key={prayer}
-                className="glass-effect rounded-2xl p-6 text-center space-y-2 hover:scale-105 smooth-transition"
+                className="glass-effect rounded-2xl p-3 md:p-6 text-center space-y-1 md:space-y-2 hover:scale-105 smooth-transition"
               >
-                <p className="text-lg font-semibold">
+                <p className="text-sm md:text-lg font-semibold">
                   {prayerNames[prayer as keyof PrayerTimes]}
                 </p>
-                <p className="text-3xl font-bold text-primary">{time}</p>
+                <p className="text-xl md:text-3xl font-bold text-primary">{time}</p>
               </div>
             ))}
           </div>

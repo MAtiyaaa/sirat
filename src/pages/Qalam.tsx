@@ -263,9 +263,9 @@ const Qalam = () => {
             <Button
               size="icon"
               variant="ghost"
-              className="absolute top-4 left-4 rounded-full w-9 h-9 z-10"
+              className="absolute top-2 left-2 md:top-4 md:left-4 rounded-full w-8 h-8 md:w-9 md:h-9 z-20"
             >
-              <History className="h-4 w-4" />
+              <History className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Button>
           </Link>
           
@@ -273,14 +273,14 @@ const Qalam = () => {
             onClick={createNewChat}
             size="icon"
             variant="outline"
-            className="absolute top-4 right-4 rounded-full w-10 h-10 z-10"
+            className="absolute top-2 right-2 md:top-4 md:right-4 rounded-full w-8 h-8 md:w-10 md:h-10 z-20"
           >
-            <Plus className="h-5 w-5" />
+            <Plus className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
         </>
       )}
       
-      <div className="text-center py-6">
+      <div className="text-center py-6 pt-12 md:pt-6">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
             <Sparkles className="h-4 w-4 text-primary" />
