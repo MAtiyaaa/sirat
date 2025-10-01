@@ -166,7 +166,7 @@ const Quran = () => {
                 {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
               </p>
               <h3 className="text-2xl font-bold">
-                {surahs.find(s => s.number === lastViewedSurah)?.englishName || ''}
+                {surahs.find(s => s.number === lastViewedSurah)?.[settings.language === 'ar' ? 'name' : 'englishName'] || ''}
               </h3>
               {progress[lastViewedSurah] && (
                 <p className="text-sm text-muted-foreground mt-1">

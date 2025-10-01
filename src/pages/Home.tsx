@@ -149,9 +149,15 @@ const Home = () => {
           </div>
           
           <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
-            <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-              Sirat
-            </span>
+            {settings.language === 'ar' ? (
+              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent arabic-regal">
+                صراط
+              </span>
+            ) : (
+              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+                Sirat
+              </span>
+            )}
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light">
