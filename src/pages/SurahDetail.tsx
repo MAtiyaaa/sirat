@@ -235,14 +235,26 @@ const SurahDetail = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user || !surahNumber) return;
 
-      await supabase
-        .from('reading_progress')
-        .upsert({
-          user_id: session.user.id,
-          surah_number: parseInt(surahNumber),
-          ayah_number: lastVisibleAyah,
-          progress_type: 'scroll',
-        });
+      try {
+        const { error } = await supabase
+          .from('reading_progress')
+          .upsert({
+            user_id: session.user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: lastVisibleAyah,
+            progress_type: 'scroll',
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,surah_number',
+            ignoreDuplicates: false,
+          });
+        
+        if (error) {
+          console.error('Error saving scroll progress:', error);
+        }
+      } catch (error) {
+        console.error('Error saving scroll progress:', error);
+      }
     };
 
     const timeoutId = setTimeout(saveProgress, 2000); // Debounce saves
@@ -286,15 +298,23 @@ const SurahDetail = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user || !surahNumber) return;
 
-    await supabase
-      .from('last_viewed_surah')
-      .upsert({
-        user_id: session.user.id,
-        surah_number: parseInt(surahNumber),
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id'
-      });
+    try {
+      const { error } = await supabase
+        .from('last_viewed_surah')
+        .upsert({
+          user_id: session.user.id,
+          surah_number: parseInt(surahNumber),
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+      
+      if (error) {
+        console.error('Error saving last viewed:', error);
+      }
+    } catch (error) {
+      console.error('Error saving last viewed:', error);
+    }
   };
 
   const toggleSurahBookmark = async () => {
@@ -391,6 +411,9 @@ const SurahDetail = () => {
   };
 
   const handleAyahChat = async (ayah: any) => {
+    // Update last visible ayah
+    setLastVisibleAyah(ayah.numberInSurah);
+    
     // Track click interaction
     if (user && surahNumber) {
       try {
@@ -472,6 +495,9 @@ const SurahDetail = () => {
   const loadTafsir = async (ayahNumber: number) => {
     if (tafsirData[ayahNumber]) return;
 
+    // Update last visible ayah
+    setLastVisibleAyah(ayahNumber);
+
     // Track click interaction
     if (user && surahNumber) {
       try {
@@ -514,6 +540,9 @@ const SurahDetail = () => {
       setPlayingAyah(null);
       return;
     }
+
+    // Update last visible ayah
+    setLastVisibleAyah(ayahNumber);
 
     // Track reciting interaction
     if (user && surahNumber) {
@@ -590,6 +619,9 @@ const SurahDetail = () => {
   const handleWordClick = async (ayahNumber: number, wordIndex: number) => {
     const key = `${ayahNumber}-${wordIndex}`;
     setOpenWordPopover(openWordPopover === key ? null : key);
+    
+    // Update last visible ayah to the one being clicked
+    setLastVisibleAyah(ayahNumber);
 
     // Track click interaction
     if (user && surahNumber) {
