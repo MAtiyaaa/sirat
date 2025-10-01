@@ -17,6 +17,7 @@ import {
   Pause, 
   ArrowLeft, 
   ChevronDown, 
+  ChevronUp,
   Volume2,
   MessageSquare,
   Bookmark
@@ -648,7 +649,7 @@ const SurahDetail = () => {
           className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 shadow-lg hover:shadow-xl smooth-transition"
           title={settings.language === 'ar' ? 'العودة للأعلى' : 'Back to top'}
         >
-          <ArrowLeft className="h-5 w-5 rotate-90" />
+          <ChevronUp className="h-5 w-5" />
         </Button>
       )}
 
