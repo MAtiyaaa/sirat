@@ -18,10 +18,10 @@ import {
   ArrowLeft, 
   ChevronDown, 
   Volume2,
-  Loader2,
   MessageSquare,
   Bookmark
 } from 'lucide-react';
+import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import {
   Collapsible,
   CollapsibleContent,
@@ -554,11 +554,7 @@ const SurahDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <IslamicFactsLoader />;
   }
 
   if (!surahData) {
@@ -771,8 +767,8 @@ const SurahDetail = () => {
                     <div dangerouslySetInnerHTML={{ __html: tafsirData[ayah.numberInSurah] }} />
                   ) : (
                     <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading tafsir...
+                      <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      {settings.language === 'ar' ? 'جاري التحميل...' : 'Loading tafsir...'}
                     </div>
                   )}
                 </div>

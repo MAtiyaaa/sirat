@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Loader2, Bookmark } from 'lucide-react';
+import { Book, Bookmark } from 'lucide-react';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 
 const Quran = () => {
   const { settings } = useSettings();
@@ -92,11 +93,7 @@ const Quran = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <IslamicFactsLoader />;
   }
 
   return (
