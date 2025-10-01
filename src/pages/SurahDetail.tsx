@@ -52,6 +52,7 @@ const SurahDetail = () => {
   const [isSurahBookmarked, setIsSurahBookmarked] = useState(false);
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(new Set());
   const [user, setUser] = useState<any>(null);
+  const [showBackButton, setShowBackButton] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -216,6 +217,9 @@ const SurahDetail = () => {
       });
 
       setLastVisibleAyah(maxVisible);
+      
+      // Show/hide back button based on scroll position
+      setShowBackButton(window.scrollY > 200);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -370,6 +374,7 @@ const SurahDetail = () => {
             surah_number: parseInt(surahNumber),
             ayah_number: ayahNumber,
             interaction_type: 'bookmark',
+            updated_at: new Date().toISOString(),
           }, {
             onConflict: 'user_id,surah_number,ayah_number,interaction_type',
             ignoreDuplicates: false,
@@ -387,17 +392,26 @@ const SurahDetail = () => {
   const handleAyahChat = async (ayah: any) => {
     // Track click interaction
     if (user && surahNumber) {
-      await supabase
-        .from('ayah_interactions')
-        .upsert({
-          user_id: user.id,
-          surah_number: parseInt(surahNumber),
-          ayah_number: ayah.numberInSurah,
-          interaction_type: 'click',
-        }, {
-          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
-          ignoreDuplicates: false,
-        });
+      try {
+        const { error } = await supabase
+          .from('ayah_interactions')
+          .upsert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: ayah.numberInSurah,
+            interaction_type: 'click',
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+            ignoreDuplicates: false,
+          });
+        
+        if (error) {
+          console.error('Error saving interaction:', error);
+        }
+      } catch (error) {
+        console.error('Error saving interaction:', error);
+      }
     }
     setChatAyah({ text: ayah.text, number: ayah.numberInSurah });
   };
@@ -459,17 +473,26 @@ const SurahDetail = () => {
 
     // Track click interaction
     if (user && surahNumber) {
-      await supabase
-        .from('ayah_interactions')
-        .upsert({
-          user_id: user.id,
-          surah_number: parseInt(surahNumber),
-          ayah_number: ayahNumber,
-          interaction_type: 'click',
-        }, {
-          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
-          ignoreDuplicates: false,
-        });
+      try {
+        const { error } = await supabase
+          .from('ayah_interactions')
+          .upsert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: ayahNumber,
+            interaction_type: 'click',
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+            ignoreDuplicates: false,
+          });
+        
+        if (error) {
+          console.error('Error saving interaction:', error);
+        }
+      } catch (error) {
+        console.error('Error saving interaction:', error);
+      }
     }
     
     try {
@@ -493,17 +516,26 @@ const SurahDetail = () => {
 
     // Track reciting interaction
     if (user && surahNumber) {
-      await supabase
-        .from('ayah_interactions')
-        .upsert({
-          user_id: user.id,
-          surah_number: parseInt(surahNumber),
-          ayah_number: ayahNumber,
-          interaction_type: 'recite',
-        }, {
-          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
-          ignoreDuplicates: false,
-        });
+      try {
+        const { error } = await supabase
+          .from('ayah_interactions')
+          .upsert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: ayahNumber,
+            interaction_type: 'recite',
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+            ignoreDuplicates: false,
+          });
+        
+        if (error) {
+          console.error('Error saving interaction:', error);
+        }
+      } catch (error) {
+        console.error('Error saving interaction:', error);
+      }
     }
 
     const audioUrl = getAyahAudioUrl(settings.qari, parseInt(surahNumber!), ayahNumber);
@@ -560,17 +592,26 @@ const SurahDetail = () => {
 
     // Track click interaction
     if (user && surahNumber) {
-      await supabase
-        .from('ayah_interactions')
-        .upsert({
-          user_id: user.id,
-          surah_number: parseInt(surahNumber),
-          ayah_number: ayahNumber,
-          interaction_type: 'click',
-        }, {
-          onConflict: 'user_id,surah_number,ayah_number,interaction_type',
-          ignoreDuplicates: false,
-        });
+      try {
+        const { error } = await supabase
+          .from('ayah_interactions')
+          .upsert({
+            user_id: user.id,
+            surah_number: parseInt(surahNumber),
+            ayah_number: ayahNumber,
+            interaction_type: 'click',
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id,surah_number,ayah_number,interaction_type',
+            ignoreDuplicates: false,
+          });
+        
+        if (error) {
+          console.error('Error saving interaction:', error);
+        }
+      } catch (error) {
+        console.error('Error saving interaction:', error);
+      }
     }
   };
 
@@ -593,8 +634,24 @@ const SurahDetail = () => {
     );
   }
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Floating Back Button */}
+      {showBackButton && (
+        <Button
+          onClick={scrollToTop}
+          size="icon"
+          className="fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 shadow-lg hover:shadow-xl smooth-transition"
+          title={settings.language === 'ar' ? 'العودة للأعلى' : 'Back to top'}
+        >
+          <ArrowLeft className="h-5 w-5 rotate-90" />
+        </Button>
+      )}
+
       {/* Header */}
       <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
         <div className="flex items-center gap-4">
