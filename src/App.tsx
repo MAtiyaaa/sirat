@@ -16,6 +16,7 @@ import Qalam from "./pages/Qalam";
 import ChatHistory from "./pages/ChatHistory";
 import Settings from "./pages/Settings";
 import Account from "./pages/Account";
+import Wudu from "./pages/Wudu";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,8 @@ const App = () => (
           <Route path="/chat-history" element={<ChatHistory />} />
           <Route path="/info" element={<Info />} />
           <Route path="/duas" element={<Duas />} />
+          <Route path="/prayer" element={<Wudu />} />
+          <Route path="/wudu" element={<Wudu />} />
           <Route path="/prophet-stories" element={<ProphetStories />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/settings" element={<Settings />} />

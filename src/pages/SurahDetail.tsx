@@ -7,7 +7,6 @@ import {
   fetchTafsir, 
   fetchWordByWord,
   getAyahAudioUrl,
-  getSurahAudioUrl,
   WordData 
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
@@ -239,55 +238,52 @@ const SurahDetail = () => {
       return;
     }
 
-    const audioUrl = getSurahAudioUrl(settings.qari, parseInt(surahNumber!));
+    if (!surahData) return;
     
-    if (surahAudioRef.current) {
-      surahAudioRef.current.pause();
-    }
-    
-    surahAudioRef.current = new Audio(audioUrl);
-    surahAudioRef.current.play()
-      .catch(error => {
-        console.error('Error playing surah audio:', error);
-        toast.error('Failed to play surah');
-      });
     setPlayingSurah(true);
     setCurrentPlayingAyah(1);
     
-    // Calculate average duration per ayah and track progress
-    surahAudioRef.current.ontimeupdate = () => {
-      if (surahAudioRef.current && surahData) {
-        const currentTime = surahAudioRef.current.currentTime;
-        const duration = surahAudioRef.current.duration;
-        
-        if (duration > 0) {
-          // Calculate which ayah should be highlighted based on progress
-          const progress = currentTime / duration;
-          const estimatedAyah = Math.floor(progress * surahData.numberOfAyahs) + 1;
-          
-          if (estimatedAyah !== currentPlayingAyah && estimatedAyah <= surahData.numberOfAyahs) {
-            setCurrentPlayingAyah(estimatedAyah);
-            
-            // Auto-scroll to current ayah
-            const element = document.querySelector(`[data-ayah="${estimatedAyah}"]`);
-            if (element) {
-              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-          }
-        }
+    // Play ayahs sequentially for accurate tracking
+    const playNextAyah = (ayahIndex: number) => {
+      if (ayahIndex > surahData.numberOfAyahs) {
+        setPlayingSurah(false);
+        setCurrentPlayingAyah(null);
+        return;
       }
+      
+      const audioUrl = getAyahAudioUrl(settings.qari, parseInt(surahNumber!), ayahIndex);
+      
+      if (surahAudioRef.current) {
+        surahAudioRef.current.pause();
+      }
+      
+      surahAudioRef.current = new Audio(audioUrl);
+      setCurrentPlayingAyah(ayahIndex);
+      
+      // Auto-scroll to current ayah
+      const element = document.querySelector(`[data-ayah="${ayahIndex}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      surahAudioRef.current.play()
+        .catch(error => {
+          console.error('Error playing ayah:', error);
+          setPlayingSurah(false);
+          setCurrentPlayingAyah(null);
+        });
+      
+      surahAudioRef.current.onended = () => {
+        playNextAyah(ayahIndex + 1);
+      };
+      
+      surahAudioRef.current.onerror = () => {
+        console.error('Error loading ayah audio');
+        playNextAyah(ayahIndex + 1);
+      };
     };
     
-    surahAudioRef.current.onended = () => {
-      setPlayingSurah(false);
-      setCurrentPlayingAyah(null);
-    };
-    
-    surahAudioRef.current.onerror = () => {
-      toast.error('Error loading surah audio');
-      setPlayingSurah(false);
-      setCurrentPlayingAyah(null);
-    };
+    playNextAyah(1);
   };
 
   const handleWordClick = (ayahNumber: number, wordIndex: number) => {

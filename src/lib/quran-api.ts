@@ -91,34 +91,30 @@ export async function fetchWordByWord(surahNumber: number, ayahNumber: number): 
   }
 }
 
-// Get audio URL for ayah
+// Get audio URL for ayah - using everyayah.com reliable CDN
 export function getAyahAudioUrl(qari: string, surahNumber: number, ayahNumber: number): string {
-  // Map qari codes to audio path
+  // Map qari codes to everyayah.com reciter paths
   const qariMap: Record<string, string> = {
-    'ar.alafasy': '1',
-    'ar.abdulbasitmurattal': '2',
-    'ar.husary': '3',
-    'ar.minshawi': '4',
+    'ar.alafasy': 'Alafasy_128kbps',
+    'ar.abdulbasitmurattal': 'Abdul_Basit_Murattal_192kbps',
+    'ar.husary': 'Husary_128kbps',
+    'ar.minshawi': 'Minshawy_Murattal_128kbps',
   };
   
-  const qariCode = qariMap[qari] || '1';
+  const qariPath = qariMap[qari] || 'Alafasy_128kbps';
   const paddedSurah = surahNumber.toString().padStart(3, '0');
   const paddedAyah = ayahNumber.toString().padStart(3, '0');
   
-  return `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${paddedSurah}${paddedAyah}.mp3`;
+  return `https://everyayah.com/data/${qariPath}/${paddedSurah}${paddedAyah}.mp3`;
 }
 
-// Get audio URL for full surah
-export function getSurahAudioUrl(qari: string, surahNumber: number): string {
-  const qariMap: Record<string, string> = {
-    'ar.alafasy': 'ar.alafasy',
-    'ar.abdulbasitmurattal': 'ar.abdulbasitmurattal',
-    'ar.husary': 'ar.husary',
-    'ar.minshawi': 'ar.minshawi',
-  };
-  
-  const qariPath = qariMap[qari] || 'ar.alafasy';
-  return `https://cdn.islamic.network/quran/audio-surah/128/${qariPath}/${surahNumber}.mp3`;
+// Get all ayah audio URLs for a surah (for sequential playback)
+export function getSurahAyahUrls(qari: string, surahNumber: number, numberOfAyahs: number): string[] {
+  const urls: string[] = [];
+  for (let i = 1; i <= numberOfAyahs; i++) {
+    urls.push(getAyahAudioUrl(qari, surahNumber, i));
+  }
+  return urls;
 }
 
 // Fetch transliteration for surah

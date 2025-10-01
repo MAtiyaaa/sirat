@@ -34,11 +34,12 @@ const Qalam = () => {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Load most recent conversation
+        // Load most recent general AI conversation (not ayah-specific)
         const { data: conversations } = await supabase
           .from('ai_conversations')
           .select('*')
           .eq('user_id', session.user.id)
+          .is('ayah_reference', null)
           .order('updated_at', { ascending: false })
           .limit(1);
         

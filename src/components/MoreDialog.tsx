@@ -4,11 +4,12 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  Clock, 
+  HandHeart,
   BookOpen, 
   User, 
   Settings as SettingsIcon,
-  MoreHorizontal
+  MoreHorizontal,
+  Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,14 +21,16 @@ const MoreDialog = () => {
   const content = {
     ar: {
       more: 'المزيد',
-      prayerTimes: 'أوقات الصلاة',
+      prayer: 'الصلاة',
+      duas: 'الأدعية',
       stories: 'قصص الأنبياء',
       account: 'الحساب',
       settings: 'الإعدادات',
     },
     en: {
       more: 'More',
-      prayerTimes: 'Prayer Times',
+      prayer: 'Prayer',
+      duas: 'Duas',
       stories: 'Prophet Stories',
       account: 'Account',
       settings: 'Settings',
@@ -37,7 +40,8 @@ const MoreDialog = () => {
   const t = content[settings.language];
 
   const menuItems = [
-    { icon: Clock, label: t.prayerTimes, path: '/info' },
+    { icon: HandHeart, label: t.prayer, path: '/prayer' },
+    { icon: Sparkles, label: t.duas, path: '/duas' },
     { icon: BookOpen, label: t.stories, path: '/prophet-stories' },
     { icon: User, label: t.account, path: '/account' },
     { icon: SettingsIcon, label: t.settings, path: '/settings' },

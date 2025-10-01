@@ -7,26 +7,26 @@ const Wudu = () => {
 
   const steps = {
     ar: [
-      { title: 'النية', description: 'انوِ في قلبك الوضوء لله تعالى' },
-      { title: 'التسمية', description: 'قل: بسم الله الرحمن الرحيم' },
-      { title: 'غسل اليدين', description: 'اغسل يديك ثلاث مرات إلى الرسغين' },
-      { title: 'المضمضة والاستنشاق', description: 'تمضمض واستنشق ثلاث مرات' },
-      { title: 'غسل الوجه', description: 'اغسل وجهك ثلاث مرات من منابت الشعر إلى الذقن' },
-      { title: 'غسل اليدين إلى المرفقين', description: 'اغسل يدك اليمنى ثم اليسرى إلى المرفقين ثلاث مرات' },
-      { title: 'مسح الرأس', description: 'امسح رأسك مرة واحدة' },
-      { title: 'مسح الأذنين', description: 'امسح داخل وخلف الأذنين' },
-      { title: 'غسل القدمين', description: 'اغسل قدمك اليمنى ثم اليسرى إلى الكعبين ثلاث مرات' },
+      { title: 'النية', count: null, description: 'انوِ في قلبك الوضوء لله تعالى' },
+      { title: 'التسمية', count: null, description: 'قل: بسم الله الرحمن الرحيم' },
+      { title: 'اليدين', count: 3, description: 'ابدأ باليد اليمنى ثم اليسرى، اغسل إلى الرسغين' },
+      { title: 'الفم والأنف', count: 3, description: 'تمضمض بيدك اليمنى، استنشق بيدك اليمنى واستنثر بيدك اليسرى' },
+      { title: 'الوجه', count: 3, description: 'من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن' },
+      { title: 'الذراعين', count: 3, description: 'ابدأ باليد اليمنى إلى المرفق، ثم اليسرى إلى المرفق' },
+      { title: 'الرأس', count: 1, description: 'امسح من الأمام إلى الخلف ثم من الخلف إلى الأمام' },
+      { title: 'الأذنين', count: 1, description: 'امسح داخل الأذنين بالسبابة، وخلفهما بالإبهام' },
+      { title: 'القدمين', count: 3, description: 'ابدأ بالقدم اليمنى إلى الكعبين، ثم اليسرى إلى الكعبين' },
     ],
     en: [
-      { title: 'Intention (Niyyah)', description: 'Intend in your heart to perform wudu for Allah' },
-      { title: 'Say Bismillah', description: 'Say: In the name of Allah, the Most Gracious, the Most Merciful' },
-      { title: 'Wash Hands', description: 'Wash your hands three times up to the wrists' },
-      { title: 'Rinse Mouth & Nose', description: 'Rinse your mouth and nose three times' },
-      { title: 'Wash Face', description: 'Wash your face three times from hairline to chin' },
-      { title: 'Wash Arms', description: 'Wash right arm then left arm up to elbows three times' },
-      { title: 'Wipe Head', description: 'Wipe over your head once' },
-      { title: 'Wipe Ears', description: 'Wipe inside and behind your ears' },
-      { title: 'Wash Feet', description: 'Wash right foot then left foot up to ankles three times' },
+      { title: 'Intention', count: null, description: 'Intend in your heart to perform wudu for the sake of Allah' },
+      { title: 'Bismillah', count: null, description: 'Say: In the name of Allah, the Most Gracious, the Most Merciful' },
+      { title: 'Hands', count: 3, description: 'Start with right hand, then left hand, wash up to wrists' },
+      { title: 'Mouth & Nose', count: 3, description: 'Rinse mouth with right hand, sniff water with right hand, blow out with left' },
+      { title: 'Face', count: 3, description: 'From hairline to chin, from ear to ear' },
+      { title: 'Arms', count: 3, description: 'Start with right arm to elbow, then left arm to elbow' },
+      { title: 'Head', count: 1, description: 'Wipe from front to back, then back to front' },
+      { title: 'Ears', count: 1, description: 'Wipe inside ears with index fingers, behind with thumbs' },
+      { title: 'Feet', count: 3, description: 'Start with right foot to ankles, then left foot to ankles' },
     ],
   };
 
@@ -36,33 +36,40 @@ const Wudu = () => {
     <div className="space-y-8">
       <div className="text-center py-6">
         <h1 className="text-4xl font-bold mb-2">
-          {settings.language === 'ar' ? 'خطوات الوضوء' : 'Wudu Steps'}
+          {settings.language === 'ar' ? 'خطوات الوضوء' : 'Prayer (Wudu)'}
         </h1>
         <p className="text-muted-foreground">
           {settings.language === 'ar' 
             ? 'دليل كامل لأداء الوضوء الصحيح'
-            : 'Complete guide to performing proper wudu'}
+            : 'Complete guide to performing proper ablution'}
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {currentSteps.map((step, index) => (
           <div
             key={index}
-            className="glass-effect rounded-2xl p-6 smooth-transition hover:scale-[1.01] apple-shadow"
+            className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow"
           >
-            <div className="flex gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Check className="h-5 w-5 text-primary" />
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary">{index + 1}</span>
                 </div>
               </div>
               
               <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2">
-                  {index + 1}. {step.title}
-                </h3>
-                <p className="text-muted-foreground">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-xl font-bold">
+                    {step.title}
+                  </h3>
+                  {step.count && (
+                    <div className="px-3 py-1 rounded-full bg-primary/20 border border-primary/30">
+                      <span className="text-lg font-bold text-primary">X{step.count}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {step.description}
                 </p>
               </div>
