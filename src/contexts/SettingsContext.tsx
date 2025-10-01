@@ -25,7 +25,7 @@ interface SettingsContextType {
 
 const defaultSettings: Settings = {
   language: 'en',
-  theme: 'light',
+  theme: 'system',
   qari: 'ar.alafasy',
   translationEnabled: true,
   transliterationEnabled: true,
