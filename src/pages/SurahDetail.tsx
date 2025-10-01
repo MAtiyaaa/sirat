@@ -254,28 +254,39 @@ const SurahDetail = () => {
     setPlayingSurah(true);
     setCurrentPlayingAyah(1);
     
-    // Estimate ayah timing (rough approximation)
-    let currentAyahIndex = 0;
-    const ayahDuration = 15000; // Roughly 15 seconds per ayah (adjust based on actual audio)
-    
-    const interval = setInterval(() => {
-      if (currentAyahIndex < surahData.numberOfAyahs - 1) {
-        currentAyahIndex++;
-        setCurrentPlayingAyah(currentAyahIndex + 1);
+    // Calculate average duration per ayah and track progress
+    surahAudioRef.current.ontimeupdate = () => {
+      if (surahAudioRef.current && surahData) {
+        const currentTime = surahAudioRef.current.currentTime;
+        const duration = surahAudioRef.current.duration;
+        
+        if (duration > 0) {
+          // Calculate which ayah should be highlighted based on progress
+          const progress = currentTime / duration;
+          const estimatedAyah = Math.floor(progress * surahData.numberOfAyahs) + 1;
+          
+          if (estimatedAyah !== currentPlayingAyah && estimatedAyah <= surahData.numberOfAyahs) {
+            setCurrentPlayingAyah(estimatedAyah);
+            
+            // Auto-scroll to current ayah
+            const element = document.querySelector(`[data-ayah="${estimatedAyah}"]`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }
       }
-    }, ayahDuration);
+    };
     
     surahAudioRef.current.onended = () => {
       setPlayingSurah(false);
       setCurrentPlayingAyah(null);
-      clearInterval(interval);
     };
     
     surahAudioRef.current.onerror = () => {
       toast.error('Error loading surah audio');
       setPlayingSurah(false);
       setCurrentPlayingAyah(null);
-      clearInterval(interval);
     };
   };
 

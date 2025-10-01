@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, BookOpen, Home, MessageSquare, Settings } from 'lucide-react';
+import { Book, BookOpen, Home, MessageSquare } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import MoreDialog from './MoreDialog';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -27,11 +28,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       path: '/qalam', 
       icon: MessageSquare, 
       label: { ar: 'قلم', en: 'Qalam' } 
-    },
-    { 
-      path: '/settings', 
-      icon: Settings, 
-      label: { ar: 'الإعدادات', en: 'Settings' } 
     },
   ];
 
@@ -66,6 +62,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </Link>
               );
             })}
+            <MoreDialog />
           </div>
         </div>
       </nav>

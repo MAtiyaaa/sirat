@@ -42,7 +42,6 @@ const Settings = () => {
       language: 'اللغة',
       theme: 'المظهر',
       qari: 'القارئ',
-      tajweed: 'تفعيل التجويد',
       translation: 'إظهار الترجمة',
       transliteration: 'إظهار النطق',
       fontType: 'نوع الخط',
@@ -66,7 +65,6 @@ const Settings = () => {
       language: 'Language',
       theme: 'Theme',
       qari: 'Reciter',
-      tajweed: 'Enable Tajweed',
       translation: 'Show Translation',
       transliteration: 'Show Transliteration',
       fontType: 'Font Type',
@@ -236,14 +234,6 @@ const Settings = () => {
           <Label className="text-lg font-semibold mb-4 block">
             {settings.language === 'ar' ? 'خيارات العرض' : 'Display Options'}
           </Label>
-
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-medium">{t.tajweed}</Label>
-            <Switch
-              checked={settings.tajweedEnabled}
-              onCheckedChange={(checked) => updateSettings({ tajweedEnabled: checked })}
-            />
-          </div>
 
           <div className="flex items-center justify-between">
             <Label className="text-base font-medium">{t.translation}</Label>

@@ -9,7 +9,6 @@ interface Settings {
   language: Language;
   theme: Theme;
   qari: string;
-  tajweedEnabled: boolean;
   translationEnabled: boolean;
   transliterationEnabled: boolean;
   fontType: FontType;
@@ -25,7 +24,6 @@ const defaultSettings: Settings = {
   language: 'en',
   theme: 'light',
   qari: 'ar.alafasy',
-  tajweedEnabled: false,
   translationEnabled: true,
   transliterationEnabled: true,
   fontType: 'quran',
@@ -57,7 +55,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             language: (data.language as Language) || defaultSettings.language,
             theme: (data.theme as Theme) || defaultSettings.theme,
             qari: data.qari || defaultSettings.qari,
-            tajweedEnabled: data.tajweed_enabled ?? defaultSettings.tajweedEnabled,
             translationEnabled: data.translation_enabled ?? defaultSettings.translationEnabled,
             transliterationEnabled: data.transliteration_enabled ?? defaultSettings.transliterationEnabled,
             fontType: (data.font_type as FontType) || defaultSettings.fontType,
@@ -104,7 +101,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           language: settings.language,
           theme: settings.theme,
           qari: settings.qari,
-          tajweed_enabled: settings.tajweedEnabled,
           translation_enabled: settings.translationEnabled,
           transliteration_enabled: settings.transliterationEnabled,
           font_type: settings.fontType,

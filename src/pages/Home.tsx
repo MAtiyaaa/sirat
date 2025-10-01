@@ -1,12 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Book, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 
+// Get Surah of the Day based on current date
+const getSurahOfTheDay = () => {
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return (dayOfYear % 114) + 1;
+};
+
 const Home = () => {
   const { settings } = useSettings();
   const [user, setUser] = React.useState<any>(null);
+  const [surahOfDay, setSurahOfDay] = useState<any>(null);
+
+  useEffect(() => {
+    // Fetch Surah of the Day
+    const fetchSurahOfDay = async () => {
+      const surahNumber = getSurahOfTheDay();
+      try {
+        const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}`);
+        const data = await response.json();
+        if (data.code === 200) {
+          setSurahOfDay({
+            number: data.data.number,
+            name: data.data.name,
+            englishName: data.data.englishName,
+            englishNameTranslation: data.data.englishNameTranslation,
+            numberOfAyahs: data.data.numberOfAyahs,
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching Surah of the Day:', error);
+      }
+    };
+
+    fetchSurahOfDay();
+  }, []);
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -51,6 +82,48 @@ const Home = () => {
     <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
       <div className="w-full max-w-5xl mx-auto px-6 py-16 space-y-16">
         
+        {/* Surah of the Day */}
+        {surahOfDay && (
+          <Link 
+            to={`/quran/${surahOfDay.number}`}
+            className="block group animate-fade-in"
+          >
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 smooth-transition" />
+              
+              <div className="relative glass-effect rounded-3xl p-6 md:p-8 border border-border/50 hover:border-primary/50 smooth-transition backdrop-blur-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium text-primary">
+                      {settings.language === 'ar' ? 'سورة اليوم' : 'Surah of the Day'}
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold text-primary">
+                    {surahOfDay.number}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-3xl font-bold bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+                    {settings.language === 'ar' ? surahOfDay.name : surahOfDay.englishName}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {surahOfDay.englishNameTranslation} • {surahOfDay.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2 text-primary font-medium group-hover:gap-3 smooth-transition">
+                  <span className="text-sm">
+                    {settings.language === 'ar' ? 'اقرأ الآن' : 'Read Now'}
+                  </span>
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+          </Link>
+        )}
+
         {/* Hero Section */}
         <div className="text-center space-y-6 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect border border-border/50">
