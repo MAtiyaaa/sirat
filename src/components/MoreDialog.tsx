@@ -39,7 +39,7 @@ const MoreDialog = () => {
   const menuItems = [
     { icon: Clock, label: t.prayerTimes, path: '/info' },
     { icon: BookOpen, label: t.stories, path: '/prophet-stories' },
-    { icon: User, label: t.account, path: '/auth' },
+    { icon: User, label: t.account, path: '/account' },
     { icon: SettingsIcon, label: t.settings, path: '/settings' },
   ];
 

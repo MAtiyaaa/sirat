@@ -12,7 +12,23 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, ayahContext } = await req.json();
+    const body = await req.text();
+    if (!body) {
+      return new Response(JSON.stringify({ error: 'Empty request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const { messages, ayahContext } = JSON.parse(body);
+    
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {

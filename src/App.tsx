@@ -15,6 +15,7 @@ import ProphetStories from "./pages/ProphetStories";
 import Qalam from "./pages/Qalam";
 import ChatHistory from "./pages/ChatHistory";
 import Settings from "./pages/Settings";
+import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/prophet-stories" element={<ProphetStories />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/account" element={<Account />} />
           <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

@@ -2,10 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Sparkles, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Loader2, Trash2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
+  id?: string;
   role: 'user' | 'assistant';
   content: string;
 }
@@ -15,6 +17,8 @@ const Qalam = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,8 +27,73 @@ const Qalam = () => {
     }
   }, [messages]);
 
+  // Load user and conversation
+  useEffect(() => {
+    const loadData = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        // Load most recent conversation
+        const { data: conversations } = await supabase
+          .from('ai_conversations')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('updated_at', { ascending: false })
+          .limit(1);
+        
+        if (conversations && conversations.length > 0) {
+          const conv = conversations[0];
+          setConversationId(conv.id);
+          
+          // Load messages
+          const { data: msgs } = await supabase
+            .from('ai_messages')
+            .select('*')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: true });
+          
+          if (msgs) {
+            setMessages(msgs.map(m => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content })));
+          }
+        }
+      }
+    };
+    
+    loadData();
+  }, []);
+
+  const createNewChat = async () => {
+    if (!user) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+    
+    setMessages([]);
+    setConversationId(null);
+    toast.success(settings.language === 'ar' ? 'محادثة جديدة' : 'New chat started');
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    if (!user) return;
+    
+    try {
+      await supabase.from('ai_messages').delete().eq('id', messageId);
+      setMessages(prev => prev.filter(m => m.id !== messageId));
+      toast.success(settings.language === 'ar' ? 'تم حذف الرسالة' : 'Message deleted');
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error(settings.language === 'ar' ? 'فشل حذف الرسالة' : 'Failed to delete message');
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+    
+    if (!user) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
     
     const userMessage: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -32,6 +101,39 @@ const Qalam = () => {
     setIsLoading(true);
 
     try {
+      // Create conversation if needed
+      let convId = conversationId;
+      if (!convId) {
+        const { data: newConv } = await supabase
+          .from('ai_conversations')
+          .insert({ user_id: user.id, title: input.slice(0, 50) })
+          .select()
+          .single();
+        
+        if (newConv) {
+          convId = newConv.id;
+          setConversationId(convId);
+        }
+      }
+      
+      // Save user message
+      if (convId) {
+        const { data: savedMsg } = await supabase
+          .from('ai_messages')
+          .insert({ 
+            conversation_id: convId, 
+            role: 'user', 
+            content: userMessage.content 
+          })
+          .select()
+          .single();
+        
+        if (savedMsg) {
+          setMessages(prev => prev.map((m, i) => 
+            i === prev.length - 1 ? { ...m, id: savedMsg.id } : m
+          ));
+        }
+      }
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
       
       const response = await fetch(CHAT_URL, {
@@ -97,6 +199,25 @@ const Qalam = () => {
           }
         }
       }
+      
+      // Save assistant message
+      if (convId && assistantMessage) {
+        const { data: savedMsg } = await supabase
+          .from('ai_messages')
+          .insert({ 
+            conversation_id: convId, 
+            role: 'assistant', 
+            content: assistantMessage 
+          })
+          .select()
+          .single();
+        
+        if (savedMsg) {
+          setMessages(prev => prev.map((m, i) => 
+            i === prev.length - 1 ? { ...m, id: savedMsg.id } : m
+          ));
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error);
       toast.error(settings.language === 'ar' ? 'حدث خطأ في الاتصال' : 'Failed to get response');
@@ -109,11 +230,24 @@ const Qalam = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
       <div className="text-center py-6">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect mb-4">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">
-            {settings.language === 'ar' ? 'قلم - المساعد الذكي' : 'Qalam - AI Assistant'}
-          </span>
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">
+              {settings.language === 'ar' ? 'قلم - المساعد الذكي' : 'Qalam - AI Assistant'}
+            </span>
+          </div>
+          {user && (
+            <Button
+              onClick={createNewChat}
+              size="sm"
+              variant="outline"
+              className="rounded-full"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              {settings.language === 'ar' ? 'جديد' : 'New'}
+            </Button>
+          )}
         </div>
         <p className="text-muted-foreground">
           {settings.language === 'ar' 
@@ -139,17 +273,39 @@ const Qalam = () => {
           <>
             {messages.map((message, index) => (
               <div
-                key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                key={message.id || index}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} group`}
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl p-4 ${
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'glass-effect'
-                  }`}
-                >
-                  {message.content}
+                <div className="flex items-start gap-2 max-w-[85%]">
+                  {message.role === 'user' && message.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                      onClick={() => deleteMessage(message.id!)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                  <div
+                    className={`rounded-2xl p-4 ${
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'glass-effect'
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                  {message.role === 'assistant' && message.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                      onClick={() => deleteMessage(message.id!)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
