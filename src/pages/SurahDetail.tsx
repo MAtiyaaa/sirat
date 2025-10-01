@@ -275,10 +275,13 @@ const SurahDetail = () => {
 
           <Button
             onClick={playSurah}
-            className="rounded-full px-6"
+            className="rounded-full px-6 py-6 shadow-lg hover:shadow-xl smooth-transition"
+            size="lg"
           >
-            {playingSurah ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-            {settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah'}
+            {playingSurah ? <Pause className="h-5 w-5 mr-2" /> : <Play className="h-5 w-5 mr-2" />}
+            <span className="font-semibold">
+              {settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah'}
+            </span>
           </Button>
         </div>
       </div>
