@@ -105,11 +105,13 @@ const Duas = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-4xl font-bold mb-2">
-          {settings.language === 'ar' ? 'الأدعية والأذكار' : 'Daily Duas & Dhikr'}
+      <div className="text-center space-y-4 py-8">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+            {settings.language === 'ar' ? 'الأدعية والأذكار' : 'Daily Duas & Dhikr'}
+          </span>
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
           {settings.language === 'ar' 
             ? 'أدعية وأذكار يومية من السنة النبوية'
             : 'Daily supplications and remembrance from the Sunnah'}
