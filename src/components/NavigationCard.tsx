@@ -4,12 +4,14 @@ import { Book, Clock, Sparkles, User, Settings, BookMarked, History } from 'luci
 import { Card } from '@/components/ui/card';
 
 interface NavigationCardProps {
-  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history';
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas';
   data?: {
     surahNumber?: number;
     ayahNumber?: number;
     surahName?: string;
     ayahText?: string;
+    book?: string;
+    search?: string;
   };
 }
 
@@ -95,6 +97,31 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
           gradient: 'from-teal-500/20 via-cyan-400/20 to-sky-500/20',
           iconBg: 'bg-teal-500/10',
           iconColor: 'text-teal-600 dark:text-teal-400',
+        };
+      case 'hadith':
+        const hadithLink = data?.book 
+          ? `/hadith?book=${data.book}${data.search ? `&search=${data.search}` : ''}`
+          : data?.search 
+          ? `/hadith?search=${data.search}`
+          : '/hadith';
+        return {
+          icon: Book,
+          title: 'Hadith Collection',
+          description: data?.search ? `Search: ${data.search}` : 'Explore authentic Hadiths',
+          link: hadithLink,
+          gradient: 'from-green-500/20 via-emerald-400/20 to-teal-500/20',
+          iconBg: 'bg-green-500/10',
+          iconColor: 'text-green-600 dark:text-green-400',
+        };
+      case 'duas':
+        return {
+          icon: Sparkles,
+          title: 'Duas',
+          description: 'Islamic supplications',
+          link: '/duas',
+          gradient: 'from-violet-500/20 via-purple-400/20 to-indigo-500/20',
+          iconBg: 'bg-violet-500/10',
+          iconColor: 'text-violet-600 dark:text-violet-400',
         };
       default:
         return null;

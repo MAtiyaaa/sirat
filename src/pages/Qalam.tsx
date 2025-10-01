@@ -17,18 +17,20 @@ interface Message {
 }
 
 interface NavCardData {
-  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history';
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas';
   data?: {
     surahNumber?: number;
     ayahNumber?: number;
     surahName?: string;
     ayahText?: string;
+    book?: string;
+    search?: string;
   };
 }
 
 const parseNavigationCards = (text: string): { text: string; cards: NavCardData[] } => {
   const cards: NavCardData[] = [];
-  const cardRegex = /\[NAV:(surah|ayah|prayer|stories|account|settings|bookmarks|history)\|?([^\]]*)\]/g;
+  const cardRegex = /\[NAV:(surah|ayah|prayer|stories|account|settings|bookmarks|history|hadith|duas)\|?([^\]]*)\]/g;
   
   const cleanText = text.replace(cardRegex, (match, type, dataStr) => {
     const cardData: NavCardData = { type };
@@ -44,12 +46,16 @@ const parseNavigationCards = (text: string): { text: string; cards: NavCardData[
           cardData.data!.surahName = value;
         } else if (key === 'text') {
           cardData.data!.ayahText = value;
+        } else if (key === 'book') {
+          cardData.data!.book = value;
+        } else if (key === 'search') {
+          cardData.data!.search = value;
         }
       });
     }
     
     cards.push(cardData);
-    return ''; // Remove the card syntax from text
+    return '';
   });
   
   return { text: cleanText.trim(), cards };

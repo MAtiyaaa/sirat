@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { 
   fetchSurahArabic, 
@@ -37,6 +37,9 @@ import { useAudio } from '@/contexts/AudioContext';
 const SurahDetail = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialAyah = searchParams.get('ayah');
   const { settings } = useSettings();
   const { playingSurah, playingAyah: globalPlayingAyah, isPlaying, playSurah: playGlobalSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
   
@@ -65,7 +68,26 @@ const SurahDetail = () => {
     loadUser();
     loadBookmarks();
     saveLastViewed();
-  }, [surahNumber]);
+
+    // Save position when entering surah
+    if (surahNumber) {
+      const ayah = initialAyah ? parseInt(initialAyah) : null;
+      localStorage.setItem('quran_last_position', JSON.stringify({ 
+        surahNumber: parseInt(surahNumber), 
+        ayahNumber: ayah 
+      }));
+    }
+
+    // Handle URL param for direct ayah navigation
+    if (initialAyah) {
+      setTimeout(() => {
+        const element = document.querySelector(`[data-ayah="${initialAyah}"]`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 800);
+    }
+  }, [surahNumber, initialAyah]);
 
   // Restore scroll position after data loads
   useEffect(() => {
@@ -220,13 +242,21 @@ const SurahDetail = () => {
       });
 
       setLastVisibleAyah(maxVisible);
+
+      // Also save to localStorage for quick restoration
+      if (surahNumber) {
+        localStorage.setItem('quran_last_position', JSON.stringify({ 
+          surahNumber: parseInt(surahNumber), 
+          ayahNumber: maxVisible 
+        }));
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [surahData]);
+  }, [surahData, surahNumber]);
 
   // Save progress to database
   useEffect(() => {

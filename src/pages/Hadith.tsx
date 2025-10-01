@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,7 @@ interface Hadith {
 
 const Hadith = () => {
   const { settings } = useSettings();
+  const location = useLocation();
   const [hadiths, setHadiths] = useState<Hadith[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -201,6 +203,32 @@ const Hadith = () => {
       fetchBookmarks();
     }
   }, [userId]);
+
+  // Handle URL params from Qalam navigation
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const bookParam = params.get('book');
+    const searchParam = params.get('search');
+    
+    if (bookParam) {
+      // Map from short names to full book slugs
+      const bookMap: Record<string, string> = {
+        'bukhari': 'sahih-bukhari',
+        'muslim': 'sahih-muslim',
+        'abudawud': 'abu-dawood',
+        'tirmidhi': 'al-tirmidhi',
+        'nasai': 'sunan-nasai',
+        'ibnmajah': 'ibn-e-majah',
+      };
+      const mappedBook = bookMap[bookParam] || bookParam;
+      setSelectedBook(mappedBook);
+    }
+    
+    if (searchParam) {
+      setSearchInput(searchParam);
+      setSearchTerm(searchParam);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     setPage(1);
