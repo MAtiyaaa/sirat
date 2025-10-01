@@ -49,13 +49,33 @@ const loadInitialSettings = (): Settings => {
   return defaultSettings;
 };
 
+// Apply theme immediately on load
+const applyTheme = (theme: Theme) => {
+  document.documentElement.classList.remove('light', 'dark', 'gold', 'pink');
+  
+  if (theme === 'system') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
+  } else {
+    document.documentElement.classList.add(theme);
+  }
+};
+
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize with localStorage settings immediately (synchronous)
-  const [settings, setSettings] = useState<Settings>(loadInitialSettings());
+  const initialSettings = loadInitialSettings();
+  const [settings, setSettings] = useState<Settings>(initialSettings);
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Apply theme immediately on mount
+  React.useEffect(() => {
+    applyTheme(initialSettings.theme);
+    document.documentElement.dir = initialSettings.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = initialSettings.language;
+  }, []);
 
   // Load settings from database or localStorage
   useEffect(() => {
@@ -119,18 +139,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   useEffect(() => {
-    // Don't save settings until they've been loaded initially
-    if (!isLoaded) return;
-
-    // Apply theme
-    document.documentElement.classList.remove('light', 'dark', 'gold', 'pink');
+    // Apply theme whenever settings change
+    applyTheme(settings.theme);
     
+    // Apply direction
+    document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = settings.language;
+
+    // Listen for system theme changes when in system mode
     if (settings.theme === 'system') {
-      // Detect system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
-      
-      // Listen for system theme changes
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = (e: MediaQueryListEvent) => {
         document.documentElement.classList.remove('light', 'dark');
@@ -139,13 +156,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
-    } else {
-      document.documentElement.classList.add(settings.theme);
     }
-    
-    // Apply direction
-    document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = settings.language;
+  }, [settings.theme, settings.language]);
+
+  useEffect(() => {
+    // Don't save settings until they've been loaded initially
+    if (!isLoaded) return;
 
     // Save settings
     if (userId) {
