@@ -193,14 +193,16 @@ const Account = () => {
       // Delete all AI messages first
       if (conversations && conversations.length > 0) {
         const conversationIds = conversations.map(c => c.id);
-        await supabase
+        const { error: messagesError } = await supabase
           .from('ai_messages')
           .delete()
           .in('conversation_id', conversationIds);
+        
+        if (messagesError) console.error('Error deleting messages:', messagesError);
       }
       
       // Delete all other user data
-      await Promise.all([
+      const deletions = await Promise.allSettled([
         supabase.from('ai_conversations').delete().eq('user_id', user.id),
         supabase.from('bookmarks').delete().eq('user_id', user.id),
         supabase.from('reading_progress').delete().eq('user_id', user.id),
@@ -208,8 +210,15 @@ const Account = () => {
         supabase.from('ayah_interactions').delete().eq('user_id', user.id),
       ]);
       
+      // Log any failures
+      deletions.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`Deletion ${index} failed:`, result.reason);
+        }
+      });
+      
       // Reset user settings to defaults
-      await supabase
+      const { error: settingsError } = await supabase
         .from('user_settings')
         .update({
           language: 'en',
@@ -222,14 +231,20 @@ const Account = () => {
           transliteration_enabled: true,
           reading_tracking_mode: 'auto',
           prayer_time_region: null,
+          updated_at: new Date().toISOString(),
         })
         .eq('user_id', user.id);
       
+      if (settingsError) console.error('Error resetting settings:', settingsError);
+      
+      // Clear all localStorage
+      localStorage.clear();
+      
       toast.success(t.dataCleared);
       
-      // Reload the page to refresh all contexts
+      // Force a complete reload
       setTimeout(() => {
-        window.location.reload();
+        window.location.href = '/';
       }, 1000);
     } catch (error) {
       console.error('Clear data error:', error);
