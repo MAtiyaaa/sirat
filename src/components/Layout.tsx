@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Book, Moon, Home, MessageSquare } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { supabase } from '@/integrations/supabase/client';
 import MoreDialog from './MoreDialog';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -17,6 +18,36 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (currentPath.startsWith('/quran/') && currentPath !== '/quran') {
       localStorage.setItem('lastSurahPath', currentPath);
     }
+  }, [location.pathname]);
+
+  // Save position to database when leaving a surah
+  useEffect(() => {
+    const handleBeforeNavigate = async () => {
+      const currentPath = location.pathname;
+      
+      // If we're leaving a surah page
+      if (currentPath.startsWith('/quran/') && currentPath !== '/quran') {
+        const surahNumber = currentPath.split('/')[2];
+        if (!surahNumber) return;
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
+
+        // Update last viewed surah
+        await supabase
+          .from('last_viewed_surah')
+          .upsert({
+            user_id: session.user.id,
+            surah_number: parseInt(surahNumber),
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
+          });
+      }
+    };
+
+    // Save when the path changes (user navigates away)
+    handleBeforeNavigate();
   }, [location.pathname]);
 
   const handleQuranClick = (e: React.MouseEvent) => {
