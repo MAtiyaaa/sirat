@@ -35,10 +35,25 @@ const defaultSettings: Settings = {
   readingTrackingMode: 'auto',
 };
 
+// Load settings from localStorage immediately (synchronously) for instant availability
+const loadInitialSettings = (): Settings => {
+  try {
+    const stored = localStorage.getItem('sirat-settings');
+    if (stored) {
+      const parsedSettings = JSON.parse(stored);
+      return { ...defaultSettings, ...parsedSettings };
+    }
+  } catch (error) {
+    console.error('Error loading initial settings from localStorage:', error);
+  }
+  return defaultSettings;
+};
+
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  // Initialize with localStorage settings immediately (synchronous)
+  const [settings, setSettings] = useState<Settings>(loadInitialSettings());
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -49,12 +64,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setUserId(session?.user?.id || null);
 
       if (session?.user?.id) {
-        // Load from database
+        // Load from database for logged-in users
         const { data, error } = await supabase
           .from('user_settings')
           .select('*')
           .eq('user_id', session.user.id)
-          .single();
+          .maybeSingle();
 
         if (data && !error) {
           setSettings({
@@ -69,18 +84,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
           });
         }
-      } else {
-        // Load from localStorage
-        const stored = localStorage.getItem('sirat-settings');
-        if (stored) {
-          try {
-            const parsedSettings = JSON.parse(stored);
-            setSettings({ ...defaultSettings, ...parsedSettings });
-          } catch (error) {
-            console.error('Error parsing settings from localStorage:', error);
-          }
-        }
       }
+      // Note: We don't need to load from localStorage here since it's already loaded in initial state
       setIsLoaded(true);
     };
 
@@ -90,9 +95,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setUserId(session?.user?.id || null);
       setIsLoaded(false);
       if (session?.user?.id) {
+        // User just signed in - load from database
         await loadSettings();
       } else {
-        // Load from localStorage when signed out
+        // User just signed out - reload from localStorage
         const stored = localStorage.getItem('sirat-settings');
         if (stored) {
           try {
@@ -100,7 +106,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setSettings({ ...defaultSettings, ...parsedSettings });
           } catch (error) {
             console.error('Error parsing settings from localStorage:', error);
+            setSettings(defaultSettings);
           }
+        } else {
+          setSettings(defaultSettings);
         }
         setIsLoaded(true);
       }
