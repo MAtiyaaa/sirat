@@ -33,10 +33,12 @@ const Quran = () => {
 
   useEffect(() => {
     if (searchTerm.trim()) {
+      const lowerSearch = searchTerm.toLowerCase();
       const filtered = surahs.filter(s =>
-        s.englishName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.englishName.toLowerCase().includes(lowerSearch) ||
         s.name.includes(searchTerm) ||
-        s.englishNameTranslation.toLowerCase().includes(searchTerm.toLowerCase())
+        s.englishNameTranslation.toLowerCase().includes(lowerSearch) ||
+        s.number.toString() === searchTerm
       );
       setFilteredSurahs(filtered);
     } else {
