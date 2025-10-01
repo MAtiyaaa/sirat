@@ -171,10 +171,10 @@ const Home = () => {
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-3xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
                 
-                <div className="relative glass-effect rounded-2xl p-6 md:p-8 h-full border border-border/30 hover:border-border/50 smooth-transition backdrop-blur-xl">
-                  <div className="space-y-5">
-                    <div className={`inline-flex w-14 h-14 rounded-xl ${feature.iconBg} items-center justify-center group-hover:scale-105 smooth-transition`}>
-                      <Icon className={`h-7 w-7 ${feature.iconColor}`} />
+                <div className="relative glass-effect rounded-2xl p-4 md:p-8 h-full border border-border/30 hover:border-border/50 smooth-transition backdrop-blur-xl">
+                  <div className="space-y-3 md:space-y-5">
+                    <div className={`inline-flex w-10 h-10 md:w-14 md:h-14 rounded-xl ${feature.iconBg} items-center justify-center group-hover:scale-105 smooth-transition`}>
+                      <Icon className={`h-5 w-5 md:h-7 md:w-7 ${feature.iconColor}`} />
                     </div>
                     
                     <div className="space-y-2">
