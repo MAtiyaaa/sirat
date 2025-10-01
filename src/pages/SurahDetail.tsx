@@ -21,7 +21,8 @@ import {
   Volume2,
   MessageSquare,
   Bookmark,
-  Search
+  Search,
+  Eye
 } from 'lucide-react';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import {
@@ -732,15 +733,26 @@ const SurahDetail = () => {
 
       {/* Search Bar */}
       <div className="glass-effect rounded-2xl p-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder={settings.language === 'ar' ? 'بحث في الآيات...' : 'Search in ayahs...'}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 rounded-2xl border-border/50 bg-background/50"
-          />
+        <div className="relative flex gap-2 items-center">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder={settings.language === 'ar' ? 'بحث في الآيات...' : 'Search in ayahs...'}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 rounded-2xl border-border/50 bg-background/50"
+            />
+          </div>
+          {searchTerm && (
+            <Button
+              onClick={() => setSearchTerm('')}
+              variant="outline"
+              className="rounded-2xl"
+            >
+              {settings.language === 'ar' ? 'مسح' : 'Clear'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -768,6 +780,23 @@ const SurahDetail = () => {
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-primary font-bold">{ayah.numberInSurah}</span>
                 </div>
+                {searchTerm && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSearchTerm('');
+                      const element = document.querySelector(`[data-ayah="${ayah.numberInSurah}"]`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
+                    className="rounded-full gap-1.5"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    {settings.language === 'ar' ? 'اذهب إلى' : 'Go to'}
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"

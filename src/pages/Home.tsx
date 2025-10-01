@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Book, MessageSquare, Sparkles, ArrowRight } from 'lucide-react';
+import { Book, MessageSquare, Sparkles, ArrowRight, BookMarked } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -120,6 +120,18 @@ const Home = () => {
       gradient: 'from-purple-500/20 via-pink-400/20 to-rose-500/20',
       iconBg: 'bg-purple-500/10',
       iconColor: 'text-purple-600 dark:text-purple-400',
+    },
+    {
+      icon: BookMarked,
+      title: { ar: 'الأحاديث النبوية', en: 'Hadith Collection' },
+      description: { 
+        ar: 'استكشف أحاديث النبي محمد ﷺ', 
+        en: 'Explore authentic Prophetic traditions' 
+      },
+      link: '/hadith',
+      gradient: 'from-green-500/20 via-emerald-400/20 to-teal-500/20',
+      iconBg: 'bg-green-500/10',
+      iconColor: 'text-green-600 dark:text-green-400',
     },
   ];
 
@@ -244,7 +256,7 @@ const Home = () => {
         )}
 
         {/* Features Grid */}
-        <div className="grid gap-6 md:grid-cols-2 mt-32">
+        <div className="grid gap-6 md:grid-cols-3 mt-32">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
