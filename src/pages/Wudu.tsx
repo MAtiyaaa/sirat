@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Card } from '@/components/ui/card';
-import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown } from 'lucide-react';
+import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown, Calendar, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import {
@@ -18,6 +18,19 @@ interface PrayerTimes {
   Isha: string;
 }
 
+interface HijriDate {
+  date: string;
+  month: string;
+  year: string;
+  designation: string;
+}
+
+interface IslamicEvent {
+  name: string;
+  date: Date;
+  hijriDate: string;
+}
+
 const Wudu = () => {
   const { settings } = useSettings();
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
@@ -25,10 +38,44 @@ const Wudu = () => {
   const [loading, setLoading] = useState(true);
   const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string; time: string } | null>(null);
   const [isPrayerTimesOpen, setIsPrayerTimesOpen] = useState(false);
+  const [isWuduStepsOpen, setIsWuduStepsOpen] = useState(false);
+  const [isHijriOpen, setIsHijriOpen] = useState(false);
+  const [isRamadanOpen, setIsRamadanOpen] = useState(false);
+  const [hijriDate, setHijriDate] = useState<HijriDate | null>(null);
+  const [islamicEvents, setIslamicEvents] = useState<IslamicEvent[]>([]);
+  const [ramadanCountdown, setRamadanCountdown] = useState<string>('');
+  const [suhurTime, setSuhurTime] = useState<string>('');
+  const [iftarTime, setIftarTime] = useState<string>('');
 
   useEffect(() => {
     fetchPrayerTimes();
+    fetchHijriDate();
+    fetchIslamicEvents();
   }, [settings.prayerTimeRegion]);
+
+  useEffect(() => {
+    if (islamicEvents.length > 0) {
+      const updateCountdowns = () => {
+        const now = new Date();
+        const ramadan = islamicEvents.find(e => e.name === 'Ramadan');
+        
+        if (ramadan) {
+          const diff = ramadan.date.getTime() - now.getTime();
+          if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            setRamadanCountdown(`${days}d ${hours}h`);
+          } else {
+            setRamadanCountdown(settings.language === 'ar' ? 'رمضان مبارك!' : 'Ramadan Mubarak!');
+          }
+        }
+      };
+
+      updateCountdowns();
+      const interval = setInterval(updateCountdowns, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [islamicEvents, settings.language]);
 
   useEffect(() => {
     if (!prayerTimes) return;
@@ -112,6 +159,9 @@ const Wudu = () => {
           Isha: data.data.timings.Isha,
         });
         setLocation(`${data.data.meta.timezone}`);
+        // Set Suhur and Iftar times
+        setSuhurTime(data.data.timings.Fajr);
+        setIftarTime(data.data.timings.Maghrib);
       }
     } catch (error) {
       console.error('Error fetching prayer times:', error);
@@ -125,6 +175,70 @@ const Wudu = () => {
       setLocation(settings.language === 'ar' ? 'الموقع غير متاح' : 'Location unavailable');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchHijriDate = async () => {
+    try {
+      const response = await fetch('https://api.aladhan.com/v1/gToH');
+      const data = await response.json();
+      
+      if (data.code === 200) {
+        setHijriDate({
+          date: data.data.hijri.day,
+          month: settings.language === 'ar' ? data.data.hijri.month.ar : data.data.hijri.month.en,
+          year: data.data.hijri.year,
+          designation: data.data.hijri.designation.abbreviated,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching Hijri date:', error);
+    }
+  };
+
+  const fetchIslamicEvents = async () => {
+    try {
+      const currentYear = new Date().getFullYear();
+      const response = await fetch(`https://api.aladhan.com/v1/calendar/${currentYear}`);
+      const data = await response.json();
+      
+      if (data.code === 200) {
+        const events: IslamicEvent[] = [];
+        
+        // Find Ramadan start
+        const ramadanData = data.data.find((d: any) => d.hijri.month.number === 9 && d.hijri.day === '1');
+        if (ramadanData) {
+          events.push({
+            name: 'Ramadan',
+            date: new Date(ramadanData.gregorian.date),
+            hijriDate: `1 ${ramadanData.hijri.month.en} ${ramadanData.hijri.year}`,
+          });
+        }
+
+        // Find Eid al-Fitr
+        const fitrData = data.data.find((d: any) => d.hijri.month.number === 10 && d.hijri.day === '1');
+        if (fitrData) {
+          events.push({
+            name: 'Eid al-Fitr',
+            date: new Date(fitrData.gregorian.date),
+            hijriDate: `1 ${fitrData.hijri.month.en} ${fitrData.hijri.year}`,
+          });
+        }
+
+        // Find Eid al-Adha
+        const adhaData = data.data.find((d: any) => d.hijri.month.number === 12 && d.hijri.day === '10');
+        if (adhaData) {
+          events.push({
+            name: 'Eid al-Adha',
+            date: new Date(adhaData.gregorian.date),
+            hijriDate: `10 ${adhaData.hijri.month.en} ${adhaData.hijri.year}`,
+          });
+        }
+
+        setIslamicEvents(events);
+      }
+    } catch (error) {
+      console.error('Error fetching Islamic events:', error);
     }
   };
 
@@ -272,68 +386,216 @@ const Wudu = () => {
         </div>
       )}
 
-      {/* Wudu Steps Section */}
-      <div className="text-center py-6">
-        <h1 className="text-4xl font-bold mb-2">
-          {settings.language === 'ar' ? 'خطوات الوضوء' : 'Wudu Steps'}
-        </h1>
-        <p className="text-muted-foreground">
-          {settings.language === 'ar' 
-            ? 'دليل كامل لأداء الوضوء الصحيح'
-            : 'Complete guide to performing proper ablution'}
-        </p>
-      </div>
-
-      <div className="space-y-3">
-        {currentSteps.map((step, index) => (
-          <div
-            key={index}
-            className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow"
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-sm font-bold text-primary">{index + 1}</span>
+      {/* Wudu Steps Dropdown */}
+      <Collapsible open={isWuduStepsOpen} onOpenChange={setIsWuduStepsOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <HandHeart className="h-5 w-5 text-primary" />
+                  <h2 className="text-2xl font-bold">
+                    {settings.language === 'ar' ? 'خطوات الوضوء' : 'Wudu Steps'}
+                  </h2>
                 </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isWuduStepsOpen ? 'rotate-180' : ''}`} />
               </div>
-              
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="text-xl font-bold">
-                    {step.title}
-                  </h3>
-                  {step.count && (
-                    <div className="px-3 py-1 rounded-full bg-primary/20 border border-primary/30">
-                      <span className="text-lg font-bold text-primary">X{step.count}</span>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            <div className="space-y-3">
+              {currentSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold text-primary">{index + 1}</span>
+                      </div>
                     </div>
-                  )}
+                    
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold">
+                          {step.title}
+                        </h3>
+                        {step.count && (
+                          <div className="px-3 py-1 rounded-full bg-primary/20 border border-primary/30">
+                            <span className="text-lg font-bold text-primary">X{step.count}</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {step.description}
-                </p>
+              ))}
+            </div>
+
+            <div className="glass-effect rounded-2xl p-6 border border-border/50 mt-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold mb-2">
+                    {settings.language === 'ar' ? 'دعاء بعد الوضوء' : 'Dua After Wudu'}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {settings.language === 'ar'
+                      ? 'بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله'
+                      : 'After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="glass-effect rounded-2xl p-6 border border-border/50">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-base font-semibold mb-2">
-              {settings.language === 'ar' ? 'دعاء بعد الوضوء' : 'Dua After Wudu'}
-            </h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {settings.language === 'ar'
-                ? 'بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله'
-                : 'After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger'}
-            </p>
-          </div>
+          </CollapsibleContent>
         </div>
-      </div>
+      </Collapsible>
+
+      {/* Hijri Calendar Dropdown */}
+      <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <h2 className="text-2xl font-bold">
+                    {settings.language === 'ar' ? 'التقويم الهجري' : 'Hijri Calendar'}
+                  </h2>
+                </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isHijriOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            {hijriDate ? (
+              <div className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
+                <div className="text-center">
+                  <div className="text-6xl font-bold text-primary mb-2">
+                    {hijriDate.date}
+                  </div>
+                  <div className="text-2xl font-semibold mb-1">
+                    {hijriDate.month}
+                  </div>
+                  <div className="text-xl text-muted-foreground">
+                    {hijriDate.year} {hijriDate.designation}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            )}
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+
+      {/* Ramadan & Islamic Events Dropdown */}
+      <Collapsible open={isRamadanOpen} onOpenChange={setIsRamadanOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Moon className="h-5 w-5 text-primary" />
+                  <h2 className="text-2xl font-bold">
+                    {settings.language === 'ar' ? 'رمضان والأعياد' : 'Ramadan & Islamic Events'}
+                  </h2>
+                </div>
+                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isRamadanOpen ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            <div className="space-y-4">
+              {/* Ramadan Countdown */}
+              {islamicEvents.find(e => e.name === 'Ramadan') && (
+                <div className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold">
+                      {settings.language === 'ar' ? 'رمضان' : 'Ramadan'}
+                    </h3>
+                    <div className="text-2xl font-bold text-primary">
+                      {ramadanCountdown}
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {islamicEvents.find(e => e.name === 'Ramadan')?.date.toLocaleDateString(
+                      settings.language === 'ar' ? 'ar-SA' : 'en-US',
+                      { year: 'numeric', month: 'long', day: 'numeric' }
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Suhur & Iftar Times */}
+              {(suhurTime || iftarTime) && (
+                <div className="grid grid-cols-2 gap-3">
+                  <Card className="p-4 text-center glass-effect border-border/50">
+                    <div className="text-sm font-semibold text-muted-foreground mb-1">
+                      {settings.language === 'ar' ? 'السحور' : 'Suhur'}
+                    </div>
+                    <div className="text-2xl font-bold text-primary">
+                      {suhurTime}
+                    </div>
+                  </Card>
+                  <Card className="p-4 text-center glass-effect border-border/50">
+                    <div className="text-sm font-semibold text-muted-foreground mb-1">
+                      {settings.language === 'ar' ? 'الإفطار' : 'Iftar'}
+                    </div>
+                    <div className="text-2xl font-bold text-primary">
+                      {iftarTime}
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {/* Other Islamic Events */}
+              <div className="space-y-3">
+                {islamicEvents.filter(e => e.name !== 'Ramadan').map((event, index) => {
+                  const now = new Date();
+                  const diff = event.date.getTime() - now.getTime();
+                  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                  const countdown = diff > 0 ? `${days}d` : (settings.language === 'ar' ? 'مبارك!' : 'Passed');
+                  
+                  return (
+                    <div key={index} className="glass-effect rounded-2xl p-5 border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-lg font-bold mb-1">
+                            {settings.language === 'ar' 
+                              ? (event.name === 'Eid al-Fitr' ? 'عيد الفطر' : 'عيد الأضحى')
+                              : event.name}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {event.date.toLocaleDateString(
+                              settings.language === 'ar' ? 'ar-SA' : 'en-US',
+                              { year: 'numeric', month: 'long', day: 'numeric' }
+                            )}
+                          </p>
+                        </div>
+                        <div className="text-xl font-bold text-primary">
+                          {countdown}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
 
       {/* Duas Card */}
       <Link to="/duas" className="block group">
