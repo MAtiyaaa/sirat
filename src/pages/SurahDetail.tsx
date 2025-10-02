@@ -7,7 +7,8 @@ import {
   fetchTafsir, 
   fetchWordByWord,
   getAyahAudioUrl,
-  WordData 
+  WordData,
+  fetchSurahs
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,8 @@ const SurahDetail = () => {
   const [user, setUser] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
+  const [nextSurahData, setNextSurahData] = useState<any>(null);
+  const [nextSurahProgress, setNextSurahProgress] = useState<number>(0);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -70,6 +73,7 @@ const SurahDetail = () => {
     loadUser();
     loadBookmarks();
     saveLastViewed();
+    loadNextSurahInfo();
 
     // Only save position when entering surah with an ayah parameter
     if (surahNumber && initialAyah) {
@@ -321,6 +325,34 @@ const SurahDetail = () => {
   const loadUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setUser(session?.user ?? null);
+  };
+
+  const loadNextSurahInfo = async () => {
+    if (!surahNumber || parseInt(surahNumber) >= 114) return;
+    
+    const nextSurahNum = parseInt(surahNumber) + 1;
+    
+    try {
+      // Fetch next surah data
+      const surahs = await fetchSurahs();
+      const nextSurah = surahs.find(s => s.number === nextSurahNum);
+      setNextSurahData(nextSurah);
+      
+      // Check for progress on next surah
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data: progressData } = await supabase
+          .from('reading_progress')
+          .select('ayah_number')
+          .eq('user_id', session.user.id)
+          .eq('surah_number', nextSurahNum)
+          .maybeSingle();
+        
+        setNextSurahProgress(progressData?.ayah_number || 0);
+      }
+    } catch (error) {
+      console.error('Error loading next surah info:', error);
+    }
   };
 
   const loadBookmarks = async () => {
@@ -1010,6 +1042,47 @@ const SurahDetail = () => {
           </div>
         ))}
       </div>
+      
+      {/* Next Surah Navigation */}
+      {nextSurahData && (
+        <div className="glass-effect rounded-3xl p-6 border border-border/50 backdrop-blur-xl">
+          <Button
+            onClick={async () => {
+              const nextSurahNum = nextSurahData.number;
+              
+              // Check if there's progress on next surah
+              if (user) {
+                const { data: progressData } = await supabase
+                  .from('reading_progress')
+                  .select('ayah_number')
+                  .eq('user_id', user.id)
+                  .eq('surah_number', nextSurahNum)
+                  .maybeSingle();
+                
+                const progress = progressData?.ayah_number || 0;
+                
+                if (progress > 0) {
+                  navigate(`/quran/${nextSurahNum}?ayah=${progress}`);
+                } else {
+                  navigate(`/quran/${nextSurahNum}`);
+                }
+              } else {
+                navigate(`/quran/${nextSurahNum}`);
+              }
+            }}
+            variant="outline"
+            className="w-full justify-between text-base h-14"
+          >
+            <span>{settings.language === 'ar' ? 'السورة التالية' : 'Next Surah'}</span>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">
+                {settings.language === 'ar' ? nextSurahData.name : nextSurahData.englishName}
+              </span>
+              <ArrowLeft className={`h-4 w-4 ${settings.language === 'ar' ? '' : 'rotate-180'}`} />
+            </div>
+          </Button>
+        </div>
+      )}
 
       <AyahChatDialog
         open={!!chatAyah}

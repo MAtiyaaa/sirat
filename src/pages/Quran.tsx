@@ -237,48 +237,69 @@ const Quran = () => {
         </div>
       </div>
 
-      {lastViewedSurah && surahs.length > 0 && (
-        <div 
-          className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition mx-4"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex-1" onClick={() => navigate(`/quran/${lastViewedSurah}`)}>
-              <p className="text-sm text-muted-foreground mb-2">
-                {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
-              </p>
-              <h3 className="text-2xl font-bold">
-                {surahs.find(s => s.number === lastViewedSurah)?.[settings.language === 'ar' ? 'name' : 'englishName'] || ''}
-              </h3>
-              {progress[lastViewedSurah] && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {settings.language === 'ar' 
-                    ? `الآية ${progress[lastViewedSurah]}`
-                    : `Ayah ${progress[lastViewedSurah]}`}
+      {lastViewedSurah && surahs.length > 0 && (() => {
+        const currentSurah = surahs.find(s => s.number === lastViewedSurah);
+        const currentProgress = progress[lastViewedSurah] || 0;
+        const isCompleted = currentSurah && currentProgress >= currentSurah.numberOfAyahs;
+        
+        // If completed, show next surah
+        const displaySurah = isCompleted && lastViewedSurah < 114 
+          ? surahs.find(s => s.number === lastViewedSurah + 1)
+          : currentSurah;
+        
+        if (!displaySurah) return null;
+        
+        const displayProgress = progress[displaySurah.number] || 0;
+        
+        return (
+          <div 
+            className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition mx-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1" onClick={() => {
+                if (displayProgress > 0) {
+                  navigate(`/quran/${displaySurah.number}?ayah=${displayProgress}`);
+                } else {
+                  navigate(`/quran/${displaySurah.number}`);
+                }
+              }}>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
                 </p>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              {playingSurah === lastViewedSurah && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    isPlaying ? pauseSurah() : resumeSurah();
-                  }}
-                >
-                  {isPlaying ? (
-                    <Pause className="h-6 w-6 text-primary" />
-                  ) : (
-                    <Play className="h-6 w-6 text-primary" />
-                  )}
-                </Button>
-              )}
-              <Book className="h-8 w-8 text-primary" />
+                <h3 className="text-2xl font-bold">
+                  {displaySurah[settings.language === 'ar' ? 'name' : 'englishName']}
+                </h3>
+                {displayProgress > 0 && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {settings.language === 'ar' 
+                      ? `الآية ${displayProgress}`
+                      : `Ayah ${displayProgress}`}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {playingSurah === displaySurah.number && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      isPlaying ? pauseSurah() : resumeSurah();
+                    }}
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-6 w-6 text-primary" />
+                    ) : (
+                      <Play className="h-6 w-6 text-primary" />
+                    )}
+                  </Button>
+                )}
+                <Book className="h-8 w-8 text-primary" />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {overallProgress > 0 && (
         <div className="glass-effect rounded-3xl p-8 space-y-4 border border-border/50 apple-shadow mx-4">
