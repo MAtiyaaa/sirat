@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send, Sparkles, Loader2, Trash2, Plus, History } from 'lucide-react';
+import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
@@ -521,7 +521,7 @@ const Qalam = () => {
           className="rounded-xl"
           disabled={isLoading}
         >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
         </Button>
       </div>
     </div>
