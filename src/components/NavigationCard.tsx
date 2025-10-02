@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Book, Clock, Sparkles, User, Settings, BookMarked, History } from 'lucide-react';
+import { Book, Clock, Sparkles, User, Settings, BookMarked, History, Repeat } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface NavigationCardProps {
-  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas';
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih';
   data?: {
     surahNumber?: number;
     ayahNumber?: number;
@@ -122,6 +122,16 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
           gradient: 'from-violet-500/20 via-purple-400/20 to-indigo-500/20',
           iconBg: 'bg-violet-500/10',
           iconColor: 'text-violet-600 dark:text-violet-400',
+        };
+      case 'tasbih':
+        return {
+          icon: Repeat,
+          title: 'Tasbih Counter',
+          description: 'Digital dhikr counter',
+          link: '/tasbih',
+          gradient: 'from-cyan-500/20 via-sky-400/20 to-blue-500/20',
+          iconBg: 'bg-cyan-500/10',
+          iconColor: 'text-cyan-600 dark:text-cyan-400',
         };
       default:
         return null;
