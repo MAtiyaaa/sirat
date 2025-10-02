@@ -21,6 +21,7 @@ import Settings from "./pages/Settings";
 import Account from "./pages/Account";
 import Wudu from "./pages/Wudu";
 import Bookmarks from "./pages/Bookmarks";
+import Tasbih from "./pages/Tasbih";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/info" element={<Info />} />
             <Route path="/duas" element={<Duas />} />
             <Route path="/hadith" element={<Hadith />} />
+            <Route path="/tasbih" element={<Tasbih />} />
             <Route path="/prayer" element={<Wudu />} />
             <Route path="/wudu" element={<Wudu />} />
             <Route path="/prophet-stories" element={<ProphetStories />} />
