@@ -9,8 +9,7 @@ import {
   getAyahAudioUrl,
   WordData,
   fetchSurahs,
-  getPageNumber,
-  fetchTransliteration
+  getPageNumber
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -542,13 +541,12 @@ const SurahDetail = () => {
       
       // Fetch translation or transliteration based on settings
       if (settings.translationEnabled) {
-        if (settings.translationSource === 'transliteration') {
-          const translit = await fetchTransliteration(parseInt(surahNumber));
-          setTranslation({ ayahs: translit });
-        } else {
-          const trans = await fetchSurahTranslation(parseInt(surahNumber), settings.translationSource);
-          setTranslation(trans);
-        }
+        // Use 'en.transliteration' edition for transliteration
+        const edition = settings.translationSource === 'transliteration' 
+          ? 'en.transliteration' 
+          : settings.translationSource;
+        const trans = await fetchSurahTranslation(parseInt(surahNumber), edition);
+        setTranslation(trans);
       } else {
         setTranslation(null);
       }
@@ -1040,9 +1038,7 @@ const SurahDetail = () => {
             {/* Translation or Transliteration */}
             {settings.translationEnabled && translation && (
               <p className={`${settings.translationSource === 'transliteration' ? 'italic' : ''} text-muted-foreground`}>
-                {settings.translationSource === 'transliteration' 
-                  ? translation.ayahs[ayah.numberInSurah - 1]?.transliteration?.text 
-                  : translation.ayahs[index]?.text}
+                {translation.ayahs[index]?.text}
               </p>
             )}
 

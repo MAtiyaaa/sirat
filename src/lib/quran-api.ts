@@ -117,17 +117,6 @@ export function getSurahAyahUrls(qari: string, surahNumber: number, numberOfAyah
   return urls;
 }
 
-// Fetch transliteration for surah
-export async function fetchTransliteration(surahNumber: number) {
-  try {
-    const response = await fetch(`${QURAN_COM_BASE}/quran/verses/transliteration?chapter_number=${surahNumber}`);
-    const data = await response.json();
-    return data.verses || [];
-  } catch (error) {
-    console.error('Error fetching transliteration:', error);
-    return [];
-  }
-}
 
 // Fetch verses by page number
 export async function fetchVersesByPage(pageNumber: number) {
