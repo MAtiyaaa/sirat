@@ -173,6 +173,26 @@ const Quran = () => {
 
       if (dbError) throw dbError;
 
+      // Delete ayah interactions for this surah
+      await supabase
+        .from('ayah_interactions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('surah_number', surahToReset);
+
+      // Clear localStorage for this surah
+      const savedPosition = localStorage.getItem('quran_last_position');
+      if (savedPosition) {
+        try {
+          const position = JSON.parse(savedPosition);
+          if (position.surahNumber === surahToReset) {
+            localStorage.removeItem('quran_last_position');
+          }
+        } catch (e) {
+          console.error('Error parsing saved position:', e);
+        }
+      }
+
       // Update local state
       const newProgress = { ...progress };
       delete newProgress[surahToReset];

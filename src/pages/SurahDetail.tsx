@@ -69,12 +69,11 @@ const SurahDetail = () => {
     loadBookmarks();
     saveLastViewed();
 
-    // Save position when entering surah
-    if (surahNumber) {
-      const ayah = initialAyah ? parseInt(initialAyah) : null;
+    // Only save position when entering surah with an ayah parameter
+    if (surahNumber && initialAyah) {
       localStorage.setItem('quran_last_position', JSON.stringify({ 
         surahNumber: parseInt(surahNumber), 
-        ayahNumber: ayah 
+        ayahNumber: parseInt(initialAyah)
       }));
     }
 
@@ -229,7 +228,10 @@ const SurahDetail = () => {
   useEffect(() => {
     if (!surahData) return;
 
+    let hasScrolled = false;
+
     const handleScroll = () => {
+      hasScrolled = true;
       const ayahElements = document.querySelectorAll('[data-ayah]');
       let maxVisible = 1;
 
@@ -243,8 +245,8 @@ const SurahDetail = () => {
 
       setLastVisibleAyah(maxVisible);
 
-      // Also save to localStorage for quick restoration
-      if (surahNumber) {
+      // Save to localStorage only after user has scrolled
+      if (surahNumber && hasScrolled) {
         localStorage.setItem('quran_last_position', JSON.stringify({ 
           surahNumber: parseInt(surahNumber), 
           ayahNumber: maxVisible 
@@ -253,13 +255,16 @@ const SurahDetail = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    // Don't call handleScroll initially to prevent auto-saving on mount
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [surahData, surahNumber]);
 
-  // Save progress to database
+  // Save progress to database (only when user scrolls)
   useEffect(() => {
+    // Don't save if lastVisibleAyah is still at initial value (1) and we haven't scrolled
+    if (lastVisibleAyah === 1 && !hasRestoredScroll) return;
+
     const saveProgress = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user || !surahNumber) return;
@@ -288,7 +293,7 @@ const SurahDetail = () => {
 
     const timeoutId = setTimeout(saveProgress, 2000); // Debounce saves
     return () => clearTimeout(timeoutId);
-  }, [lastVisibleAyah, surahNumber]);
+  }, [lastVisibleAyah, surahNumber, hasRestoredScroll]);
 
   const loadUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
