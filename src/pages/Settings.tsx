@@ -85,9 +85,7 @@ const Settings = () => {
       title: 'الإعدادات',
       language: 'اللغة',
       theme: 'المظهر',
-      qari: 'القارئ',
-      translation: 'إظهار الترجمة',
-      transliteration: 'إظهار النطق',
+      translationSource: 'مصدر الترجمة',
       fontType: 'نوع الخط',
       tafsirSource: 'مصدر التفسير',
       prayerRegion: 'منطقة أوقات الصلاة',
@@ -130,9 +128,7 @@ const Settings = () => {
       title: 'Settings',
       language: 'Language',
       theme: 'Theme',
-      qari: 'Reciter',
-      translation: 'Show Translation',
-      transliteration: 'Show Transliteration',
+      translationSource: 'Translation Source',
       fontType: 'Font Type',
       tafsirSource: 'Tafsir Source',
       prayerRegion: 'Prayer Times Region',
@@ -295,21 +291,26 @@ const Settings = () => {
           </Select>
         </div>
 
-        {/* Qari */}
+        {/* Translation Source */}
         <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
-          <Label className="text-base font-semibold">{t.qari}</Label>
+          <Label className="text-base font-semibold">{t.translationSource}</Label>
           <Select
-            value={settings.qari}
-            onValueChange={(value) => updateSettings({ qari: value })}
+            value={settings.translationSource}
+            onValueChange={(value) => updateSettings({ translationSource: value })}
           >
             <SelectTrigger className="glass-effect">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ar.alafasy">Mishary Alafasy</SelectItem>
-              <SelectItem value="ar.abdulbasitmurattal">Abdul Basit</SelectItem>
-              <SelectItem value="ar.husary">Mahmoud Khalil Al-Husary</SelectItem>
-              <SelectItem value="ar.minshawi">Mohamed Siddiq Al-Minshawi</SelectItem>
+              <SelectItem value="transliteration">{settings.language === 'ar' ? 'النطق اللاتيني' : 'Transliteration'}</SelectItem>
+              <SelectItem value="en.sahih">Sahih International (English)</SelectItem>
+              <SelectItem value="en.pickthall">Pickthall (English)</SelectItem>
+              <SelectItem value="en.yusufali">Yusuf Ali (English)</SelectItem>
+              <SelectItem value="ar.muyassar">الميسر (العربية)</SelectItem>
+              <SelectItem value="ur.jalandhry">اردو - جالندری</SelectItem>
+              <SelectItem value="fr.hamidullah">Hamidullah (Français)</SelectItem>
+              <SelectItem value="tr.diyanet">Diyanet (Türkçe)</SelectItem>
+              <SelectItem value="de.bubenheim">Bubenheim (Deutsch)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -331,29 +332,6 @@ const Settings = () => {
               <SelectItem value="ar-tafsir-al-jalalayn">الجلالين (العربية)</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        {/* Toggle Settings */}
-        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-6 border border-border/50 backdrop-blur-xl">
-          <Label className="text-lg font-semibold mb-4 block">
-            {settings.language === 'ar' ? 'خيارات العرض' : 'Display Options'}
-          </Label>
-
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-medium">{t.translation}</Label>
-            <Switch
-              checked={settings.translationEnabled}
-              onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-medium">{t.transliteration}</Label>
-            <Switch
-              checked={settings.transliterationEnabled}
-              onCheckedChange={(checked) => updateSettings({ transliterationEnabled: checked })}
-            />
-          </div>
         </div>
 
         {/* Prayer Times Region */}

@@ -9,9 +9,7 @@ export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 
 interface Settings {
   language: Language;
   theme: Theme;
-  qari: string;
-  translationEnabled: boolean;
-  transliterationEnabled: boolean;
+  translationSource: string;
   fontType: FontType;
   tafsirSource: string;
   prayerTimeRegion: string | null;
@@ -26,9 +24,7 @@ interface SettingsContextType {
 const defaultSettings: Settings = {
   language: 'en',
   theme: 'system', // System is default
-  qari: 'ar.alafasy',
-  translationEnabled: true,
-  transliterationEnabled: true,
+  translationSource: 'en.sahih',
   fontType: 'quran',
   tafsirSource: 'en-tafisr-ibn-kathir',
   prayerTimeRegion: null,
@@ -127,9 +123,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const dbSettings: Settings = {
               language: (data.language as Language) || defaultSettings.language,
               theme: (data.theme as Theme) || defaultSettings.theme,
-              qari: data.qari || defaultSettings.qari,
-              translationEnabled: data.translation_enabled ?? defaultSettings.translationEnabled,
-              transliterationEnabled: data.transliteration_enabled ?? defaultSettings.transliterationEnabled,
+              translationSource: data.translation_source || defaultSettings.translationSource,
               fontType: (data.font_type as FontType) || defaultSettings.fontType,
               tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
               prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
@@ -235,9 +229,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         user_id: userId,
         language: settings.language,
         theme: settings.theme,
-        qari: settings.qari,
-        translation_enabled: settings.translationEnabled,
-        transliteration_enabled: settings.transliterationEnabled,
+        translation_source: settings.translationSource,
         font_type: settings.fontType,
         tafsir_source: settings.tafsirSource,
         prayer_time_region: settings.prayerTimeRegion,

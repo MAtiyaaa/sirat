@@ -94,7 +94,7 @@ const SurahDetail = () => {
         }
       }, 800);
     }
-  }, [surahNumber, initialAyah]);
+  }, [surahNumber, initialAyah, settings.translationSource]);
 
   // Restore scroll position after data loads
   useEffect(() => {
@@ -536,13 +536,16 @@ const SurahDetail = () => {
     
     setLoading(true);
     try {
-      const [arabic, trans] = await Promise.all([
-        fetchSurahArabic(parseInt(surahNumber)),
-        fetchSurahTranslation(parseInt(surahNumber), 'en.sahih'),
-      ]);
-      
+      const arabic = await fetchSurahArabic(parseInt(surahNumber));
       setSurahData(arabic);
-      setTranslation(trans);
+      
+      // Only fetch translation if not transliteration mode
+      if (settings.translationSource !== 'transliteration') {
+        const trans = await fetchSurahTranslation(parseInt(surahNumber), settings.translationSource);
+        setTranslation(trans);
+      } else {
+        setTranslation(null);
+      }
       
       // Auto-load word-by-word and page numbers for all ayahs
       if (arabic?.ayahs) {
@@ -681,7 +684,7 @@ const SurahDetail = () => {
       }
     }
 
-    const audioUrl = getAyahAudioUrl(settings.qari, parseInt(surahNumber!), ayahNumber);
+    const audioUrl = getAyahAudioUrl('ar.alafasy', parseInt(surahNumber!), ayahNumber);
     
     if (audioRef.current) {
       audioRef.current.pause();
@@ -1029,7 +1032,7 @@ const SurahDetail = () => {
             </div>
 
             {/* Translation */}
-            {settings.translationEnabled && translation && (
+            {settings.translationSource !== 'transliteration' && translation && (
               <p className="text-muted-foreground">
                 {translation.ayahs[index]?.text}
               </p>

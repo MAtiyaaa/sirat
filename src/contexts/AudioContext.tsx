@@ -30,7 +30,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    const audioUrl = getAyahAudioUrl(settings.qari, surahNumber, ayahIndex);
+    const audioUrl = getAyahAudioUrl('ar.alafasy', surahNumber, ayahIndex);
 
     if (audioRef.current) {
       audioRef.current.pause();
