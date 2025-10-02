@@ -10,7 +10,7 @@ import {
   MoreHorizontal,
   Bookmark,
   Repeat,
-  Sparkles,
+  Hand,
   Scroll
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -47,7 +47,7 @@ const MoreDialog = () => {
 
   const menuItems = [
     { icon: BookOpen, label: t.hadith, path: '/hadith' },
-    { icon: Sparkles, label: t.duas, path: '/duas' },
+    { icon: Hand, label: t.duas, path: '/duas' },
     { icon: Scroll, label: t.stories, path: '/prophet-stories' },
     { icon: Repeat, label: t.tasbih, path: '/tasbih' },
     { icon: Bookmark, label: t.bookmarks, path: '/bookmarks' },
