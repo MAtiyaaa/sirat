@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Heart, Sun, Moon, Utensils, Home, Shield } from 'lucide-react';
+import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface Dua {
   id: number;
@@ -14,6 +15,7 @@ interface Dua {
 
 const Duas = () => {
   const { settings } = useSettings();
+  const navigate = useNavigate();
 
   const duas: Dua[] = [
     {
@@ -187,6 +189,24 @@ const Duas = () => {
               </div>
             </div>
           ))}
+        </div>
+        
+        {/* Track Dhikr Card */}
+        <div 
+          onClick={() => navigate('/tasbih')}
+          className="glass-effect rounded-2xl p-6 cursor-pointer hover:bg-accent/50 smooth-transition group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold">
+                {settings.language === 'ar' ? 'تتبعها' : 'Track Them'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {settings.language === 'ar' ? 'التسبيح الرقمي' : 'Digital Tasbih'}
+              </p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-primary group-hover:translate-x-1 smooth-transition" />
+          </div>
         </div>
       </div>
     </div>

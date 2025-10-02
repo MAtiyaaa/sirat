@@ -47,9 +47,9 @@ const MoreDialog = () => {
 
   const menuItems = [
     { icon: BookOpen, label: t.hadith, path: '/hadith' },
-    { icon: Repeat, label: t.tasbih, path: '/tasbih' },
     { icon: Hand, label: t.duas, path: '/duas' },
     { icon: Scroll, label: t.stories, path: '/prophet-stories' },
+    { icon: Repeat, label: t.tasbih, path: '/tasbih' },
     { icon: Bookmark, label: t.bookmarks, path: '/bookmarks' },
     { icon: User, label: t.account, path: '/account' },
     { icon: SettingsIcon, label: t.settings, path: '/settings' },
