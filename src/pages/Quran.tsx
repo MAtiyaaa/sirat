@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Bookmark, Volume2, Pause, Play, Search } from 'lucide-react';
+import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw } from 'lucide-react';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -10,10 +10,12 @@ import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import { useAudio } from '@/contexts/AudioContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Quran = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { playingSurah, isPlaying, playSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
@@ -132,6 +134,42 @@ const Quran = () => {
     }
   };
 
+  const resetSurahProgress = async (surahNumber: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+
+    try {
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('reading_progress')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('surah_number', surahNumber);
+
+      if (dbError) throw dbError;
+
+      // Update local state
+      const newProgress = { ...progress };
+      delete newProgress[surahNumber];
+      setProgress(newProgress);
+
+      // Recalculate overall progress
+      const totalAyahs = 6236;
+      const completedAyahs = Object.values(newProgress).reduce((sum, val) => sum + val, 0);
+      setOverallProgress((completedAyahs / totalAyahs) * 100);
+
+      toast.success(settings.language === 'ar' ? 'تم إعادة تعيين التقدم' : 'Progress reset successfully');
+    } catch (error) {
+      console.error('Error resetting progress:', error);
+      toast.error(settings.language === 'ar' ? 'فشل إعادة التعيين' : 'Failed to reset progress');
+    }
+  };
+
   if (loading) {
     return <IslamicFactsLoader />;
   }
@@ -244,6 +282,17 @@ const Quran = () => {
                         {settings.language === 'ar' ? surah.name : surah.englishName}
                       </h3>
                       <div className="flex items-center gap-2">
+                        {surahProgressPercent > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => resetSurahProgress(surah.number, e)}
+                            title={settings.language === 'ar' ? 'إعادة تعيين التقدم' : 'Reset progress'}
+                          >
+                            <RotateCcw className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                          </Button>
+                        )}
                         {playingSurah === surah.number && (
                           <Button
                             variant="ghost"

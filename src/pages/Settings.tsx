@@ -7,8 +7,19 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, User, MessageSquare } from 'lucide-react';
+import { LogOut, User, MessageSquare, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const Settings = () => {
   const { settings, updateSettings } = useSettings();
@@ -22,6 +33,50 @@ const Settings = () => {
       navigate('/');
     } catch (error: any) {
       toast.error(error.message || (settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred'));
+    }
+  };
+
+  const handleResetAllProgress = async () => {
+    if (!user) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+
+    try {
+      // Clear from database
+      const { error: progressError } = await supabase
+        .from('reading_progress')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (progressError) throw progressError;
+
+      const { error: lastViewedError } = await supabase
+        .from('last_viewed_surah')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (lastViewedError) throw lastViewedError;
+
+      const { error: interactionsError } = await supabase
+        .from('ayah_interactions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (interactionsError) throw interactionsError;
+
+      // Clear from localStorage
+      localStorage.removeItem('quran_last_position');
+      localStorage.removeItem('reading_progress');
+      localStorage.removeItem('last_viewed_surah');
+
+      toast.success(settings.language === 'ar' ? 'تم إعادة تعيين جميع التقدم بنجاح' : 'All progress reset successfully');
+      
+      // Reload page to reflect changes
+      window.location.reload();
+    } catch (error) {
+      console.error('Error resetting all progress:', error);
+      toast.error(settings.language === 'ar' ? 'فشل إعادة التعيين' : 'Failed to reset progress');
     }
   };
 
@@ -362,6 +417,50 @@ const Settings = () => {
             </Button>
           </Link>
         </div>
+
+        {/* Reset Reading Progress */}
+        {user && (
+          <div className="glass-effect rounded-3xl p-6 md:p-8 border border-destructive/30 backdrop-blur-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <RotateCcw className="h-5 w-5 text-destructive" />
+              <Label className="text-lg font-semibold text-destructive">
+                {settings.language === 'ar' ? 'إعادة تعيين التقدم' : 'Reset Progress'}
+              </Label>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {settings.language === 'ar' 
+                ? 'سيؤدي هذا إلى حذف جميع بيانات التقدم في القراءة من الجهاز والخادم'
+                : 'This will delete all reading progress data from local storage, server, and database'}
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full">
+                  {settings.language === 'ar' ? 'إعادة تعيين كل التقدم' : 'Reset All Progress'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {settings.language === 'ar' ? 'هل أنت متأكد؟' : 'Are you sure?'}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {settings.language === 'ar'
+                      ? 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع بيانات تقدم القراءة بشكل دائم.'
+                      : 'This action cannot be undone. This will permanently delete all your reading progress data.'}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>
+                    {settings.language === 'ar' ? 'إلغاء' : 'Cancel'}
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={handleResetAllProgress} className="bg-destructive hover:bg-destructive/90">
+                    {settings.language === 'ar' ? 'إعادة التعيين' : 'Reset'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
     </div>
   );
