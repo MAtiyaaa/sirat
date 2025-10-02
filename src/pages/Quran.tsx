@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw } from 'lucide-react';
+import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw, BookOpen, List } from 'lucide-react';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -24,10 +24,17 @@ import {
 } from '@/components/ui/alert-dialog';
 
 const Quran = () => {
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { playingSurah, isPlaying, playSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
+
+  // If in traditional mode, redirect to pages view
+  useEffect(() => {
+    if (settings.viewMode === 'traditional') {
+      navigate('/quran/pages');
+    }
+  }, [settings.viewMode, navigate]);
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<Record<number, number>>({});
@@ -226,14 +233,25 @@ const Quran = () => {
 
       {/* Search Bar */}
       <div className="px-4">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={settings.language === 'ar' ? 'ابحث عن سورة...' : 'Search for a surah...'}
-            className="pl-12 h-14 rounded-2xl glass-effect border-border/50 text-base"
-          />
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={settings.language === 'ar' ? 'ابحث عن سورة...' : 'Search for a surah...'}
+              className="pl-12 h-14 rounded-2xl glass-effect border-border/50 text-base"
+            />
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => updateSettings({ viewMode: 'traditional' })}
+            className="h-14 w-14 rounded-2xl"
+            title={settings.language === 'ar' ? 'العرض التقليدي' : 'Traditional View'}
+          >
+            <BookOpen className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
