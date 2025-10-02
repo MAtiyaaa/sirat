@@ -277,11 +277,13 @@ const Wudu = () => {
   };
 
   const fetchIslamicEvents = async () => {
+    console.log('🔍 Starting fetchIslamicEvents...');
     try {
       let latitude, longitude;
 
       if (settings.prayerTimeRegion) {
         [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+        console.log('📍 Using manual region:', latitude, longitude);
       } else {
         try {
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -289,8 +291,9 @@ const Wudu = () => {
           });
           latitude = position.coords.latitude;
           longitude = position.coords.longitude;
-        } catch {
-          // Default to Mecca if geolocation fails
+          console.log('📍 Using geolocation:', latitude, longitude);
+        } catch (geoError) {
+          console.log('⚠️ Geolocation failed, using Mecca coordinates');
           latitude = 21.4225;
           longitude = 39.8262;
         }
@@ -298,14 +301,17 @@ const Wudu = () => {
 
       const currentYear = new Date().getFullYear();
       const nextYear = currentYear + 1;
+      console.log('📅 Fetching events for years:', currentYear, nextYear);
       const events: IslamicEvent[] = [];
 
       // Fetch both current and next year
       for (const year of [currentYear, nextYear]) {
-        const response = await fetch(
-          `https://api.aladhan.com/v1/calendar/${year}?latitude=${latitude}&longitude=${longitude}&method=2`
-        );
+        const url = `https://api.aladhan.com/v1/calendar/${year}?latitude=${latitude}&longitude=${longitude}&method=2`;
+        console.log('🌐 Fetching:', url);
+        
+        const response = await fetch(url);
         const data = await response.json();
+        console.log(`✅ API Response for ${year}:`, data.code, 'Data length:', data.data?.length);
         
         if (data.code === 200 && data.data && Array.isArray(data.data)) {
           // Find Ramadan start (month 9, day 1)
@@ -314,10 +320,11 @@ const Wudu = () => {
           );
           if (ramadanData) {
             const gregDate = ramadanData.date.gregorian.date;
+            console.log('🌙 Found Ramadan:', gregDate);
             const [day, month, yearStr] = gregDate.split('-').map((n: string) => parseInt(n));
             const eventDate = new Date(yearStr, month - 1, day);
             
-            if (eventDate > new Date() || events.length === 0) {
+            if (eventDate > new Date() || events.filter(e => e.name === 'Ramadan').length === 0) {
               events.push({
                 name: 'Ramadan',
                 date: eventDate,
@@ -333,6 +340,7 @@ const Wudu = () => {
           );
           if (fitrData) {
             const gregDate = fitrData.date.gregorian.date;
+            console.log('🎉 Found Eid al-Fitr:', gregDate);
             const [day, month, yearStr] = gregDate.split('-').map((n: string) => parseInt(n));
             const eventDate = new Date(yearStr, month - 1, day);
             
@@ -352,6 +360,7 @@ const Wudu = () => {
           );
           if (adhaData) {
             const gregDate = adhaData.date.gregorian.date;
+            console.log('🕌 Found Eid al-Adha:', gregDate);
             const [day, month, yearStr] = gregDate.split('-').map((n: string) => parseInt(n));
             const eventDate = new Date(yearStr, month - 1, day);
             
@@ -367,14 +376,12 @@ const Wudu = () => {
         }
       }
 
-      // Remove duplicates and keep only future events
-      const uniqueEvents = events.filter((event, index, self) => 
-        index === self.findIndex((e) => e.name === event.name && e.date.getTime() === event.date.getTime())
-      );
+      console.log('📋 Total events found:', events.length);
+      console.log('Events:', events.map(e => ({ name: e.name, date: e.date.toISOString() })));
 
-      setIslamicEvents(uniqueEvents);
+      setIslamicEvents(events);
     } catch (error) {
-      console.error('Error fetching Islamic events:', error);
+      console.error('❌ Error fetching Islamic events:', error);
     }
   };
 
