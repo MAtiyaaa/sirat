@@ -101,7 +101,7 @@ const Settings = () => {
         dark: 'داكن',
         gold: 'ذهبي',
         pink: 'وردي',
-        green: 'أخضر قرآني',
+        green: 'أخضر',
         system: 'حسب النظام',
       },
       fonts: {
@@ -151,7 +151,7 @@ const Settings = () => {
         dark: 'Dark',
         gold: 'Gold',
         pink: 'Pink',
-        green: 'Quranic Green',
+        green: 'Green',
         system: 'System',
       },
       fonts: {
