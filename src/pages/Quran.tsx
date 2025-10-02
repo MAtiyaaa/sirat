@@ -11,6 +11,17 @@ import { useAudio } from '@/contexts/AudioContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const Quran = () => {
   const { settings } = useSettings();
@@ -25,6 +36,8 @@ const Quran = () => {
   const [lastViewedSurah, setLastViewedSurah] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredSurahs, setFilteredSurahs] = useState<Surah[]>([]);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [surahToReset, setSurahToReset] = useState<number | null>(null);
 
   useEffect(() => {
     loadSurahs();
@@ -134,7 +147,7 @@ const Quran = () => {
     }
   };
 
-  const resetSurahProgress = async (surahNumber: number, e: React.MouseEvent) => {
+  const handleResetClick = (surahNumber: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
@@ -143,19 +156,26 @@ const Quran = () => {
       return;
     }
 
+    setSurahToReset(surahNumber);
+    setResetDialogOpen(true);
+  };
+
+  const confirmResetSurahProgress = async () => {
+    if (!surahToReset || !user) return;
+
     try {
       // Delete from database
       const { error: dbError } = await supabase
         .from('reading_progress')
         .delete()
         .eq('user_id', user.id)
-        .eq('surah_number', surahNumber);
+        .eq('surah_number', surahToReset);
 
       if (dbError) throw dbError;
 
       // Update local state
       const newProgress = { ...progress };
-      delete newProgress[surahNumber];
+      delete newProgress[surahToReset];
       setProgress(newProgress);
 
       // Recalculate overall progress
@@ -164,6 +184,8 @@ const Quran = () => {
       setOverallProgress((completedAyahs / totalAyahs) * 100);
 
       toast.success(settings.language === 'ar' ? 'تم إعادة تعيين التقدم' : 'Progress reset successfully');
+      setResetDialogOpen(false);
+      setSurahToReset(null);
     } catch (error) {
       console.error('Error resetting progress:', error);
       toast.error(settings.language === 'ar' ? 'فشل إعادة التعيين' : 'Failed to reset progress');
@@ -287,7 +309,7 @@ const Quran = () => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={(e) => resetSurahProgress(surah.number, e)}
+                            onClick={(e) => handleResetClick(surah.number, e)}
                             title={settings.language === 'ar' ? 'إعادة تعيين التقدم' : 'Reset progress'}
                           >
                             <RotateCcw className="h-4 w-4 text-muted-foreground hover:text-destructive" />
@@ -356,6 +378,29 @@ const Quran = () => {
           );
         })}
       </div>
+
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {settings.language === 'ar' ? 'هل أنت متأكد؟' : 'Are you sure?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {settings.language === 'ar'
+                ? 'سيتم حذف تقدمك في قراءة هذه السورة. لا يمكن التراجع عن هذا الإجراء.'
+                : 'This will delete your reading progress for this surah. This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {settings.language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmResetSurahProgress} className="bg-destructive hover:bg-destructive/90">
+              {settings.language === 'ar' ? 'إعادة التعيين' : 'Reset'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
