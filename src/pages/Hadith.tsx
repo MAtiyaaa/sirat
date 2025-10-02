@@ -340,7 +340,7 @@ const Hadith = () => {
                          <p className="text-xl leading-loose text-right font-arabic">
                            {hadith.hadithArabic}
                          </p>
-                         {settings.translationSource !== 'transliteration' && (
+                         {settings.translationEnabled && (
                            <p className="text-base leading-relaxed text-muted-foreground ios-26-style">
                              {hadith.hadithEnglish}
                            </p>
@@ -351,7 +351,7 @@ const Hadith = () => {
                          <p className="text-base leading-relaxed ios-26-style">
                            {hadith.hadithEnglish}
                          </p>
-                         {settings.translationSource !== 'transliteration' && (
+                         {settings.translationEnabled && (
                            <p className="text-xl font-arabic text-right leading-loose text-muted-foreground">
                              {hadith.hadithArabic}
                            </p>

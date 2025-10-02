@@ -315,7 +315,7 @@ const Bookmarks = () => {
                         <p className="text-base font-arabic text-right">
                           {bookmark.hadith_arabic}
                         </p>
-                        {settings.translationSource !== 'transliteration' && (
+                        {settings.translationEnabled && (
                           <p className="text-sm text-muted-foreground">
                             {bookmark.hadith_english}
                           </p>
@@ -326,7 +326,7 @@ const Bookmarks = () => {
                         <p className="text-base">
                           {bookmark.hadith_english}
                         </p>
-                        {settings.translationSource !== 'transliteration' && (
+                        {settings.translationEnabled && (
                           <p className="text-sm font-arabic text-right text-muted-foreground">
                             {bookmark.hadith_arabic}
                           </p>

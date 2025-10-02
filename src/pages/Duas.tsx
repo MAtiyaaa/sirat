@@ -141,13 +141,13 @@ const Duas = () => {
                   {dua.arabic}
                 </p>
                 
-                {settings.translationSource === 'transliteration' && (
+                {settings.translationEnabled && settings.translationSource === 'transliteration' && (
                   <p className="text-sm text-muted-foreground italic">
                     {dua.transliteration}
                   </p>
                 )}
                 
-                {settings.translationSource !== 'transliteration' && (
+                {settings.translationEnabled && settings.translationSource !== 'transliteration' && (
                   <p className="text-sm text-muted-foreground">
                     {dua.translation}
                   </p>
@@ -170,13 +170,13 @@ const Duas = () => {
                 {item.arabic}
               </p>
               
-              {settings.translationSource === 'transliteration' && (
+              {settings.translationEnabled && settings.translationSource === 'transliteration' && (
                 <p className="text-sm text-muted-foreground italic">
                   {item.transliteration}
                 </p>
               )}
               
-              {settings.translationSource !== 'transliteration' && (
+              {settings.translationEnabled && settings.translationSource !== 'transliteration' && (
                 <p className="text-xs text-muted-foreground">
                   {item.translation}
                 </p>

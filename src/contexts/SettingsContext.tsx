@@ -9,8 +9,10 @@ export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 
 interface Settings {
   language: Language;
   theme: Theme;
+  translationEnabled: boolean;
   translationSource: string;
   fontType: FontType;
+  tafsirEnabled: boolean;
   tafsirSource: string;
   prayerTimeRegion: string | null;
   readingTrackingMode: ReadingTrackingMode;
@@ -24,8 +26,10 @@ interface SettingsContextType {
 const defaultSettings: Settings = {
   language: 'en',
   theme: 'system', // System is default
+  translationEnabled: true,
   translationSource: 'en.sahih',
   fontType: 'quran',
+  tafsirEnabled: true,
   tafsirSource: 'en-tafisr-ibn-kathir',
   prayerTimeRegion: null,
   readingTrackingMode: 'auto',
@@ -123,8 +127,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             const dbSettings: Settings = {
               language: (data.language as Language) || defaultSettings.language,
               theme: (data.theme as Theme) || defaultSettings.theme,
+              translationEnabled: data.translation_enabled ?? defaultSettings.translationEnabled,
               translationSource: data.translation_source || defaultSettings.translationSource,
               fontType: (data.font_type as FontType) || defaultSettings.fontType,
+              tafsirEnabled: data.tafsir_enabled ?? defaultSettings.tafsirEnabled,
               tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
               prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
               readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
@@ -229,8 +235,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         user_id: userId,
         language: settings.language,
         theme: settings.theme,
+        translation_enabled: settings.translationEnabled,
         translation_source: settings.translationSource,
         font_type: settings.fontType,
+        tafsir_enabled: settings.tafsirEnabled,
         tafsir_source: settings.tafsirSource,
         prayer_time_region: settings.prayerTimeRegion,
         reading_tracking_mode: settings.readingTrackingMode,

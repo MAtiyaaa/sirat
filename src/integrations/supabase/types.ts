@@ -255,9 +255,11 @@ export type Database = {
           language: string | null
           prayer_time_region: string | null
           reading_tracking_mode: string | null
+          tafsir_enabled: boolean | null
           tafsir_source: string | null
           tajweed_enabled: boolean | null
           theme: string | null
+          translation_enabled: boolean | null
           translation_source: string | null
           updated_at: string | null
           user_id: string
@@ -269,9 +271,11 @@ export type Database = {
           language?: string | null
           prayer_time_region?: string | null
           reading_tracking_mode?: string | null
+          tafsir_enabled?: boolean | null
           tafsir_source?: string | null
           tajweed_enabled?: boolean | null
           theme?: string | null
+          translation_enabled?: boolean | null
           translation_source?: string | null
           updated_at?: string | null
           user_id: string
@@ -283,9 +287,11 @@ export type Database = {
           language?: string | null
           prayer_time_region?: string | null
           reading_tracking_mode?: string | null
+          tafsir_enabled?: boolean | null
           tafsir_source?: string | null
           tajweed_enabled?: boolean | null
           theme?: string | null
+          translation_enabled?: boolean | null
           translation_source?: string | null
           updated_at?: string | null
           user_id?: string

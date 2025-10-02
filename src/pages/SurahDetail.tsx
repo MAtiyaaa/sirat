@@ -9,7 +9,8 @@ import {
   getAyahAudioUrl,
   WordData,
   fetchSurahs,
-  getPageNumber
+  getPageNumber,
+  fetchTransliteration
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -94,7 +95,7 @@ const SurahDetail = () => {
         }
       }, 800);
     }
-  }, [surahNumber, initialAyah, settings.translationSource]);
+  }, [surahNumber, initialAyah, settings.translationEnabled, settings.translationSource]);
 
   // Restore scroll position after data loads
   useEffect(() => {
@@ -539,10 +540,15 @@ const SurahDetail = () => {
       const arabic = await fetchSurahArabic(parseInt(surahNumber));
       setSurahData(arabic);
       
-      // Only fetch translation if not transliteration mode
-      if (settings.translationSource !== 'transliteration') {
-        const trans = await fetchSurahTranslation(parseInt(surahNumber), settings.translationSource);
-        setTranslation(trans);
+      // Fetch translation or transliteration based on settings
+      if (settings.translationEnabled) {
+        if (settings.translationSource === 'transliteration') {
+          const translit = await fetchTransliteration(parseInt(surahNumber));
+          setTranslation({ ayahs: translit });
+        } else {
+          const trans = await fetchSurahTranslation(parseInt(surahNumber), settings.translationSource);
+          setTranslation(trans);
+        }
       } else {
         setTranslation(null);
       }
@@ -1031,10 +1037,12 @@ const SurahDetail = () => {
               )}
             </div>
 
-            {/* Translation */}
-            {settings.translationSource !== 'transliteration' && translation && (
-              <p className="text-muted-foreground">
-                {translation.ayahs[index]?.text}
+            {/* Translation or Transliteration */}
+            {settings.translationEnabled && translation && (
+              <p className={`${settings.translationSource === 'transliteration' ? 'italic' : ''} text-muted-foreground`}>
+                {settings.translationSource === 'transliteration' 
+                  ? translation.ayahs[ayah.numberInSurah - 1]?.text 
+                  : translation.ayahs[index]?.text}
               </p>
             )}
 
@@ -1046,39 +1054,41 @@ const SurahDetail = () => {
             )}
 
             {/* Tafsir Dropdown */}
-            <Collapsible
-              open={openTafsir === ayah.numberInSurah}
-              onOpenChange={(open) => {
-                if (open) {
-                  setOpenTafsir(ayah.numberInSurah);
-                  loadTafsir(ayah.numberInSurah);
-                } else {
-                  setOpenTafsir(null);
-                }
-              }}
-            >
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between"
-                >
-                  <span>{settings.language === 'ar' ? 'التفسير' : 'Tafsir'}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${openTafsir === ayah.numberInSurah ? 'rotate-180' : ''}`} />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="pt-4">
-                <div className="glass-effect rounded-xl p-4 text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert">
-                  {tafsirData[ayah.numberInSurah] ? (
-                    <div dangerouslySetInnerHTML={{ __html: tafsirData[ayah.numberInSurah] }} />
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      {settings.language === 'ar' ? 'جاري التحميل...' : 'Loading tafsir...'}
-                    </div>
-                  )}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            {settings.tafsirEnabled && (
+              <Collapsible
+                open={openTafsir === ayah.numberInSurah}
+                onOpenChange={(open) => {
+                  if (open) {
+                    setOpenTafsir(ayah.numberInSurah);
+                    loadTafsir(ayah.numberInSurah);
+                  } else {
+                    setOpenTafsir(null);
+                  }
+                }}
+              >
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-between"
+                  >
+                    <span>{settings.language === 'ar' ? 'التفسير' : 'Tafsir'}</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${openTafsir === ayah.numberInSurah ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-4">
+                  <div className="glass-effect rounded-xl p-4 text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert">
+                    {tafsirData[ayah.numberInSurah] ? (
+                      <div dangerouslySetInnerHTML={{ __html: tafsirData[ayah.numberInSurah] }} />
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                        {settings.language === 'ar' ? 'جاري التحميل...' : 'Loading tafsir...'}
+                      </div>
+                    )}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
           </div>
         ))}
       </div>

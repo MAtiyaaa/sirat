@@ -86,6 +86,8 @@ const Settings = () => {
       language: 'اللغة',
       theme: 'المظهر',
       translationSource: 'مصدر الترجمة',
+      translationOff: 'الترجمة متوقفة',
+      tafsirOff: 'التفسير متوقف',
       fontType: 'نوع الخط',
       tafsirSource: 'مصدر التفسير',
       prayerRegion: 'منطقة أوقات الصلاة',
@@ -129,6 +131,8 @@ const Settings = () => {
       language: 'Language',
       theme: 'Theme',
       translationSource: 'Translation Source',
+      translationOff: 'Translation Off',
+      tafsirOff: 'Tafsir Off',
       fontType: 'Font Type',
       tafsirSource: 'Tafsir Source',
       prayerRegion: 'Prayer Times Region',
@@ -293,45 +297,65 @@ const Settings = () => {
 
         {/* Translation Source */}
         <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
-          <Label className="text-base font-semibold">{t.translationSource}</Label>
-          <Select
-            value={settings.translationSource}
-            onValueChange={(value) => updateSettings({ translationSource: value })}
-          >
-            <SelectTrigger className="glass-effect">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="transliteration">{settings.language === 'ar' ? 'النطق اللاتيني' : 'Transliteration'}</SelectItem>
-              <SelectItem value="en.sahih">Sahih International (English)</SelectItem>
-              <SelectItem value="en.pickthall">Pickthall (English)</SelectItem>
-              <SelectItem value="en.yusufali">Yusuf Ali (English)</SelectItem>
-              <SelectItem value="ar.muyassar">الميسر (العربية)</SelectItem>
-              <SelectItem value="ur.jalandhry">اردو - جالندری</SelectItem>
-              <SelectItem value="fr.hamidullah">Hamidullah (Français)</SelectItem>
-              <SelectItem value="tr.diyanet">Diyanet (Türkçe)</SelectItem>
-              <SelectItem value="de.bubenheim">Bubenheim (Deutsch)</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center justify-between mb-4">
+            <Label className="text-base font-semibold">{t.translationSource}</Label>
+            <Switch
+              checked={settings.translationEnabled}
+              onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })}
+            />
+          </div>
+          {settings.translationEnabled ? (
+            <Select
+              value={settings.translationSource}
+              onValueChange={(value) => updateSettings({ translationSource: value })}
+            >
+              <SelectTrigger className="glass-effect">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="transliteration">{settings.language === 'ar' ? 'النطق اللاتيني' : 'Transliteration'}</SelectItem>
+                <SelectItem value="en.sahih">Sahih International (English)</SelectItem>
+                <SelectItem value="en.pickthall">Pickthall (English)</SelectItem>
+                <SelectItem value="en.yusufali">Yusuf Ali (English)</SelectItem>
+                <SelectItem value="ar.muyassar">الميسر (العربية)</SelectItem>
+                <SelectItem value="ur.jalandhry">اردو - جالندری</SelectItem>
+                <SelectItem value="fr.hamidullah">Hamidullah (Français)</SelectItem>
+                <SelectItem value="tr.diyanet">Diyanet (Türkçe)</SelectItem>
+                <SelectItem value="de.bubenheim">Bubenheim (Deutsch)</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t.translationOff}</p>
+          )}
         </div>
 
         {/* Tafsir Source */}
         <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
-          <Label className="text-base font-semibold">{t.tafsirSource}</Label>
-          <Select
-            value={settings.tafsirSource}
-            onValueChange={(value) => updateSettings({ tafsirSource: value })}
-          >
-            <SelectTrigger className="glass-effect">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en-tafisr-ibn-kathir">Ibn Kathir (English)</SelectItem>
-              <SelectItem value="ar-tafsir-ibn-kathir">ابن كثير (العربية)</SelectItem>
-              <SelectItem value="en-tafseer-maududi">Maududi (English)</SelectItem>
-              <SelectItem value="ar-tafsir-al-jalalayn">الجلالين (العربية)</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center justify-between mb-4">
+            <Label className="text-base font-semibold">{t.tafsirSource}</Label>
+            <Switch
+              checked={settings.tafsirEnabled}
+              onCheckedChange={(checked) => updateSettings({ tafsirEnabled: checked })}
+            />
+          </div>
+          {settings.tafsirEnabled ? (
+            <Select
+              value={settings.tafsirSource}
+              onValueChange={(value) => updateSettings({ tafsirSource: value })}
+            >
+              <SelectTrigger className="glass-effect">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en-tafisr-ibn-kathir">Ibn Kathir (English)</SelectItem>
+                <SelectItem value="ar-tafsir-ibn-kathir">ابن كثير (العربية)</SelectItem>
+                <SelectItem value="en-tafseer-maududi">Maududi (English)</SelectItem>
+                <SelectItem value="ar-tafsir-al-jalalayn">الجلالين (العربية)</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t.tafsirOff}</p>
+          )}
         </div>
 
         {/* Prayer Times Region */}
