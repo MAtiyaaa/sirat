@@ -1041,7 +1041,7 @@ const SurahDetail = () => {
             {settings.translationEnabled && translation && (
               <p className={`${settings.translationSource === 'transliteration' ? 'italic' : ''} text-muted-foreground`}>
                 {settings.translationSource === 'transliteration' 
-                  ? translation.ayahs[ayah.numberInSurah - 1]?.text 
+                  ? translation.ayahs[ayah.numberInSurah - 1]?.transliteration?.text 
                   : translation.ayahs[index]?.text}
               </p>
             )}
