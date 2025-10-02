@@ -298,6 +298,10 @@ const Settings = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="quran">{t.fonts.quran}</SelectItem>
+              <SelectItem value="amiri">{t.fonts.amiri}</SelectItem>
+              <SelectItem value="scheherazade">{t.fonts.scheherazade}</SelectItem>
+              <SelectItem value="lateef">{t.fonts.lateef}</SelectItem>
+              <SelectItem value="noto-naskh">{t.fonts['noto-naskh']}</SelectItem>
               <SelectItem value="normal">{t.fonts.normal}</SelectItem>
             </SelectContent>
           </Select>
