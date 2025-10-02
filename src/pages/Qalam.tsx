@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import NavigationCard from '@/components/NavigationCard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { z } from 'zod';
 
 interface Message {
   id?: string;
@@ -203,11 +204,21 @@ const Qalam = () => {
     }
   };
 
+  const messageSchema = z.object({
+    content: z.string().trim().min(1, 'Message cannot be empty').max(5000, 'Message too long'),
+  });
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
     
     if (!user) {
       toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+
+    const validation = messageSchema.safeParse({ content: input.trim() });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
       return;
     }
     

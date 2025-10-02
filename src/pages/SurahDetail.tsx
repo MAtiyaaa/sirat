@@ -35,6 +35,7 @@ import {
 import AyahChatDialog from '@/components/AyahChatDialog';
 import { toast } from 'sonner';
 import { useAudio } from '@/contexts/AudioContext';
+import DOMPurify from 'dompurify';
 
 const SurahDetail = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
@@ -1088,7 +1089,7 @@ const SurahDetail = () => {
                 <CollapsibleContent className="pt-4">
                   <div className="glass-effect rounded-xl p-4 text-sm text-muted-foreground prose prose-sm max-w-none dark:prose-invert">
                     {tafsirData[ayah.numberInSurah] ? (
-                      <div dangerouslySetInnerHTML={{ __html: tafsirData[ayah.numberInSurah] }} />
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(tafsirData[ayah.numberInSurah]) }} />
                     ) : (
                       <div className="flex items-center gap-2">
                         <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />

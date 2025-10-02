@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { z } from 'zod';
 
 const Auth = () => {
   const { settings } = useSettings();
@@ -25,11 +26,31 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
+  const authSchema = z.object({
+    email: z.string().email('Invalid email address').max(255, 'Email too long'),
+    password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password too long'),
+    fullName: z.string().min(1, 'Name required').max(100, 'Name too long').optional(),
+  });
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Validate input
+      const validation = authSchema.safeParse({
+        email: email.trim(),
+        password,
+        fullName: isSignUp ? fullName.trim() : undefined,
+      });
+
+      if (!validation.success) {
+        const errors = validation.error.errors.map(e => e.message).join(', ');
+        toast.error(errors);
+        setLoading(false);
+        return;
+      }
+
       if (isSignUp) {
         const { error } = await supabase.auth.signUp({
           email,

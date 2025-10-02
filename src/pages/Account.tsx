@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Mail, Lock, Trash2, LogOut, AlertTriangle, RotateCcw } from 'lucide-react';
+import { User, Mail, Lock, LogOut, AlertTriangle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from 'zod';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,16 +69,12 @@ const Account = () => {
       clearAllData: 'مسح جميع البيانات',
       clearDataWarning: 'سيؤدي هذا إلى مسح جميع بياناتك (الدردشات، الإشارات المرجعية، سجل القراءة، الإعدادات) بشكل دائم.',
       clearDataConfirm: 'هل أنت متأكد أنك تريد مسح جميع بياناتك؟ لا يمكن التراجع عن هذا الإجراء.',
-      deleteAccount: 'حذف الحساب',
-      deleteWarning: 'سيؤدي هذا إلى حذف حسابك وجميع بياناتك بشكل دائم.',
-      deleteConfirm: 'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
       signOut: 'تسجيل الخروج',
       cancel: 'إلغاء',
       confirm: 'تأكيد',
       profileUpdated: 'تم تحديث الملف الشخصي',
       passwordUpdated: 'تم تحديث كلمة المرور',
       passwordMismatch: 'كلمات المرور غير متطابقة',
-      accountDeleted: 'تم حذف الحساب',
       dataCleared: 'تم مسح جميع البيانات بنجاح',
       error: 'حدث خطأ',
       signedOut: 'تم تسجيل الخروج بنجاح',
@@ -99,16 +96,12 @@ const Account = () => {
       clearAllData: 'Clear All Data',
       clearDataWarning: 'This will permanently clear all your data (chats, bookmarks, reading history, settings).',
       clearDataConfirm: 'Are you sure you want to clear all your data? This action cannot be undone.',
-      deleteAccount: 'Delete Account',
-      deleteWarning: 'This will permanently delete your account and all your data.',
-      deleteConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
       signOut: 'Sign Out',
       cancel: 'Cancel',
       confirm: 'Confirm',
       profileUpdated: 'Profile updated successfully',
       passwordUpdated: 'Password updated successfully',
       passwordMismatch: 'Passwords do not match',
-      accountDeleted: 'Account deleted successfully',
       dataCleared: 'All data cleared successfully',
       error: 'An error occurred',
       signedOut: 'Signed out successfully',
@@ -118,11 +111,26 @@ const Account = () => {
 
   const t = content[settings.language];
 
+  const profileSchema = z.object({
+    fullName: z.string().trim().min(1, 'Name required').max(100, 'Name too long'),
+  });
+
+  const passwordSchema = z.object({
+    password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password too long'),
+  });
+
   const handleUpdateProfile = async () => {
     if (!user) return;
     
     setIsLoading(true);
     try {
+      const validation = profileSchema.safeParse({ fullName: fullName.trim() });
+      if (!validation.success) {
+        toast.error(validation.error.errors[0].message);
+        setIsLoading(false);
+        return;
+      }
+
       await supabase
         .from('profiles')
         .update({ full_name: fullName })
@@ -144,6 +152,12 @@ const Account = () => {
       toast.error(t.passwordMismatch);
       return;
     }
+
+    const validation = passwordSchema.safeParse({ password: newPassword });
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -159,25 +173,6 @@ const Account = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!user) return;
-    
-    try {
-      // Delete user data first
-      await supabase.from('profiles').delete().eq('user_id', user.id);
-      await supabase.from('user_settings').delete().eq('user_id', user.id);
-      await supabase.from('ai_conversations').delete().eq('user_id', user.id);
-      
-      // Then delete auth user
-      await supabase.auth.admin.deleteUser(user.id);
-      
-      toast.success(t.accountDeleted);
-      navigate('/');
-    } catch (error) {
-      console.error('Delete error:', error);
-      toast.error(t.error);
-    }
-  };
 
   const handleClearAllData = async () => {
     if (!user) return;
@@ -409,37 +404,6 @@ const Account = () => {
                   onClick={handleClearAllData}
                   className="bg-destructive hover:bg-destructive/90"
                   disabled={isLoading}
-                >
-                  {t.confirm}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-
-        {/* Delete Account */}
-        <div className="space-y-4 pt-4 border-t border-destructive/20">
-          <p className="text-sm text-muted-foreground">{t.deleteWarning}</p>
-          
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full">
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t.deleteAccount}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.deleteAccount}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t.deleteConfirm}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteAccount}
-                  className="bg-destructive hover:bg-destructive/90"
                 >
                   {t.confirm}
                 </AlertDialogAction>
