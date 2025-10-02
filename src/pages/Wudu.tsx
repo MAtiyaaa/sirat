@@ -21,14 +21,23 @@ interface PrayerTimes {
 interface HijriDate {
   date: string;
   month: string;
+  monthNumber: number;
   year: string;
   designation: string;
+  weekday: string;
 }
 
 interface IslamicEvent {
   name: string;
   date: Date;
   hijriDate: string;
+  countdown: string;
+}
+
+interface HijriCalendarDay {
+  day: number;
+  gregorianDate: string;
+  isToday: boolean;
 }
 
 const Wudu = () => {
@@ -42,8 +51,10 @@ const Wudu = () => {
   const [isHijriOpen, setIsHijriOpen] = useState(false);
   const [isRamadanOpen, setIsRamadanOpen] = useState(false);
   const [hijriDate, setHijriDate] = useState<HijriDate | null>(null);
+  const [hijriCalendarDays, setHijriCalendarDays] = useState<HijriCalendarDay[]>([]);
+  const [currentHijriMonth, setCurrentHijriMonth] = useState<number>(1);
+  const [currentHijriYear, setCurrentHijriYear] = useState<number>(1447);
   const [islamicEvents, setIslamicEvents] = useState<IslamicEvent[]>([]);
-  const [ramadanCountdown, setRamadanCountdown] = useState<string>('');
   const [suhurTime, setSuhurTime] = useState<string>('');
   const [iftarTime, setIftarTime] = useState<string>('');
 
@@ -54,28 +65,37 @@ const Wudu = () => {
   }, [settings.prayerTimeRegion]);
 
   useEffect(() => {
+    if (hijriDate) {
+      setCurrentHijriMonth(hijriDate.monthNumber);
+      setCurrentHijriYear(parseInt(hijriDate.year));
+      fetchHijriCalendar(hijriDate.monthNumber, parseInt(hijriDate.year));
+    }
+  }, [hijriDate]);
+
+  useEffect(() => {
     if (islamicEvents.length > 0) {
       const updateCountdowns = () => {
-        const now = new Date();
-        const ramadan = islamicEvents.find(e => e.name === 'Ramadan');
-        
-        if (ramadan) {
-          const diff = ramadan.date.getTime() - now.getTime();
+        const updatedEvents = islamicEvents.map(event => {
+          const now = new Date();
+          const diff = event.date.getTime() - now.getTime();
+          
           if (diff > 0) {
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            setRamadanCountdown(`${days}d ${hours}h`);
+            return { ...event, countdown: `${days}d ${hours}h` };
           } else {
-            setRamadanCountdown(settings.language === 'ar' ? 'رمضان مبارك!' : 'Ramadan Mubarak!');
+            return { ...event, countdown: settings.language === 'ar' ? 'مضى' : 'Passed' };
           }
-        }
+        });
+        
+        setIslamicEvents(updatedEvents);
       };
 
       updateCountdowns();
       const interval = setInterval(updateCountdowns, 60000);
       return () => clearInterval(interval);
     }
-  }, [islamicEvents, settings.language]);
+  }, [islamicEvents.length, settings.language]);
 
   useEffect(() => {
     if (!prayerTimes) return;
@@ -187,8 +207,10 @@ const Wudu = () => {
         setHijriDate({
           date: data.data.hijri.day,
           month: settings.language === 'ar' ? data.data.hijri.month.ar : data.data.hijri.month.en,
+          monthNumber: data.data.hijri.month.number,
           year: data.data.hijri.year,
           designation: data.data.hijri.designation.abbreviated,
+          weekday: settings.language === 'ar' ? data.data.hijri.weekday.ar : data.data.hijri.weekday.en,
         });
       }
     } catch (error) {
@@ -196,7 +218,7 @@ const Wudu = () => {
     }
   };
 
-  const fetchIslamicEvents = async () => {
+  const fetchHijriCalendar = async (month: number, year: number) => {
     try {
       let latitude, longitude;
 
@@ -210,50 +232,147 @@ const Wudu = () => {
         longitude = position.coords.longitude;
       }
 
-      const currentYear = new Date().getFullYear();
+      const hijriYear = year;
       const response = await fetch(
-        `https://api.aladhan.com/v1/calendar/${currentYear}?latitude=${latitude}&longitude=${longitude}&method=2`
+        `https://api.aladhan.com/v1/hijriCalendar/${month}/${hijriYear}?latitude=${latitude}&longitude=${longitude}&method=2`
       );
       const data = await response.json();
       
       if (data.code === 200) {
-        const events: IslamicEvent[] = [];
-        
-        // Find Ramadan start (month 9, day 1)
-        const ramadanData = data.data.find((d: any) => d.date.hijri.month.number === 9 && d.date.hijri.day === '1');
-        if (ramadanData) {
-          const [day, month, year] = ramadanData.date.gregorian.date.split('-');
-          events.push({
-            name: 'Ramadan',
-            date: new Date(`${year}-${month}-${day}`),
-            hijriDate: `1 ${ramadanData.date.hijri.month.en} ${ramadanData.date.hijri.year}`,
-          });
-        }
-
-        // Find Eid al-Fitr (month 10, day 1)
-        const fitrData = data.data.find((d: any) => d.date.hijri.month.number === 10 && d.date.hijri.day === '1');
-        if (fitrData) {
-          const [day, month, year] = fitrData.date.gregorian.date.split('-');
-          events.push({
-            name: 'Eid al-Fitr',
-            date: new Date(`${year}-${month}-${day}`),
-            hijriDate: `1 ${fitrData.date.hijri.month.en} ${fitrData.date.hijri.year}`,
-          });
-        }
-
-        // Find Eid al-Adha (month 12, day 10)
-        const adhaData = data.data.find((d: any) => d.date.hijri.month.number === 12 && d.date.hijri.day === '10');
-        if (adhaData) {
-          const [day, month, year] = adhaData.date.gregorian.date.split('-');
-          events.push({
-            name: 'Eid al-Adha',
-            date: new Date(`${year}-${month}-${day}`),
-            hijriDate: `10 ${adhaData.date.hijri.month.en} ${adhaData.date.hijri.year}`,
-          });
-        }
-
-        setIslamicEvents(events);
+        const today = new Date().toISOString().split('T')[0];
+        const days: HijriCalendarDay[] = data.data.map((item: any) => ({
+          day: parseInt(item.date.hijri.day),
+          gregorianDate: item.date.gregorian.date,
+          isToday: item.date.gregorian.date === today,
+        }));
+        setHijriCalendarDays(days);
       }
+    } catch (error) {
+      console.error('Error fetching Hijri calendar:', error);
+    }
+  };
+
+  const navigateHijriMonth = (direction: 'prev' | 'next') => {
+    let newMonth = currentHijriMonth;
+    let newYear = currentHijriYear;
+
+    if (direction === 'next') {
+      newMonth = currentHijriMonth === 12 ? 1 : currentHijriMonth + 1;
+      newYear = currentHijriMonth === 12 ? currentHijriYear + 1 : currentHijriYear;
+    } else {
+      newMonth = currentHijriMonth === 1 ? 12 : currentHijriMonth - 1;
+      newYear = currentHijriMonth === 1 ? currentHijriYear - 1 : currentHijriYear;
+    }
+
+    setCurrentHijriMonth(newMonth);
+    setCurrentHijriYear(newYear);
+    fetchHijriCalendar(newMonth, newYear);
+  };
+
+  const getHijriMonthName = (monthNumber: number) => {
+    const months = settings.language === 'ar' 
+      ? ['محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة']
+      : ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'];
+    return months[monthNumber - 1];
+  };
+
+  const fetchIslamicEvents = async () => {
+    try {
+      let latitude, longitude;
+
+      if (settings.prayerTimeRegion) {
+        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+      } else {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch {
+          // Default to Mecca if geolocation fails
+          latitude = 21.4225;
+          longitude = 39.8262;
+        }
+      }
+
+      const currentYear = new Date().getFullYear();
+      const nextYear = currentYear + 1;
+      const events: IslamicEvent[] = [];
+
+      // Fetch both current and next year
+      for (const year of [currentYear, nextYear]) {
+        const response = await fetch(
+          `https://api.aladhan.com/v1/calendar/${year}?latitude=${latitude}&longitude=${longitude}&method=2`
+        );
+        const data = await response.json();
+        
+        if (data.code === 200 && data.data && Array.isArray(data.data)) {
+          // Find Ramadan start (month 9, day 1)
+          const ramadanData = data.data.find((d: any) => 
+            d?.date?.hijri?.month?.number === 9 && d?.date?.hijri?.day === '1'
+          );
+          if (ramadanData) {
+            const gregDate = ramadanData.date.gregorian.date;
+            const [day, month, yearStr] = gregDate.split('-').map((n: string) => parseInt(n));
+            const eventDate = new Date(yearStr, month - 1, day);
+            
+            if (eventDate > new Date() || events.length === 0) {
+              events.push({
+                name: 'Ramadan',
+                date: eventDate,
+                hijriDate: `1 ${ramadanData.date.hijri.month.en} ${ramadanData.date.hijri.year}`,
+                countdown: '',
+              });
+            }
+          }
+
+          // Find Eid al-Fitr (month 10, day 1)
+          const fitrData = data.data.find((d: any) => 
+            d?.date?.hijri?.month?.number === 10 && d?.date?.hijri?.day === '1'
+          );
+          if (fitrData) {
+            const gregDate = fitrData.date.gregorian.date;
+            const [day, month, yearStr] = gregDate.split('-').map((n: string) => parseInt(n));
+            const eventDate = new Date(yearStr, month - 1, day);
+            
+            if (eventDate > new Date() || events.filter(e => e.name === 'Eid al-Fitr').length === 0) {
+              events.push({
+                name: 'Eid al-Fitr',
+                date: eventDate,
+                hijriDate: `1 ${fitrData.date.hijri.month.en} ${fitrData.date.hijri.year}`,
+                countdown: '',
+              });
+            }
+          }
+
+          // Find Eid al-Adha (month 12, day 10)
+          const adhaData = data.data.find((d: any) => 
+            d?.date?.hijri?.month?.number === 12 && d?.date?.hijri?.day === '10'
+          );
+          if (adhaData) {
+            const gregDate = adhaData.date.gregorian.date;
+            const [day, month, yearStr] = gregDate.split('-').map((n: string) => parseInt(n));
+            const eventDate = new Date(yearStr, month - 1, day);
+            
+            if (eventDate > new Date() || events.filter(e => e.name === 'Eid al-Adha').length === 0) {
+              events.push({
+                name: 'Eid al-Adha',
+                date: eventDate,
+                hijriDate: `10 ${adhaData.date.hijri.month.en} ${adhaData.date.hijri.year}`,
+                countdown: '',
+              });
+            }
+          }
+        }
+      }
+
+      // Remove duplicates and keep only future events
+      const uniqueEvents = events.filter((event, index, self) => 
+        index === self.findIndex((e) => e.name === event.name && e.date.getTime() === event.date.getTime())
+      );
+
+      setIslamicEvents(uniqueEvents);
     } catch (error) {
       console.error('Error fetching Islamic events:', error);
     }
@@ -403,6 +522,89 @@ const Wudu = () => {
         </div>
       )}
 
+      {/* Hijri Calendar Dropdown */}
+      <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === 'ar' ? 'التقويم الهجري' : 'Hijri Calendar'}
+                    </h2>
+                  </div>
+                </div>
+                
+                {hijriDate ? (
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">
+                        {settings.language === 'ar' ? 'اليوم' : 'Today'}
+                      </div>
+                      <div className="text-xl font-bold text-primary">
+                        {hijriDate.date} {hijriDate.month}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {hijriDate.year} {hijriDate.designation}
+                      </div>
+                    </div>
+                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isHijriOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                ) : (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                )}
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            <div className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
+              {/* Month Navigation */}
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={() => navigateHijriMonth('prev')}
+                  className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
+                >
+                  <ChevronDown className="h-5 w-5 rotate-90 text-primary" />
+                </button>
+                <div className="text-center">
+                  <div className="text-2xl font-bold">
+                    {getHijriMonthName(currentHijriMonth)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {currentHijriYear} {hijriDate?.designation}
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigateHijriMonth('next')}
+                  className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
+                >
+                  <ChevronDown className="h-5 w-5 -rotate-90 text-primary" />
+                </button>
+              </div>
+
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-2">
+                {hijriCalendarDays.map((day, index) => (
+                  <div
+                    key={index}
+                    className={`aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all
+                      ${day.isToday 
+                        ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
+                        : 'bg-background/50 hover:bg-background/80'
+                      }`}
+                  >
+                    {day.day}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+
       {/* Wudu Steps Dropdown */}
       <Collapsible open={isWuduStepsOpen} onOpenChange={setIsWuduStepsOpen}>
         <div className="glass-effect rounded-3xl p-6 border border-border/50">
@@ -475,47 +677,6 @@ const Wudu = () => {
         </div>
       </Collapsible>
 
-      {/* Hijri Calendar Dropdown */}
-      <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
-        <div className="glass-effect rounded-3xl p-6 border border-border/50">
-          <CollapsibleTrigger asChild>
-            <button className="w-full">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <h2 className="text-2xl font-bold">
-                    {settings.language === 'ar' ? 'التقويم الهجري' : 'Hijri Calendar'}
-                  </h2>
-                </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isHijriOpen ? 'rotate-180' : ''}`} />
-              </div>
-            </button>
-          </CollapsibleTrigger>
-
-          <CollapsibleContent className="mt-6">
-            {hijriDate ? (
-              <div className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
-                <div className="text-center">
-                  <div className="text-6xl font-bold text-primary mb-2">
-                    {hijriDate.date}
-                  </div>
-                  <div className="text-2xl font-semibold mb-1">
-                    {hijriDate.month}
-                  </div>
-                  <div className="text-xl text-muted-foreground">
-                    {hijriDate.year} {hijriDate.designation}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            )}
-          </CollapsibleContent>
-        </div>
-      </Collapsible>
-
       {/* Ramadan & Islamic Events Dropdown */}
       <Collapsible open={isRamadanOpen} onOpenChange={setIsRamadanOpen}>
         <div className="glass-effect rounded-3xl p-6 border border-border/50">
@@ -535,80 +696,63 @@ const Wudu = () => {
 
           <CollapsibleContent className="mt-6">
             <div className="space-y-4">
-              {/* Ramadan Countdown */}
-              {islamicEvents.find(e => e.name === 'Ramadan') && (
-                <div className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold">
-                      {settings.language === 'ar' ? 'رمضان' : 'Ramadan'}
-                    </h3>
-                    <div className="text-2xl font-bold text-primary">
-                      {ramadanCountdown}
+              {/* All Islamic Events */}
+              {islamicEvents.length > 0 ? (
+                islamicEvents.map((event, index) => (
+                  <div key={index} className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xl font-bold">
+                        {settings.language === 'ar' 
+                          ? (event.name === 'Ramadan' ? 'رمضان' : event.name === 'Eid al-Fitr' ? 'عيد الفطر' : 'عيد الأضحى')
+                          : event.name}
+                      </h3>
+                      <div className="text-2xl font-bold text-primary">
+                        {event.countdown}
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {event.date.toLocaleDateString(
+                        settings.language === 'ar' ? 'ar-SA' : 'en-US',
+                        { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {event.hijriDate}
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {islamicEvents.find(e => e.name === 'Ramadan')?.date.toLocaleDateString(
-                      settings.language === 'ar' ? 'ar-SA' : 'en-US',
-                      { year: 'numeric', month: 'long', day: 'numeric' }
-                    )}
-                  </div>
+                ))
+              ) : (
+                <div className="flex items-center justify-center p-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               )}
 
               {/* Suhur & Iftar Times */}
-              {(suhurTime || iftarTime) && (
-                <div className="grid grid-cols-2 gap-3">
-                  <Card className="p-4 text-center glass-effect border-border/50">
-                    <div className="text-sm font-semibold text-muted-foreground mb-1">
-                      {settings.language === 'ar' ? 'السحور' : 'Suhur'}
-                    </div>
-                    <div className="text-2xl font-bold text-primary">
-                      {suhurTime}
-                    </div>
-                  </Card>
-                  <Card className="p-4 text-center glass-effect border-border/50">
-                    <div className="text-sm font-semibold text-muted-foreground mb-1">
-                      {settings.language === 'ar' ? 'الإفطار' : 'Iftar'}
-                    </div>
-                    <div className="text-2xl font-bold text-primary">
-                      {iftarTime}
-                    </div>
-                  </Card>
+              {(suhurTime && iftarTime) && (
+                <div>
+                  <h4 className="text-lg font-bold mb-3">
+                    {settings.language === 'ar' ? 'أوقات رمضان' : 'Ramadan Times'}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Card className="p-4 text-center glass-effect border-border/50">
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {settings.language === 'ar' ? 'السحور' : 'Suhur'}
+                      </div>
+                      <div className="text-2xl font-bold text-primary">
+                        {suhurTime}
+                      </div>
+                    </Card>
+                    <Card className="p-4 text-center glass-effect border-border/50">
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {settings.language === 'ar' ? 'الإفطار' : 'Iftar'}
+                      </div>
+                      <div className="text-2xl font-bold text-primary">
+                        {iftarTime}
+                      </div>
+                    </Card>
+                  </div>
                 </div>
               )}
-
-              {/* Other Islamic Events */}
-              <div className="space-y-3">
-                {islamicEvents.filter(e => e.name !== 'Ramadan').map((event, index) => {
-                  const now = new Date();
-                  const diff = event.date.getTime() - now.getTime();
-                  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                  const countdown = diff > 0 ? `${days}d` : (settings.language === 'ar' ? 'مبارك!' : 'Passed');
-                  
-                  return (
-                    <div key={index} className="glass-effect rounded-2xl p-5 border border-border/50">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-lg font-bold mb-1">
-                            {settings.language === 'ar' 
-                              ? (event.name === 'Eid al-Fitr' ? 'عيد الفطر' : 'عيد الأضحى')
-                              : event.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {event.date.toLocaleDateString(
-                              settings.language === 'ar' ? 'ar-SA' : 'en-US',
-                              { year: 'numeric', month: 'long', day: 'numeric' }
-                            )}
-                          </p>
-                        </div>
-                        <div className="text-xl font-bold text-primary">
-                          {countdown}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </CollapsibleContent>
         </div>
