@@ -193,15 +193,8 @@ const Quran = () => {
         }
       }
 
-      // Update local state
-      const newProgress = { ...progress };
-      delete newProgress[surahToReset];
-      setProgress(newProgress);
-
-      // Recalculate overall progress
-      const totalAyahs = 6236;
-      const completedAyahs = Object.values(newProgress).reduce((sum, val) => sum + val, 0);
-      setOverallProgress((completedAyahs / totalAyahs) * 100);
+      // Reload progress from database to ensure sync
+      await loadProgress();
 
       toast.success(settings.language === 'ar' ? 'تم إعادة تعيين التقدم' : 'Progress reset successfully');
       setResetDialogOpen(false);
