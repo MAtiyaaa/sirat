@@ -8,7 +8,8 @@ import {
   fetchWordByWord,
   getAyahAudioUrl,
   WordData,
-  fetchSurahs
+  fetchSurahs,
+  getPageNumber
 } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,7 @@ const SurahDetail = () => {
   const [hasUserScrolled, setHasUserScrolled] = useState(false);
   const [nextSurahData, setNextSurahData] = useState<any>(null);
   const [nextSurahProgress, setNextSurahProgress] = useState<number>(0);
+  const [ayahPages, setAyahPages] = useState<Record<number, number>>({});
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -542,7 +544,7 @@ const SurahDetail = () => {
       setSurahData(arabic);
       setTranslation(trans);
       
-      // Auto-load word-by-word for all ayahs
+      // Auto-load word-by-word and page numbers for all ayahs
       if (arabic?.ayahs) {
         const wordPromises = arabic.ayahs.map((ayah: any) => 
           fetchWordByWord(parseInt(surahNumber), ayah.numberInSurah)
@@ -553,7 +555,21 @@ const SurahDetail = () => {
             })
         );
         
-        const wordResults = await Promise.all(wordPromises);
+        // Load page numbers for all ayahs
+        const pagePromises = arabic.ayahs.map((ayah: any) =>
+          getPageNumber(parseInt(surahNumber), ayah.numberInSurah)
+            .then(page => ({ ayahNumber: ayah.numberInSurah, page }))
+            .catch(error => {
+              console.error(`Error loading page number for ayah ${ayah.numberInSurah}:`, error);
+              return null;
+            })
+        );
+        
+        const [wordResults, pageResults] = await Promise.all([
+          Promise.all(wordPromises),
+          Promise.all(pagePromises)
+        ]);
+        
         const newWordData: Record<number, any[]> = {};
         wordResults.forEach(result => {
           if (result) {
@@ -561,6 +577,14 @@ const SurahDetail = () => {
           }
         });
         setWordData(newWordData);
+        
+        const newPageData: Record<number, number> = {};
+        pageResults.forEach(result => {
+          if (result && result.page) {
+            newPageData[result.ayahNumber] = result.page;
+          }
+        });
+        setAyahPages(newPageData);
       }
     } catch (error) {
       console.error('Error loading surah:', error);
@@ -1002,6 +1026,13 @@ const SurahDetail = () => {
             {settings.translationEnabled && translation && (
               <p className="text-muted-foreground">
                 {translation.ayahs[index]?.text}
+              </p>
+            )}
+
+            {/* Page Number */}
+            {ayahPages[ayah.numberInSurah] && (
+              <p className="text-xs text-muted-foreground/60 italic">
+                {settings.language === 'ar' ? `صفحة ${ayahPages[ayah.numberInSurah]}` : `Page ${ayahPages[ayah.numberInSurah]}`}
               </p>
             )}
 

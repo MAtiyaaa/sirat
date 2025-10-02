@@ -128,3 +128,45 @@ export async function fetchTransliteration(surahNumber: number) {
     return [];
   }
 }
+
+// Fetch verses by page number
+export async function fetchVersesByPage(pageNumber: number) {
+  try {
+    const response = await fetch(`${QURAN_COM_BASE}/verses/by_page/${pageNumber}?words=false&translations=131`);
+    const data = await response.json();
+    return data.verses || [];
+  } catch (error) {
+    console.error('Error fetching verses by page:', error);
+    return [];
+  }
+}
+
+// Get page number for a specific ayah
+export async function getPageNumber(surahNumber: number, ayahNumber: number): Promise<number | null> {
+  try {
+    const response = await fetch(`${QURAN_COM_BASE}/verses/by_key/${surahNumber}:${ayahNumber}?words=false`);
+    const data = await response.json();
+    return data.verse?.page_number || null;
+  } catch (error) {
+    console.error('Error fetching page number:', error);
+    return null;
+  }
+}
+
+// Get first ayah of a page (returns {surahNumber, ayahNumber})
+export async function getFirstAyahOfPage(pageNumber: number): Promise<{surahNumber: number, ayahNumber: number} | null> {
+  try {
+    const verses = await fetchVersesByPage(pageNumber);
+    if (verses.length > 0) {
+      const firstVerse = verses[0];
+      return {
+        surahNumber: firstVerse.chapter_id || firstVerse.verse_key?.split(':')[0],
+        ayahNumber: firstVerse.verse_number || firstVerse.verse_key?.split(':')[1]
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting first ayah of page:', error);
+    return null;
+  }
+}

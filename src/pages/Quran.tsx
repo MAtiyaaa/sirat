@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw } from 'lucide-react';
-import { fetchSurahs, Surah } from '@/lib/quran-api';
+import { fetchSurahs, Surah, getFirstAyahOfPage } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
@@ -50,35 +50,54 @@ const Quran = () => {
   }, []);
 
   useEffect(() => {
-    if (searchTerm.trim()) {
-      // Normalize and remove diacritics for better Arabic matching
-      const normalizeArabic = (text: string) => {
-        return text
-          .normalize('NFKC') // Normalize Unicode
-          .replace(/[\u064B-\u065F\u0670]/g, '') // Remove diacritics
-          .replace(/[ًٌٍَُِّْٰ]/g, '') // Remove more diacritics
-          .trim();
-      };
-      
-      const normalizedSearch = normalizeArabic(searchTerm.toLowerCase());
-      
-      const filtered = surahs.filter(s => {
-        const englishName = s.englishName.toLowerCase();
-        const arabicName = normalizeArabic(s.name.toLowerCase());
-        const translation = s.englishNameTranslation.toLowerCase();
-        const numberMatch = s.number.toString() === searchTerm;
+    const handleSearch = async () => {
+      if (searchTerm.trim()) {
+        // Check if search is a page number (1-604)
+        const pageNumber = parseInt(searchTerm);
+        if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= 604) {
+          // Navigate to the page
+          try {
+            const firstAyah = await getFirstAyahOfPage(pageNumber);
+            if (firstAyah) {
+              navigate(`/quran/${firstAyah.surahNumber}?ayah=${firstAyah.ayahNumber}`);
+              return;
+            }
+          } catch (error) {
+            console.error('Error navigating to page:', error);
+          }
+        }
         
-        return englishName.includes(normalizedSearch) ||
-               arabicName.includes(normalizedSearch) ||
-               translation.includes(normalizedSearch) ||
-               numberMatch;
-      });
-      
-      setFilteredSurahs(filtered);
-    } else {
-      setFilteredSurahs(surahs);
-    }
-  }, [searchTerm, surahs]);
+        // Normalize and remove diacritics for better Arabic matching
+        const normalizeArabic = (text: string) => {
+          return text
+            .normalize('NFKC') // Normalize Unicode
+            .replace(/[\u064B-\u065F\u0670]/g, '') // Remove diacritics
+            .replace(/[ًٌٍَُِّْٰ]/g, '') // Remove more diacritics
+            .trim();
+        };
+        
+        const normalizedSearch = normalizeArabic(searchTerm.toLowerCase());
+        
+        const filtered = surahs.filter(s => {
+          const englishName = s.englishName.toLowerCase();
+          const arabicName = normalizeArabic(s.name.toLowerCase());
+          const translation = s.englishNameTranslation.toLowerCase();
+          const numberMatch = s.number.toString() === searchTerm;
+          
+          return englishName.includes(normalizedSearch) ||
+                 arabicName.includes(normalizedSearch) ||
+                 translation.includes(normalizedSearch) ||
+                 numberMatch;
+        });
+        
+        setFilteredSurahs(filtered);
+      } else {
+        setFilteredSurahs(surahs);
+      }
+    };
+
+    handleSearch();
+  }, [searchTerm, surahs, navigate]);
 
   const loadSurahs = async () => {
     setLoading(true);
