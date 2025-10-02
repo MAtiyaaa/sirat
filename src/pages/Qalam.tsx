@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History } from 'lucide-react';
+import { SendHorizontal, BotMessageSquare, Loader2, Trash2, Plus, History } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
@@ -382,7 +382,7 @@ const Qalam = () => {
       <div className="text-center py-6 pt-12 md:pt-6">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
-            <Sparkles className="h-4 w-4 text-primary" />
+            <BotMessageSquare className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium">
               {settings.language === 'ar' ? 'قلم - المساعد الذكي' : 'Qalam - AI Assistant'}
             </span>
@@ -400,7 +400,7 @@ const Qalam = () => {
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="h-10 w-10 text-primary" />
+              <BotMessageSquare className="h-10 w-10 text-primary" />
             </div>
             <p className="text-muted-foreground">
               {settings.language === 'ar'
