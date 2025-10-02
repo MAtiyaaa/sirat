@@ -38,6 +38,7 @@ const Quran = () => {
   const [filteredSurahs, setFilteredSurahs] = useState<Surah[]>([]);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [surahToReset, setSurahToReset] = useState<number | null>(null);
+  const [pageSuggestion, setPageSuggestion] = useState<{pageNumber: number, surahNumber: number, ayahNumber: number} | null>(null);
 
   useEffect(() => {
     loadSurahs();
@@ -55,17 +56,25 @@ const Quran = () => {
         // Check if search is a page number (1-604)
         const pageNumber = parseInt(searchTerm);
         if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= 604) {
-          // Navigate to the page
+          // Load page suggestion
           try {
             const firstAyah = await getFirstAyahOfPage(pageNumber);
             if (firstAyah) {
-              navigate(`/quran/${firstAyah.surahNumber}?ayah=${firstAyah.ayahNumber}`);
+              setPageSuggestion({
+                pageNumber,
+                surahNumber: firstAyah.surahNumber,
+                ayahNumber: firstAyah.ayahNumber
+              });
+              setFilteredSurahs([]);
               return;
             }
           } catch (error) {
-            console.error('Error navigating to page:', error);
+            console.error('Error loading page suggestion:', error);
           }
         }
+        
+        // Clear page suggestion if not a page number
+        setPageSuggestion(null);
         
         // Normalize and remove diacritics for better Arabic matching
         const normalizeArabic = (text: string) => {
@@ -93,6 +102,7 @@ const Quran = () => {
         setFilteredSurahs(filtered);
       } else {
         setFilteredSurahs(surahs);
+        setPageSuggestion(null);
       }
     };
 
@@ -250,11 +260,42 @@ const Quran = () => {
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={settings.language === 'ar' ? 'ابحث عن سورة...' : 'Search for a surah...'}
+            placeholder={settings.language === 'ar' ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search for a surah or page number...'}
             className="pl-12 h-14 rounded-2xl glass-effect border-border/50 text-base"
           />
         </div>
       </div>
+
+      {/* Page Suggestion */}
+      {pageSuggestion && (
+        <div className="px-4">
+          <div 
+            onClick={() => {
+              navigate(`/quran/${pageSuggestion.surahNumber}?ayah=${pageSuggestion.ayahNumber}`);
+              setSearchTerm('');
+              setPageSuggestion(null);
+            }}
+            className="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-[1.02] smooth-transition border border-primary/30"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  {settings.language === 'ar' ? `الصفحة ${pageSuggestion.pageNumber}` : `Page ${pageSuggestion.pageNumber}`}
+                </p>
+                <p className="text-lg font-semibold">
+                  {settings.language === 'ar' ? 'اذهب إلى هذه الصفحة' : 'Go to this page'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {settings.language === 'ar' 
+                    ? `سورة ${surahs.find(s => s.number === pageSuggestion.surahNumber)?.name || pageSuggestion.surahNumber} - آية ${pageSuggestion.ayahNumber}`
+                    : `Surah ${surahs.find(s => s.number === pageSuggestion.surahNumber)?.englishName || pageSuggestion.surahNumber} - Ayah ${pageSuggestion.ayahNumber}`}
+                </p>
+              </div>
+              <Book className="h-8 w-8 text-primary" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {lastViewedSurah && surahs.length > 0 && (() => {
         const currentSurah = surahs.find(s => s.number === lastViewedSurah);

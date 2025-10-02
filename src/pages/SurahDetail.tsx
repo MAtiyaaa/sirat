@@ -852,7 +852,7 @@ const SurahDetail = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={settings.language === 'ar' ? 'بحث في الآيات...' : 'Search in ayahs...'}
+              placeholder={settings.language === 'ar' ? 'ابحث في الآيات برقم أو نص...' : 'Search ayahs by number or text...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 rounded-2xl border-border/50 bg-background/50"
@@ -875,6 +875,12 @@ const SurahDetail = () => {
         {surahData.ayahs
           .filter((ayah: any, index: number) => {
             if (!searchTerm.trim()) return true;
+            
+            // Check if search term is a number (ayah number)
+            const searchNumber = parseInt(searchTerm);
+            if (!isNaN(searchNumber)) {
+              return ayah.numberInSurah === searchNumber;
+            }
             
             // Normalize Arabic text for better matching
             const normalizeArabic = (text: string) => {
