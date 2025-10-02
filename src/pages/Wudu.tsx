@@ -198,40 +198,57 @@ const Wudu = () => {
 
   const fetchIslamicEvents = async () => {
     try {
+      let latitude, longitude;
+
+      if (settings.prayerTimeRegion) {
+        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+      } else {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+      }
+
       const currentYear = new Date().getFullYear();
-      const response = await fetch(`https://api.aladhan.com/v1/calendar/${currentYear}`);
+      const response = await fetch(
+        `https://api.aladhan.com/v1/calendar/${currentYear}?latitude=${latitude}&longitude=${longitude}&method=2`
+      );
       const data = await response.json();
       
       if (data.code === 200) {
         const events: IslamicEvent[] = [];
         
-        // Find Ramadan start
-        const ramadanData = data.data.find((d: any) => d.hijri.month.number === 9 && d.hijri.day === '1');
+        // Find Ramadan start (month 9, day 1)
+        const ramadanData = data.data.find((d: any) => d.date.hijri.month.number === 9 && d.date.hijri.day === '1');
         if (ramadanData) {
+          const [day, month, year] = ramadanData.date.gregorian.date.split('-');
           events.push({
             name: 'Ramadan',
-            date: new Date(ramadanData.gregorian.date),
-            hijriDate: `1 ${ramadanData.hijri.month.en} ${ramadanData.hijri.year}`,
+            date: new Date(`${year}-${month}-${day}`),
+            hijriDate: `1 ${ramadanData.date.hijri.month.en} ${ramadanData.date.hijri.year}`,
           });
         }
 
-        // Find Eid al-Fitr
-        const fitrData = data.data.find((d: any) => d.hijri.month.number === 10 && d.hijri.day === '1');
+        // Find Eid al-Fitr (month 10, day 1)
+        const fitrData = data.data.find((d: any) => d.date.hijri.month.number === 10 && d.date.hijri.day === '1');
         if (fitrData) {
+          const [day, month, year] = fitrData.date.gregorian.date.split('-');
           events.push({
             name: 'Eid al-Fitr',
-            date: new Date(fitrData.gregorian.date),
-            hijriDate: `1 ${fitrData.hijri.month.en} ${fitrData.hijri.year}`,
+            date: new Date(`${year}-${month}-${day}`),
+            hijriDate: `1 ${fitrData.date.hijri.month.en} ${fitrData.date.hijri.year}`,
           });
         }
 
-        // Find Eid al-Adha
-        const adhaData = data.data.find((d: any) => d.hijri.month.number === 12 && d.hijri.day === '10');
+        // Find Eid al-Adha (month 12, day 10)
+        const adhaData = data.data.find((d: any) => d.date.hijri.month.number === 12 && d.date.hijri.day === '10');
         if (adhaData) {
+          const [day, month, year] = adhaData.date.gregorian.date.split('-');
           events.push({
             name: 'Eid al-Adha',
-            date: new Date(adhaData.gregorian.date),
-            hijriDate: `10 ${adhaData.hijri.month.en} ${adhaData.hijri.year}`,
+            date: new Date(`${year}-${month}-${day}`),
+            hijriDate: `10 ${adhaData.date.hijri.month.en} ${adhaData.date.hijri.year}`,
           });
         }
 
