@@ -128,28 +128,3 @@ export async function fetchTransliteration(surahNumber: number) {
     return [];
   }
 }
-
-// Fetch verses for a specific page (Madani Mushaf - 604 pages)
-export async function fetchPageVerses(pageNumber: number) {
-  try {
-    const response = await fetch(`${QURAN_COM_BASE}/verses/by_page/${pageNumber}?words=true&translations=131&word_fields=text_uthmani&translation_fields=text`);
-    const data = await response.json();
-    return data.verses || [];
-  } catch (error) {
-    console.error('Error fetching page verses:', error);
-    return [];
-  }
-}
-
-// Get page number from surah:ayah
-export function getPageFromSurahAyah(surahNumber: number, ayahNumber: number): number {
-  // This is a simplified mapping - in production, use the Quran.com API or a complete mapping
-  // For now, we'll use the API to fetch the verse and get its page number
-  return 1; // Placeholder
-}
-
-// Convert page and position to surah:ayah
-export function getSurahAyahFromPage(pageNumber: number, position: number = 0): { surah: number; ayah: number } {
-  // Placeholder - will be determined by the verses on that page
-  return { surah: 1, ayah: 1 };
-}

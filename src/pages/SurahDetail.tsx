@@ -828,23 +828,9 @@ const SurahDetail = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={settings.language === 'ar' ? 'بحث في الآيات... (أو رقم الآية)' : 'Search in ayahs... (or ayah number)'}
+              placeholder={settings.language === 'ar' ? 'بحث في الآيات...' : 'Search in ayahs...'}
               value={searchTerm}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchTerm(value);
-                
-                // If it's a number, jump to that ayah
-                const ayahNum = parseInt(value);
-                if (!isNaN(ayahNum) && ayahNum > 0 && ayahNum <= surahData.numberOfAyahs) {
-                  setTimeout(() => {
-                    const element = document.querySelector(`[data-ayah="${ayahNum}"]`);
-                    if (element) {
-                      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                  }, 300);
-                }
-              }}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 rounded-2xl border-border/50 bg-background/50"
             />
           </div>
@@ -1018,13 +1004,6 @@ const SurahDetail = () => {
                 {translation.ayahs[index]?.text}
               </p>
             )}
-
-            {/* Page Number Indicator */}
-            <div className="flex items-center justify-center pt-2 border-t border-border/30">
-              <span className="text-xs text-muted-foreground">
-                {settings.language === 'ar' ? 'صفحة' : 'Page'}: {ayah.page || Math.ceil(ayah.number / 15)}
-              </span>
-            </div>
 
             {/* Tafsir Dropdown */}
             <Collapsible

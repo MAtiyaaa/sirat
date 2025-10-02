@@ -403,36 +403,6 @@ const Settings = () => {
           </Select>
         </div>
 
-        {/* Quran View Mode */}
-        <div className="glass-effect rounded-3xl p-6 md:p-8 space-y-4 border border-border/50 backdrop-blur-xl">
-          <div className="space-y-2">
-            <Label className="text-base font-semibold">
-              {settings.language === 'ar' ? 'نمط العرض' : 'View Mode'}
-            </Label>
-            <p className="text-sm text-muted-foreground">
-              {settings.language === 'ar' 
-                ? 'اختر بين العرض الحديث (حسب السورة) أو التقليدي (حسب الصفحة)'
-                : 'Choose between Modern (by surah) or Traditional (by page) view'}
-            </p>
-          </div>
-          <Select
-            value={settings.viewMode}
-            onValueChange={(value: 'modern' | 'traditional') => updateSettings({ viewMode: value })}
-          >
-            <SelectTrigger className="glass-effect">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="modern">
-                {settings.language === 'ar' ? 'حديث - حسب السورة' : 'Modern - By Surah'}
-              </SelectItem>
-              <SelectItem value="traditional">
-                {settings.language === 'ar' ? 'تقليدي - حسب الصفحة' : 'Traditional - By Page'}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Chat History Link */}
         <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
           <div className="flex items-center gap-3 mb-4">

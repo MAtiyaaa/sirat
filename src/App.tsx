@@ -9,7 +9,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Quran from "./pages/Quran";
-import QuranPages from "./pages/QuranPages";
 import SurahDetail from "./pages/SurahDetail";
 import Auth from "./pages/Auth";
 import Info from "./pages/Info";
@@ -40,7 +39,6 @@ const App = () => (
               <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/quran" element={<Quran />} />
-            <Route path="/quran/pages" element={<QuranPages />} />
             <Route path="/quran/:surahNumber" element={<SurahDetail />} />
             <Route path="/qalam" element={<Qalam />} />
             <Route path="/chat-history" element={<ChatHistory />} />

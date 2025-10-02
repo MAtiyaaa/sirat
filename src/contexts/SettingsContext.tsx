@@ -5,7 +5,6 @@ export type Language = 'ar' | 'en';
 export type Theme = 'light' | 'dark' | 'gold' | 'pink' | 'system';
 export type FontType = 'quran' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
-export type ViewMode = 'modern' | 'traditional';
 
 interface Settings {
   language: Language;
@@ -17,7 +16,6 @@ interface Settings {
   tafsirSource: string;
   prayerTimeRegion: string | null;
   readingTrackingMode: ReadingTrackingMode;
-  viewMode: ViewMode;
 }
 
 interface SettingsContextType {
@@ -35,7 +33,6 @@ const defaultSettings: Settings = {
   tafsirSource: 'en-tafisr-ibn-kathir',
   prayerTimeRegion: null,
   readingTrackingMode: 'auto',
-  viewMode: 'modern',
 };
 
 // Load settings from localStorage immediately (synchronously) for instant availability
@@ -137,7 +134,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
               prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
               readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
-              viewMode: 'modern', // Default for now, will be synced from localStorage
             };
             console.log('[Settings] Setting state to DB settings:', dbSettings);
             setSettings(dbSettings);
