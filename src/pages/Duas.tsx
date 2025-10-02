@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight } from 'lucide-react';
+import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight, CircleDot } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Dua {
@@ -194,18 +194,24 @@ const Duas = () => {
         {/* Track Dhikr Card */}
         <div 
           onClick={() => navigate('/tasbih')}
-          className="glass-effect rounded-2xl p-6 cursor-pointer hover:bg-accent/50 smooth-transition group"
+          className="relative overflow-hidden glass-effect rounded-2xl p-8 cursor-pointer hover:scale-[1.02] smooth-transition group border border-primary/20"
         >
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold">
-                {settings.language === 'ar' ? 'تتبعها' : 'Track Them'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {settings.language === 'ar' ? 'التسبيح الرقمي' : 'Digital Tasbih'}
-              </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 smooth-transition" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                <CircleDot className="h-7 w-7 text-primary-foreground" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-bold">
+                  {settings.language === 'ar' ? 'تتبعها' : 'Track Them'}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {settings.language === 'ar' ? 'التسبيح الرقمي' : 'Digital Tasbih Counter'}
+                </p>
+              </div>
             </div>
-            <ArrowRight className="h-5 w-5 text-primary group-hover:translate-x-1 smooth-transition" />
+            <ArrowRight className="h-6 w-6 text-primary group-hover:translate-x-2 smooth-transition" />
           </div>
         </div>
       </div>
