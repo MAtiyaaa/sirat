@@ -105,6 +105,10 @@ const Settings = () => {
       },
       fonts: {
         quran: 'خط المصحف',
+        amiri: 'خط أميري',
+        scheherazade: 'خط شهرزاد',
+        lateef: 'خط لطيف',
+        'noto-naskh': 'خط نوتو نسخ',
         normal: 'خط عادي',
       },
       trackingModes: {
@@ -149,7 +153,11 @@ const Settings = () => {
         system: 'System',
       },
       fonts: {
-        quran: 'Quran Font',
+        quran: 'Uthmanic Hafs',
+        amiri: 'Amiri',
+        scheherazade: 'Scheherazade New',
+        lateef: 'Lateef',
+        'noto-naskh': 'Noto Naskh Arabic',
         normal: 'Normal Font',
       },
       trackingModes: {

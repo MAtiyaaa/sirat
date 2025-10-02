@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
 export type Theme = 'light' | 'dark' | 'gold' | 'pink' | 'system';
-export type FontType = 'quran' | 'normal';
+export type FontType = 'quran' | 'amiri' | 'scheherazade' | 'lateef' | 'noto-naskh' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
 
 interface Settings {

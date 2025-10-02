@@ -804,7 +804,14 @@ const SurahDetail = () => {
       <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+            <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${
+              settings.fontType === 'normal' ? '' : 
+              settings.fontType === 'amiri' ? 'amiri-font' :
+              settings.fontType === 'scheherazade' ? 'scheherazade-font' :
+              settings.fontType === 'lateef' ? 'lateef-font' :
+              settings.fontType === 'noto-naskh' ? 'noto-naskh-font' :
+              'quran-font'
+            }`}>
               <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
                 {settings.language === 'ar' ? surahData.name : surahData.englishName}
               </span>
@@ -975,7 +982,14 @@ const SurahDetail = () => {
 
             {/* Arabic Text with word-by-word */}
             <div
-              className={`text-2xl leading-loose text-right ${settings.fontType === 'quran' ? 'quran-font' : ''}`}
+              className={`text-2xl leading-loose text-right ${
+                settings.fontType === 'normal' ? '' : 
+                settings.fontType === 'amiri' ? 'amiri-font' :
+                settings.fontType === 'scheherazade' ? 'scheherazade-font' :
+                settings.fontType === 'lateef' ? 'lateef-font' :
+                settings.fontType === 'noto-naskh' ? 'noto-naskh-font' :
+                'quran-font'
+              }`}
               dir="rtl"
             >
               {wordData[ayah.numberInSurah] ? (
