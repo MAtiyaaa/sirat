@@ -29,7 +29,7 @@ const Settings = () => {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success(settings.language === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Signed out successfully');
+      toast.success(settings.language === 'ar' ? 'تم تسجيل الخروج' : 'Signed out');
       navigate('/');
     } catch (error: any) {
       toast.error(error.message || (settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred'));
@@ -70,7 +70,7 @@ const Settings = () => {
       localStorage.removeItem('reading_progress');
       localStorage.removeItem('last_viewed_surah');
 
-      toast.success(settings.language === 'ar' ? 'تم إعادة تعيين جميع التقدم بنجاح' : 'All progress reset successfully');
+      toast.success(settings.language === 'ar' ? 'تم إعادة التعيين' : 'Progress reset');
       
       // Reload page to reflect changes
       window.location.reload();
@@ -101,6 +101,7 @@ const Settings = () => {
         dark: 'داكن',
         gold: 'ذهبي',
         pink: 'وردي',
+        green: 'أخضر قرآني',
         system: 'حسب النظام',
       },
       fonts: {
@@ -150,6 +151,7 @@ const Settings = () => {
         dark: 'Dark',
         gold: 'Gold',
         pink: 'Pink',
+        green: 'Quranic Green',
         system: 'System',
       },
       fonts: {
@@ -282,6 +284,7 @@ const Settings = () => {
               <SelectItem value="dark">{t.themes.dark}</SelectItem>
               <SelectItem value="gold">{t.themes.gold}</SelectItem>
               <SelectItem value="pink">{t.themes.pink}</SelectItem>
+              <SelectItem value="green">{t.themes.green}</SelectItem>
             </SelectContent>
           </Select>
         </div>

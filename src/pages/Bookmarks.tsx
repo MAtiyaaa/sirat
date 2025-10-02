@@ -93,7 +93,7 @@ const Bookmarks = () => {
         await supabase.from('bookmarks').delete().eq('id', bookmarkId);
         setBookmarks(prev => prev.filter(b => b.id !== bookmarkId));
       }
-      toast.success(settings.language === 'ar' ? 'تم الحذف' : 'Bookmark removed');
+      toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
     } catch (error) {
       console.error('Error removing bookmark:', error);
       toast.error(settings.language === 'ar' ? 'فشل الحذف' : 'Failed to remove bookmark');

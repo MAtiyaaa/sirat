@@ -425,7 +425,7 @@ const SurahDetail = () => {
           .eq('bookmark_type', 'surah');
         
         setIsSurahBookmarked(false);
-        toast.success(settings.language === 'ar' ? 'تم إزالة الإشارة المرجعية' : 'Bookmark removed');
+        toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
       } else {
         await supabase
           .from('bookmarks')
@@ -436,7 +436,7 @@ const SurahDetail = () => {
           });
         
         setIsSurahBookmarked(true);
-        toast.success(settings.language === 'ar' ? 'تمت الإضافة للإشارات المرجعية' : 'Added to bookmarks');
+        toast.success(settings.language === 'ar' ? 'تمت الإضافة' : 'Added');
       }
     } catch (error) {
       console.error('Error toggling bookmark:', error);
@@ -467,7 +467,7 @@ const SurahDetail = () => {
           newSet.delete(ayahNumber);
           return newSet;
         });
-        toast.success(settings.language === 'ar' ? 'تم إزالة الإشارة المرجعية' : 'Bookmark removed');
+        toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
       } else {
         // Add bookmark
         await supabase
@@ -494,7 +494,7 @@ const SurahDetail = () => {
           });
         
         setBookmarkedAyahs(prev => new Set([...prev, ayahNumber]));
-        toast.success(settings.language === 'ar' ? 'تمت الإضافة للإشارات المرجعية' : 'Added to bookmarks');
+        toast.success(settings.language === 'ar' ? 'تمت الإضافة' : 'Added');
       }
     } catch (error) {
       console.error('Error toggling bookmark:', error);

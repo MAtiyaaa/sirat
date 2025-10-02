@@ -225,7 +225,7 @@ const Quran = () => {
       // Reload progress from database to ensure sync
       await loadProgress();
 
-      toast.success(settings.language === 'ar' ? 'تم إعادة تعيين التقدم' : 'Progress reset successfully');
+      toast.success(settings.language === 'ar' ? 'تم إعادة التعيين' : 'Progress reset');
       setResetDialogOpen(false);
       setSurahToReset(null);
     } catch (error) {

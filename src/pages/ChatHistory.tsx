@@ -96,7 +96,7 @@ const ChatHistory = () => {
         setSelectedConversation(null);
         setMessages([]);
       }
-      toast.success(settings.language === 'ar' ? 'تم الحذف بنجاح' : 'Deleted successfully');
+      toast.success(settings.language === 'ar' ? 'تم الحذف' : 'Deleted');
     }
     setDeleteId(null);
   };

@@ -109,12 +109,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isInSurahDetail = location.pathname.startsWith('/quran/') && location.pathname !== '/quran';
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <main className="container mx-auto px-4 py-6 max-w-4xl">
+    <div className="min-h-screen bg-background">
+      <main className="container mx-auto px-4 py-6 max-w-4xl pb-24 md:pb-20">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border z-50">
+      <nav className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border z-50 backdrop-blur-xl">
         <div className="container mx-auto max-w-4xl">
           <div className="flex justify-around items-center py-2">
             {navItems.map((item) => {

@@ -166,7 +166,7 @@ const Hadith = () => {
           newSet.delete(bookmarkKey);
           return newSet;
         });
-        toast.success(settings.language === 'ar' ? 'تمت إزالة الإشارة المرجعية' : 'Bookmark removed');
+        toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
       }
     } else {
       const { error } = await supabase

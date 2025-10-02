@@ -77,7 +77,7 @@ const Auth = () => {
         });
 
         if (error) throw error;
-        toast.success(settings.language === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Signed in successfully!');
+        toast.success(settings.language === 'ar' ? 'تم تسجيل الدخول' : 'Signed in');
         navigate('/');
       }
     } catch (error: any) {

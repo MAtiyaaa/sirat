@@ -169,6 +169,40 @@ All colors MUST be HSL.
     --glass-bg: 330 50% 98% / 0.7;
     --glass-border: 340 82% 67% / 0.18;
   }
+  
+  .green {
+    /* Quranic Green Theme */
+    --background: 140 25% 96%;
+    --foreground: 145 40% 15%;
+    
+    --card: 140 30% 98%;
+    --card-foreground: 145 40% 15%;
+    
+    --popover: 140 30% 98%;
+    --popover-foreground: 145 40% 15%;
+    
+    --primary: 145 63% 42%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 140 25% 92%;
+    --secondary-foreground: 145 40% 15%;
+    
+    --muted: 140 25% 92%;
+    --muted-foreground: 145 20% 45%;
+    
+    --accent: 145 63% 42%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 140 25% 88%;
+    --input: 140 25% 88%;
+    --ring: 145 63% 42%;
+    
+    --glass-bg: 140 30% 98% / 0.7;
+    --glass-border: 145 63% 42% / 0.18;
+  }
 }
 
 @layer base {
