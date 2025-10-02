@@ -59,12 +59,14 @@ const SurahDetail = () => {
   const [bookmarkedAyahs, setBookmarkedAyahs] = useState<Set<number>>(new Set());
   const [user, setUser] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [hasUserScrolled, setHasUserScrolled] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     loadSurah();
     setHasRestoredScroll(false);
+    setHasUserScrolled(false); // Reset scroll flag when switching surahs
     loadUser();
     loadBookmarks();
     saveLastViewed();
@@ -228,48 +230,67 @@ const SurahDetail = () => {
   useEffect(() => {
     if (!surahData) return;
 
-    let hasScrolled = false;
-
     const handleScroll = () => {
-      hasScrolled = true;
+      // Mark that user has actually scrolled
+      if (!hasUserScrolled) {
+        setHasUserScrolled(true);
+        console.log('[Scroll] User has scrolled - enabling progress tracking');
+      }
+
       const ayahElements = document.querySelectorAll('[data-ayah]');
       let maxVisible = 1;
 
       ayahElements.forEach((el) => {
         const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
+        // Check if element is in viewport (with some buffer at top)
+        if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
           const ayahNum = parseInt(el.getAttribute('data-ayah') || '1');
           if (ayahNum > maxVisible) maxVisible = ayahNum;
         }
       });
 
+      console.log('[Scroll] Detected ayah:', maxVisible, 'in surah:', surahNumber);
       setLastVisibleAyah(maxVisible);
 
-      // Save to localStorage only after user has scrolled
-      if (surahNumber && hasScrolled) {
+      // Save to localStorage immediately
+      if (surahNumber) {
         localStorage.setItem('quran_last_position', JSON.stringify({ 
           surahNumber: parseInt(surahNumber), 
           ayahNumber: maxVisible 
         }));
+        console.log('[Scroll] Saved to localStorage - Surah:', surahNumber, 'Ayah:', maxVisible);
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    // Don't call handleScroll initially to prevent auto-saving on mount
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [surahData, surahNumber]);
+  }, [surahData, surahNumber, hasUserScrolled]);
 
-  // Save progress to database (only when user scrolls)
+  // Save progress to database (only when user has actually scrolled)
   useEffect(() => {
-    // Don't save if lastVisibleAyah is still at initial value (1) and we haven't scrolled
-    if (lastVisibleAyah === 1 && !hasRestoredScroll) return;
+    // Only save if user has actually scrolled
+    if (!hasUserScrolled) {
+      console.log('[DB Save] Skipping - user has not scrolled yet');
+      return;
+    }
+
+    // Don't save ayah 1 unless user explicitly scrolled there
+    if (lastVisibleAyah === 1 && !hasRestoredScroll) {
+      console.log('[DB Save] Skipping - still at ayah 1 with no scroll restoration');
+      return;
+    }
 
     const saveProgress = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user || !surahNumber) return;
+      if (!session?.user || !surahNumber) {
+        console.log('[DB Save] Skipping - no session or surah number');
+        return;
+      }
 
       try {
+        console.log('[DB Save] Saving progress - Surah:', surahNumber, 'Ayah:', lastVisibleAyah);
+        
         const { error } = await supabase
           .from('reading_progress')
           .upsert({
@@ -284,16 +305,18 @@ const SurahDetail = () => {
           });
         
         if (error) {
-          console.error('Error saving scroll progress:', error);
+          console.error('[DB Save] Error saving scroll progress:', error);
+        } else {
+          console.log('[DB Save] Successfully saved - Surah:', surahNumber, 'Ayah:', lastVisibleAyah);
         }
       } catch (error) {
-        console.error('Error saving scroll progress:', error);
+        console.error('[DB Save] Exception saving scroll progress:', error);
       }
     };
 
     const timeoutId = setTimeout(saveProgress, 2000); // Debounce saves
     return () => clearTimeout(timeoutId);
-  }, [lastVisibleAyah, surahNumber, hasRestoredScroll]);
+  }, [lastVisibleAyah, surahNumber, hasUserScrolled, hasRestoredScroll]);
 
   const loadUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
