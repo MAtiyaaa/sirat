@@ -361,7 +361,7 @@ const Qalam = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] relative">
+    <div className="flex flex-col h-[calc(100vh-8rem)] relative overflow-hidden">
       {user && (
         <>
           <Link to="/chat-history">
@@ -530,7 +530,7 @@ const Qalam = () => {
       )}
 
       {/* Input */}
-      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-4 md:mb-0">
+      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
