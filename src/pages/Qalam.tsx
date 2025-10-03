@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History } from 'lucide-react';
+import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
@@ -69,13 +69,19 @@ const Qalam = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    const isNearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 100;
+    setShowScrollButton(!isNearBottom && messages.length > 0);
+  };
 
   // Save current state to sessionStorage
   useEffect(() => {
@@ -379,8 +385,8 @@ const Qalam = () => {
         </>
       )}
       
-      <div className="text-center py-6 pt-12 md:pt-6">
-        <div className="flex items-center justify-center gap-3 mb-4">
+      <div className="text-center py-3 md:py-4 pt-12 md:pt-4">
+        <div className="flex items-center justify-center gap-3 mb-2">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
             <Sparkles className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium">
@@ -388,7 +394,7 @@ const Qalam = () => {
             </span>
           </div>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {settings.language === 'ar' 
             ? 'اسأل أي سؤال إسلامي'
             : 'Ask any Islamic question'}
@@ -396,7 +402,11 @@ const Qalam = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+      <div 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto space-y-4 mb-4"
+      >
         {messages.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4">
@@ -505,8 +515,22 @@ const Qalam = () => {
         )}
       </div>
 
+      {/* Scroll to bottom button */}
+      {showScrollButton && (
+        <div className="fixed bottom-24 md:bottom-20 left-1/2 -translate-x-1/2 z-10">
+          <Button
+            onClick={scrollToBottom}
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full shadow-lg glass-effect"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
       {/* Input */}
-      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-2 md:mb-0">
+      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-4 md:mb-0">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
