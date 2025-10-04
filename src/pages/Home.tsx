@@ -11,7 +11,7 @@ import {
   Bookmark, 
   User, 
   Settings as SettingsIcon,
-  Droplet,
+  Moon,
   History
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -191,7 +191,7 @@ const Home = () => {
       gradient: 'from-teal-500 to-cyan-500',
     },
     {
-      icon: Droplet,
+      icon: Moon,
       title: { ar: 'الصلاة', en: 'Prayer' },
       link: '/wudu',
       gradient: 'from-sky-500 to-blue-500',
