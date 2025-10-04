@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight, CircleDot } from 'lucide-react';
+import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight, CircleDot, Plane, BookOpen, Sparkles, CloudRain, Users, Bed, BedDouble, Droplet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Dua {
@@ -38,6 +38,24 @@ const Duas = () => {
     },
     {
       id: 3,
+      icon: Bed,
+      titleAr: 'دعاء الاستيقاظ',
+      titleEn: 'Upon Waking',
+      arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ',
+      transliteration: 'Alhamdu lillahil-ladhi ahyana ba\'da ma amatana wa ilayhin-nushur',
+      translation: 'All praise is for Allah who gave us life after having taken it from us and unto Him is the resurrection'
+    },
+    {
+      id: 4,
+      icon: BedDouble,
+      titleAr: 'دعاء النوم',
+      titleEn: 'Before Sleep',
+      arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+      transliteration: 'Bismika Allahumma amutu wa ahya',
+      translation: 'In Your name O Allah, I die and I live'
+    },
+    {
+      id: 5,
       icon: Utensils,
       titleAr: 'دعاء قبل الطعام',
       titleEn: 'Before Eating',
@@ -46,7 +64,7 @@ const Duas = () => {
       translation: 'In the name of Allah and with the blessings of Allah'
     },
     {
-      id: 4,
+      id: 6,
       icon: Heart,
       titleAr: 'دعاء بعد الطعام',
       titleEn: 'After Eating',
@@ -55,7 +73,16 @@ const Duas = () => {
       translation: 'All praise is due to Allah who has fed us and given us drink and made us Muslims'
     },
     {
-      id: 5,
+      id: 7,
+      icon: Droplet,
+      titleAr: 'دعاء بعد الوضوء',
+      titleEn: 'After Wudu',
+      arabic: 'أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ',
+      transliteration: 'Ashhadu an la ilaha illallahu wahdahu la sharika lah, wa ashhadu anna Muhammadan \'abduhu wa rasuluh',
+      translation: 'I bear witness that none has the right to be worshipped except Allah, alone without partner, and I bear witness that Muhammad is His slave and Messenger'
+    },
+    {
+      id: 8,
       icon: Home,
       titleAr: 'دعاء دخول المنزل',
       titleEn: 'Entering Home',
@@ -64,13 +91,67 @@ const Duas = () => {
       translation: 'In the name of Allah we enter, in the name of Allah we leave, and upon our Lord we place our trust'
     },
     {
-      id: 6,
+      id: 9,
+      icon: Plane,
+      titleAr: 'دعاء السفر',
+      titleEn: 'Travel Dua',
+      arabic: 'سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَىٰ رَبِّنَا لَمُنقَلِبُونَ',
+      transliteration: 'Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila rabbina lamunqalibun',
+      translation: 'Glory is to Him Who has subjected this to us, and we could never have it by our efforts. Surely, unto our Lord we are returning'
+    },
+    {
+      id: 10,
       icon: Shield,
       titleAr: 'دعاء الحفظ',
       titleEn: 'Protection Dua',
       arabic: 'أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ',
       transliteration: 'A\'udhu bikalimatillahit-tammati min sharri ma khalaq',
       translation: 'I seek refuge in the perfect words of Allah from the evil of what He has created'
+    },
+    {
+      id: 11,
+      icon: BookOpen,
+      titleAr: 'دعاء طلب العلم',
+      titleEn: 'Seeking Knowledge',
+      arabic: 'رَبِّ زِدْنِي عِلْمًا',
+      transliteration: 'Rabbi zidni \'ilma',
+      translation: 'My Lord, increase me in knowledge'
+    },
+    {
+      id: 12,
+      icon: Sparkles,
+      titleAr: 'دعاء الاستغفار',
+      titleEn: 'Seeking Forgiveness',
+      arabic: 'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ',
+      transliteration: 'Astaghfirullaha al-\'Azeem alladhi la ilaha illa Huwal-Hayyul-Qayyum wa atubu ilayh',
+      translation: 'I seek forgiveness from Allah the Mighty, Whom there is none worthy of worship except Him, The Living, The Eternal, and I repent to Him'
+    },
+    {
+      id: 13,
+      icon: Users,
+      titleAr: 'دعاء للوالدين',
+      titleEn: 'For Parents',
+      arabic: 'رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا',
+      transliteration: 'Rabbir-hamhuma kama rabbayani saghira',
+      translation: 'My Lord, have mercy upon them as they brought me up when I was small'
+    },
+    {
+      id: 14,
+      icon: CloudRain,
+      titleAr: 'دعاء المطر',
+      titleEn: 'When it Rains',
+      arabic: 'اللَّهُمَّ صَيِّبًا نَافِعًا',
+      transliteration: 'Allahumma sayyiban nafi\'a',
+      translation: 'O Allah, let it be a beneficial rain'
+    },
+    {
+      id: 15,
+      icon: Sparkles,
+      titleAr: 'دعاء الاستخارة',
+      titleEn: 'Istikhara (Seeking Guidance)',
+      arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ',
+      transliteration: 'Allahumma inni astakhiruka bi\'ilmika, wa astaqdiruka biqudratika, wa as\'aluka min fadlikal-\'azim, fa innaka taqdiru wa la aqdir, wa ta\'lamu wa la a\'lam, wa anta \'allamul-ghuyub',
+      translation: 'O Allah, I seek Your guidance through Your knowledge, and I seek ability through Your power, and I ask You of Your great bounty. You have power; I have none. And You know; I know not. You are the Knower of hidden things'
     }
   ];
 
