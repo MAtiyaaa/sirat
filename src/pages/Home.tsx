@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Book, MessageSquare, Sparkles, ArrowRight, BookMarked } from 'lucide-react';
+import { 
+  Book, 
+  MessageSquare, 
+  Sparkles, 
+  BookMarked, 
+  Hand, 
+  CircleDot, 
+  Scroll, 
+  Bookmark, 
+  User, 
+  Settings as SettingsIcon,
+  Droplet,
+  History
+} from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -96,217 +109,194 @@ const Home = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const features = [
+  const appBoxes = [
     {
       icon: Book,
-      title: { ar: 'القرآن الكريم', en: 'Holy Quran' },
-      description: { 
-        ar: 'اقرأ وتعلم مع التفسير والترجمة', 
-        en: 'Read and learn with tafsir and translation' 
-      },
+      title: { ar: 'القرآن', en: 'Quran' },
       link: '/quran',
-      gradient: 'from-blue-500/20 via-blue-400/20 to-cyan-500/20',
-      iconBg: 'bg-blue-500/10',
-      iconColor: 'text-blue-600 dark:text-blue-400',
+      gradient: 'from-blue-500 to-cyan-500',
     },
     {
       icon: MessageSquare,
-      title: { ar: 'قلم - المساعد الذكي', en: 'Qalam AI' },
-      description: { 
-        ar: 'اسأل أسئلة إسلامية واحصل على إجابات', 
-        en: 'Islamic questions answered instantly' 
-      },
+      title: { ar: 'قلم', en: 'Qalam' },
       link: '/qalam',
-      gradient: 'from-purple-500/20 via-pink-400/20 to-rose-500/20',
-      iconBg: 'bg-purple-500/10',
-      iconColor: 'text-purple-600 dark:text-purple-400',
+      gradient: 'from-purple-500 to-pink-500',
     },
     {
       icon: BookMarked,
-      title: { ar: 'الأحاديث النبوية', en: 'Hadith Collection' },
-      description: { 
-        ar: 'استكشف أحاديث النبي محمد ﷺ', 
-        en: 'Explore authentic Prophetic traditions' 
-      },
+      title: { ar: 'الأحاديث', en: 'Hadith' },
       link: '/hadith',
-      gradient: 'from-green-500/20 via-emerald-400/20 to-teal-500/20',
-      iconBg: 'bg-green-500/10',
-      iconColor: 'text-green-600 dark:text-green-400',
+      gradient: 'from-green-500 to-emerald-500',
+    },
+    {
+      icon: Hand,
+      title: { ar: 'الأدعية', en: 'Duas' },
+      link: '/duas',
+      gradient: 'from-orange-500 to-amber-500',
+    },
+    {
+      icon: CircleDot,
+      title: { ar: 'التسبيح', en: 'Tasbih' },
+      link: '/tasbih',
+      gradient: 'from-teal-500 to-cyan-500',
+    },
+    {
+      icon: Droplet,
+      title: { ar: 'الوضوء', en: 'Wudu' },
+      link: '/wudu',
+      gradient: 'from-sky-500 to-blue-500',
+    },
+    {
+      icon: Scroll,
+      title: { ar: 'القصص', en: 'Stories' },
+      link: '/prophet-stories',
+      gradient: 'from-indigo-500 to-purple-500',
+    },
+    {
+      icon: Bookmark,
+      title: { ar: 'المحفوظات', en: 'Bookmarks' },
+      link: '/bookmarks',
+      gradient: 'from-rose-500 to-pink-500',
+    },
+    {
+      icon: History,
+      title: { ar: 'السجل', en: 'History' },
+      link: '/chat-history',
+      gradient: 'from-violet-500 to-purple-500',
+    },
+    {
+      icon: User,
+      title: { ar: 'الحساب', en: 'Account' },
+      link: '/account',
+      gradient: 'from-gray-500 to-slate-500',
+    },
+    {
+      icon: SettingsIcon,
+      title: { ar: 'الإعدادات', en: 'Settings' },
+      link: '/settings',
+      gradient: 'from-zinc-500 to-gray-500',
     },
   ];
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
-      <div className="w-full max-w-5xl mx-auto px-6 py-16 space-y-16">
+    <div className="min-h-[calc(100vh-8rem)] pb-8">
+      <div className="w-full max-w-4xl mx-auto px-4 py-8 space-y-8">
         
-        {/* Hero Section */}
-        <div className="text-center space-y-6 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect border border-border/50">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">
-              {settings.language === 'ar' ? 'بسم الله الرحمن الرحيم' : 'In the name of Allah, the Most Gracious'}
-            </span>
-          </div>
-          
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight">
+        {/* Hero Section - Compact */}
+        <div className="text-center space-y-3 animate-fade-in">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight ios-26-style">
             {settings.language === 'ar' ? (
-              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent arabic-regal">
+              <span className="bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent arabic-regal">
                 صراط
               </span>
             ) : (
-              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
                 Sirat
               </span>
             )}
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light">
+          <p className="text-sm md:text-base text-muted-foreground">
             {settings.language === 'ar' 
-              ? 'رفيقك في رحلة تعلم القرآن الكريم'
-              : 'Your companion in the journey of learning the Quran'}
+              ? 'رفيقك الإسلامي الشامل'
+              : 'Your Complete Islamic Companion'}
           </p>
-
-          {!user && (
-            <Link 
-              to="/auth"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 smooth-transition"
-            >
-              {settings.language === 'ar' ? 'ابدأ الآن' : 'Get Started'}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          )}
         </div>
 
-        {/* Surah of the Day */}
-        {surahOfDay && (
-          <Link 
-            to={`/quran/${surahOfDay.number}`}
-            className="block group animate-fade-in max-w-2xl mx-auto"
-          >
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
-              
-              <div className="relative glass-effect rounded-2xl p-4 md:p-5 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-semibold text-primary tracking-wide uppercase">
-                      {settings.language === 'ar' ? 'سورة اليوم' : 'Surah of the Day'}
-                    </span>
-                  </div>
-                  <div className="text-lg font-bold text-primary/70">
-                    {surahOfDay.number}
+        {/* Quick Access Cards */}
+        {(surahOfDay || continueReading) && (
+          <div className="space-y-3">
+            {/* Surah of the Day */}
+            {surahOfDay && (
+              <Link 
+                to={`/quran/${surahOfDay.number}`}
+                className="block group animate-fade-in"
+              >
+                <div className="glass-effect rounded-3xl p-4 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+                        <Sparkles className="h-6 w-6 text-primary-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          {settings.language === 'ar' ? 'سورة اليوم' : 'Surah of the Day'}
+                        </p>
+                        <h3 className="text-base font-bold">
+                          {settings.language === 'ar' ? surahOfDay.name : surahOfDay.englishName}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-primary/50">
+                      {surahOfDay.number}
+                    </div>
                   </div>
                 </div>
-                
-                <div className="space-y-1">
-                  <h3 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-                    {settings.language === 'ar' ? surahOfDay.name : surahOfDay.englishName}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {surahOfDay.englishNameTranslation} • {surahOfDay.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'}
-                  </p>
-                </div>
+              </Link>
+            )}
 
-                <div className="mt-3 flex items-center gap-1.5 text-primary text-xs font-semibold group-hover:gap-2.5 smooth-transition">
-                  <span>
-                    {settings.language === 'ar' ? 'اقرأ الآن' : 'Read Now'}
-                  </span>
-                  <ArrowRight className="h-3.5 w-3.5" />
+            {/* Continue Reading */}
+            {continueReading && (
+              <Link 
+                to={`/quran/${continueReading.number}`}
+                className="block group animate-fade-in"
+              >
+                <div className="glass-effect rounded-3xl p-4 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                        <Book className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
+                        </p>
+                        <h3 className="text-base font-bold">
+                          {settings.language === 'ar' ? continueReading.name : continueReading.englishName}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-primary/50">
+                      {continueReading.number}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </Link>
+              </Link>
+            )}
+          </div>
         )}
 
-        {/* Continue Reading */}
-        {continueReading && (
-          <Link 
-            to={`/quran/${continueReading.number}`}
-            className="block group animate-fade-in max-w-2xl mx-auto"
-          >
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
-              
-              <div className="relative glass-effect rounded-2xl p-4 md:p-5 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Book className="h-4 w-4 text-primary" />
-                    <span className="text-xs font-semibold text-primary tracking-wide uppercase">
-                      {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
-                    </span>
-                  </div>
-                  <div className="text-lg font-bold text-primary/70">
-                    {continueReading.number}
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <h3 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-                    {settings.language === 'ar' ? continueReading.name : continueReading.englishName}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {continueReading.englishNameTranslation} • {settings.language === 'ar' ? `الآية ${continueReading.ayahNumber}` : `Ayah ${continueReading.ayahNumber}`}
-                  </p>
-                </div>
-
-                <div className="mt-3 flex items-center gap-1.5 text-primary text-xs font-semibold group-hover:gap-2.5 smooth-transition">
-                  <span>
-                    {settings.language === 'ar' ? 'استمر' : 'Continue'}
-                  </span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        )}
-
-        {/* Features Grid */}
-        <div className="grid gap-6 md:grid-cols-3 mt-32">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
+        {/* App Grid - iOS 26 Style */}
+        <div className="grid grid-cols-4 gap-4 animate-fade-in">
+          {appBoxes.map((app, index) => {
+            const Icon = app.icon;
             return (
               <Link
-                key={feature.link}
-                to={feature.link}
-                className="group relative"
+                key={app.link}
+                to={app.link}
+                className="flex flex-col items-center gap-2 group"
                 style={{
-                  animationDelay: `${index * 100}ms`,
+                  animationDelay: `${index * 30}ms`,
                 }}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} rounded-3xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
-                
-                <div className="relative glass-effect rounded-2xl p-4 md:p-8 h-full border border-border/30 hover:border-border/50 smooth-transition backdrop-blur-xl">
-                  <div className="space-y-3 md:space-y-5">
-                    <div className={`inline-flex w-10 h-10 md:w-14 md:h-14 rounded-xl ${feature.iconBg} items-center justify-center group-hover:scale-105 smooth-transition`}>
-                      <Icon className={`h-5 w-5 md:h-7 md:w-7 ${feature.iconColor}`} />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-semibold tracking-tight">
-                        {feature.title[settings.language]}
-                      </h3>
-                      
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {feature.description[settings.language]}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 smooth-transition">
-                      <span>
-                        {settings.language === 'ar' ? 'استكشف' : 'Explore'}
-                      </span>
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  </div>
+                {/* iOS-style app icon */}
+                <div className={`w-full aspect-square rounded-[22%] bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 smooth-transition relative overflow-hidden`}>
+                  {/* Subtle overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+                  <Icon className="h-8 w-8 md:h-10 md:w-10 text-white relative z-10" strokeWidth={2} />
                 </div>
+                
+                {/* App label */}
+                <span className="text-xs font-medium text-center leading-tight w-full truncate px-1">
+                  {app.title[settings.language]}
+                </span>
               </Link>
             );
           })}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-3xl mx-auto">
+        {/* Stats - More compact */}
+        <div className="grid grid-cols-3 gap-3 pt-4">
           {[
             { value: '114', label: settings.language === 'ar' ? 'سورة' : 'Surahs' },
             { value: '6,236', label: settings.language === 'ar' ? 'آية' : 'Verses' },
@@ -314,13 +304,12 @@ const Home = () => {
           ].map((stat, i) => (
             <div 
               key={i} 
-              className="text-center glass-effect rounded-xl p-4 md:p-5 border border-border/30 animate-fade-in"
-              style={{ animationDelay: `${(i + 2) * 100}ms` }}
+              className="text-center glass-effect rounded-2xl p-3 border border-border/30"
             >
-              <div className="text-2xl md:text-3xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent mb-1.5 whitespace-nowrap">
+              <div className="text-xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
                 {stat.value}
               </div>
-              <div className="text-xs md:text-sm text-muted-foreground font-medium">
+              <div className="text-xs text-muted-foreground font-medium">
                 {stat.label}
               </div>
             </div>
