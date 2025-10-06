@@ -203,7 +203,7 @@ const Duas = () => {
 
       {/* Daily Duas */}
       <div className="space-y-4">
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent text-center pt-8">
           {settings.language === 'ar' ? 'الأدعية اليومية' : 'Daily Duas'}
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
