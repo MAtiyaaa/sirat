@@ -195,6 +195,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
           full_name: string | null
           id: string
@@ -202,6 +203,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
@@ -209,6 +211,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
           full_name?: string | null
           id?: string
@@ -293,6 +296,99 @@ export type Database = {
           theme?: string | null
           translation_enabled?: boolean | null
           translation_source?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          created_at: string | null
+          days_opened_this_year: number | null
+          id: string
+          last_opened_date: string | null
+          surahs_read: number | null
+          times_opened_this_month: number | null
+          times_opened_this_year: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          days_opened_this_year?: number | null
+          id?: string
+          last_opened_date?: string | null
+          surahs_read?: number | null
+          times_opened_this_month?: number | null
+          times_opened_this_year?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          days_opened_this_year?: number | null
+          id?: string
+          last_opened_date?: string | null
+          surahs_read?: number | null
+          times_opened_this_month?: number | null
+          times_opened_this_year?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_zakat_data: {
+        Row: {
+          business_assets: number | null
+          cash_bank: number | null
+          created_at: string | null
+          crypto: number | null
+          currency: string | null
+          gold_grams: number | null
+          gold_price_per_gram: number | null
+          id: string
+          investments: number | null
+          liabilities: number | null
+          nisab_basis: string | null
+          receivables: number | null
+          silver_grams: number | null
+          silver_price_per_gram: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_assets?: number | null
+          cash_bank?: number | null
+          created_at?: string | null
+          crypto?: number | null
+          currency?: string | null
+          gold_grams?: number | null
+          gold_price_per_gram?: number | null
+          id?: string
+          investments?: number | null
+          liabilities?: number | null
+          nisab_basis?: string | null
+          receivables?: number | null
+          silver_grams?: number | null
+          silver_price_per_gram?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_assets?: number | null
+          cash_bank?: number | null
+          created_at?: string | null
+          crypto?: number | null
+          currency?: string | null
+          gold_grams?: number | null
+          gold_price_per_gram?: number | null
+          id?: string
+          investments?: number | null
+          liabilities?: number | null
+          nisab_basis?: string | null
+          receivables?: number | null
+          silver_grams?: number | null
+          silver_price_per_gram?: number | null
           updated_at?: string | null
           user_id?: string
         }

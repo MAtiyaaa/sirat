@@ -12,7 +12,8 @@ import {
   User, 
   Settings as SettingsIcon,
   Moon,
-  History
+  History,
+  Calculator
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -195,6 +196,12 @@ const Home = () => {
       title: { ar: 'الصلاة', en: 'Prayer' },
       link: '/wudu',
       gradient: 'from-sky-500 to-blue-500',
+    },
+    {
+      icon: Calculator,
+      title: { ar: 'الزكاة', en: 'Zakat' },
+      link: '/zakat',
+      gradient: 'from-amber-500 to-yellow-500',
     },
     {
       icon: Scroll,

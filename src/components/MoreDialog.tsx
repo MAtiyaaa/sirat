@@ -11,7 +11,8 @@ import {
   Bookmark,
   CircleDot,
   Hand,
-  Scroll
+  Scroll,
+  Calculator
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -26,6 +27,7 @@ const MoreDialog = () => {
       duas: 'الأدعية',
       hadith: 'الأحاديث',
       tasbih: 'التسبيح',
+      zakat: 'الزكاة',
       stories: 'قصص الأنبياء',
       bookmarks: 'الإشارات المرجعية',
       account: 'الحساب',
@@ -36,6 +38,7 @@ const MoreDialog = () => {
       duas: 'Duas',
       hadith: 'Hadith',
       tasbih: 'Tasbih',
+      zakat: 'Zakat',
       stories: 'Prophet Stories',
       bookmarks: 'Bookmarks',
       account: 'Account',
@@ -50,6 +53,7 @@ const MoreDialog = () => {
     { icon: Hand, label: t.duas, path: '/duas' },
     { icon: Scroll, label: t.stories, path: '/prophet-stories' },
     { icon: CircleDot, label: t.tasbih, path: '/tasbih' },
+    { icon: Calculator, label: t.zakat, path: '/zakat' },
     { icon: Bookmark, label: t.bookmarks, path: '/bookmarks' },
     { icon: User, label: t.account, path: '/account' },
     { icon: SettingsIcon, label: t.settings, path: '/settings' },
