@@ -73,33 +73,49 @@ const Account = () => {
   }, [user]);
 
   useEffect(() => {
-    // Reload profile when returning to the page
+    // Reload profile when returning to the page or when navigating
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        loadProfile();
+      }
+    };
+    
     const handleFocus = () => {
       if (user) {
         loadProfile();
       }
     };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   const loadProfile = async () => {
     if (!user) return;
     
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-    if (error) {
+      if (error) {
+        console.error('Error loading profile:', error);
+        return;
+      }
+
+      if (data) {
+        setProfile(data);
+        setFullName(data.full_name || '');
+      }
+    } catch (error) {
       console.error('Error loading profile:', error);
-      return;
-    }
-
-    if (data) {
-      setProfile(data);
-      setFullName(data.full_name || '');
     }
   };
 

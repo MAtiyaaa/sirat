@@ -36,6 +36,16 @@ const Settings = () => {
     // Load auto-lock setting
     const savedAutoLock = localStorage.getItem('quran_auto_lock') === 'true';
     setAutoLock(savedAutoLock);
+    
+    // Reload profile when returning to page
+    const handleVisibilityChange = () => {
+      if (!document.hidden && user) {
+        loadProfile();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [user]);
 
   const loadProfile = async () => {

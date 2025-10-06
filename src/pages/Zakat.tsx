@@ -480,10 +480,7 @@ const Zakat = () => {
           </CardContent>
         </Card>
 
-        <div className="flex flex-col gap-3 mb-6">
-          <Button onClick={saveZakatData} disabled={loading} className="w-full">
-            {loading ? (settings.language === 'ar' ? 'جاري الحفظ...' : 'Saving...') : t.save}
-          </Button>
+        <div className="mb-6">
           <p className="text-xs text-center text-muted-foreground">{t.privacyNote}</p>
         </div>
       </div>
