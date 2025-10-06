@@ -561,13 +561,19 @@ const Account = () => {
     );
   }
 
-  const joinedDate = profile?.created_at 
-    ? new Date(profile.created_at).toLocaleDateString(settings.language === 'ar' ? 'ar-SA' : 'en-US', {
+  const joinedDate = stats.joinedDate 
+    ? new Date(stats.joinedDate).toLocaleDateString(settings.language === 'ar' ? 'ar-SA' : 'en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       })
-    : '';
+    : (profile?.created_at 
+      ? new Date(profile.created_at).toLocaleDateString(settings.language === 'ar' ? 'ar-SA' : 'en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      : '—');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/10">

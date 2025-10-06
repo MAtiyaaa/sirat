@@ -1,7 +1,8 @@
 import React from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight, CircleDot, Plane, BookOpen, Sparkles, CloudRain, Users, Bed, BedDouble, Droplet } from 'lucide-react';
+import { Heart, Sun, Moon, Utensils, Home, Shield, ArrowRight, ArrowLeft, CircleDot, Plane, BookOpen, Sparkles, CloudRain, Users, Bed, BedDouble, Droplet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface Dua {
   id: number;
@@ -194,7 +195,7 @@ const Duas = () => {
         onClick={() => navigate(-1)}
         className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
       >
-        <ArrowRight className="h-5 w-5" />
+        <ArrowLeft className="h-5 w-5" />
       </Button>
 
       <div className="text-center space-y-4 pt-8">
