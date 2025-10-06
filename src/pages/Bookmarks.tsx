@@ -183,22 +183,26 @@ const Bookmarks = () => {
             </div>
           ) : (
             ayahBookmarks.map(bookmark => (
-              <Card
+              <div
                 key={bookmark.id}
-                className="glass-effect p-6 border border-border/50 hover:border-primary/50 smooth-transition cursor-pointer"
                 onClick={() => navigate(`/quran/${bookmark.surah_number}`)}
+                className="glass-effect rounded-3xl p-6 border border-border/30 hover:border-primary/40 backdrop-blur-xl smooth-transition cursor-pointer group"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <BookOpen className="h-4 w-4 text-primary" />
-                      <h3 className="font-semibold">{getSurahName(bookmark.surah_number)}</h3>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg group-hover:scale-110 smooth-transition">
+                        <BookOpen className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">{getSurahName(bookmark.surah_number)}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {settings.language === 'ar' 
+                            ? `الآية ${bookmark.ayah_number}`
+                            : `Ayah ${bookmark.ayah_number}`}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {settings.language === 'ar' 
-                        ? `الآية ${bookmark.ayah_number}`
-                        : `Ayah ${bookmark.ayah_number}`}
-                    </p>
                   </div>
                   <Button
                     variant="ghost"
@@ -207,12 +211,12 @@ const Bookmarks = () => {
                       e.stopPropagation();
                       removeBookmark(bookmark.id);
                     }}
-                    className="text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive rounded-full"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-5 w-5" />
                   </Button>
                 </div>
-              </Card>
+              </div>
             ))
           )}
         </TabsContent>
@@ -231,25 +235,23 @@ const Bookmarks = () => {
             surahBookmarks.map(bookmark => {
               const surah = surahs.find(s => s.number === bookmark.surah_number);
               return (
-                <Card
+                <div
                   key={bookmark.id}
-                  className="glass-effect p-6 border border-border/50 hover:border-primary/50 smooth-transition cursor-pointer"
                   onClick={() => navigate(`/quran/${bookmark.surah_number}`)}
+                  className="glass-effect rounded-3xl p-6 border border-border/30 hover:border-primary/40 backdrop-blur-xl smooth-transition cursor-pointer group"
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                          <span className="text-primary font-bold">{bookmark.surah_number}</span>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{getSurahName(bookmark.surah_number)}</h3>
-                          {surah && (
-                            <p className="text-sm text-muted-foreground">
-                              {surah.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'}
-                            </p>
-                          )}
-                        </div>
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg group-hover:scale-110 smooth-transition">
+                        <span className="text-white font-bold text-xl">{bookmark.surah_number}</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-xl mb-1">{getSurahName(bookmark.surah_number)}</h3>
+                        {surah && (
+                          <p className="text-sm text-muted-foreground">
+                            {surah.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <Button
@@ -259,12 +261,12 @@ const Bookmarks = () => {
                         e.stopPropagation();
                         removeBookmark(bookmark.id);
                       }}
-                      className="text-muted-foreground hover:text-destructive"
+                      className="text-muted-foreground hover:text-destructive rounded-full"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
-                </Card>
+                </div>
               );
             })
           )}

@@ -738,6 +738,23 @@ const SurahDetail = () => {
     playGlobalSurah(currentSurahNumber, surahData.numberOfAyahs);
   };
 
+  // Auto-scroll to playing ayah when locked
+  useEffect(() => {
+    if (!playingSurah || !isPlaying || playingSurah !== parseInt(surahNumber!)) return;
+    
+    const isLocked = window.quranLockState;
+    if (!isLocked) return;
+
+    const scrollToCurrentAyah = () => {
+      const element = document.querySelector(`[data-ayah="${globalPlayingAyah}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+
+    scrollToCurrentAyah();
+  }, [globalPlayingAyah, playingSurah, isPlaying, surahNumber]);
+
   const handleWordClick = async (ayahNumber: number, wordIndex: number) => {
     const key = `${ayahNumber}-${wordIndex}`;
     setOpenWordPopover(openWordPopover === key ? null : key);
@@ -801,39 +818,6 @@ const SurahDetail = () => {
       >
         <ArrowLeft className="h-4 w-4" />
       </Button>
-
-      {/* Lock/Play Controls - Bottom Right */}
-      {playingSurah === parseInt(surahNumber!) && (
-        <div className="fixed bottom-6 right-6 z-[60] flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => {
-              const autoLock = localStorage.getItem('quran_auto_lock') === 'true';
-              localStorage.setItem('quran_auto_lock', (!autoLock).toString());
-              toast.success(settings.language === 'ar' ? 
-                (autoLock ? 'تم إيقاف القفل التلقائي' : 'تم تفعيل القفل التلقائي') : 
-                (autoLock ? 'Auto-lock disabled' : 'Auto-lock enabled')
-              );
-            }}
-            className="rounded-full w-10 h-10 bg-background/80 backdrop-blur-sm shadow-lg"
-            title={settings.language === 'ar' ? 'قفل تلقائي' : 'Auto-lock'}
-          >
-            <Lock className="h-4 w-4" />
-          </Button>
-          <Button
-            onClick={playSurah}
-            className="rounded-full w-12 h-12 shadow-lg"
-            title={isPlaying ? (settings.language === 'ar' ? 'إيقاف مؤقت' : 'Pause') : (settings.language === 'ar' ? 'تشغيل' : 'Play')}
-          >
-            {isPlaying ? (
-              <Pause className="h-5 w-5" />
-            ) : (
-              <Play className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-      )}
 
       {/* Header */}
       <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">

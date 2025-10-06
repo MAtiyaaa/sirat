@@ -1,18 +1,50 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Book, Moon, Home, MessageSquare } from 'lucide-react';
+import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useAudio } from '@/contexts/AudioContext';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
 import MoreDialog from './MoreDialog';
+
+declare global {
+  interface Window {
+    quranLockState?: boolean;
+  }
+}
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const { playingSurah, isPlaying, pauseSurah, resumeSurah } = useAudio();
+  const [isLocked, setIsLocked] = useState(false);
   
   const appName = settings.language === 'ar' 
     ? <span className="arabic-regal text-3xl">صراط</span>
     : 'Sirat';
+
+  const isInQuranPage = location.pathname.startsWith('/quran/') && location.pathname !== '/quran';
+
+  // Check auto-lock setting when surah starts playing
+  useEffect(() => {
+    if (playingSurah && isInQuranPage) {
+      const autoLockEnabled = localStorage.getItem('quran_auto_lock') === 'true';
+      setIsLocked(autoLockEnabled);
+    }
+  }, [playingSurah, isInQuranPage]);
+
+  // Reset lock when leaving Quran page
+  useEffect(() => {
+    if (!isInQuranPage) {
+      setIsLocked(false);
+    }
+  }, [isInQuranPage]);
+
+  // Store lock state globally so SurahDetail can access it
+  useEffect(() => {
+    window.quranLockState = isLocked;
+  }, [isLocked]);
 
   // Track when user leaves a surah to remember position
   useEffect(() => {
@@ -116,6 +148,48 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       <nav className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border z-50 backdrop-blur-xl">
         <div className="container mx-auto max-w-4xl">
+          {/* Global Play Controls - Above Nav */}
+          {playingSurah && (
+            <div className="border-b border-border/50 py-2 px-4">
+              <div className="flex items-center justify-center gap-3">
+                {/* Lock button - only show on Quran page */}
+                {isInQuranPage && (
+                  <Button
+                    variant={isLocked ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setIsLocked(!isLocked)}
+                    className="rounded-full w-10 h-10"
+                    title={settings.language === 'ar' ? 
+                      (isLocked ? 'إلغاء القفل' : 'قفل') : 
+                      (isLocked ? 'Unlock' : 'Lock')}
+                  >
+                    {isLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
+                  </Button>
+                )}
+                
+                {/* Play/Pause - always show when playing */}
+                <Button
+                  onClick={isPlaying ? pauseSurah : resumeSurah}
+                  className="rounded-full w-12 h-12 shadow-lg"
+                  title={isPlaying ? 
+                    (settings.language === 'ar' ? 'إيقاف مؤقت' : 'Pause') : 
+                    (settings.language === 'ar' ? 'تشغيل' : 'Play')}
+                >
+                  {isPlaying ? (
+                    <Pause className="h-5 w-5" />
+                  ) : (
+                    <Play className="h-5 w-5" />
+                  )}
+                </Button>
+                
+                <span className="text-xs text-muted-foreground">
+                  {settings.language === 'ar' ? `سورة ${playingSurah}` : `Surah ${playingSurah}`}
+                </span>
+              </div>
+            </div>
+          )}
+          
+          {/* Navigation Tabs */}
           <div className="flex justify-around items-center py-2">
             {navItems.map((item) => {
               const Icon = item.icon;

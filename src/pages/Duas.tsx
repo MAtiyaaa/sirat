@@ -213,17 +213,17 @@ const Duas = () => {
 
       {/* Daily Duas */}
       <div className="space-y-4">
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent text-center pt-8 pb-2">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-4">
           {settings.language === 'ar' ? 'الأدعية اليومية' : 'Daily Duas'}
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {duas.map((dua) => {
             const Icon = dua.icon;
             return (
-              <div key={dua.id} className="glass-effect rounded-2xl p-6 space-y-4">
+              <div key={dua.id} className="glass-effect rounded-3xl p-6 space-y-4 border border-border/30 backdrop-blur-xl hover:border-primary/30 smooth-transition">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-primary" />
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                    <Icon className="h-6 w-6 text-white" />
                   </div>
                   <h3 className="text-lg font-semibold">
                     {settings.language === 'ar' ? dua.titleAr : dua.titleEn}
@@ -251,14 +251,13 @@ const Duas = () => {
         </div>
       </div>
 
-      {/* Dhikr Counter */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-semibold">
-          {settings.language === 'ar' ? 'الأذكار' : 'Dhikr'}
+        <h2 className="text-2xl md:text-3xl font-bold text-center">
+          {settings.language === 'ar' ? 'الأذكار' : 'Daily Dhikr'}
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {dhikr.map((item) => (
-            <div key={item.id} className="glass-effect rounded-2xl p-6 text-center space-y-3">
+            <div key={item.id} className="glass-effect rounded-3xl p-6 text-center space-y-3 border border-border/30 backdrop-blur-xl hover:border-primary/30 smooth-transition">
               <p className={`text-2xl font-bold ${settings.fontType === 'quran' ? 'font-quran' : ''}`} dir="rtl">
                 {item.arabic}
               </p>
