@@ -72,6 +72,17 @@ const Account = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Reload profile when returning to the page
+    const handleFocus = () => {
+      if (user) {
+        loadProfile();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user]);
+
   const loadProfile = async () => {
     if (!user) return;
     

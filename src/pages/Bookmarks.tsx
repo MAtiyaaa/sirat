@@ -134,27 +134,27 @@ const Bookmarks = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="rounded-full"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-4xl md:text-5xl font-bold">
-            {settings.language === 'ar' ? 'الإشارات المرجعية' : 'Bookmarks'}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {settings.language === 'ar' 
-              ? 'الآيات والسور والأحاديث المحفوظة'
-              : 'Your saved ayahs, surahs, and hadiths'}
-          </p>
-        </div>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate(-1)}
+        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+
+      <div className="text-center space-y-4 pt-8">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+            {settings.language === 'ar' ? 'المحفوظات' : 'Bookmarks'}
+          </span>
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          {settings.language === 'ar' 
+            ? 'الآيات والسور والأحاديث المحفوظة'
+            : 'Your saved ayahs, surahs, and hadiths'}
+        </p>
       </div>
 
       {/* Tabs */}

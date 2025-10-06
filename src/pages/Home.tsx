@@ -307,10 +307,10 @@ const Home = () => {
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-primary uppercase tracking-wider">
-                          {settings.language === 'ar' ? 'سورة اليوم' : 'Surah of the Day'}
+                          {settings.language === 'ar' ? 'آية اليوم' : 'Daily Ayah'}
                         </p>
                         <h3 className="text-sm font-bold leading-tight">
-                          {settings.language === 'ar' ? surahOfDay.name : surahOfDay.englishName}
+                          {settings.language === 'ar' ? surahOfDay.name : `${surahOfDay.englishName} (${surahOfDay.number}):1`}
                         </h3>
                       </div>
                     </div>

@@ -187,17 +187,26 @@ const Duas = () => {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="text-center space-y-4 py-8">
+    <div className="max-w-4xl mx-auto space-y-8">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate(-1)}
+        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
+      >
+        <ArrowRight className="h-5 w-5" />
+      </Button>
+
+      <div className="text-center space-y-4 pt-8">
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
           <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-            {settings.language === 'ar' ? 'الأدعية والأذكار' : 'Daily Duas & Dhikr'}
+            {settings.language === 'ar' ? 'الأدعية والأذكار' : 'Daily Duas'}
           </span>
         </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
           {settings.language === 'ar' 
             ? 'أدعية وأذكار يومية من السنة النبوية'
-            : 'Daily supplications and remembrance from the Sunnah'}
+            : 'Daily supplications from the Sunnah'}
         </p>
       </div>
 
