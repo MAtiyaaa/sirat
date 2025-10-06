@@ -75,6 +75,7 @@ const Zakat = () => {
       explanation: 'الزكاة واجبة على كل مسلم بالغ عاقل يملك نصاباً من المال الذي مر عليه حول كامل. النصاب هو 85 جرام من الذهب أو 595 جرام من الفضة. مقدار الزكاة هو 2.5% من صافي الأصول الزكوية.',
       privacyNote: 'جميع البيانات خاصة بك ولن يتم مشاركتها.',
       signInRequired: 'يرجى تسجيل الدخول لحفظ بياناتك',
+      enterPriceNote: 'أدخل سعر الجرام للذهب/الفضة لحساب حد النصاب بدقة.',
     },
     en: {
       title: 'Zakat Calculator',
@@ -107,6 +108,7 @@ const Zakat = () => {
       explanation: 'Zakat is obligatory for every adult Muslim who possesses the nisab (minimum threshold) for one lunar year. The nisab is equivalent to 85 grams of gold or 595 grams of silver. The Zakat rate is 2.5% of net zakatable assets.',
       privacyNote: 'All your data is private and will not be shared.',
       signInRequired: 'Please sign in to save your data',
+      enterPriceNote: 'Enter price/gram for gold/silver to compute nisab accurately.',
     },
   };
 
@@ -212,8 +214,11 @@ const Zakat = () => {
   };
 
   const calculateZakat = () => {
-    const goldValue = (parseFloat(goldGrams) || 0) * (parseFloat(goldPricePerGram) || 0);
-    const silverValue = (parseFloat(silverGrams) || 0) * (parseFloat(silverPricePerGram) || 0);
+    const goldPrice = parseFloat(goldPricePerGram) || 0;
+    const silverPrice = parseFloat(silverPricePerGram) || 0;
+
+    const goldValue = (parseFloat(goldGrams) || 0) * goldPrice;
+    const silverValue = (parseFloat(silverGrams) || 0) * silverPrice;
     
     const totalAssets = 
       (parseFloat(cashBank) || 0) +
@@ -227,12 +232,23 @@ const Zakat = () => {
     const totalLiabilities = parseFloat(liabilities) || 0;
     const netAssets = totalAssets - totalLiabilities;
 
-    const nisabValue = nisabBasis === 'gold'
-      ? 85 * (parseFloat(goldPricePerGram) || 0)
-      : 595 * (parseFloat(silverPricePerGram) || 0);
+    // Require valid price/gram for chosen basis to compute nisab correctly
+    const priceMissing = nisabBasis === 'gold'
+      ? goldPrice <= 0
+      : silverPrice <= 0;
 
-    const qualifies = netAssets >= nisabValue;
-    const zakatDue = qualifies ? netAssets * 0.025 : 0;
+    const nisabValue = priceMissing
+      ? NaN
+      : (nisabBasis === 'gold'
+          ? 85 * goldPrice
+          : 595 * silverPrice);
+
+    // Only qualify if nisabValue is valid and netAssets >= nisab
+    const qualifies = !isNaN(nisabValue) && netAssets >= nisabValue;
+
+    // Zakat is 2.5% of NET if qualifies; also never charge on negative net
+    const zakatBase = Math.max(0, netAssets);
+    const zakatDue = qualifies ? zakatBase * 0.025 : 0;
 
     return {
       totalAssets,
@@ -241,6 +257,7 @@ const Zakat = () => {
       nisabValue,
       qualifies,
       zakatDue,
+      priceMissing,
     };
   };
 
@@ -458,21 +475,29 @@ const Zakat = () => {
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground">{t.nisabThreshold}</p>
-                <p className="text-2xl font-bold">{currencySymbol}{results.nisabValue.toFixed(2)}</p>
+                <p className="text-2xl font-bold">
+                  {isNaN(results.nisabValue) ? '—' : `${currencySymbol}${results.nisabValue.toFixed(2)}`}
+                </p>
               </div>
             </div>
 
-            <div className={`p-4 rounded-lg text-center ${results.qualifies ? 'bg-primary/10 text-primary' : 'bg-muted'}`}>
-              <p className="font-semibold text-lg mb-2">
-                {results.qualifies ? t.qualifies : t.notQualifies}
-              </p>
-              {results.qualifies && (
-                <div>
-                  <p className="text-muted-foreground text-sm mb-1">{t.zakatDue}</p>
-                  <p className="text-3xl font-bold">{currencySymbol}{results.zakatDue.toFixed(2)}</p>
-                </div>
-              )}
-            </div>
+            {results.priceMissing ? (
+              <div className="p-4 rounded-lg text-center bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+                {t.enterPriceNote}
+              </div>
+            ) : (
+              <div className={`p-4 rounded-lg text-center ${results.qualifies ? 'bg-primary/10 text-primary' : 'bg-muted'}`}>
+                <p className="font-semibold text-lg mb-2">
+                  {results.qualifies ? t.qualifies : t.notQualifies}
+                </p>
+                {results.qualifies && (
+                  <div>
+                    <p className="text-muted-foreground text-sm mb-1">{t.zakatDue}</p>
+                    <p className="text-3xl font-bold">{currencySymbol}{results.zakatDue.toFixed(2)}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">
               {t.explanation}
