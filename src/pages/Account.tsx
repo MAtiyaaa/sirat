@@ -600,9 +600,9 @@ const Account = () => {
           {/* Avatar */}
           <div className="relative inline-block">
             <Avatar className="w-32 h-32 border-4 border-primary/20 shadow-xl">
-              <AvatarImage src={profile?.avatar_url} />
+              <AvatarImage src={profile?.avatar_url} key={profile?.avatar_url} />
               <AvatarFallback className="bg-primary/10 text-primary text-4xl font-bold">
-                {fullName ? fullName[0].toUpperCase() : user.email?.[0].toUpperCase() || '?'}
+                {(profile?.full_name || fullName) ? (profile?.full_name || fullName)[0].toUpperCase() : user.email?.[0].toUpperCase() || '?'}
               </AvatarFallback>
             </Avatar>
             <label 
@@ -623,7 +623,7 @@ const Account = () => {
 
           {/* Name */}
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold">{fullName || user.email}</h1>
+            <h1 className="text-3xl font-bold">{profile?.full_name || fullName || user.email}</h1>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
 
