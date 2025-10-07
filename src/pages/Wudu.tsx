@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown, Calendar, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -52,6 +53,9 @@ const Wudu = () => {
   const [isHijriOpen, setIsHijriOpen] = useState(false);
   const [isRamadanOpen, setIsRamadanOpen] = useState(false);
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
+  const [deviceHeading, setDeviceHeading] = useState<number>(0);
+  const [compassMode, setCompassMode] = useState<boolean>(false);
+  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   const [hijriDate, setHijriDate] = useState<HijriDate | null>(null);
   const [hijriCalendarDays, setHijriCalendarDays] = useState<HijriCalendarDay[]>([]);
   const [currentHijriMonth, setCurrentHijriMonth] = useState<number>(1);
@@ -248,6 +252,43 @@ const Wudu = () => {
       setQiblaDirection(null);
     }
   };
+
+  const requestOrientationPermission = async () => {
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const permission = await (DeviceOrientationEvent as any).requestPermission();
+        if (permission === 'granted') {
+          setPermissionGranted(true);
+          setCompassMode(true);
+          toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass enabled');
+        } else {
+          toast.error(settings.language === 'ar' ? 'لم يتم منح الإذن' : 'Permission denied');
+        }
+      } catch (error) {
+        console.error('Error requesting permission:', error);
+        toast.error(settings.language === 'ar' ? 'خطأ في الإذن' : 'Permission error');
+      }
+    } else {
+      // Android or other browsers - no permission needed
+      setPermissionGranted(true);
+      setCompassMode(true);
+      toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass enabled');
+    }
+  };
+
+  useEffect(() => {
+    if (!compassMode || !permissionGranted) return;
+
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.alpha !== null) {
+        // Alpha is the compass heading (0-360)
+        setDeviceHeading(360 - event.alpha);
+      }
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation);
+    return () => window.removeEventListener('deviceorientation', handleOrientation);
+  }, [compassMode, permissionGranted]);
 
   const fetchHijriCalendar = async (month: number, year: number) => {
     try {
@@ -572,24 +613,43 @@ const Wudu = () => {
           <CollapsibleContent className="mt-8">
             {qiblaDirection !== null ? (
               <div className="flex flex-col items-center space-y-6">
+                {/* Compass Mode Toggle */}
+                <button
+                  onClick={requestOrientationPermission}
+                  disabled={compassMode}
+                  className={`px-6 py-3 rounded-full font-medium transition-all ${
+                    compassMode 
+                      ? 'bg-primary/20 text-primary cursor-not-allowed' 
+                      : 'bg-primary text-primary-foreground hover:scale-105'
+                  }`}
+                >
+                  {compassMode 
+                    ? (settings.language === 'ar' ? '🧭 البوصلة نشطة' : '🧭 Compass Active')
+                    : (settings.language === 'ar' ? 'تفعيل البوصلة الحية' : 'Enable Live Compass')
+                  }
+                </button>
+
                 {/* Large Compass */}
                 <div className="relative w-64 h-64">
                   {/* Compass Circle */}
-                  <div className="absolute inset-0 rounded-full border-8 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl"></div>
-                  
-                  {/* Compass Directions */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative w-full h-full">
-                      <div className="absolute top-2 left-1/2 -translate-x-1/2 text-sm font-bold text-primary">N</div>
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-sm font-bold text-muted-foreground">S</div>
-                      <div className="absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">W</div>
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">E</div>
+                  <div 
+                    className="absolute inset-0 rounded-full border-8 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl transition-transform duration-300"
+                    style={{ transform: compassMode ? `rotate(${deviceHeading}deg)` : 'rotate(0deg)' }}
+                  >
+                    {/* Compass Directions */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="relative w-full h-full">
+                        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-sm font-bold text-primary">N</div>
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-sm font-bold text-muted-foreground">S</div>
+                        <div className="absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">W</div>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">E</div>
+                      </div>
                     </div>
                   </div>
                   
-                  {/* Qibla Arrow with Kaaba */}
+                  {/* Qibla Arrow with Kaaba - always points to Qibla */}
                   <div 
-                    className="absolute inset-0 flex items-center justify-center"
+                    className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
                     style={{ transform: `rotate(${qiblaDirection}deg)` }}
                   >
                     <div className="flex flex-col items-center">
@@ -615,6 +675,13 @@ const Wudu = () => {
                       ? 'اتجه نحو الكعبة المشرفة' 
                       : 'Direction to the Holy Kaaba'}
                   </p>
+                  {compassMode && (
+                    <p className="text-xs text-muted-foreground">
+                      {settings.language === 'ar' 
+                        ? 'حرك هاتفك لرؤية الاتجاه' 
+                        : 'Move your phone to see direction'}
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (

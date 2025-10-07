@@ -241,15 +241,17 @@ const Account = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get public URL with timestamp to force refresh
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
+      
+      const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
 
       // Update profile
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: timestampedUrl })
         .eq('user_id', user.id);
 
       if (updateError) throw updateError;
@@ -258,7 +260,8 @@ const Account = () => {
         title: t.photoUpdated,
       });
 
-      loadProfile();
+      // Force reload profile with slight delay
+      setTimeout(() => loadProfile(), 500);
     } catch (error) {
       console.error('Avatar upload error:', error);
       toast({
