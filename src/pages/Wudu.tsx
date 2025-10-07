@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown, Calendar, Moon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -48,14 +47,9 @@ const Wudu = () => {
   const [loading, setLoading] = useState(true);
   const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string; time: string } | null>(null);
   const [isPrayerTimesOpen, setIsPrayerTimesOpen] = useState(false);
-  const [isQiblaOpen, setIsQiblaOpen] = useState(false);
   const [isWuduStepsOpen, setIsWuduStepsOpen] = useState(false);
   const [isHijriOpen, setIsHijriOpen] = useState(false);
   const [isRamadanOpen, setIsRamadanOpen] = useState(false);
-  const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
-  const [deviceHeading, setDeviceHeading] = useState<number>(0);
-  const [compassMode, setCompassMode] = useState<boolean>(false);
-  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   const [hijriDate, setHijriDate] = useState<HijriDate | null>(null);
   const [hijriCalendarDays, setHijriCalendarDays] = useState<HijriCalendarDay[]>([]);
   const [currentHijriMonth, setCurrentHijriMonth] = useState<number>(1);
@@ -68,7 +62,6 @@ const Wudu = () => {
     fetchPrayerTimes();
     fetchHijriDate();
     fetchIslamicEvents();
-    fetchQiblaDirection();
   }, [settings.prayerTimeRegion]);
 
   useEffect(() => {
@@ -224,71 +217,6 @@ const Wudu = () => {
       console.error('Error fetching Hijri date:', error);
     }
   };
-
-  const fetchQiblaDirection = async () => {
-    try {
-      let latitude, longitude;
-
-      if (settings.prayerTimeRegion) {
-        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
-      } else {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-        latitude = position.coords.latitude;
-        longitude = position.coords.longitude;
-      }
-
-      const response = await fetch(
-        `https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`
-      );
-      const data = await response.json();
-
-      if (data.code === 200) {
-        setQiblaDirection(data.data.direction);
-      }
-    } catch (error) {
-      console.error('Error fetching Qibla direction:', error);
-      setQiblaDirection(null);
-    }
-  };
-
-  const requestOrientationPermission = async () => {
-    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-      try {
-        const permission = await (DeviceOrientationEvent as any).requestPermission();
-        if (permission === 'granted') {
-          setPermissionGranted(true);
-          setCompassMode(true);
-          toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass enabled');
-        } else {
-          toast.error(settings.language === 'ar' ? 'لم يتم منح الإذن' : 'Permission denied');
-        }
-      } catch (error) {
-        console.error('Error requesting permission:', error);
-        toast.error(settings.language === 'ar' ? 'خطأ في الإذن' : 'Permission error');
-      }
-    } else {
-      // Android or other browsers - no permission needed
-      setPermissionGranted(true);
-      setCompassMode(true);
-      toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass enabled');
-    }
-  };
-
-  useEffect(() => {
-    if (!compassMode || !permissionGranted) return;
-
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (event.alpha !== null) {
-        // Alpha is the compass heading (0-360)
-        setDeviceHeading(360 - event.alpha);
-      }
-    };
-
-    window.addEventListener('deviceorientation', handleOrientation);
-    return () => window.removeEventListener('deviceorientation', handleOrientation);
-  }, [compassMode, permissionGranted]);
 
   const fetchHijriCalendar = async (month: number, year: number) => {
     try {
@@ -561,140 +489,6 @@ const Wudu = () => {
           </div>
         </div>
       )}
-
-      {/* Qibla Locator Section */}
-      <Collapsible open={isQiblaOpen} onOpenChange={setIsQiblaOpen}>
-        <div className="glass-effect rounded-3xl p-6 border border-border/50">
-          <CollapsibleTrigger asChild>
-            <button className="w-full">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <h2 className="text-2xl font-bold">
-                      {settings.language === 'ar' ? 'اتجاه القبلة' : 'Qibla Direction'}
-                    </h2>
-                    {qiblaDirection !== null && (
-                      <div className="text-sm text-muted-foreground mt-1">
-                        {qiblaDirection.toFixed(1)}°
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {qiblaDirection !== null && !isQiblaOpen && (
-                  <div className="flex items-center gap-4">
-                    <div className="relative w-12 h-12">
-                      <div className="absolute inset-0 rounded-full bg-primary/10"></div>
-                      <svg 
-                        className="w-12 h-12 text-primary"
-                        style={{ transform: `rotate(${qiblaDirection}deg)` }}
-                        viewBox="0 0 24 24" 
-                        fill="currentColor"
-                      >
-                        <path d="M12 2L4 20h16L12 2z" />
-                      </svg>
-                    </div>
-                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isQiblaOpen ? 'rotate-180' : ''}`} />
-                  </div>
-                )}
-                {qiblaDirection === null && !isQiblaOpen && (
-                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isQiblaOpen ? 'rotate-180' : ''}`} />
-                )}
-              </div>
-            </button>
-          </CollapsibleTrigger>
-
-          <CollapsibleContent className="mt-8">
-            {qiblaDirection !== null ? (
-              <div className="flex flex-col items-center space-y-6">
-                {/* Compass Mode Toggle */}
-                <button
-                  onClick={requestOrientationPermission}
-                  disabled={compassMode}
-                  className={`px-6 py-3 rounded-full font-medium transition-all ${
-                    compassMode 
-                      ? 'bg-primary/20 text-primary cursor-not-allowed' 
-                      : 'bg-primary text-primary-foreground hover:scale-105'
-                  }`}
-                >
-                  {compassMode 
-                    ? (settings.language === 'ar' ? '🧭 البوصلة نشطة' : '🧭 Compass Active')
-                    : (settings.language === 'ar' ? 'تفعيل البوصلة الحية' : 'Enable Live Compass')
-                  }
-                </button>
-
-                {/* Large Compass */}
-                <div className="relative w-64 h-64">
-                  {/* Compass Circle */}
-                  <div 
-                    className="absolute inset-0 rounded-full border-8 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 shadow-xl transition-transform duration-300"
-                    style={{ transform: compassMode ? `rotate(${deviceHeading}deg)` : 'rotate(0deg)' }}
-                  >
-                    {/* Compass Directions */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="relative w-full h-full">
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-sm font-bold text-primary">N</div>
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-sm font-bold text-muted-foreground">S</div>
-                        <div className="absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">W</div>
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-bold text-muted-foreground">E</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Qibla Arrow with Kaaba - always points to Qibla */}
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
-                    style={{ transform: `rotate(${qiblaDirection}deg)` }}
-                  >
-                    <div className="flex flex-col items-center">
-                      {/* Kaaba Icon */}
-                      <div className="w-12 h-12 mb-2 bg-gradient-to-br from-amber-600 to-amber-800 rounded-lg shadow-lg flex items-center justify-center">
-                        <div className="w-8 h-8 border-2 border-amber-200/50 rounded"></div>
-                      </div>
-                      {/* Arrow */}
-                      <svg className="w-16 h-32 text-primary drop-shadow-lg" viewBox="0 0 24 48" fill="currentColor">
-                        <path d="M12 0L4 16h6v32h4V16h6L12 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Direction Info */}
-                <div className="text-center space-y-2">
-                  <p className="text-3xl font-bold text-primary">
-                    {qiblaDirection.toFixed(1)}°
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {settings.language === 'ar' 
-                      ? 'اتجه نحو الكعبة المشرفة' 
-                      : 'Direction to the Holy Kaaba'}
-                  </p>
-                  {compassMode && (
-                    <p className="text-xs text-muted-foreground">
-                      {settings.language === 'ar' 
-                        ? 'حرك هاتفك لرؤية الاتجاه' 
-                        : 'Move your phone to see direction'}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-                <p className="text-muted-foreground">
-                  {settings.language === 'ar' ? 'جاري تحديد الاتجاه...' : 'Determining direction...'}
-                </p>
-              </div>
-            )}
-          </CollapsibleContent>
-        </div>
-      </Collapsible>
 
       {/* Hijri Calendar Dropdown */}
       <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>

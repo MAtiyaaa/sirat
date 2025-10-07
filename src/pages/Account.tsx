@@ -241,17 +241,15 @@ const Account = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL with timestamp to force refresh
+      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
-      
-      const timestampedUrl = `${publicUrl}?t=${Date.now()}`;
 
       // Update profile
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: timestampedUrl })
+        .update({ avatar_url: publicUrl })
         .eq('user_id', user.id);
 
       if (updateError) throw updateError;
@@ -260,8 +258,7 @@ const Account = () => {
         title: t.photoUpdated,
       });
 
-      // Force reload profile with slight delay
-      setTimeout(() => loadProfile(), 500);
+      loadProfile();
     } catch (error) {
       console.error('Avatar upload error:', error);
       toast({
@@ -603,9 +600,9 @@ const Account = () => {
           {/* Avatar */}
           <div className="relative inline-block">
             <Avatar className="w-32 h-32 border-4 border-primary/20 shadow-xl">
-              <AvatarImage src={profile?.avatar_url} key={profile?.avatar_url} />
+              <AvatarImage src={profile?.avatar_url} />
               <AvatarFallback className="bg-primary/10 text-primary text-4xl font-bold">
-                {(profile?.full_name || fullName) ? (profile?.full_name || fullName)[0].toUpperCase() : user.email?.[0].toUpperCase() || '?'}
+                {fullName ? fullName[0].toUpperCase() : user.email?.[0].toUpperCase() || '?'}
               </AvatarFallback>
             </Avatar>
             <label 
@@ -626,7 +623,7 @@ const Account = () => {
 
           {/* Name */}
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold">{profile?.full_name || fullName || user.email}</h1>
+            <h1 className="text-3xl font-bold">{fullName || user.email}</h1>
             <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
 
