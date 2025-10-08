@@ -594,7 +594,7 @@ const Wudu = () => {
 
       {/* Qibla Finder */}
       <Collapsible open={isQiblaOpen} onOpenChange={setIsQiblaOpen}>
-        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+        <div className="glass-effect rounded-3xl p-6 border border-border/50 overflow-hidden">
           <CollapsibleTrigger asChild>
             <button className="w-full">
               <div className="flex items-center justify-between">
@@ -604,28 +604,56 @@ const Wudu = () => {
                     <h2 className="text-2xl font-bold">
                       {settings.language === 'ar' ? 'اتجاه القبلة' : 'Qibla Direction'}
                     </h2>
+                    {qiblaDirection !== null && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {qiblaDirection}° {settings.language === 'ar' ? 'من الشمال' : 'from North'}
+                      </p>
+                    )}
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
                   {qiblaDirection !== null && (
-                    <div className="relative w-16 h-16">
+                    <div className="relative w-20 h-20">
+                      {/* Mini compass background */}
                       <div 
-                        className="absolute inset-0 rounded-full border-4 border-primary/20"
-                        style={{
-                          background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.05) 0%, transparent 70%)'
+                        className="absolute inset-0 rounded-full border-2 border-primary/30 transition-transform duration-300"
+                        style={{ 
+                          transform: `rotate(${permissionGranted ? -deviceHeading : 0}deg)`,
+                          background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background) / 0.8) 70%)',
+                          boxShadow: '0 0 20px hsl(var(--primary) / 0.15), inset 0 0 15px hsl(var(--primary) / 0.05)'
                         }}
-                      />
+                      >
+                        {/* Cardinal markers on mini compass */}
+                        {[0, 90, 180, 270].map((degree) => (
+                          <div
+                            key={degree}
+                            className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
+                            style={{
+                              transform: `rotate(${degree}deg) translateY(-50%)`,
+                              height: '50%',
+                            }}
+                          >
+                            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary/30 rounded-full" />
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Kaaba arrow on mini compass */}
                       <div 
-                        className="absolute inset-2 flex items-center justify-center transition-transform duration-300"
+                        className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
                         style={{ 
                           transform: `rotate(${permissionGranted ? (qiblaDirection - deviceHeading) : qiblaDirection}deg)` 
                         }}
                       >
-                        <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[24px] border-b-primary" />
+                        <div className="absolute -top-1 flex flex-col items-center">
+                          <div className="text-2xl">🕋</div>
+                        </div>
                       </div>
+                      
+                      {/* Center dot */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-primary" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       </div>
                     </div>
                   )}
@@ -638,70 +666,102 @@ const Wudu = () => {
           <CollapsibleContent className="mt-6">
             {qiblaDirection !== null && (
               <div className="space-y-6">
-                {/* Compass */}
-                <div className="relative mx-auto aspect-square max-w-[400px]">
-                  {/* Outer glow */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-2xl" />
+                {/* Alignment Status */}
+                {(() => {
+                  const angleDiff = Math.abs((qiblaDirection - deviceHeading + 360) % 360);
+                  const adjustedDiff = angleDiff > 180 ? 360 - angleDiff : angleDiff;
+                  const isAligned = adjustedDiff <= 10;
                   
-                  {/* Compass circle - rotates with device */}
+                  return isAligned && permissionGranted && (
+                    <div className="glass-effect rounded-2xl p-4 border-2 border-green-500/50 bg-green-500/10 animate-pulse">
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="text-3xl">🕋</div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                            {settings.language === 'ar' ? '✓ متوافق مع الكعبة' : '✓ Aligned with Kaaba'}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {settings.language === 'ar' ? `خطأ: ${Math.round(adjustedDiff)}°` : `Off by: ${Math.round(adjustedDiff)}°`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Compass */}
+                <div className="relative mx-auto aspect-square max-w-[380px]">
+                  {/* Outer glow */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-3xl animate-pulse" />
+                  
+                  {/* Compass background - stays fixed */}
+                  <div className="absolute inset-0 rounded-full border-4 border-primary/20"
+                       style={{ 
+                         background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 70%)',
+                         boxShadow: '0 0 40px hsl(var(--primary) / 0.2), inset 0 0 40px hsl(var(--primary) / 0.05)'
+                       }} />
+                  
+                  {/* Rotating compass ring with markers */}
                   <div 
-                    className="relative w-full h-full rounded-full border-4 border-primary/30 transition-transform duration-300 ease-out"
+                    className="absolute inset-6 rounded-full border-2 border-primary/40 transition-transform duration-300 ease-out"
                     style={{ 
-                      transform: `rotate(${-deviceHeading}deg)`,
-                      background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.05) 0%, hsl(var(--background)) 70%)',
-                      boxShadow: '0 0 60px hsl(var(--primary) / 0.2), inset 0 0 30px hsl(var(--primary) / 0.1)'
+                      transform: `rotate(${permissionGranted ? -deviceHeading : 0}deg)`,
                     }}
                   >
                     {/* Degree markers */}
-                    {[0, 45, 90, 135, 180, 225, 270, 315].map((degree) => (
-                      <div
-                        key={degree}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
-                        style={{
-                          transform: `rotate(${degree}deg) translateY(-50%)`,
-                          height: '50%',
-                        }}
-                      >
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-4 bg-primary/40 rounded-full" />
-                        <div className="absolute top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">
-                          {degree === 0 ? 'N' : degree === 90 ? 'E' : degree === 180 ? 'S' : degree === 270 ? 'W' : degree}
+                    {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((degree) => {
+                      const isCardinal = degree % 90 === 0;
+                      return (
+                        <div
+                          key={degree}
+                          className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
+                          style={{
+                            transform: `rotate(${degree}deg) translateY(-50%)`,
+                            height: '50%',
+                          }}
+                        >
+                          <div className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-full ${
+                            isCardinal ? 'w-1 h-5 bg-primary/60' : 'w-0.5 h-3 bg-primary/30'
+                          }`} />
+                          {isCardinal && (
+                            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-sm font-bold text-primary">
+                              {degree === 0 ? 'N' : degree === 90 ? 'E' : degree === 180 ? 'S' : 'W'}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
-                    
-                    {/* Minor degree markers */}
-                    {Array.from({ length: 36 }, (_, i) => i * 10).filter(d => ![0, 45, 90, 135, 180, 225, 270, 315].includes(d)).map((degree) => (
-                      <div
-                        key={`minor-${degree}`}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
-                        style={{
-                          transform: `rotate(${degree}deg) translateY(-50%)`,
-                          height: '50%',
-                        }}
-                      >
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary/20 rounded-full" />
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
-                  {/* Qibla arrow - stays fixed pointing to Kaaba */}
+                  {/* Kaaba indicator - rotates to always point at Qibla */}
                   <div 
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-300"
                     style={{ 
-                      transform: `rotate(${qiblaDirection}deg)` 
+                      transform: `rotate(${permissionGranted ? (qiblaDirection - deviceHeading) : qiblaDirection}deg)` 
                     }}
                   >
-                    <div className="absolute top-[15%] flex flex-col items-center gap-2">
-                      <div className="text-4xl">🕋</div>
-                      <div className="w-1 h-[35%] bg-gradient-to-b from-primary via-primary to-transparent rounded-full shadow-lg" 
-                           style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.5)' }} />
+                    <div className="absolute -top-6 flex flex-col items-center gap-1">
+                      <div className="text-5xl drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 10px hsl(var(--primary) / 0.3))' }}>
+                        🕋
+                      </div>
+                      <div 
+                        className="w-1.5 h-[45%] rounded-full"
+                        style={{ 
+                          background: 'linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary) / 0.3), transparent)',
+                          boxShadow: '0 0 15px hsl(var(--primary) / 0.5)' 
+                        }} 
+                      />
                     </div>
                   </div>
 
-                  {/* Center circle */}
+                  {/* Center circle with degree display */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-background border-4 border-primary shadow-xl flex items-center justify-center">
-                      <div className="text-sm font-bold text-primary">
+                    <div className="w-20 h-20 rounded-full bg-background/95 border-4 border-primary/40 shadow-2xl flex flex-col items-center justify-center"
+                         style={{ boxShadow: '0 0 30px hsl(var(--primary) / 0.3)' }}>
+                      <div className="text-xs text-muted-foreground font-medium">
+                        {settings.language === 'ar' ? 'القبلة' : 'Qibla'}
+                      </div>
+                      <div className="text-lg font-bold text-primary">
                         {Math.round((qiblaDirection - deviceHeading + 360) % 360)}°
                       </div>
                     </div>

@@ -224,51 +224,6 @@ const Account = () => {
     password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password too long'),
   });
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !e.target.files[0] || !user) return;
-    
-    const file = e.target.files[0];
-    setIsLoading(true);
-
-    try {
-      // Upload to storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
-      // Update profile
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      toast({
-        title: t.photoUpdated,
-      });
-
-      loadProfile();
-    } catch (error) {
-      console.error('Avatar upload error:', error);
-      toast({
-        title: t.error,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleUpdateName = async () => {
     if (!user) return;
@@ -284,18 +239,35 @@ const Account = () => {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
         .from('profiles')
-        .update({ full_name: fullName.trim() })
-        .eq('user_id', user.id);
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingProfile) {
+        // Update existing profile
+        const { error } = await supabase
+          .from('profiles')
+          .update({ full_name: fullName.trim() })
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        // Create new profile
+        const { error } = await supabase
+          .from('profiles')
+          .insert({ user_id: user.id, full_name: fullName.trim() });
+
+        if (error) throw error;
+      }
 
       toast({
         title: t.nameUpdated,
       });
       setShowNameDialog(false);
-      loadProfile();
+      await loadProfile();
     } catch (error) {
       console.error('Name update error:', error);
       toast({
@@ -602,29 +574,15 @@ const Account = () => {
             <Avatar className="w-32 h-32 border-4 border-primary/20 shadow-xl">
               <AvatarImage src={profile?.avatar_url} />
               <AvatarFallback className="bg-primary/10 text-primary text-4xl font-bold">
-                {fullName ? fullName[0].toUpperCase() : user.email?.[0].toUpperCase() || '?'}
+                {(profile?.full_name || user.email)?.[0]?.toUpperCase() || '?'}
               </AvatarFallback>
             </Avatar>
-            <label 
-              htmlFor="avatar-upload" 
-              className="absolute bottom-0 right-0 p-2 bg-primary text-primary-foreground rounded-full cursor-pointer hover:scale-110 smooth-transition shadow-lg"
-            >
-              <Camera className="h-4 w-4" />
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarUpload}
-                disabled={isLoading}
-              />
-            </label>
           </div>
 
           {/* Name */}
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold">{fullName || user.email}</h1>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <h1 className="text-3xl font-bold">{profile?.full_name || user.email}</h1>
+            {profile?.full_name && <p className="text-xs text-muted-foreground">{user.email}</p>}
           </div>
 
           {/* Stats Row */}
