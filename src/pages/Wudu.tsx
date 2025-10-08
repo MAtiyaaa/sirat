@@ -1,14 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useSettings } from '@/contexts/SettingsContext';
-import { Card } from '@/components/ui/card';
-import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown, Calendar, Moon } from 'lucide-react';
-import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import React, { useState, useEffect } from "react";
+import { useSettings } from "@/contexts/SettingsContext";
+import { Card } from "@/components/ui/card";
+import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown, Calendar, Moon } from "lucide-react";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface PrayerTimes {
   Fajr: string;
@@ -43,7 +39,7 @@ interface HijriCalendarDay {
 const Wudu = () => {
   const { settings } = useSettings();
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
-  const [location, setLocation] = useState<string>('');
+  const [location, setLocation] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string; time: string } | null>(null);
   const [isPrayerTimesOpen, setIsPrayerTimesOpen] = useState(false);
@@ -55,13 +51,38 @@ const Wudu = () => {
   const [currentHijriMonth, setCurrentHijriMonth] = useState<number>(1);
   const [currentHijriYear, setCurrentHijriYear] = useState<number>(1447);
   const [islamicEvents, setIslamicEvents] = useState<IslamicEvent[]>([]);
-  const [suhurTime, setSuhurTime] = useState<string>('');
-  const [iftarTime, setIftarTime] = useState<string>('');
+  const [suhurTime, setSuhurTime] = useState<string>("");
+  const [iftarTime, setIftarTime] = useState<string>("");
   const [isQiblaOpen, setIsQiblaOpen] = useState(false);
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
   const [deviceHeading, setDeviceHeading] = useState<number>(0);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [isCalibrating, setIsCalibrating] = useState(false);
+
+  // === QIBLA HELPERS (added) ===
+  const normalize = (deg: number) => ((deg % 360) + 360) % 360;
+
+  const getScreenAngle = () => {
+    const a: any = (screen.orientation && (screen.orientation as any).angle) ?? (window as any).orientation ?? 0;
+    return typeof a === "number" ? a : 0;
+  };
+
+  function getCompassHeading(e: DeviceOrientationEvent): number | null {
+    // iOS Safari exposes absolute heading as webkitCompassHeading (clockwise from North)
+    const webkit = (e as any).webkitCompassHeading;
+    let heading: number | null = typeof webkit === "number" ? webkit : null;
+
+    // Android: alpha increases counter-clockwise; convert to clockwise-from-North
+    if (heading == null && typeof e.alpha === "number") {
+      heading = 360 - e.alpha;
+    }
+    if (heading == null) return null;
+
+    // Compensate for screen rotation (portrait/landscape)
+    heading = normalize(heading + getScreenAngle());
+    return heading;
+  }
+  // === END QIBLA HELPERS ===
 
   useEffect(() => {
     fetchPrayerTimes();
@@ -70,41 +91,25 @@ const Wudu = () => {
     fetchQiblaDirection();
   }, [settings.prayerTimeRegion]);
 
+  // === QIBLA ORIENTATION EFFECT (replaced) ===
   useEffect(() => {
     if (!permissionGranted || !isQiblaOpen) return;
 
-    let lastAlpha: number | null = null;
-
-    const handleOrientation = (event: DeviceOrientationEvent) => {
-      if (event.alpha !== null) {
-        // iOS provides absolute orientation, Android provides relative
-        let heading = (event as any).webkitCompassHeading || event.alpha;
-        
-        // Normalize to 0-360
-        if (heading < 0) heading += 360;
-        if (heading >= 360) heading -= 360;
-        
-        // Apply smoothing to reduce jitter
-        if (lastAlpha !== null) {
-          const diff = heading - lastAlpha;
-          if (Math.abs(diff) < 180) {
-            heading = lastAlpha + diff * 0.3; // Smooth transition
-          }
-        }
-        
-        lastAlpha = heading;
-        setDeviceHeading(Math.round(heading));
+    const onOrientation = (event: DeviceOrientationEvent) => {
+      const h = getCompassHeading(event);
+      if (h != null) {
+        setDeviceHeading(h); // keep precision; don't round in state
       }
     };
 
-    window.addEventListener('deviceorientation', handleOrientation);
-    window.addEventListener('deviceorientationabsolute', handleOrientation);
+    const evName = "ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation";
+    window.addEventListener(evName as any, onOrientation as any, { passive: true });
 
     return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-      window.removeEventListener('deviceorientationabsolute', handleOrientation);
+      window.removeEventListener(evName as any, onOrientation as any);
     };
   }, [permissionGranted, isQiblaOpen]);
+  // === END QIBLA ORIENTATION EFFECT ===
 
   useEffect(() => {
     if (hijriDate) {
@@ -117,19 +122,19 @@ const Wudu = () => {
   useEffect(() => {
     if (islamicEvents.length > 0) {
       const updateCountdowns = () => {
-        const updatedEvents = islamicEvents.map(event => {
+        const updatedEvents = islamicEvents.map((event) => {
           const now = new Date();
           const diff = event.date.getTime() - now.getTime();
-          
+
           if (diff > 0) {
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             return { ...event, countdown: `${days}d ${hours}h` };
           } else {
-            return { ...event, countdown: settings.language === 'ar' ? 'مضى' : 'Passed' };
+            return { ...event, countdown: settings.language === "ar" ? "مضى" : "Passed" };
           }
         });
-        
+
         setIslamicEvents(updatedEvents);
       };
 
@@ -147,15 +152,15 @@ const Wudu = () => {
       const currentTime = now.getHours() * 60 + now.getMinutes();
 
       const prayers = [
-        { name: 'Fajr', time: prayerTimes.Fajr },
-        { name: 'Dhuhr', time: prayerTimes.Dhuhr },
-        { name: 'Asr', time: prayerTimes.Asr },
-        { name: 'Maghrib', time: prayerTimes.Maghrib },
-        { name: 'Isha', time: prayerTimes.Isha },
+        { name: "Fajr", time: prayerTimes.Fajr },
+        { name: "Dhuhr", time: prayerTimes.Dhuhr },
+        { name: "Asr", time: prayerTimes.Asr },
+        { name: "Maghrib", time: prayerTimes.Maghrib },
+        { name: "Isha", time: prayerTimes.Isha },
       ];
 
       for (const prayer of prayers) {
-        const [hours, minutes] = prayer.time.split(':').map(Number);
+        const [hours, minutes] = prayer.time.split(":").map(Number);
         const prayerTime = hours * 60 + minutes;
 
         if (prayerTime > currentTime) {
@@ -172,7 +177,7 @@ const Wudu = () => {
       }
 
       // If no prayer is left today, next is Fajr tomorrow
-      const [fajrHours, fajrMinutes] = prayerTimes.Fajr.split(':').map(Number);
+      const [fajrHours, fajrMinutes] = prayerTimes.Fajr.split(":").map(Number);
       const fajrTime = fajrHours * 60 + fajrMinutes;
       const diff = 24 * 60 - currentTime + fajrTime;
       const hoursLeft = Math.floor(diff / 60);
@@ -197,7 +202,7 @@ const Wudu = () => {
 
       if (settings.prayerTimeRegion) {
         // Use manual region
-        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+        [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
       } else {
         // Use geolocation
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -208,7 +213,7 @@ const Wudu = () => {
       }
 
       const response = await fetch(
-        `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`
+        `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`,
       );
       const data = await response.json();
 
@@ -226,15 +231,15 @@ const Wudu = () => {
         setIftarTime(data.data.timings.Maghrib);
       }
     } catch (error) {
-      console.error('Error fetching prayer times:', error);
+      console.error("Error fetching prayer times:", error);
       setPrayerTimes({
-        Fajr: '05:00',
-        Dhuhr: '12:30',
-        Asr: '15:45',
-        Maghrib: '18:15',
-        Isha: '19:30',
+        Fajr: "05:00",
+        Dhuhr: "12:30",
+        Asr: "15:45",
+        Maghrib: "18:15",
+        Isha: "19:30",
       });
-      setLocation(settings.language === 'ar' ? 'الموقع غير متاح' : 'Location unavailable');
+      setLocation(settings.language === "ar" ? "الموقع غير متاح" : "Location unavailable");
     } finally {
       setLoading(false);
     }
@@ -242,21 +247,21 @@ const Wudu = () => {
 
   const fetchHijriDate = async () => {
     try {
-      const response = await fetch('https://api.aladhan.com/v1/gToH');
+      const response = await fetch("https://api.aladhan.com/v1/gToH");
       const data = await response.json();
-      
+
       if (data.code === 200) {
         setHijriDate({
           date: data.data.hijri.day,
-          month: settings.language === 'ar' ? data.data.hijri.month.ar : data.data.hijri.month.en,
+          month: settings.language === "ar" ? data.data.hijri.month.ar : data.data.hijri.month.en,
           monthNumber: data.data.hijri.month.number,
           year: data.data.hijri.year,
           designation: data.data.hijri.designation.abbreviated,
-          weekday: settings.language === 'ar' ? data.data.hijri.weekday.ar : data.data.hijri.weekday.en,
+          weekday: settings.language === "ar" ? data.data.hijri.weekday.ar : data.data.hijri.weekday.en,
         });
       }
     } catch (error) {
-      console.error('Error fetching Hijri date:', error);
+      console.error("Error fetching Hijri date:", error);
     }
   };
 
@@ -265,7 +270,7 @@ const Wudu = () => {
       let latitude, longitude;
 
       if (settings.prayerTimeRegion) {
-        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+        [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
       } else {
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
@@ -276,12 +281,12 @@ const Wudu = () => {
 
       const hijriYear = year;
       const response = await fetch(
-        `https://api.aladhan.com/v1/hijriCalendar/${month}/${hijriYear}?latitude=${latitude}&longitude=${longitude}&method=2`
+        `https://api.aladhan.com/v1/hijriCalendar/${month}/${hijriYear}?latitude=${latitude}&longitude=${longitude}&method=2`,
       );
       const data = await response.json();
-      
+
       if (data.code === 200) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().split("T")[0];
         const days: HijriCalendarDay[] = data.data.map((item: any) => ({
           day: parseInt(item.date.hijri.day),
           gregorianDate: item.date.gregorian.date,
@@ -290,15 +295,15 @@ const Wudu = () => {
         setHijriCalendarDays(days);
       }
     } catch (error) {
-      console.error('Error fetching Hijri calendar:', error);
+      console.error("Error fetching Hijri calendar:", error);
     }
   };
 
-  const navigateHijriMonth = (direction: 'prev' | 'next') => {
+  const navigateHijriMonth = (direction: "prev" | "next") => {
     let newMonth = currentHijriMonth;
     let newYear = currentHijriYear;
 
-    if (direction === 'next') {
+    if (direction === "next") {
       newMonth = currentHijriMonth === 12 ? 1 : currentHijriMonth + 1;
       newYear = currentHijriMonth === 12 ? currentHijriYear + 1 : currentHijriYear;
     } else {
@@ -312,20 +317,47 @@ const Wudu = () => {
   };
 
   const getHijriMonthName = (monthNumber: number) => {
-    const months = settings.language === 'ar' 
-      ? ['محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة']
-      : ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'];
+    const months =
+      settings.language === "ar"
+        ? [
+            "محرم",
+            "صفر",
+            "ربيع الأول",
+            "ربيع الثاني",
+            "جمادى الأولى",
+            "جمادى الآخرة",
+            "رجب",
+            "شعبان",
+            "رمضان",
+            "شوال",
+            "ذو القعدة",
+            "ذو الحجة",
+          ]
+        : [
+            "Muharram",
+            "Safar",
+            "Rabi al-Awwal",
+            "Rabi al-Thani",
+            "Jumada al-Awwal",
+            "Jumada al-Thani",
+            "Rajab",
+            "Shaban",
+            "Ramadan",
+            "Shawwal",
+            "Dhu al-Qadah",
+            "Dhu al-Hijjah",
+          ];
     return months[monthNumber - 1];
   };
 
   const fetchIslamicEvents = async () => {
-    console.log('🔍 Starting fetchIslamicEvents...');
+    console.log("🔍 Starting fetchIslamicEvents...");
     try {
       let latitude, longitude;
 
       if (settings.prayerTimeRegion) {
-        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
-        console.log('📍 Using manual region:', latitude, longitude);
+        [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
+        console.log("📍 Using manual region:", latitude, longitude);
       } else {
         try {
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -333,44 +365,44 @@ const Wudu = () => {
           });
           latitude = position.coords.latitude;
           longitude = position.coords.longitude;
-          console.log('📍 Using geolocation:', latitude, longitude);
+          console.log("📍 Using geolocation:", latitude, longitude);
         } catch (geoError) {
-          console.log('⚠️ Geolocation failed, using Mecca coordinates');
+          console.log("⚠️ Geolocation failed, using Mecca coordinates");
           latitude = 21.4225;
           longitude = 39.8262;
         }
       }
 
       const events: IslamicEvent[] = [];
-      
+
       // Use gToHCalendar endpoint to convert specific dates
       // Ramadan 2026 starts around February 28, 2026
       // Eid al-Fitr 2026 around March 30, 2026
       // Eid al-Adha 2026 around June 6, 2026
-      
+
       const upcomingDates = [
-        { gregorian: '28-02-2026', name: 'Ramadan', hijriDay: 1, hijriMonth: 'Ramadan' },
-        { gregorian: '30-03-2026', name: 'Eid al-Fitr', hijriDay: 1, hijriMonth: 'Shawwal' },
-        { gregorian: '06-06-2026', name: 'Eid al-Adha', hijriDay: 10, hijriMonth: 'Dhu al-Hijjah' },
+        { gregorian: "28-02-2026", name: "Ramadan", hijriDay: 1, hijriMonth: "Ramadan" },
+        { gregorian: "30-03-2026", name: "Eid al-Fitr", hijriDay: 1, hijriMonth: "Shawwal" },
+        { gregorian: "06-06-2026", name: "Eid al-Adha", hijriDay: 10, hijriMonth: "Dhu al-Hijjah" },
       ];
 
       for (const eventInfo of upcomingDates) {
         try {
           const url = `https://api.aladhan.com/v1/gToH/${eventInfo.gregorian}`;
-          console.log('🌐 Fetching:', url);
+          console.log("🌐 Fetching:", url);
           const response = await fetch(url);
           const data = await response.json();
-          
+
           if (data.code === 200) {
-            const [day, month, year] = eventInfo.gregorian.split('-').map(n => parseInt(n));
+            const [day, month, year] = eventInfo.gregorian.split("-").map((n) => parseInt(n));
             const eventDate = new Date(year, month - 1, day);
-            
+
             if (eventDate > new Date()) {
               events.push({
                 name: eventInfo.name,
                 date: eventDate,
                 hijriDate: `${eventInfo.hijriDay} ${eventInfo.hijriMonth} ${data.data.hijri.year}`,
-                countdown: '',
+                countdown: "",
               });
               console.log(`✅ Added ${eventInfo.name}:`, eventDate.toISOString());
             }
@@ -380,11 +412,11 @@ const Wudu = () => {
         }
       }
 
-      console.log('📋 Total events found:', events.length);
+      console.log("📋 Total events found:", events.length);
 
       setIslamicEvents(events);
     } catch (error) {
-      console.error('❌ Error fetching Islamic events:', error);
+      console.error("❌ Error fetching Islamic events:", error);
     }
   };
 
@@ -393,7 +425,7 @@ const Wudu = () => {
       let latitude, longitude;
 
       if (settings.prayerTimeRegion) {
-        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+        [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
       } else {
         try {
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
@@ -408,52 +440,50 @@ const Wudu = () => {
         }
       }
 
-      const response = await fetch(
-        `https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`
-      );
+      const response = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
       const data = await response.json();
 
       if (data.code === 200) {
         setQiblaDirection(Math.round(data.data.direction));
       }
     } catch (error) {
-      console.error('Error fetching Qibla direction:', error);
+      console.error("Error fetching Qibla direction:", error);
       setQiblaDirection(0);
     }
   };
 
   const requestOrientationPermission = async () => {
     setIsCalibrating(true);
-    
+
     try {
-      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
         // iOS 13+ requires permission
         const permission = await (DeviceOrientationEvent as any).requestPermission();
-        if (permission === 'granted') {
+        if (permission === "granted") {
           setPermissionGranted(true);
-          toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass activated');
+          toast.success(settings.language === "ar" ? "تم تفعيل البوصلة" : "Compass activated");
         } else {
-          toast.error(settings.language === 'ar' ? 'تم رفض الإذن' : 'Permission denied');
+          toast.error(settings.language === "ar" ? "تم رفض الإذن" : "Permission denied");
         }
       } else {
         // Android or older browsers
         setPermissionGranted(true);
-        toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass activated');
+        toast.success(settings.language === "ar" ? "تم تفعيل البوصلة" : "Compass activated");
       }
     } catch (error) {
-      console.error('Error requesting orientation permission:', error);
-      toast.error(settings.language === 'ar' ? 'خطأ في تفعيل البوصلة' : 'Error activating compass');
+      console.error("Error requesting orientation permission:", error);
+      toast.error(settings.language === "ar" ? "خطأ في تفعيل البوصلة" : "Error activating compass");
     } finally {
       setTimeout(() => setIsCalibrating(false), 500);
     }
   };
 
   const prayerNames = {
-    Fajr: settings.language === 'ar' ? 'الفجر' : 'Fajr',
-    Dhuhr: settings.language === 'ar' ? 'الظهر' : 'Dhuhr',
-    Asr: settings.language === 'ar' ? 'العصر' : 'Asr',
-    Maghrib: settings.language === 'ar' ? 'المغرب' : 'Maghrib',
-    Isha: settings.language === 'ar' ? 'العشاء' : 'Isha',
+    Fajr: settings.language === "ar" ? "الفجر" : "Fajr",
+    Dhuhr: settings.language === "ar" ? "الظهر" : "Dhuhr",
+    Asr: settings.language === "ar" ? "العصر" : "Asr",
+    Maghrib: settings.language === "ar" ? "المغرب" : "Maghrib",
+    Isha: settings.language === "ar" ? "العشاء" : "Isha",
   };
 
   const prayerRakaas = {
@@ -466,26 +496,34 @@ const Wudu = () => {
 
   const steps = {
     ar: [
-      { title: 'النية', count: null, description: 'انوِ في قلبك الوضوء لله تعالى' },
-      { title: 'التسمية', count: null, description: 'قل: بسم الله الرحمن الرحيم' },
-      { title: 'اليدين', count: 3, description: 'ابدأ باليد اليمنى ثم اليسرى، اغسل إلى الرسغين' },
-      { title: 'الفم والأنف', count: 3, description: 'تمضمض بيدك اليمنى، استنشق بيدك اليمنى واستنثر بيدك اليسرى' },
-      { title: 'الوجه', count: 3, description: 'من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن' },
-      { title: 'الذراعين', count: 3, description: 'ابدأ باليد اليمنى إلى المرفق، ثم اليسرى إلى المرفق' },
-      { title: 'الرأس', count: 1, description: 'امسح من الأمام إلى الخلف ثم من الخلف إلى الأمام' },
-      { title: 'الأذنين', count: 1, description: 'امسح داخل الأذنين بالسبابة، وخلفهما بالإبهام' },
-      { title: 'القدمين', count: 3, description: 'ابدأ بالقدم اليمنى إلى الكعبين، ثم اليسرى إلى الكعبين' },
+      { title: "النية", count: null, description: "انوِ في قلبك الوضوء لله تعالى" },
+      { title: "التسمية", count: null, description: "قل: بسم الله الرحمن الرحيم" },
+      { title: "اليدين", count: 3, description: "ابدأ باليد اليمنى ثم اليسرى، اغسل إلى الرسغين" },
+      { title: "الفم والأنف", count: 3, description: "تمضمض بيدك اليمنى، استنشق بيدك اليمنى واستنثر بيدك اليسرى" },
+      { title: "الوجه", count: 3, description: "من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن" },
+      { title: "الذراعين", count: 3, description: "ابدأ باليد اليمنى إلى المرفق، ثم اليسرى إلى المرفق" },
+      { title: "الرأس", count: 1, description: "امسح من الأمام إلى الخلف ثم من الخلف إلى الأمام" },
+      { title: "الأذنين", count: 1, description: "امسح داخل الأذنين بالسبابة، وخلفهما بالإبهام" },
+      { title: "القدمين", count: 3, description: "ابدأ بالقدم اليمنى إلى الكعبين، ثم اليسرى إلى الكعبين" },
     ],
     en: [
-      { title: 'Intention', count: null, description: 'Intend in your heart to perform wudu for the sake of Allah' },
-      { title: 'Bismillah', count: null, description: 'Say: In the name of Allah, the Most Gracious, the Most Merciful' },
-      { title: 'Hands', count: 3, description: 'Start with right hand, then left hand, wash up to wrists' },
-      { title: 'Mouth & Nose', count: 3, description: 'Rinse mouth with right hand, sniff water with right hand, blow out with left' },
-      { title: 'Face', count: 3, description: 'From hairline to chin, from ear to ear' },
-      { title: 'Arms', count: 3, description: 'Start with right arm to elbow, then left arm to elbow' },
-      { title: 'Head', count: 1, description: 'Wipe from front to back, then back to front' },
-      { title: 'Ears', count: 1, description: 'Wipe inside ears with index fingers, behind with thumbs' },
-      { title: 'Feet', count: 3, description: 'Start with right foot to ankles, then left foot to ankles' },
+      { title: "Intention", count: null, description: "Intend in your heart to perform wudu for the sake of Allah" },
+      {
+        title: "Bismillah",
+        count: null,
+        description: "Say: In the name of Allah, the Most Gracious, the Most Merciful",
+      },
+      { title: "Hands", count: 3, description: "Start with right hand, then left hand, wash up to wrists" },
+      {
+        title: "Mouth & Nose",
+        count: 3,
+        description: "Rinse mouth with right hand, sniff water with right hand, blow out with left",
+      },
+      { title: "Face", count: 3, description: "From hairline to chin, from ear to ear" },
+      { title: "Arms", count: 3, description: "Start with right arm to elbow, then left arm to elbow" },
+      { title: "Head", count: 1, description: "Wipe from front to back, then back to front" },
+      { title: "Ears", count: 1, description: "Wipe inside ears with index fingers, behind with thumbs" },
+      { title: "Feet", count: 3, description: "Start with right foot to ankles, then left foot to ankles" },
     ],
   };
 
@@ -503,7 +541,7 @@ const Wudu = () => {
                   <HandHeart className="h-5 w-5 text-primary" />
                   <div className="text-left">
                     <h2 className="text-2xl font-bold">
-                      {settings.language === 'ar' ? 'أوقات الصلاة' : 'Prayer Times'}
+                      {settings.language === "ar" ? "أوقات الصلاة" : "Prayer Times"}
                     </h2>
                     {location && (
                       <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
@@ -513,23 +551,21 @@ const Wudu = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
                 ) : nextPrayer ? (
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="text-sm text-muted-foreground">
-                        {settings.language === 'ar' ? 'القادمة' : 'Next'}
+                        {settings.language === "ar" ? "القادمة" : "Next"}
                       </div>
-                      <div className="text-xl font-bold text-primary">
-                        {nextPrayer.name}
-                      </div>
-                      <div className="text-lg font-semibold">
-                        {nextPrayer.time}
-                      </div>
+                      <div className="text-xl font-bold text-primary">{nextPrayer.name}</div>
+                      <div className="text-lg font-semibold">{nextPrayer.time}</div>
                     </div>
-                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isPrayerTimesOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-5 w-5 text-muted-foreground transition-transform ${isPrayerTimesOpen ? "rotate-180" : ""}`}
+                    />
                   </div>
                 ) : null}
               </div>
@@ -542,20 +578,21 @@ const Wudu = () => {
                 {Object.entries(prayerTimes).map(([prayer, time]) => {
                   const rakaas = prayerRakaas[prayer as keyof PrayerTimes];
                   return (
-                    <Card key={prayer} className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition">
+                    <Card
+                      key={prayer}
+                      className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition"
+                    >
                       <div className="text-sm font-semibold text-muted-foreground mb-1">
                         {prayerNames[prayer as keyof PrayerTimes]}
                       </div>
-                      <div className="text-lg font-bold text-primary mb-2">
-                        {time}
-                      </div>
+                      <div className="text-lg font-bold text-primary mb-2">{time}</div>
                       <div className="text-xs text-muted-foreground space-y-0.5">
                         <div>
-                          {settings.language === 'ar' ? 'فرض' : 'Fard'}: {rakaas.fard}
+                          {settings.language === "ar" ? "فرض" : "Fard"}: {rakaas.fard}
                         </div>
                         {rakaas.sunnah > 0 && (
                           <div>
-                            {settings.language === 'ar' ? 'سنة' : 'Sunnah'}: {rakaas.sunnah}
+                            {settings.language === "ar" ? "سنة" : "Sunnah"}: {rakaas.sunnah}
                           </div>
                         )}
                       </div>
@@ -578,16 +615,12 @@ const Wudu = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {settings.language === 'ar' ? 'الوقت المتبقي حتى' : 'Time till'}
+                  {settings.language === "ar" ? "الوقت المتبقي حتى" : "Time till"}
                 </p>
-                <p className="text-xl font-bold text-primary">
-                  {nextPrayer.name}
-                </p>
+                <p className="text-xl font-bold text-primary">{nextPrayer.name}</p>
               </div>
             </div>
-            <div className="text-3xl font-bold text-primary">
-              {nextPrayer.timeLeft}
-            </div>
+            <div className="text-3xl font-bold text-primary">{nextPrayer.timeLeft}</div>
           </div>
         </div>
       )}
@@ -602,26 +635,27 @@ const Wudu = () => {
                   <MapPin className="h-5 w-5 text-primary" />
                   <div className="text-left">
                     <h2 className="text-2xl font-bold">
-                      {settings.language === 'ar' ? 'اتجاه القبلة' : 'Qibla Direction'}
+                      {settings.language === "ar" ? "اتجاه القبلة" : "Qibla Direction"}
                     </h2>
                     {qiblaDirection !== null && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        {qiblaDirection}° {settings.language === 'ar' ? 'من الشمال' : 'from North'}
+                        {qiblaDirection}° {settings.language === "ar" ? "من الشمال" : "from North"}
                       </p>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   {qiblaDirection !== null && (
                     <div className="relative w-20 h-20">
                       {/* Mini compass background */}
-                      <div 
-                        className="absolute inset-0 rounded-full border-2 border-primary/30 transition-transform duration-300"
-                        style={{ 
+                      <div
+                        className="absolute inset-0 rounded-full border-2 border-primary/30 transition-transform duration-75"
+                        style={{
                           transform: `rotate(${permissionGranted ? -deviceHeading : 0}deg)`,
-                          background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background) / 0.8) 70%)',
-                          boxShadow: '0 0 20px hsl(var(--primary) / 0.15), inset 0 0 15px hsl(var(--primary) / 0.05)'
+                          background:
+                            "radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background) / 0.8) 70%)",
+                          boxShadow: "0 0 20px hsl(var(--primary) / 0.15), inset 0 0 15px hsl(var(--primary) / 0.05)",
                         }}
                       >
                         {/* Cardinal markers on mini compass */}
@@ -631,33 +665,35 @@ const Wudu = () => {
                             className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
                             style={{
                               transform: `rotate(${degree}deg) translateY(-50%)`,
-                              height: '50%',
+                              height: "50%",
                             }}
                           >
                             <div className="absolute top-1 left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary/30 rounded-full" />
                           </div>
                         ))}
                       </div>
-                      
+
                       {/* Kaaba arrow on mini compass */}
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center transition-transform duration-300"
-                        style={{ 
-                          transform: `rotate(${permissionGranted ? (qiblaDirection - deviceHeading) : qiblaDirection}deg)` 
+                      <div
+                        className="absolute inset-0 flex items-center justify-center transition-transform duration-75"
+                        style={{
+                          transform: `rotate(${permissionGranted ? normalize(qiblaDirection - deviceHeading) : qiblaDirection}deg)`,
                         }}
                       >
                         <div className="absolute -top-1 flex flex-col items-center">
                           <div className="text-2xl">🕋</div>
                         </div>
                       </div>
-                      
+
                       {/* Center dot */}
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       </div>
                     </div>
                   )}
-                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isQiblaOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`h-5 w-5 text-muted-foreground transition-transform ${isQiblaOpen ? "rotate-180" : ""}`}
+                  />
                 </div>
               </div>
             </button>
@@ -671,21 +707,26 @@ const Wudu = () => {
                   const angleDiff = Math.abs((qiblaDirection - deviceHeading + 360) % 360);
                   const adjustedDiff = angleDiff > 180 ? 360 - angleDiff : angleDiff;
                   const isAligned = adjustedDiff <= 10;
-                  
-                  return isAligned && permissionGranted && (
-                    <div className="glass-effect rounded-2xl p-4 border-2 border-green-500/50 bg-green-500/10 animate-pulse">
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="text-3xl">🕋</div>
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                            {settings.language === 'ar' ? '✓ متوافق مع الكعبة' : '✓ Aligned with Kaaba'}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {settings.language === 'ar' ? `خطأ: ${Math.round(adjustedDiff)}°` : `Off by: ${Math.round(adjustedDiff)}°`}
-                          </p>
+
+                  return (
+                    isAligned &&
+                    permissionGranted && (
+                      <div className="glass-effect rounded-2xl p-4 border-2 border-green-500/50 bg-green-500/10 animate-pulse">
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="text-3xl">🕋</div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                              {settings.language === "ar" ? "✓ متوافق مع الكعبة" : "✓ Aligned with Kaaba"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {settings.language === "ar"
+                                ? `خطأ: ${Math.round(adjustedDiff)}°`
+                                : `Off by: ${Math.round(adjustedDiff)}°`}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )
                   );
                 })()}
 
@@ -693,18 +734,21 @@ const Wudu = () => {
                 <div className="relative mx-auto aspect-square max-w-[380px]">
                   {/* Outer glow */}
                   <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-3xl animate-pulse" />
-                  
+
                   {/* Compass background - stays fixed */}
-                  <div className="absolute inset-0 rounded-full border-4 border-primary/20"
-                       style={{ 
-                         background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 70%)',
-                         boxShadow: '0 0 40px hsl(var(--primary) / 0.2), inset 0 0 40px hsl(var(--primary) / 0.05)'
-                       }} />
-                  
+                  <div
+                    className="absolute inset-0 rounded-full border-4 border-primary/20"
+                    style={{
+                      background:
+                        "radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 70%)",
+                      boxShadow: "0 0 40px hsl(var(--primary) / 0.2), inset 0 0 40px hsl(var(--primary) / 0.05)",
+                    }}
+                  />
+
                   {/* Rotating compass ring with markers */}
-                  <div 
-                    className="absolute inset-6 rounded-full border-2 border-primary/40 transition-transform duration-300 ease-out"
-                    style={{ 
+                  <div
+                    className="absolute inset-6 rounded-full border-2 border-primary/40 transition-transform duration-75 ease-out"
+                    style={{
                       transform: `rotate(${permissionGranted ? -deviceHeading : 0}deg)`,
                     }}
                   >
@@ -717,15 +761,17 @@ const Wudu = () => {
                           className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
                           style={{
                             transform: `rotate(${degree}deg) translateY(-50%)`,
-                            height: '50%',
+                            height: "50%",
                           }}
                         >
-                          <div className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-full ${
-                            isCardinal ? 'w-1 h-5 bg-primary/60' : 'w-0.5 h-3 bg-primary/30'
-                          }`} />
+                          <div
+                            className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-full ${
+                              isCardinal ? "w-1 h-5 bg-primary/60" : "w-0.5 h-3 bg-primary/30"
+                            }`}
+                          />
                           {isCardinal && (
                             <div className="absolute top-8 left-1/2 -translate-x-1/2 text-sm font-bold text-primary">
-                              {degree === 0 ? 'N' : degree === 90 ? 'E' : degree === 180 ? 'S' : 'W'}
+                              {degree === 0 ? "N" : degree === 90 ? "E" : degree === 180 ? "S" : "W"}
                             </div>
                           )}
                         </div>
@@ -734,32 +780,38 @@ const Wudu = () => {
                   </div>
 
                   {/* Kaaba indicator - rotates to always point at Qibla */}
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-300"
-                    style={{ 
-                      transform: `rotate(${permissionGranted ? (qiblaDirection - deviceHeading) : qiblaDirection}deg)` 
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-75"
+                    style={{
+                      transform: `rotate(${permissionGranted ? normalize(qiblaDirection - deviceHeading) : qiblaDirection}deg)`,
                     }}
                   >
                     <div className="absolute -top-6 flex flex-col items-center gap-1">
-                      <div className="text-5xl drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 10px hsl(var(--primary) / 0.3))' }}>
+                      <div
+                        className="text-5xl drop-shadow-lg"
+                        style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.3))" }}
+                      >
                         🕋
                       </div>
-                      <div 
+                      <div
                         className="w-1.5 h-[45%] rounded-full"
-                        style={{ 
-                          background: 'linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary) / 0.3), transparent)',
-                          boxShadow: '0 0 15px hsl(var(--primary) / 0.5)' 
-                        }} 
+                        style={{
+                          background:
+                            "linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary) / 0.3), transparent)",
+                          boxShadow: "0 0 15px hsl(var(--primary) / 0.5)",
+                        }}
                       />
                     </div>
                   </div>
 
                   {/* Center circle with degree display */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-background/95 border-4 border-primary/40 shadow-2xl flex flex-col items-center justify-center"
-                         style={{ boxShadow: '0 0 30px hsl(var(--primary) / 0.3)' }}>
+                    <div
+                      className="w-20 h-20 rounded-full bg-background/95 border-4 border-primary/40 shadow-2xl flex flex-col items-center justify-center"
+                      style={{ boxShadow: "0 0 30px hsl(var(--primary) / 0.3)" }}
+                    >
                       <div className="text-xs text-muted-foreground font-medium">
-                        {settings.language === 'ar' ? 'القبلة' : 'Qibla'}
+                        {settings.language === "ar" ? "القبلة" : "Qibla"}
                       </div>
                       <div className="text-lg font-bold text-primary">
                         {Math.round((qiblaDirection - deviceHeading + 360) % 360)}°
@@ -779,22 +831,24 @@ const Wudu = () => {
                       {isCalibrating ? (
                         <>
                           <Loader2 className="h-5 w-5 animate-spin" />
-                          {settings.language === 'ar' ? 'جاري التفعيل...' : 'Activating...'}
+                          {settings.language === "ar" ? "جاري التفعيل..." : "Activating..."}
                         </>
+                      ) : settings.language === "ar" ? (
+                        "تفعيل البوصلة المباشرة"
                       ) : (
-                        settings.language === 'ar' ? 'تفعيل البوصلة المباشرة' : 'Enable Live Compass'
+                        "Enable Live Compass"
                       )}
                     </button>
                   ) : (
                     <div className="glass-effect rounded-2xl p-4 border border-primary/20 bg-primary/5">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">
-                          {settings.language === 'ar' ? 'البوصلة نشطة' : 'Compass Active'}
+                          {settings.language === "ar" ? "البوصلة نشطة" : "Compass Active"}
                         </span>
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                           <span className="text-sm text-muted-foreground">
-                            {settings.language === 'ar' ? 'اتجاهك: ' : 'Your heading: '}
+                            {settings.language === "ar" ? "اتجاهك: " : "Your heading: "}
                             <span className="font-bold text-primary">{deviceHeading}°</span>
                           </span>
                         </div>
@@ -806,10 +860,10 @@ const Wudu = () => {
                   <div className="glass-effect rounded-2xl p-6 border border-border/50">
                     <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
                       <span className="text-2xl">📱</span>
-                      {settings.language === 'ar' ? 'كيفية المعايرة' : 'How to Calibrate'}
+                      {settings.language === "ar" ? "كيفية المعايرة" : "How to Calibrate"}
                     </h3>
                     <div className="space-y-3 text-sm text-muted-foreground">
-                      {settings.language === 'ar' ? (
+                      {settings.language === "ar" ? (
                         <>
                           <div className="flex items-start gap-3">
                             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -883,16 +937,16 @@ const Wudu = () => {
                   <Calendar className="h-5 w-5 text-primary" />
                   <div className="text-left">
                     <h2 className="text-2xl font-bold">
-                      {settings.language === 'ar' ? 'التقويم الهجري' : 'Hijri Calendar'}
+                      {settings.language === "ar" ? "التقويم الهجري" : "Hijri Calendar"}
                     </h2>
                   </div>
                 </div>
-                
+
                 {hijriDate ? (
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <div className="text-sm text-muted-foreground">
-                        {settings.language === 'ar' ? 'اليوم' : 'Today'}
+                        {settings.language === "ar" ? "اليوم" : "Today"}
                       </div>
                       <div className="text-xl font-bold text-primary">
                         {hijriDate.date} {hijriDate.month}
@@ -901,7 +955,9 @@ const Wudu = () => {
                         {hijriDate.year} {hijriDate.designation}
                       </div>
                     </div>
-                    <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isHijriOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown
+                      className={`h-5 w-5 text-muted-foreground transition-transform ${isHijriOpen ? "rotate-180" : ""}`}
+                    />
                   </div>
                 ) : (
                   <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -915,21 +971,19 @@ const Wudu = () => {
               {/* Month Navigation */}
               <div className="flex items-center justify-between mb-6">
                 <button
-                  onClick={() => navigateHijriMonth('prev')}
+                  onClick={() => navigateHijriMonth("prev")}
                   className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
                 >
                   <ChevronDown className="h-5 w-5 rotate-90 text-primary" />
                 </button>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">
-                    {getHijriMonthName(currentHijriMonth)}
-                  </div>
+                  <div className="text-2xl font-bold">{getHijriMonthName(currentHijriMonth)}</div>
                   <div className="text-sm text-muted-foreground">
                     {currentHijriYear} {hijriDate?.designation}
                   </div>
                 </div>
                 <button
-                  onClick={() => navigateHijriMonth('next')}
+                  onClick={() => navigateHijriMonth("next")}
                   className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
                 >
                   <ChevronDown className="h-5 w-5 -rotate-90 text-primary" />
@@ -942,9 +996,10 @@ const Wudu = () => {
                   <div
                     key={index}
                     className={`aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all
-                      ${day.isToday 
-                        ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
-                        : 'bg-background/50 hover:bg-background/80'
+                      ${
+                        day.isToday
+                          ? "bg-primary text-primary-foreground shadow-lg scale-110"
+                          : "bg-background/50 hover:bg-background/80"
                       }`}
                   >
                     {day.day}
@@ -964,11 +1019,11 @@ const Wudu = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <HandHeart className="h-5 w-5 text-primary" />
-                  <h2 className="text-2xl font-bold">
-                    {settings.language === 'ar' ? 'خطوات الوضوء' : 'Wudu Steps'}
-                  </h2>
+                  <h2 className="text-2xl font-bold">{settings.language === "ar" ? "خطوات الوضوء" : "Wudu Steps"}</h2>
                 </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isWuduStepsOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isWuduStepsOpen ? "rotate-180" : ""}`}
+                />
               </div>
             </button>
           </CollapsibleTrigger>
@@ -986,21 +1041,17 @@ const Wudu = () => {
                         <span className="text-sm font-bold text-primary">{index + 1}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold">
-                          {step.title}
-                        </h3>
+                        <h3 className="text-xl font-bold">{step.title}</h3>
                         {step.count && (
                           <div className="px-3 py-1 rounded-full bg-primary/20 border border-primary/30">
                             <span className="text-lg font-bold text-primary">X{step.count}</span>
                           </div>
                         )}
                       </div>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {step.description}
-                      </p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{step.description}</p>
                     </div>
                   </div>
                 </div>
@@ -1014,12 +1065,12 @@ const Wudu = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-base font-semibold mb-2">
-                    {settings.language === 'ar' ? 'دعاء بعد الوضوء' : 'Dua After Wudu'}
+                    {settings.language === "ar" ? "دعاء بعد الوضوء" : "Dua After Wudu"}
                   </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {settings.language === 'ar'
-                      ? 'بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله'
-                      : 'After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger'}
+                    {settings.language === "ar"
+                      ? "بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله"
+                      : "After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger"}
                   </p>
                 </div>
               </div>
@@ -1037,10 +1088,12 @@ const Wudu = () => {
                 <div className="flex items-center gap-3">
                   <Moon className="h-5 w-5 text-primary" />
                   <h2 className="text-2xl font-bold">
-                    {settings.language === 'ar' ? 'رمضان والأعياد' : 'Ramadan & Islamic Events'}
+                    {settings.language === "ar" ? "رمضان والأعياد" : "Ramadan & Islamic Events"}
                   </h2>
                 </div>
-                <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isRamadanOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isRamadanOpen ? "rotate-180" : ""}`}
+                />
               </div>
             </button>
           </CollapsibleTrigger>
@@ -1053,23 +1106,25 @@ const Wudu = () => {
                   <div key={index} className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xl font-bold">
-                        {settings.language === 'ar' 
-                          ? (event.name === 'Ramadan' ? 'رمضان' : event.name === 'Eid al-Fitr' ? 'عيد الفطر' : 'عيد الأضحى')
+                        {settings.language === "ar"
+                          ? event.name === "Ramadan"
+                            ? "رمضان"
+                            : event.name === "Eid al-Fitr"
+                              ? "عيد الفطر"
+                              : "عيد الأضحى"
                           : event.name}
                       </h3>
-                      <div className="text-2xl font-bold text-primary">
-                        {event.countdown}
-                      </div>
+                      <div className="text-2xl font-bold text-primary">{event.countdown}</div>
                     </div>
                     <div className="text-sm text-muted-foreground mb-2">
-                      {event.date.toLocaleDateString(
-                        settings.language === 'ar' ? 'ar-SA' : 'en-US',
-                        { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
-                      )}
+                      {event.date.toLocaleDateString(settings.language === "ar" ? "ar-SA" : "en-US", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {event.hijriDate}
-                    </div>
+                    <div className="text-xs text-muted-foreground">{event.hijriDate}</div>
                   </div>
                 ))
               ) : (
@@ -1079,27 +1134,23 @@ const Wudu = () => {
               )}
 
               {/* Suhur & Iftar Times */}
-              {(suhurTime && iftarTime) && (
+              {suhurTime && iftarTime && (
                 <div>
                   <h4 className="text-lg font-bold mb-3">
-                    {settings.language === 'ar' ? 'أوقات رمضان' : 'Ramadan Times'}
+                    {settings.language === "ar" ? "أوقات رمضان" : "Ramadan Times"}
                   </h4>
                   <div className="grid grid-cols-2 gap-3">
                     <Card className="p-4 text-center glass-effect border-border/50">
                       <div className="text-sm font-semibold text-muted-foreground mb-1">
-                        {settings.language === 'ar' ? 'السحور' : 'Suhur'}
+                        {settings.language === "ar" ? "السحور" : "Suhur"}
                       </div>
-                      <div className="text-2xl font-bold text-primary">
-                        {suhurTime}
-                      </div>
+                      <div className="text-2xl font-bold text-primary">{suhurTime}</div>
                     </Card>
                     <Card className="p-4 text-center glass-effect border-border/50">
                       <div className="text-sm font-semibold text-muted-foreground mb-1">
-                        {settings.language === 'ar' ? 'الإفطار' : 'Iftar'}
+                        {settings.language === "ar" ? "الإفطار" : "Iftar"}
                       </div>
-                      <div className="text-2xl font-bold text-primary">
-                        {iftarTime}
-                      </div>
+                      <div className="text-2xl font-bold text-primary">{iftarTime}</div>
                     </Card>
                   </div>
                 </div>
@@ -1113,7 +1164,7 @@ const Wudu = () => {
       <Link to="/duas" className="block group">
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-400/10 to-rose-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
-          
+
           <div className="relative glass-effect rounded-3xl p-8 border border-border/50 hover:border-primary/30 smooth-transition">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -1121,13 +1172,9 @@ const Wudu = () => {
                   <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold mb-1">
-                    {settings.language === 'ar' ? 'الأدعية' : "Dua's"}
-                  </h3>
+                  <h3 className="text-2xl font-bold mb-1">{settings.language === "ar" ? "الأدعية" : "Dua's"}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {settings.language === 'ar' 
-                      ? 'زيارة صفحة الأدعية للمزيد'
-                      : 'Visit duas for more'}
+                    {settings.language === "ar" ? "زيارة صفحة الأدعية للمزيد" : "Visit duas for more"}
                   </p>
                 </div>
               </div>
