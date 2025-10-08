@@ -57,12 +57,54 @@ const Wudu = () => {
   const [islamicEvents, setIslamicEvents] = useState<IslamicEvent[]>([]);
   const [suhurTime, setSuhurTime] = useState<string>('');
   const [iftarTime, setIftarTime] = useState<string>('');
+  const [isQiblaOpen, setIsQiblaOpen] = useState(false);
+  const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
+  const [deviceHeading, setDeviceHeading] = useState<number>(0);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [isCalibrating, setIsCalibrating] = useState(false);
 
   useEffect(() => {
     fetchPrayerTimes();
     fetchHijriDate();
     fetchIslamicEvents();
+    fetchQiblaDirection();
   }, [settings.prayerTimeRegion]);
+
+  useEffect(() => {
+    if (!permissionGranted || !isQiblaOpen) return;
+
+    let lastAlpha: number | null = null;
+
+    const handleOrientation = (event: DeviceOrientationEvent) => {
+      if (event.alpha !== null) {
+        // iOS provides absolute orientation, Android provides relative
+        let heading = (event as any).webkitCompassHeading || event.alpha;
+        
+        // Normalize to 0-360
+        if (heading < 0) heading += 360;
+        if (heading >= 360) heading -= 360;
+        
+        // Apply smoothing to reduce jitter
+        if (lastAlpha !== null) {
+          const diff = heading - lastAlpha;
+          if (Math.abs(diff) < 180) {
+            heading = lastAlpha + diff * 0.3; // Smooth transition
+          }
+        }
+        
+        lastAlpha = heading;
+        setDeviceHeading(Math.round(heading));
+      }
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation);
+    window.addEventListener('deviceorientationabsolute', handleOrientation);
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('deviceorientationabsolute', handleOrientation);
+    };
+  }, [permissionGranted, isQiblaOpen]);
 
   useEffect(() => {
     if (hijriDate) {
@@ -346,6 +388,66 @@ const Wudu = () => {
     }
   };
 
+  const fetchQiblaDirection = async () => {
+    try {
+      let latitude, longitude;
+
+      if (settings.prayerTimeRegion) {
+        [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+      } else {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch {
+          // Default to Mecca
+          latitude = 21.4225;
+          longitude = 39.8262;
+        }
+      }
+
+      const response = await fetch(
+        `https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`
+      );
+      const data = await response.json();
+
+      if (data.code === 200) {
+        setQiblaDirection(Math.round(data.data.direction));
+      }
+    } catch (error) {
+      console.error('Error fetching Qibla direction:', error);
+      setQiblaDirection(0);
+    }
+  };
+
+  const requestOrientationPermission = async () => {
+    setIsCalibrating(true);
+    
+    try {
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        // iOS 13+ requires permission
+        const permission = await (DeviceOrientationEvent as any).requestPermission();
+        if (permission === 'granted') {
+          setPermissionGranted(true);
+          toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass activated');
+        } else {
+          toast.error(settings.language === 'ar' ? 'تم رفض الإذن' : 'Permission denied');
+        }
+      } else {
+        // Android or older browsers
+        setPermissionGranted(true);
+        toast.success(settings.language === 'ar' ? 'تم تفعيل البوصلة' : 'Compass activated');
+      }
+    } catch (error) {
+      console.error('Error requesting orientation permission:', error);
+      toast.error(settings.language === 'ar' ? 'خطأ في تفعيل البوصلة' : 'Error activating compass');
+    } finally {
+      setTimeout(() => setIsCalibrating(false), 500);
+    }
+  };
+
   const prayerNames = {
     Fajr: settings.language === 'ar' ? 'الفجر' : 'Fajr',
     Dhuhr: settings.language === 'ar' ? 'الظهر' : 'Dhuhr',
@@ -489,6 +591,227 @@ const Wudu = () => {
           </div>
         </div>
       )}
+
+      {/* Qibla Finder */}
+      <Collapsible open={isQiblaOpen} onOpenChange={setIsQiblaOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === 'ar' ? 'اتجاه القبلة' : 'Qibla Direction'}
+                    </h2>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  {qiblaDirection !== null && (
+                    <div className="relative w-16 h-16">
+                      <div 
+                        className="absolute inset-0 rounded-full border-4 border-primary/20"
+                        style={{
+                          background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.05) 0%, transparent 70%)'
+                        }}
+                      />
+                      <div 
+                        className="absolute inset-2 flex items-center justify-center transition-transform duration-300"
+                        style={{ 
+                          transform: `rotate(${permissionGranted ? (qiblaDirection - deviceHeading) : qiblaDirection}deg)` 
+                        }}
+                      >
+                        <div className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[24px] border-b-primary" />
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
+                      </div>
+                    </div>
+                  )}
+                  <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${isQiblaOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            {qiblaDirection !== null && (
+              <div className="space-y-6">
+                {/* Compass */}
+                <div className="relative mx-auto aspect-square max-w-[400px]">
+                  {/* Outer glow */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-2xl" />
+                  
+                  {/* Compass circle - rotates with device */}
+                  <div 
+                    className="relative w-full h-full rounded-full border-4 border-primary/30 transition-transform duration-300 ease-out"
+                    style={{ 
+                      transform: `rotate(${-deviceHeading}deg)`,
+                      background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.05) 0%, hsl(var(--background)) 70%)',
+                      boxShadow: '0 0 60px hsl(var(--primary) / 0.2), inset 0 0 30px hsl(var(--primary) / 0.1)'
+                    }}
+                  >
+                    {/* Degree markers */}
+                    {[0, 45, 90, 135, 180, 225, 270, 315].map((degree) => (
+                      <div
+                        key={degree}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
+                        style={{
+                          transform: `rotate(${degree}deg) translateY(-50%)`,
+                          height: '50%',
+                        }}
+                      >
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1 h-4 bg-primary/40 rounded-full" />
+                        <div className="absolute top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-primary">
+                          {degree === 0 ? 'N' : degree === 90 ? 'E' : degree === 180 ? 'S' : degree === 270 ? 'W' : degree}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Minor degree markers */}
+                    {Array.from({ length: 36 }, (_, i) => i * 10).filter(d => ![0, 45, 90, 135, 180, 225, 270, 315].includes(d)).map((degree) => (
+                      <div
+                        key={`minor-${degree}`}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
+                        style={{
+                          transform: `rotate(${degree}deg) translateY(-50%)`,
+                          height: '50%',
+                        }}
+                      >
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary/20 rounded-full" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Qibla arrow - stays fixed pointing to Kaaba */}
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    style={{ 
+                      transform: `rotate(${qiblaDirection}deg)` 
+                    }}
+                  >
+                    <div className="absolute top-[15%] flex flex-col items-center gap-2">
+                      <div className="text-4xl">🕋</div>
+                      <div className="w-1 h-[35%] bg-gradient-to-b from-primary via-primary to-transparent rounded-full shadow-lg" 
+                           style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.5)' }} />
+                    </div>
+                  </div>
+
+                  {/* Center circle */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-background border-4 border-primary shadow-xl flex items-center justify-center">
+                      <div className="text-sm font-bold text-primary">
+                        {Math.round((qiblaDirection - deviceHeading + 360) % 360)}°
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Controls */}
+                <div className="space-y-4">
+                  {!permissionGranted ? (
+                    <button
+                      onClick={requestOrientationPermission}
+                      disabled={isCalibrating}
+                      className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isCalibrating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          {settings.language === 'ar' ? 'جاري التفعيل...' : 'Activating...'}
+                        </>
+                      ) : (
+                        settings.language === 'ar' ? 'تفعيل البوصلة المباشرة' : 'Enable Live Compass'
+                      )}
+                    </button>
+                  ) : (
+                    <div className="glass-effect rounded-2xl p-4 border border-primary/20 bg-primary/5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          {settings.language === 'ar' ? 'البوصلة نشطة' : 'Compass Active'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className="text-sm text-muted-foreground">
+                            {settings.language === 'ar' ? 'اتجاهك: ' : 'Your heading: '}
+                            <span className="font-bold text-primary">{deviceHeading}°</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Calibration Instructions */}
+                  <div className="glass-effect rounded-2xl p-6 border border-border/50">
+                    <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                      <span className="text-2xl">📱</span>
+                      {settings.language === 'ar' ? 'كيفية المعايرة' : 'How to Calibrate'}
+                    </h3>
+                    <div className="space-y-3 text-sm text-muted-foreground">
+                      {settings.language === 'ar' ? (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">1</span>
+                            </div>
+                            <p>امسك هاتفك بشكل مسطح (موازي للأرض)</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">2</span>
+                            </div>
+                            <p>حرك هاتفك في حركة رقم ثمانية (∞) في الهواء</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">3</span>
+                            </div>
+                            <p>ابتعد عن المعادن والأجهزة الإلكترونية</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">4</span>
+                            </div>
+                            <p>أدر جسمك ببطء حتى تشير السهم الأخضر للكعبة (🕋) في الأعلى</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">1</span>
+                            </div>
+                            <p>Hold your phone flat (parallel to the ground)</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">2</span>
+                            </div>
+                            <p>Move your phone in a figure-eight (∞) motion in the air</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">3</span>
+                            </div>
+                            <p>Stay away from metal objects and electronic devices</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">4</span>
+                            </div>
+                            <p>Slowly turn your body until the Kaaba (🕋) points upward</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
 
       {/* Hijri Calendar Dropdown */}
       <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
