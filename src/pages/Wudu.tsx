@@ -1,36 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card } from "@/components/ui/card";
-import {
-  Loader2,
-  MapPin,
-  Clock,
-  HandHeart,
-  Sparkles,
-  ArrowRight,
-  ChevronDown,
-  Calendar,
-  Moon,
-  Target,
-  Compass,
-  Info,
-  Navigation,
-  ArrowUp,
-} from "lucide-react";
+import { Loader2, MapPin, Clock, HandHeart, Sparkles, ArrowRight, ChevronDown, Calendar, Moon } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-/**
- * Goals
- * - Stable UI: one section open at a time, all closed by default. No double triggers.
- * - Minimal look: neutral background, subtle borders, crisp typography.
- * - Qibla: unambiguous arrow-to-12-o’clock. Show "turn left/right X°" and lock when on target.
- * - Collapsed headers show live summaries (mini Qibla, compact prayer times, step preview).
- * - Auto sensor permission on mount (if unsupported, we gracefully degrade).
- */
-
-/* ===================== Types ===================== */
 interface PrayerTimes {
   Fajr: string;
   Dhuhr: string;
@@ -59,98 +34,32 @@ interface HijriCalendarDay {
   day: number;
   gregorianDate: string;
   isToday: boolean;
-  weekdayIndex?: number;
 }
 
-/* ===================== Component ===================== */
-const Wudu: React.FC = () => {
+const Wudu = () => {
   const { settings } = useSettings();
-  const isAR = settings.language === "ar";
-
-  const t = useMemo(
-    () => ({
-      // Global
-      locationUnavailable: isAR ? "الموقع غير متاح" : "Location unavailable",
-      today: isAR ? "اليوم" : "Today",
-
-      // Sections
-      prayerTimes: isAR ? "أوقات الصلاة" : "Prayer Times",
-      nextPrayerLabel: isAR ? "الصلاة القادمة" : "Next Prayer",
-      timeTill: isAR ? "الوقت المتبقي حتى" : "Time till",
-      qibla: isAR ? "اتجاه القبلة" : "Qibla Direction",
-      fromNorth: isAR ? "من الشمال" : "from North",
-      hijriCalendar: isAR ? "التقويم الهجري" : "Hijri Calendar",
-      wuduSteps: isAR ? "خطوات الوضوء" : "Wudu Steps",
-      ramadanEvents: isAR ? "رمضان والأعياد" : "Ramadan & Islamic Events",
-
-      // Prayer names
-      Fajr: isAR ? "الفجر" : "Fajr",
-      Dhuhr: isAR ? "الظهر" : "Dhuhr",
-      Asr: isAR ? "العصر" : "Asr",
-      Maghrib: isAR ? "المغرب" : "Maghrib",
-      Isha: isAR ? "العشاء" : "Isha",
-
-      // Chips
-      fard: isAR ? "فرض" : "Fard",
-      sunnah: isAR ? "سنة" : "Sunnah",
-
-      // Qibla UX
-      compassActive: isAR ? "البوصلة فعّالة" : "Compass Active",
-      yourHeading: isAR ? "اتجاهك" : "Your heading",
-      offBy: isAR ? "الانحراف" : "Off by",
-      turnLeft: isAR ? "أدر يساراً" : "Turn left",
-      turnRight: isAR ? "أدر يميناً" : "Turn right",
-      holdSteady: isAR ? "ثبّت اتجاهك" : "Hold steady",
-      align12: isAR ? "اجعل السهم عند 12" : "Put the arrow at 12 o’clock",
-      aligned: isAR ? "متوافق مع الكعبة" : "Aligned with Kaaba",
-      tipsTitle: isAR ? "إرشادات المعايرة" : "Calibration Tips",
-      tip1: isAR ? "ضع الهاتف أفقيًا (موازيًا للأرض)." : "Hold the phone flat (parallel to the ground).",
-      tip2: isAR ? "حرّك الهاتف بشكل رقم 8 (∞) في الهواء." : "Move the phone in a figure-eight (∞) motion.",
-      tip3: isAR ? "ابتعد عن المعادن والأجهزة." : "Keep away from metal and electronics.",
-      tip4: isAR ? "أدر جسدك ببطء حتى يصل السهم إلى 12." : "Rotate slowly until the arrow reaches 12.",
-      iosNote: isAR
-        ? 'قد يتطلب iOS إذنًا عبر تفاعل مستخدم. إن لم تتحرك البوصلة، فعّل "Motion & Orientation Access".'
-        : "iOS may require a user gesture to grant “Motion & Orientation Access”. If the compass is static, enable it.",
-
-      // Ramadan
-      suhur: isAR ? "السحور" : "Suhur",
-      iftar: isAR ? "الإفطار" : "Iftar",
-      passed: isAR ? "مضى" : "Passed",
-
-      // Duas
-      duas: isAR ? "الأدعية" : "Dua's",
-      visitDuas: isAR ? "زيارة صفحة الأدعية للمزيد" : "Visit duas for more",
-    }),
-    [isAR],
-  );
-
-  /* ===================== State ===================== */
-  // Controlled "accordion": only one section open at a time (or none).
-  const [openSection, setOpenSection] = useState<null | "prayer" | "qibla" | "hijri" | "wudu" | "events">(null);
-  const isOpen = (key: typeof openSection) => openSection === key;
-  const toggle = (key: NonNullable<typeof openSection>) => setOpenSection((prev) => (prev === key ? null : key));
-
-  // Data
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [location, setLocation] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [nextPrayer, setNextPrayer] = useState<{ name: string; timeLeft: string; time: string } | null>(null);
-
+  const [isPrayerTimesOpen, setIsPrayerTimesOpen] = useState(false);
+  const [isWuduStepsOpen, setIsWuduStepsOpen] = useState(false);
+  const [isHijriOpen, setIsHijriOpen] = useState(false);
+  const [isRamadanOpen, setIsRamadanOpen] = useState(false);
   const [hijriDate, setHijriDate] = useState<HijriDate | null>(null);
   const [hijriCalendarDays, setHijriCalendarDays] = useState<HijriCalendarDay[]>([]);
   const [currentHijriMonth, setCurrentHijriMonth] = useState<number>(1);
   const [currentHijriYear, setCurrentHijriYear] = useState<number>(1447);
-
   const [islamicEvents, setIslamicEvents] = useState<IslamicEvent[]>([]);
   const [suhurTime, setSuhurTime] = useState<string>("");
   const [iftarTime, setIftarTime] = useState<string>("");
-
-  // Qibla & compass
+  const [isQiblaOpen, setIsQiblaOpen] = useState(false);
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
-  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
   const [deviceHeading, setDeviceHeading] = useState<number>(0);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [isCalibrating, setIsCalibrating] = useState(false);
 
-  /* ===================== Utilities ===================== */
+  // === QIBLA HELPERS (added) ===
   const normalize = (deg: number) => ((deg % 360) + 360) % 360;
 
   const getScreenAngle = () => {
@@ -159,75 +68,22 @@ const Wudu: React.FC = () => {
   };
 
   function getCompassHeading(e: DeviceOrientationEvent): number | null {
+    // iOS Safari exposes absolute heading as webkitCompassHeading (clockwise from North)
     const webkit = (e as any).webkitCompassHeading;
     let heading: number | null = typeof webkit === "number" ? webkit : null;
+
+    // Android: alpha increases counter-clockwise; convert to clockwise-from-North
     if (heading == null && typeof e.alpha === "number") {
-      // Android alpha grows counter-clockwise; flip to clockwise-from-North
       heading = 360 - e.alpha;
     }
     if (heading == null) return null;
-    return normalize(heading + getScreenAngle());
+
+    // Compensate for screen rotation (portrait/landscape)
+    heading = normalize(heading + getScreenAngle());
+    return heading;
   }
+  // === END QIBLA HELPERS ===
 
-  /* ===================== Smooth heading via RAF ===================== */
-  const liveHeadingRef = useRef<number>(0);
-  const targetHeadingRef = useRef<number>(0);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const smooth = () => {
-      const prev = liveHeadingRef.current;
-      const target = targetHeadingRef.current;
-      let delta = normalize(target - prev);
-      if (delta > 180) delta -= 360;
-      const next = prev + delta * 0.35; // snappy but stable
-      liveHeadingRef.current = next;
-      setDeviceHeading(normalize(next));
-      rafRef.current = requestAnimationFrame(smooth);
-    };
-    rafRef.current = requestAnimationFrame(smooth);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  /* ===================== Auto permission on mount ===================== */
-  useEffect(() => {
-    (async () => {
-      try {
-        if (typeof (DeviceOrientationEvent as any)?.requestPermission === "function") {
-          const res = await (DeviceOrientationEvent as any).requestPermission();
-          setPermissionGranted(res === "granted");
-          if (res !== "granted") {
-            // Quiet tip; no button
-            toast.message(
-              isAR
-                ? "لم يُمنح إذن مستشعر الاتجاه. قد تحتاج لتفعيله من إعدادات المتصفح."
-                : "Motion/orientation permission not granted. You may need to enable it in browser settings.",
-            );
-          }
-        } else {
-          setPermissionGranted(true); // most Androids
-        }
-      } catch {
-        setPermissionGranted(false);
-      }
-    })();
-  }, [isAR]);
-
-  /* ===================== Orientation listener ===================== */
-  useEffect(() => {
-    if (!permissionGranted) return;
-    const evName = "ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation";
-    const handler = (e: DeviceOrientationEvent) => {
-      const h = getCompassHeading(e);
-      if (h != null) targetHeadingRef.current = h;
-    };
-    window.addEventListener(evName as any, handler as any, { passive: true });
-    return () => window.removeEventListener(evName as any, handler as any);
-  }, [permissionGranted]);
-
-  /* ===================== Fetch data ===================== */
   useEffect(() => {
     fetchPrayerTimes();
     fetchHijriDate();
@@ -235,24 +91,131 @@ const Wudu: React.FC = () => {
     fetchQiblaDirection();
   }, [settings.prayerTimeRegion]);
 
+  // === QIBLA ORIENTATION EFFECT (replaced) ===
+  useEffect(() => {
+    if (!permissionGranted || !isQiblaOpen) return;
+
+    const onOrientation = (event: DeviceOrientationEvent) => {
+      const h = getCompassHeading(event);
+      if (h != null) {
+        setDeviceHeading(h); // keep precision; don't round in state
+      }
+    };
+
+    const evName = "ondeviceorientationabsolute" in window ? "deviceorientationabsolute" : "deviceorientation";
+    window.addEventListener(evName as any, onOrientation as any, { passive: true });
+
+    return () => {
+      window.removeEventListener(evName as any, onOrientation as any);
+    };
+  }, [permissionGranted, isQiblaOpen]);
+  // === END QIBLA ORIENTATION EFFECT ===
+
+  useEffect(() => {
+    if (hijriDate) {
+      setCurrentHijriMonth(hijriDate.monthNumber);
+      setCurrentHijriYear(parseInt(hijriDate.year));
+      fetchHijriCalendar(hijriDate.monthNumber, parseInt(hijriDate.year));
+    }
+  }, [hijriDate]);
+
+  useEffect(() => {
+    if (islamicEvents.length > 0) {
+      const updateCountdowns = () => {
+        const updatedEvents = islamicEvents.map((event) => {
+          const now = new Date();
+          const diff = event.date.getTime() - now.getTime();
+
+          if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            return { ...event, countdown: `${days}d ${hours}h` };
+          } else {
+            return { ...event, countdown: settings.language === "ar" ? "مضى" : "Passed" };
+          }
+        });
+
+        setIslamicEvents(updatedEvents);
+      };
+
+      updateCountdowns();
+      const interval = setInterval(updateCountdowns, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [islamicEvents.length, settings.language]);
+
+  useEffect(() => {
+    if (!prayerTimes) return;
+
+    const calculateNextPrayer = () => {
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      const prayers = [
+        { name: "Fajr", time: prayerTimes.Fajr },
+        { name: "Dhuhr", time: prayerTimes.Dhuhr },
+        { name: "Asr", time: prayerTimes.Asr },
+        { name: "Maghrib", time: prayerTimes.Maghrib },
+        { name: "Isha", time: prayerTimes.Isha },
+      ];
+
+      for (const prayer of prayers) {
+        const [hours, minutes] = prayer.time.split(":").map(Number);
+        const prayerTime = hours * 60 + minutes;
+
+        if (prayerTime > currentTime) {
+          const diff = prayerTime - currentTime;
+          const hoursLeft = Math.floor(diff / 60);
+          const minutesLeft = diff % 60;
+          setNextPrayer({
+            name: prayerNames[prayer.name as keyof PrayerTimes],
+            timeLeft: `${hoursLeft}h ${minutesLeft}m`,
+            time: prayer.time,
+          });
+          return;
+        }
+      }
+
+      // If no prayer is left today, next is Fajr tomorrow
+      const [fajrHours, fajrMinutes] = prayerTimes.Fajr.split(":").map(Number);
+      const fajrTime = fajrHours * 60 + fajrMinutes;
+      const diff = 24 * 60 - currentTime + fajrTime;
+      const hoursLeft = Math.floor(diff / 60);
+      const minutesLeft = diff % 60;
+      setNextPrayer({
+        name: prayerNames.Fajr,
+        timeLeft: `${hoursLeft}h ${minutesLeft}m`,
+        time: prayerTimes.Fajr,
+      });
+    };
+
+    calculateNextPrayer();
+    const interval = setInterval(calculateNextPrayer, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [prayerTimes, settings.language]);
+
   const fetchPrayerTimes = async () => {
     setLoading(true);
     try {
-      let latitude: number, longitude: number;
+      let latitude, longitude;
+
       if (settings.prayerTimeRegion) {
+        // Use manual region
         [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
       } else {
-        const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-          navigator.geolocation.getCurrentPosition(resolve, reject),
-        );
-        latitude = pos.coords.latitude;
-        longitude = pos.coords.longitude;
+        // Use geolocation
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
       }
 
-      const res = await fetch(
+      const response = await fetch(
         `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`,
       );
-      const data = await res.json();
+      const data = await response.json();
 
       if (data.code === 200) {
         setPrayerTimes({
@@ -263,12 +226,20 @@ const Wudu: React.FC = () => {
           Isha: data.data.timings.Isha,
         });
         setLocation(`${data.data.meta.timezone}`);
+        // Set Suhur and Iftar times
         setSuhurTime(data.data.timings.Fajr);
         setIftarTime(data.data.timings.Maghrib);
       }
-    } catch {
-      setPrayerTimes({ Fajr: "05:00", Dhuhr: "12:30", Asr: "15:45", Maghrib: "18:15", Isha: "19:30" });
-      setLocation(t.locationUnavailable);
+    } catch (error) {
+      console.error("Error fetching prayer times:", error);
+      setPrayerTimes({
+        Fajr: "05:00",
+        Dhuhr: "12:30",
+        Asr: "15:45",
+        Maghrib: "18:15",
+        Isha: "19:30",
+      });
+      setLocation(settings.language === "ar" ? "الموقع غير متاح" : "Location unavailable");
     } finally {
       setLoading(false);
     }
@@ -276,171 +247,244 @@ const Wudu: React.FC = () => {
 
   const fetchHijriDate = async () => {
     try {
-      const res = await fetch("https://api.aladhan.com/v1/gToH");
-      const data = await res.json();
+      const response = await fetch("https://api.aladhan.com/v1/gToH");
+      const data = await response.json();
+
       if (data.code === 200) {
         setHijriDate({
           date: data.data.hijri.day,
-          month: isAR ? data.data.hijri.month.ar : data.data.hijri.month.en,
+          month: settings.language === "ar" ? data.data.hijri.month.ar : data.data.hijri.month.en,
           monthNumber: data.data.hijri.month.number,
           year: data.data.hijri.year,
           designation: data.data.hijri.designation.abbreviated,
-          weekday: isAR ? data.data.hijri.weekday.ar : data.data.hijri.weekday.en,
+          weekday: settings.language === "ar" ? data.data.hijri.weekday.ar : data.data.hijri.weekday.en,
         });
       }
-    } catch {}
+    } catch (error) {
+      console.error("Error fetching Hijri date:", error);
+    }
   };
 
   const fetchHijriCalendar = async (month: number, year: number) => {
     try {
-      let latitude: number, longitude: number;
+      let latitude, longitude;
+
       if (settings.prayerTimeRegion) {
         [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
       } else {
-        const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-          navigator.geolocation.getCurrentPosition(resolve, reject),
-        );
-        latitude = pos.coords.latitude;
-        longitude = pos.coords.longitude;
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
       }
-      const res = await fetch(
-        `https://api.aladhan.com/v1/hijriCalendar/${month}/${year}?latitude=${latitude}&longitude=${longitude}&method=2`,
+
+      const hijriYear = year;
+      const response = await fetch(
+        `https://api.aladhan.com/v1/hijriCalendar/${month}/${hijriYear}?latitude=${latitude}&longitude=${longitude}&method=2`,
       );
-      const data = await res.json();
+      const data = await response.json();
+
       if (data.code === 200) {
         const today = new Date().toISOString().split("T")[0];
-        const days: HijriCalendarDay[] = data.data.map((item: any) => {
-          const g = item.date.gregorian.date;
-          const d = new Date(g);
-          return {
-            day: parseInt(item.date.hijri.day, 10),
-            gregorianDate: g,
-            isToday: g === today,
-            weekdayIndex: d.getDay(),
-          };
-        });
+        const days: HijriCalendarDay[] = data.data.map((item: any) => ({
+          day: parseInt(item.date.hijri.day),
+          gregorianDate: item.date.gregorian.date,
+          isToday: item.date.gregorian.date === today,
+        }));
         setHijriCalendarDays(days);
       }
-    } catch {}
+    } catch (error) {
+      console.error("Error fetching Hijri calendar:", error);
+    }
   };
 
-  useEffect(() => {
-    if (!hijriDate) return;
-    setCurrentHijriMonth(hijriDate.monthNumber);
-    setCurrentHijriYear(parseInt(hijriDate.year, 10));
-    fetchHijriCalendar(hijriDate.monthNumber, parseInt(hijriDate.year, 10));
-  }, [hijriDate]);
+  const navigateHijriMonth = (direction: "prev" | "next") => {
+    let newMonth = currentHijriMonth;
+    let newYear = currentHijriYear;
+
+    if (direction === "next") {
+      newMonth = currentHijriMonth === 12 ? 1 : currentHijriMonth + 1;
+      newYear = currentHijriMonth === 12 ? currentHijriYear + 1 : currentHijriYear;
+    } else {
+      newMonth = currentHijriMonth === 1 ? 12 : currentHijriMonth - 1;
+      newYear = currentHijriMonth === 1 ? currentHijriYear - 1 : currentHijriYear;
+    }
+
+    setCurrentHijriMonth(newMonth);
+    setCurrentHijriYear(newYear);
+    fetchHijriCalendar(newMonth, newYear);
+  };
+
+  const getHijriMonthName = (monthNumber: number) => {
+    const months =
+      settings.language === "ar"
+        ? [
+            "محرم",
+            "صفر",
+            "ربيع الأول",
+            "ربيع الثاني",
+            "جمادى الأولى",
+            "جمادى الآخرة",
+            "رجب",
+            "شعبان",
+            "رمضان",
+            "شوال",
+            "ذو القعدة",
+            "ذو الحجة",
+          ]
+        : [
+            "Muharram",
+            "Safar",
+            "Rabi al-Awwal",
+            "Rabi al-Thani",
+            "Jumada al-Awwal",
+            "Jumada al-Thani",
+            "Rajab",
+            "Shaban",
+            "Ramadan",
+            "Shawwal",
+            "Dhu al-Qadah",
+            "Dhu al-Hijjah",
+          ];
+    return months[monthNumber - 1];
+  };
 
   const fetchIslamicEvents = async () => {
+    console.log("🔍 Starting fetchIslamicEvents...");
     try {
-      let latitude: number, longitude: number;
+      let latitude, longitude;
+
       if (settings.prayerTimeRegion) {
         [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
+        console.log("📍 Using manual region:", latitude, longitude);
       } else {
         try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject),
-          );
-          latitude = pos.coords.latitude;
-          longitude = pos.coords.longitude;
-        } catch {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+          console.log("📍 Using geolocation:", latitude, longitude);
+        } catch (geoError) {
+          console.log("⚠️ Geolocation failed, using Mecca coordinates");
           latitude = 21.4225;
-          longitude = 39.8262; // Mecca fallback
+          longitude = 39.8262;
         }
       }
-      const upcoming = [
+
+      const events: IslamicEvent[] = [];
+
+      // Use gToHCalendar endpoint to convert specific dates
+      // Ramadan 2026 starts around February 28, 2026
+      // Eid al-Fitr 2026 around March 30, 2026
+      // Eid al-Adha 2026 around June 6, 2026
+
+      const upcomingDates = [
         { gregorian: "28-02-2026", name: "Ramadan", hijriDay: 1, hijriMonth: "Ramadan" },
         { gregorian: "30-03-2026", name: "Eid al-Fitr", hijriDay: 1, hijriMonth: "Shawwal" },
         { gregorian: "06-06-2026", name: "Eid al-Adha", hijriDay: 10, hijriMonth: "Dhu al-Hijjah" },
       ];
-      const events: IslamicEvent[] = [];
-      for (const e of upcoming) {
+
+      for (const eventInfo of upcomingDates) {
         try {
-          const url = `https://api.aladhan.com/v1/gToH/${e.gregorian}`;
-          const res = await fetch(url);
-          const data = await res.json();
+          const url = `https://api.aladhan.com/v1/gToH/${eventInfo.gregorian}`;
+          console.log("🌐 Fetching:", url);
+          const response = await fetch(url);
+          const data = await response.json();
+
           if (data.code === 200) {
-            const [d, m, y] = e.gregorian.split("-").map((n) => parseInt(n, 10));
-            const date = new Date(y, m - 1, d);
-            if (date > new Date()) {
+            const [day, month, year] = eventInfo.gregorian.split("-").map((n) => parseInt(n));
+            const eventDate = new Date(year, month - 1, day);
+
+            if (eventDate > new Date()) {
               events.push({
-                name: e.name,
-                date,
-                hijriDate: `${e.hijriDay} ${e.hijriMonth} ${data.data.hijri.year}`,
+                name: eventInfo.name,
+                date: eventDate,
+                hijriDate: `${eventInfo.hijriDay} ${eventInfo.hijriMonth} ${data.data.hijri.year}`,
                 countdown: "",
               });
+              console.log(`✅ Added ${eventInfo.name}:`, eventDate.toISOString());
             }
           }
-        } catch {}
-      }
-      setIslamicEvents(events);
-    } catch {}
-  };
-
-  useEffect(() => {
-    if (islamicEvents.length === 0) return;
-    const tick = () => {
-      const up = islamicEvents.map((evt) => {
-        const now = Date.now();
-        const diff = evt.date.getTime() - now;
-        if (diff <= 0) return { ...evt, countdown: t.passed };
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        return { ...evt, countdown: `${days}d ${hours}h` };
-      });
-      setIslamicEvents(up);
-    };
-    tick();
-    const id = setInterval(tick, 60000);
-    return () => clearInterval(id);
-  }, [islamicEvents.length, t]);
-
-  /* ===================== Next prayer ticker ===================== */
-  useEffect(() => {
-    if (!prayerTimes) return;
-    const calc = () => {
-      const now = new Date();
-      const current = now.getHours() * 60 + now.getMinutes();
-      const order: Array<{ key: keyof PrayerTimes; label: string }> = [
-        { key: "Fajr", label: t.Fajr },
-        { key: "Dhuhr", label: t.Dhuhr },
-        { key: "Asr", label: t.Asr },
-        { key: "Maghrib", label: t.Maghrib },
-        { key: "Isha", label: t.Isha },
-      ];
-      for (const p of order) {
-        const [h, m] = (prayerTimes[p.key] || "00:00").split(":").map(Number);
-        const mins = h * 60 + m;
-        if (mins > current) {
-          const diff = mins - current;
-          setNextPrayer({
-            name: p.label,
-            timeLeft: `${Math.floor(diff / 60)}h ${diff % 60}m`,
-            time: prayerTimes[p.key],
-          });
-          return;
+        } catch (err) {
+          console.log(`⚠️ Failed to fetch ${eventInfo.name}:`, err);
         }
       }
-      const [fh, fm] = prayerTimes.Fajr.split(":").map(Number);
-      const mins = 24 * 60 - current + (fh * 60 + fm);
-      setNextPrayer({ name: t.Fajr, timeLeft: `${Math.floor(mins / 60)}h ${mins % 60}m`, time: prayerTimes.Fajr });
-    };
-    calc();
-    const id = setInterval(calc, 60000);
-    return () => clearInterval(id);
-  }, [prayerTimes, t]);
 
-  /* ===================== Qibla helpers ===================== */
-  const prayerNames = useMemo(
-    () => ({
-      Fajr: t.Fajr,
-      Dhuhr: t.Dhuhr,
-      Asr: t.Asr,
-      Maghrib: t.Maghrib,
-      Isha: t.Isha,
-    }),
-    [t],
-  );
+      console.log("📋 Total events found:", events.length);
+
+      setIslamicEvents(events);
+    } catch (error) {
+      console.error("❌ Error fetching Islamic events:", error);
+    }
+  };
+
+  const fetchQiblaDirection = async () => {
+    try {
+      let latitude, longitude;
+
+      if (settings.prayerTimeRegion) {
+        [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
+      } else {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch {
+          // Default to Mecca
+          latitude = 21.4225;
+          longitude = 39.8262;
+        }
+      }
+
+      const response = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
+      const data = await response.json();
+
+      if (data.code === 200) {
+        setQiblaDirection(Math.round(data.data.direction));
+      }
+    } catch (error) {
+      console.error("Error fetching Qibla direction:", error);
+      setQiblaDirection(0);
+    }
+  };
+
+  const requestOrientationPermission = async () => {
+    setIsCalibrating(true);
+
+    try {
+      if (typeof (DeviceOrientationEvent as any).requestPermission === "function") {
+        // iOS 13+ requires permission
+        const permission = await (DeviceOrientationEvent as any).requestPermission();
+        if (permission === "granted") {
+          setPermissionGranted(true);
+          toast.success(settings.language === "ar" ? "تم تفعيل البوصلة" : "Compass activated");
+        } else {
+          toast.error(settings.language === "ar" ? "تم رفض الإذن" : "Permission denied");
+        }
+      } else {
+        // Android or older browsers
+        setPermissionGranted(true);
+        toast.success(settings.language === "ar" ? "تم تفعيل البوصلة" : "Compass activated");
+      }
+    } catch (error) {
+      console.error("Error requesting orientation permission:", error);
+      toast.error(settings.language === "ar" ? "خطأ في تفعيل البوصلة" : "Error activating compass");
+    } finally {
+      setTimeout(() => setIsCalibrating(false), 500);
+    }
+  };
+
+  const prayerNames = {
+    Fajr: settings.language === "ar" ? "الفجر" : "Fajr",
+    Dhuhr: settings.language === "ar" ? "الظهر" : "Dhuhr",
+    Asr: settings.language === "ar" ? "العصر" : "Asr",
+    Maghrib: settings.language === "ar" ? "المغرب" : "Maghrib",
+    Isha: settings.language === "ar" ? "العشاء" : "Isha",
+  };
 
   const prayerRakaas = {
     Fajr: { fard: 2, sunnah: 2 },
@@ -450,205 +494,107 @@ const Wudu: React.FC = () => {
     Isha: { fard: 4, sunnah: 2 },
   };
 
-  const fetchQiblaDirection = async () => {
-    try {
-      let latitude: number, longitude: number;
-      if (settings.prayerTimeRegion) {
-        [latitude, longitude] = settings.prayerTimeRegion.split(",").map(Number);
-      } else {
-        try {
-          const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-            navigator.geolocation.getCurrentPosition(resolve, reject),
-          );
-          latitude = pos.coords.latitude;
-          longitude = pos.coords.longitude;
-        } catch {
-          latitude = 21.4225;
-          longitude = 39.8262; // Mecca fallback
-        }
-      }
-      const res = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
-      const data = await res.json();
-      if (data.code === 200) setQiblaDirection(Math.round(data.data.direction));
-    } catch {
-      setQiblaDirection(0);
-    }
+  const steps = {
+    ar: [
+      { title: "النية", count: null, description: "انوِ في قلبك الوضوء لله تعالى" },
+      { title: "التسمية", count: null, description: "قل: بسم الله الرحمن الرحيم" },
+      { title: "اليدين", count: 3, description: "ابدأ باليد اليمنى ثم اليسرى، اغسل إلى الرسغين" },
+      { title: "الفم والأنف", count: 3, description: "تمضمض بيدك اليمنى، استنشق بيدك اليمنى واستنثر بيدك اليسرى" },
+      { title: "الوجه", count: 3, description: "من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن" },
+      { title: "الذراعين", count: 3, description: "ابدأ باليد اليمنى إلى المرفق، ثم اليسرى إلى المرفق" },
+      { title: "الرأس", count: 1, description: "امسح من الأمام إلى الخلف ثم من الخلف إلى الأمام" },
+      { title: "الأذنين", count: 1, description: "امسح داخل الأذنين بالسبابة، وخلفهما بالإبهام" },
+      { title: "القدمين", count: 3, description: "ابدأ بالقدم اليمنى إلى الكعبين، ثم اليسرى إلى الكعبين" },
+    ],
+    en: [
+      { title: "Intention", count: null, description: "Intend in your heart to perform wudu for the sake of Allah" },
+      {
+        title: "Bismillah",
+        count: null,
+        description: "Say: In the name of Allah, the Most Gracious, the Most Merciful",
+      },
+      { title: "Hands", count: 3, description: "Start with right hand, then left hand, wash up to wrists" },
+      {
+        title: "Mouth & Nose",
+        count: 3,
+        description: "Rinse mouth with right hand, sniff water with right hand, blow out with left",
+      },
+      { title: "Face", count: 3, description: "From hairline to chin, from ear to ear" },
+      { title: "Arms", count: 3, description: "Start with right arm to elbow, then left arm to elbow" },
+      { title: "Head", count: 1, description: "Wipe from front to back, then back to front" },
+      { title: "Ears", count: 1, description: "Wipe inside ears with index fingers, behind with thumbs" },
+      { title: "Feet", count: 3, description: "Start with right foot to ankles, then left foot to ankles" },
+    ],
   };
 
-  const delta = useMemo(() => {
-    if (qiblaDirection == null) return 0;
-    const raw = normalize(qiblaDirection - deviceHeading);
-    return raw > 180 ? raw - 360 : raw; // -180..+180 (negative = left, positive = right)
-  }, [qiblaDirection, deviceHeading]);
+  const currentSteps = steps[settings.language];
 
-  const isAligned = Math.abs(delta) <= 8;
-
-  /* ===================== Local UI atoms ===================== */
-  const Section: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-    <div className={`rounded-2xl border border-border/60 bg-background/70 backdrop-blur-sm ${className || ""}`}>
-      {children}
-    </div>
-  );
-
-  const PillTime: React.FC<{ time: string }> = ({ time }) => (
-    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-md border border-border/60">
-      {time}
-    </span>
-  );
-
-  const Chip: React.FC<{ label: string; value: number }> = ({ label, value }) => (
-    <span className="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-semibold rounded-md border border-border/60">
-      <span className="opacity-70">{label}</span>
-      <span className="tabular-nums">{value}</span>
-    </span>
-  );
-
-  const getHijriMonthName = (n: number) => {
-    const ar = [
-      "محرم",
-      "صفر",
-      "ربيع الأول",
-      "ربيع الثاني",
-      "جمادى الأولى",
-      "جمادى الآخرة",
-      "رجب",
-      "شعبان",
-      "رمضان",
-      "شوال",
-      "ذو القعدة",
-      "ذو الحجة",
-    ];
-    const en = [
-      "Muharram",
-      "Safar",
-      "Rabi al-Awwal",
-      "Rabi al-Thani",
-      "Jumada al-Awwal",
-      "Jumada al-Thani",
-      "Rajab",
-      "Shaban",
-      "Ramadan",
-      "Shawwal",
-      "Dhu al-Qadah",
-      "Dhu al-Hijjah",
-    ];
-    return (isAR ? ar : en)[n - 1];
-  };
-
-  const navigateHijriMonth = (dir: "prev" | "next") => {
-    let m = currentHijriMonth,
-      y = currentHijriYear;
-    if (dir === "next") {
-      m = m === 12 ? 1 : m + 1;
-      y = m === 1 ? y + 1 : y;
-    } else {
-      m = m === 1 ? 12 : m - 1;
-      y = m === 12 ? y - 1 : y;
-    }
-    setCurrentHijriMonth(m);
-    setCurrentHijriYear(y);
-    fetchHijriCalendar(m, y);
-  };
-
-  /* ===================== Steps (AR/EN) ===================== */
-  const steps = useMemo(() => {
-    const ar = [
-      { title: "النية", count: null, description: "انوِ بقلبك الوضوء لله تعالى." },
-      { title: "التسمية", count: null, description: "قل: بسم الله الرحمن الرحيم." },
-      { title: "اليدين", count: 3, description: "ابدأ باليمنى ثم اليسرى إلى الرسغين." },
-      { title: "الفم والأنف", count: 3, description: "تمضمض، ثم استنشق واستنثر بلطف." },
-      { title: "الوجه", count: 3, description: "من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن." },
-      { title: "الذراعان", count: 3, description: "اليمنى إلى المرفق، ثم اليسرى إلى المرفق." },
-      { title: "مسح الرأس", count: 1, description: "من الأمام إلى الخلف ثم العودة إلى الأمام." },
-      { title: "الأذنان", count: 1, description: "داخل الأذن بالسبابتين وخلفهما بالإبهامين." },
-      { title: "القدمان", count: 3, description: "اليمنى ثم اليسرى إلى الكعبين." },
-    ];
-    const en = [
-      { title: "Intention", count: null, description: "Intend in your heart to perform wudu for Allah." },
-      { title: "Bismillah", count: null, description: "Say: In the name of Allah, the Most Merciful." },
-      { title: "Hands", count: 3, description: "Right then left, up to the wrists." },
-      { title: "Mouth & Nose", count: 3, description: "Rinse mouth; sniff and expel water gently." },
-      { title: "Face", count: 3, description: "From hairline to chin, ear to ear." },
-      { title: "Arms", count: 3, description: "Right to the elbow, then left to the elbow." },
-      { title: "Head Wipe", count: 1, description: "Front to back, then back to front." },
-      { title: "Ears", count: 1, description: "Inside with index fingers; behind with thumbs." },
-      { title: "Feet", count: 3, description: "Right then left, up to the ankles." },
-    ];
-    return isAR ? ar : en;
-  }, [isAR]);
-
-  /* ===================== Render ===================== */
   return (
     <div className="space-y-8">
-      {/* ========== PRAYER TIMES ========== */}
-      <Collapsible open={isOpen("prayer")} onOpenChange={(open) => setOpenSection(open ? "prayer" : null)}>
-        <Section className="p-6">
+      {/* Prayer Times Section */}
+      <Collapsible open={isPrayerTimesOpen} onOpenChange={setIsPrayerTimesOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
           <CollapsibleTrigger asChild>
-            <button type="button" onClick={() => toggle("prayer")} className="w-full">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-3 min-w-0">
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
                   <HandHeart className="h-5 w-5 text-primary" />
-                  <div className="min-w-0">
-                    <h2 className="text-2xl font-semibold tracking-tight">{t.prayerTimes}</h2>
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === "ar" ? "أوقات الصلاة" : "Prayer Times"}
+                    </h2>
                     {location && (
-                      <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground truncate">
-                        <MapPin className="h-3.5 w-3.5" />
-                        <span className="truncate">{location}</span>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span>{location}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  ) : nextPrayer ? (
-                    <div className="hidden sm:flex items-center gap-4">
-                      <div className="text-right">
-                        <div className="text-xs text-muted-foreground">{t.nextPrayerLabel}</div>
-                        <div className="text-lg font-semibold text-primary leading-tight">{nextPrayer.name}</div>
-                        <div className="text-sm text-foreground/90">{nextPrayer.time}</div>
+
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                ) : nextPrayer ? (
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">
+                        {settings.language === "ar" ? "القادمة" : "Next"}
                       </div>
-                      <div className="text-base font-medium">
-                        {t.timeTill}: {nextPrayer.timeLeft}
-                      </div>
+                      <div className="text-xl font-bold text-primary">{nextPrayer.name}</div>
+                      <div className="text-lg font-semibold">{nextPrayer.time}</div>
                     </div>
-                  ) : null}
-                  <ChevronDown
-                    className={`h-5 w-5 text-muted-foreground transition-transform duration-150 ${isOpen("prayer") ? "rotate-180" : ""}`}
-                  />
-                </div>
+                    <ChevronDown
+                      className={`h-5 w-5 text-muted-foreground transition-transform ${isPrayerTimesOpen ? "rotate-180" : ""}`}
+                    />
+                  </div>
+                ) : null}
               </div>
             </button>
           </CollapsibleTrigger>
-
-          {/* Compact live summary when collapsed */}
-          {!isOpen("prayer") && prayerTimes && (
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-              {Object.entries(prayerTimes).map(([k, v]) => (
-                <div key={k} className="rounded-xl border border-border/60 px-3 py-2.5">
-                  <div className="text-xs text-muted-foreground">{prayerNames[k as keyof PrayerTimes]}</div>
-                  <div className="mt-0.5 text-base font-semibold">{v}</div>
-                </div>
-              ))}
-            </div>
-          )}
 
           <CollapsibleContent className="mt-6">
             {prayerTimes && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 {Object.entries(prayerTimes).map(([prayer, time]) => {
-                  const rk = prayerRakaas[prayer as keyof PrayerTimes];
+                  const rakaas = prayerRakaas[prayer as keyof PrayerTimes];
                   return (
-                    <Card key={prayer} className="p-4 border border-border/60 rounded-2xl">
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-medium text-muted-foreground">
-                          {prayerNames[prayer as keyof PrayerTimes]}
-                        </div>
-                        <PillTime time={time} />
+                    <Card
+                      key={prayer}
+                      className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition"
+                    >
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {prayerNames[prayer as keyof PrayerTimes]}
                       </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <Chip label={t.fard} value={rk.fard} />
-                        {rk.sunnah > 0 && <Chip label={t.sunnah} value={rk.sunnah} />}
+                      <div className="text-lg font-bold text-primary mb-2">{time}</div>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <div>
+                          {settings.language === "ar" ? "فرض" : "Fard"}: {rakaas.fard}
+                        </div>
+                        {rakaas.sunnah > 0 && (
+                          <div>
+                            {settings.language === "ar" ? "سنة" : "Sunnah"}: {rakaas.sunnah}
+                          </div>
+                        )}
                       </div>
                     </Card>
                   );
@@ -656,114 +602,97 @@ const Wudu: React.FC = () => {
               </div>
             )}
           </CollapsibleContent>
-        </Section>
+        </div>
       </Collapsible>
 
-      {/* ========== NEXT PRAYER CALLOUT ========== */}
-      {nextPrayer && (
-        <Section className="p-5 border-primary/25 bg-primary/5">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 rounded-full border border-primary/30 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-primary" />
+      {/* Next Prayer Countdown */}
+      {nextPrayer && isPrayerTimesOpen && (
+        <div className="glass-effect rounded-2xl p-5 border border-primary/20 bg-primary/5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-primary" />
               </div>
-              <div className="min-w-0">
-                <div className="text-xs text-muted-foreground">{t.timeTill}</div>
-                <div className="text-lg font-semibold text-primary leading-tight">{nextPrayer.name}</div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {settings.language === "ar" ? "الوقت المتبقي حتى" : "Time till"}
+                </p>
+                <p className="text-xl font-bold text-primary">{nextPrayer.name}</p>
               </div>
             </div>
-            <div className="text-2xl font-bold text-primary tabular-nums">{nextPrayer.timeLeft}</div>
+            <div className="text-3xl font-bold text-primary">{nextPrayer.timeLeft}</div>
           </div>
-        </Section>
+        </div>
       )}
 
-      {/* ========== QIBLA ========== */}
-      <Collapsible open={isOpen("qibla")} onOpenChange={(open) => setOpenSection(open ? "qibla" : null)}>
-        <Section className="p-6">
+      {/* Qibla Finder */}
+      <Collapsible open={isQiblaOpen} onOpenChange={setIsQiblaOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50 overflow-hidden">
           <CollapsibleTrigger asChild>
-            <button type="button" onClick={() => toggle("qibla")} className="w-full">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-center gap-3 min-w-0">
-                  <Target className="h-5 w-5 text-primary" />
-                  <div className="min-w-0">
-                    <h2 className="text-2xl font-semibold tracking-tight">{t.qibla}</h2>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === "ar" ? "اتجاه القبلة" : "Qibla Direction"}
+                    </h2>
                     {qiblaDirection !== null && (
-                      <div className="mt-1 text-sm text-muted-foreground">
-                        {qiblaDirection}° {t.fromNorth}
-                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {qiblaDirection}° {settings.language === "ar" ? "من الشمال" : "from North"}
+                      </p>
                     )}
                   </div>
                 </div>
 
-                {/* Live mini indicator (always-on) */}
-                <div className="flex items-center gap-5">
-                  <div className="relative" style={{ width: 72, height: 72 }}>
-                    {/* Static bezel */}
-                    <div className="absolute inset-0 rounded-full border border-border/70" aria-hidden />
-                    {/* Rotating ring so N/E/S/W stay world-aligned */}
-                    <div
-                      className="absolute inset-0 rounded-full border border-border/60 transition-transform duration-100"
-                      style={{ transform: `rotate(${-deviceHeading}deg)` }}
-                      aria-hidden
-                    >
-                      {[0, 90, 180, 270].map((d) => (
-                        <div
-                          key={d}
-                          className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
-                          style={{ transform: `rotate(${d}deg) translateY(-50%)`, height: "50%" }}
-                        >
-                          <div className="absolute top-1 left-1/2 -translate-x-1/2 w-0.5 h-2 bg-muted-foreground/40 rounded-full" />
-                          <div className="absolute top-5 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground/80 select-none">
-                            {d === 0 ? "N" : d === 90 ? "E" : d === 180 ? "S" : "W"}
+                <div className="flex items-center gap-4">
+                  {qiblaDirection !== null && (
+                    <div className="relative w-20 h-20">
+                      {/* Mini compass background */}
+                      <div
+                        className="absolute inset-0 rounded-full border-2 border-primary/30 transition-transform duration-75"
+                        style={{
+                          transform: `rotate(${permissionGranted ? -deviceHeading : 0}deg)`,
+                          background:
+                            "radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background) / 0.8) 70%)",
+                          boxShadow: "0 0 20px hsl(var(--primary) / 0.15), inset 0 0 15px hsl(var(--primary) / 0.05)",
+                        }}
+                      >
+                        {/* Cardinal markers on mini compass */}
+                        {[0, 90, 180, 270].map((degree) => (
+                          <div
+                            key={degree}
+                            className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
+                            style={{
+                              transform: `rotate(${degree}deg) translateY(-50%)`,
+                              height: "50%",
+                            }}
+                          >
+                            <div className="absolute top-1 left-1/2 -translate-x-1/2 w-0.5 h-2 bg-primary/30 rounded-full" />
                           </div>
+                        ))}
+                      </div>
+
+                      {/* Kaaba arrow on mini compass */}
+                      <div
+                        className="absolute inset-0 flex items-center justify-center transition-transform duration-75"
+                        style={{
+                          transform: `rotate(${permissionGranted ? normalize(qiblaDirection - deviceHeading) : qiblaDirection}deg)`,
+                        }}
+                      >
+                        <div className="absolute -top-1 flex flex-col items-center">
+                          <div className="text-2xl">🕋</div>
                         </div>
-                      ))}
-                      {/* 12-o'clock marker */}
-                      <div className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/80 select-none">
-                        12
+                      </div>
+
+                      {/* Center dot */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       </div>
                     </div>
-                    {/* Qibla arrow (rotate relative to device) */}
-                    <div
-                      className="absolute inset-0 flex items-center justify-center transition-transform duration-100"
-                      style={{
-                        transform: `rotate(${qiblaDirection != null ? normalize(qiblaDirection - deviceHeading) : 0}deg)`,
-                      }}
-                      aria-label="Qibla pointer"
-                    >
-                      <ArrowUp className="h-4 w-4 text-primary absolute -top-2" />
-                      <div className="w-0.5 h-6 bg-primary/70 rounded-full" />
-                    </div>
-                    {/* Center dot */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-foreground/70" />
-                    </div>
-                  </div>
-
-                  {/* Direction text */}
-                  <div className="hidden sm:flex flex-col items-end">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <Compass className="h-3.5 w-3.5" />
-                      <span>{t.compassActive}</span>
-                    </div>
-                    <div className="mt-0.5 text-sm">
-                      <span className="opacity-60">{t.yourHeading}:</span>{" "}
-                      <span className="font-medium tabular-nums">{Math.round(deviceHeading)}°</span>
-                    </div>
-                    {qiblaDirection != null && (
-                      <div className="text-sm">
-                        <span className="opacity-60">{t.offBy}:</span>{" "}
-                        <span
-                          className={`font-medium tabular-nums ${isAligned ? "text-green-600 dark:text-green-400" : ""}`}
-                        >
-                          {Math.abs(Math.round(delta))}°
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
+                  )}
                   <ChevronDown
-                    className={`h-5 w-5 text-muted-foreground transition-transform duration-150 ${isOpen("qibla") ? "rotate-180" : ""}`}
+                    className={`h-5 w-5 text-muted-foreground transition-transform ${isQiblaOpen ? "rotate-180" : ""}`}
                   />
                 </div>
               </div>
@@ -772,120 +701,262 @@ const Wudu: React.FC = () => {
 
           <CollapsibleContent className="mt-6">
             {qiblaDirection !== null && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Big Compass */}
-                <div className="relative mx-auto aspect-square w-full max-w-[420px]">
-                  {/* Outer ring */}
+              <div className="space-y-6">
+                {/* Alignment Status */}
+                {(() => {
+                  const angleDiff = Math.abs((qiblaDirection - deviceHeading + 360) % 360);
+                  const adjustedDiff = angleDiff > 180 ? 360 - angleDiff : angleDiff;
+                  const isAligned = adjustedDiff <= 10;
+
+                  return (
+                    isAligned &&
+                    permissionGranted && (
+                      <div className="glass-effect rounded-2xl p-4 border-2 border-green-500/50 bg-green-500/10 animate-pulse">
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="text-3xl">🕋</div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                              {settings.language === "ar" ? "✓ متوافق مع الكعبة" : "✓ Aligned with Kaaba"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {settings.language === "ar"
+                                ? `خطأ: ${Math.round(adjustedDiff)}°`
+                                : `Off by: ${Math.round(adjustedDiff)}°`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  );
+                })()}
+
+                {/* Compass */}
+                <div className="relative mx-auto aspect-square max-w-[380px]">
+                  {/* Outer glow */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-transparent blur-3xl animate-pulse" />
+
+                  {/* Compass background - stays fixed */}
                   <div
-                    className={`absolute inset-0 rounded-full border-2 ${isAligned ? "border-green-500/60" : "border-border/70"}`}
+                    className="absolute inset-0 rounded-full border-4 border-primary/20"
+                    style={{
+                      background:
+                        "radial-gradient(circle at center, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 70%)",
+                      boxShadow: "0 0 40px hsl(var(--primary) / 0.2), inset 0 0 40px hsl(var(--primary) / 0.05)",
+                    }}
                   />
 
-                  {/* Rotating ring with ticks & cardinal letters (keeps world-aligned) */}
+                  {/* Rotating compass ring with markers */}
                   <div
-                    className="absolute inset-6 rounded-full border border-border/60 transition-transform duration-100"
-                    style={{ transform: `rotate(${-deviceHeading}deg)` }}
+                    className="absolute inset-6 rounded-full border-2 border-primary/40 transition-transform duration-75 ease-out"
+                    style={{
+                      transform: `rotate(${permissionGranted ? -deviceHeading : 0}deg)`,
+                    }}
                   >
-                    {[...Array(12)].map((_, i) => {
-                      const degree = i * 30;
+                    {/* Degree markers */}
+                    {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((degree) => {
                       const isCardinal = degree % 90 === 0;
                       return (
                         <div
                           key={degree}
                           className="absolute left-1/2 top-1/2 -translate-x-1/2 origin-top"
-                          style={{ transform: `rotate(${degree}deg) translateY(-50%)`, height: "50%" }}
+                          style={{
+                            transform: `rotate(${degree}deg) translateY(-50%)`,
+                            height: "50%",
+                          }}
                         >
                           <div
-                            className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-full ${isCardinal ? "w-1 h-5 bg-foreground/70" : "w-0.5 h-3 bg-muted-foreground/40"}`}
+                            className={`absolute top-0 left-1/2 -translate-x-1/2 rounded-full ${
+                              isCardinal ? "w-1 h-5 bg-primary/60" : "w-0.5 h-3 bg-primary/30"
+                            }`}
                           />
                           {isCardinal && (
-                            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xs font-semibold text-foreground/80 select-none">
+                            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-sm font-bold text-primary">
                               {degree === 0 ? "N" : degree === 90 ? "E" : degree === 180 ? "S" : "W"}
                             </div>
                           )}
                         </div>
                       );
                     })}
-                    {/* 12 o’clock label */}
-                    <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-medium text-foreground/80 select-none">
-                      {t.align12}
+                  </div>
+
+                  {/* Kaaba indicator - rotates to always point at Qibla */}
+                  <div
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-75"
+                    style={{
+                      transform: `rotate(${permissionGranted ? normalize(qiblaDirection - deviceHeading) : qiblaDirection}deg)`,
+                    }}
+                  >
+                    <div className="absolute -top-6 flex flex-col items-center gap-1">
+                      <div
+                        className="text-5xl drop-shadow-lg"
+                        style={{ filter: "drop-shadow(0 0 10px hsl(var(--primary) / 0.3))" }}
+                      >
+                        🕋
+                      </div>
+                      <div
+                        className="w-1.5 h-[45%] rounded-full"
+                        style={{
+                          background:
+                            "linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary) / 0.3), transparent)",
+                          boxShadow: "0 0 15px hsl(var(--primary) / 0.5)",
+                        }}
+                      />
                     </div>
                   </div>
 
-                  {/* Qibla pointer relative to device */}
-                  <div
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none transition-transform duration-100"
-                    style={{ transform: `rotate(${normalize(qiblaDirection - deviceHeading)}deg)` }}
-                    aria-hidden
-                  >
-                    <ArrowUp
-                      className={`h-7 w-7 absolute -top-8 ${isAligned ? "text-green-600 dark:text-green-400" : "text-primary"}`}
-                    />
-                    <div className={`w-1.5 h-[44%] rounded-full ${isAligned ? "bg-green-500/70" : "bg-primary/70"}`} />
-                  </div>
-
-                  {/* Center readout */}
+                  {/* Center circle with degree display */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-28 h-28 rounded-full border border-border/60 bg-background/95 flex flex-col items-center justify-center">
-                      <div className="text-[11px] text-muted-foreground">{t.qibla}</div>
-                      <div className="mt-0.5 text-lg font-semibold tabular-nums">
-                        {Math.round(normalize(qiblaDirection - deviceHeading))}°
+                    <div
+                      className="w-20 h-20 rounded-full bg-background/95 border-4 border-primary/40 shadow-2xl flex flex-col items-center justify-center"
+                      style={{ boxShadow: "0 0 30px hsl(var(--primary) / 0.3)" }}
+                    >
+                      <div className="text-xs text-muted-foreground font-medium">
+                        {settings.language === "ar" ? "القبلة" : "Qibla"}
                       </div>
-                      <div
-                        className={`mt-1 text-xs ${isAligned ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}
-                      >
-                        {isAligned
-                          ? t.aligned
-                          : delta > 0
-                            ? `${t.turnRight} ${Math.abs(Math.round(delta))}°`
-                            : `${t.turnLeft} ${Math.abs(Math.round(delta))}°`}
+                      <div className="text-lg font-bold text-primary">
+                        {Math.round((qiblaDirection - deviceHeading + 360) % 360)}°
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Tips & iOS Note */}
-                <div className="rounded-2xl border border-border/60 p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Info className="h-4 w-4 text-muted-foreground" />
-                    <h3 className="text-base font-semibold">{t.tipsTitle}</h3>
+                {/* Controls */}
+                <div className="space-y-4">
+                  {!permissionGranted ? (
+                    <button
+                      onClick={requestOrientationPermission}
+                      disabled={isCalibrating}
+                      className="w-full py-4 rounded-2xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isCalibrating ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          {settings.language === "ar" ? "جاري التفعيل..." : "Activating..."}
+                        </>
+                      ) : settings.language === "ar" ? (
+                        "تفعيل البوصلة المباشرة"
+                      ) : (
+                        "Enable Live Compass"
+                      )}
+                    </button>
+                  ) : (
+                    <div className="glass-effect rounded-2xl p-4 border border-primary/20 bg-primary/5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">
+                          {settings.language === "ar" ? "البوصلة نشطة" : "Compass Active"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          <span className="text-sm text-muted-foreground">
+                            {settings.language === "ar" ? "اتجاهك: " : "Your heading: "}
+                            <span className="font-bold text-primary">{deviceHeading}°</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Calibration Instructions */}
+                  <div className="glass-effect rounded-2xl p-6 border border-border/50">
+                    <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                      <span className="text-2xl">📱</span>
+                      {settings.language === "ar" ? "كيفية المعايرة" : "How to Calibrate"}
+                    </h3>
+                    <div className="space-y-3 text-sm text-muted-foreground">
+                      {settings.language === "ar" ? (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">1</span>
+                            </div>
+                            <p>امسك هاتفك بشكل مسطح (موازي للأرض)</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">2</span>
+                            </div>
+                            <p>حرك هاتفك في حركة رقم ثمانية (∞) في الهواء</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">3</span>
+                            </div>
+                            <p>ابتعد عن المعادن والأجهزة الإلكترونية</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">4</span>
+                            </div>
+                            <p>أدر جسمك ببطء حتى تشير السهم الأخضر للكعبة (🕋) في الأعلى</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">1</span>
+                            </div>
+                            <p>Hold your phone flat (parallel to the ground)</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">2</span>
+                            </div>
+                            <p>Move your phone in a figure-eight (∞) motion in the air</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">3</span>
+                            </div>
+                            <p>Stay away from metal objects and electronic devices</p>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-xs font-bold text-primary">4</span>
+                            </div>
+                            <p>Slowly turn your body until the Kaaba (🕋) points upward</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <ul className="space-y-2.5 text-sm text-muted-foreground leading-relaxed">
-                    <li>• {t.tip1}</li>
-                    <li>• {t.tip2}</li>
-                    <li>• {t.tip3}</li>
-                    <li>• {t.tip4}</li>
-                  </ul>
-                  {!permissionGranted && <div className="mt-4 text-xs text-muted-foreground/80">{t.iosNote}</div>}
                 </div>
               </div>
             )}
           </CollapsibleContent>
-        </Section>
+        </div>
       </Collapsible>
 
-      {/* ========== HIJRI CALENDAR ========== */}
-      <Collapsible open={isOpen("hijri")} onOpenChange={(open) => setOpenSection(open ? "hijri" : null)}>
-        <Section className="p-6">
+      {/* Hijri Calendar Dropdown */}
+      <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
           <CollapsibleTrigger asChild>
-            <button type="button" onClick={() => toggle("hijri")} className="w-full">
-              <div className="flex items-center justify-between gap-6">
+            <button className="w-full">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-primary" />
-                  <h2 className="text-2xl font-semibold tracking-tight">{t.hijriCalendar}</h2>
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === "ar" ? "التقويم الهجري" : "Hijri Calendar"}
+                    </h2>
+                  </div>
                 </div>
+
                 {hijriDate ? (
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <div className="text-xs text-muted-foreground">{t.today}</div>
-                      <div className="text-lg font-semibold text-primary">
+                      <div className="text-sm text-muted-foreground">
+                        {settings.language === "ar" ? "اليوم" : "Today"}
+                      </div>
+                      <div className="text-xl font-bold text-primary">
                         {hijriDate.date} {hijriDate.month}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-sm text-muted-foreground">
                         {hijriDate.year} {hijriDate.designation}
                       </div>
                     </div>
                     <ChevronDown
-                      className={`h-5 w-5 text-muted-foreground transition-transform duration-150 ${isOpen("hijri") ? "rotate-180" : ""}`}
+                      className={`h-5 w-5 text-muted-foreground transition-transform ${isHijriOpen ? "rotate-180" : ""}`}
                     />
                   </div>
                 ) : (
@@ -896,151 +967,132 @@ const Wudu: React.FC = () => {
           </CollapsibleTrigger>
 
           <CollapsibleContent className="mt-6">
-            <div className="rounded-2xl border border-border/60 p-5 bg-background/60">
-              {/* Month switcher */}
-              <div className="flex items-center justify-between mb-5">
+            <div className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
+              {/* Month Navigation */}
+              <div className="flex items-center justify-between mb-6">
                 <button
                   onClick={() => navigateHijriMonth("prev")}
-                  className="w-10 h-10 rounded-full border border-border/60 hover:bg-muted/40 transition-colors"
-                  aria-label="Previous month"
+                  className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
                 >
-                  <ChevronDown className="h-4 w-4 rotate-90" />
+                  <ChevronDown className="h-5 w-5 rotate-90 text-primary" />
                 </button>
                 <div className="text-center">
-                  <div className="text-xl font-semibold">{getHijriMonthName(currentHijriMonth)}</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold">{getHijriMonthName(currentHijriMonth)}</div>
+                  <div className="text-sm text-muted-foreground">
                     {currentHijriYear} {hijriDate?.designation}
                   </div>
                 </div>
                 <button
                   onClick={() => navigateHijriMonth("next")}
-                  className="w-10 h-10 rounded-full border border-border/60 hover:bg-muted/40 transition-colors"
-                  aria-label="Next month"
+                  className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors"
                 >
-                  <ChevronDown className="h-4 w-4 -rotate-90" />
+                  <ChevronDown className="h-5 w-5 -rotate-90 text-primary" />
                 </button>
               </div>
 
-              {/* Week header */}
-              <div className="grid grid-cols-7 gap-1 text-xs text-muted-foreground mb-2">
-                {(isAR
-                  ? ["أحد", "اثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"]
-                  : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-                ).map((d, i) => (
-                  <div key={i} className={`py-1 text-center ${i === 5 ? "text-primary" : ""}`}>
-                    {d}
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-2">
+                {hijriCalendarDays.map((day, index) => (
+                  <div
+                    key={index}
+                    className={`aspect-square flex items-center justify-center rounded-lg text-sm font-medium transition-all
+                      ${
+                        day.isToday
+                          ? "bg-primary text-primary-foreground shadow-lg scale-110"
+                          : "bg-background/50 hover:bg-background/80"
+                      }`}
+                  >
+                    {day.day}
                   </div>
                 ))}
               </div>
-
-              {/* Calendar grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {hijriCalendarDays.map((day, idx) => {
-                  const isFriday = day.weekdayIndex === 5;
-                  return (
-                    <div
-                      key={idx}
-                      className={[
-                        "aspect-square rounded-lg border text-sm flex flex-col items-center justify-center",
-                        "transition-colors",
-                        day.isToday ? "border-primary/50 bg-primary/5" : "border-border/60 hover:bg-muted/30",
-                        isFriday ? "text-primary" : "text-foreground",
-                      ].join(" ")}
-                      title={day.gregorianDate}
-                    >
-                      <div className="font-medium">{day.day}</div>
-                      <div className="text-[10px] text-muted-foreground">{day.gregorianDate.slice(8, 10)}</div>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </CollapsibleContent>
-        </Section>
+        </div>
       </Collapsible>
 
-      {/* ========== WUDU ========== */}
-      <Collapsible open={isOpen("wudu")} onOpenChange={(open) => setOpenSection(open ? "wudu" : null)}>
-        <Section className="p-6">
+      {/* Wudu Steps Dropdown */}
+      <Collapsible open={isWuduStepsOpen} onOpenChange={setIsWuduStepsOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
           <CollapsibleTrigger asChild>
-            <button type="button" onClick={() => toggle("wudu")} className="w-full">
-              <div className="flex items-center justify-between gap-6">
+            <button className="w-full">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <HandHeart className="h-5 w-5 text-primary" />
-                  <h2 className="text-2xl font-semibold tracking-tight">{t.wuduSteps}</h2>
+                  <h2 className="text-2xl font-bold">{settings.language === "ar" ? "خطوات الوضوء" : "Wudu Steps"}</h2>
                 </div>
                 <ChevronDown
-                  className={`h-5 w-5 text-muted-foreground transition-transform duration-150 ${isOpen("wudu") ? "rotate-180" : ""}`}
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isWuduStepsOpen ? "rotate-180" : ""}`}
                 />
               </div>
             </button>
           </CollapsibleTrigger>
 
-          {/* Preview when collapsed */}
-          {!isOpen("wudu") && (
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {steps.slice(0, 3).map((s, i) => (
-                <div key={i} className="rounded-xl border border-border/60 px-3 py-2.5">
-                  <div className="text-xs text-muted-foreground">{`${i + 1}. ${s.title}`}</div>
-                  <div className="mt-0.5 text-sm">{s.description}</div>
-                </div>
-              ))}
-            </div>
-          )}
-
           <CollapsibleContent className="mt-6">
-            <div className="space-y-4">
-              {steps.map((step, i) => (
-                <div key={i} className="rounded-2xl border border-border/60 p-5">
+            <div className="space-y-3">
+              {currentSteps.map((step, index) => (
+                <div
+                  key={index}
+                  className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow"
+                >
                   <div className="flex items-start gap-4">
-                    <div className="mt-0.5">
-                      <div className="w-8 h-8 rounded-full border border-border/60 flex items-center justify-center text-sm font-semibold">
-                        {i + 1}
+                    <div className="flex-shrink-0 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-sm font-bold text-primary">{index + 1}</span>
                       </div>
                     </div>
+
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold">{step.title}</h3>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-bold">{step.title}</h3>
                         {step.count && (
-                          <span className="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-md border border-border/60">
-                            ×{step.count}
-                          </span>
+                          <div className="px-3 py-1 rounded-full bg-primary/20 border border-primary/30">
+                            <span className="text-lg font-bold text-primary">X{step.count}</span>
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{step.description}</p>
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
 
-              <div className="rounded-2xl border border-border/60 p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="text-base font-semibold">{isAR ? "دعاء بعد الوضوء" : "Dua After Wudu"}</h3>
+            <div className="glass-effect rounded-2xl p-6 border border-border/50 mt-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary" />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {isAR
-                    ? "أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمدًا عبده ورسوله"
-                    : "I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger"}
-                </p>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold mb-2">
+                    {settings.language === "ar" ? "دعاء بعد الوضوء" : "Dua After Wudu"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {settings.language === "ar"
+                      ? "بعد إتمام الوضوء قل: أشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمداً عبده ورسوله"
+                      : "After completing wudu, say: I bear witness that there is no deity except Allah alone, without partner, and I bear witness that Muhammad is His servant and Messenger"}
+                  </p>
+                </div>
               </div>
             </div>
           </CollapsibleContent>
-        </Section>
+        </div>
       </Collapsible>
 
-      {/* ========== RAMADAN & EVENTS ========== */}
-      <Collapsible open={isOpen("events")} onOpenChange={(open) => setOpenSection(open ? "events" : null)}>
-        <Section className="p-6">
+      {/* Ramadan & Islamic Events Dropdown */}
+      <Collapsible open={isRamadanOpen} onOpenChange={setIsRamadanOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
           <CollapsibleTrigger asChild>
-            <button type="button" onClick={() => toggle("events")} className="w-full">
-              <div className="flex items-center justify-between gap-6">
+            <button className="w-full">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Moon className="h-5 w-5 text-primary" />
-                  <h2 className="text-2xl font-semibold tracking-tight">{t.ramadanEvents}</h2>
+                  <h2 className="text-2xl font-bold">
+                    {settings.language === "ar" ? "رمضان والأعياد" : "Ramadan & Islamic Events"}
+                  </h2>
                 </div>
                 <ChevronDown
-                  className={`h-5 w-5 text-muted-foreground transition-transform duration-150 ${isOpen("events") ? "rotate-180" : ""}`}
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isRamadanOpen ? "rotate-180" : ""}`}
                 />
               </div>
             </button>
@@ -1048,12 +1100,13 @@ const Wudu: React.FC = () => {
 
           <CollapsibleContent className="mt-6">
             <div className="space-y-4">
+              {/* All Islamic Events */}
               {islamicEvents.length > 0 ? (
-                islamicEvents.map((event, idx) => (
-                  <div key={idx} className="rounded-2xl border border-border/60 p-5">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <h3 className="text-lg font-semibold">
-                        {isAR
+                islamicEvents.map((event, index) => (
+                  <div key={index} className="glass-effect rounded-2xl p-6 border border-primary/20 bg-primary/5">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-xl font-bold">
+                        {settings.language === "ar"
                           ? event.name === "Ramadan"
                             ? "رمضان"
                             : event.name === "Eid al-Fitr"
@@ -1061,60 +1114,71 @@ const Wudu: React.FC = () => {
                               : "عيد الأضحى"
                           : event.name}
                       </h3>
-                      <div className="text-lg font-medium text-primary tabular-nums">{event.countdown}</div>
+                      <div className="text-2xl font-bold text-primary">{event.countdown}</div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {event.date.toLocaleDateString(isAR ? "ar-SA" : "en-US", {
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {event.date.toLocaleDateString(settings.language === "ar" ? "ar-SA" : "en-US", {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
                         day: "numeric",
                       })}
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground/80">{event.hijriDate}</div>
+                    <div className="text-xs text-muted-foreground">{event.hijriDate}</div>
                   </div>
                 ))
               ) : (
                 <div className="flex items-center justify-center p-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               )}
 
+              {/* Suhur & Iftar Times */}
               {suhurTime && iftarTime && (
                 <div>
-                  <h4 className="text-base font-semibold mb-3">{isAR ? "أوقات رمضان" : "Ramadan Times"}</h4>
+                  <h4 className="text-lg font-bold mb-3">
+                    {settings.language === "ar" ? "أوقات رمضان" : "Ramadan Times"}
+                  </h4>
                   <div className="grid grid-cols-2 gap-3">
-                    <Card className="p-4 border border-border/60 rounded-2xl">
-                      <div className="text-xs text-muted-foreground">{t.suhur}</div>
-                      <div className="mt-1 text-xl font-semibold">{suhurTime}</div>
+                    <Card className="p-4 text-center glass-effect border-border/50">
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {settings.language === "ar" ? "السحور" : "Suhur"}
+                      </div>
+                      <div className="text-2xl font-bold text-primary">{suhurTime}</div>
                     </Card>
-                    <Card className="p-4 border border-border/60 rounded-2xl">
-                      <div className="text-xs text-muted-foreground">{t.iftar}</div>
-                      <div className="mt-1 text-xl font-semibold">{iftarTime}</div>
+                    <Card className="p-4 text-center glass-effect border-border/50">
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {settings.language === "ar" ? "الإفطار" : "Iftar"}
+                      </div>
+                      <div className="text-2xl font-bold text-primary">{iftarTime}</div>
                     </Card>
                   </div>
                 </div>
               )}
             </div>
           </CollapsibleContent>
-        </Section>
+        </div>
       </Collapsible>
 
-      {/* ========== DUAS LINK ========== */}
+      {/* Duas Card */}
       <Link to="/duas" className="block group">
-        <div className="relative">
-          <div className="rounded-2xl border border-border/60 p-8 bg-background/70 hover:bg-background transition-colors">
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-pink-400/10 to-rose-500/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+
+          <div className="relative glass-effect rounded-3xl p-8 border border-border/50 hover:border-primary/30 smooth-transition">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl border border-border/60 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Sparkles className="h-6 w-6 text-primary" />
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center group-hover:scale-110 smooth-transition">
+                  <Sparkles className="h-7 w-7 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-semibold mb-1">{t.duas}</h3>
-                  <p className="text-sm text-muted-foreground">{t.visitDuas}</p>
+                  <h3 className="text-2xl font-bold mb-1">{settings.language === "ar" ? "الأدعية" : "Dua's"}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {settings.language === "ar" ? "زيارة صفحة الأدعية للمزيد" : "Visit duas for more"}
+                  </p>
                 </div>
               </div>
-              <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+              <ArrowRight className="h-6 w-6 text-primary group-hover:translate-x-1 smooth-transition" />
             </div>
           </div>
         </div>
