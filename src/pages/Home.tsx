@@ -433,7 +433,7 @@ const Home = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 backdrop-blur-sm">
               <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
               <span className="text-xs font-semibold text-primary tracking-wider">
-                {settings.language === 'ar' ? 'بسم الله الرحمن الرحيم' : 'In the name of Allah'}
+                {settings.language === 'ar' ? 'بسم الله الرحمن الرحيم' : 'بسم الله الرحمن الرحيم'}
               </span>
             </div>
             
