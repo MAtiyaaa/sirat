@@ -26,51 +26,224 @@ const getSurahOfTheDay = () => {
 
 // Islamic Quotes
 const islamicQuotes = [
-  {
-    ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
-    en: "Indeed, with hardship comes ease",
-    reference: "Quran 94:6"
-  },
-  {
-    ar: "وَاصْبِرْ فَإِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ",
-    en: "Be patient, for Allah does not allow the reward of good-doers to be lost",
-    reference: "Quran 11:115"
-  },
-  {
-    ar: "فَاذْكُرُونِي أَذْكُرْكُمْ",
-    en: "Remember Me; I will remember you",
-    reference: "Quran 2:152"
-  },
-  {
-    ar: "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ",
-    en: "Whoever relies upon Allah - then He is sufficient for him",
-    reference: "Quran 65:3"
-  },
-  {
-    ar: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
-    en: "Indeed, Allah is with the patient",
-    reference: "Quran 2:153"
-  },
-  {
-    ar: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً",
-    en: "Our Lord, give us good in this world and good in the Hereafter",
-    reference: "Quran 2:201"
-  },
-  {
-    ar: "وَقُل رَّبِّ زِدْنِي عِلْمًا",
-    en: "My Lord, increase me in knowledge",
-    reference: "Quran 20:114"
-  },
-  {
-    ar: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
-    en: "Allah does not burden a soul beyond that it can bear",
-    reference: "Quran 2:286"
-  }
+    {
+        ar: "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+        en: "Indeed, with hardship comes ease",
+        reference: "Ash-Sharh (94):6"
+    },
+    {
+        ar: "وَاصْبِرْ فَإِنَّ اللَّهَ لَا يُضِيعُ أَجْرَ الْمُحْسِنِينَ",
+        en: "Be patient, for Allah does not allow the reward of good-doers to be lost",
+        reference: "Hud (11):115"
+    },
+    {
+        ar: "فَاذْكُرُونِي أَذْكُرْكُمْ",
+        en: "Remember Me; I will remember you",
+        reference: "Al-Baqarah (2):152"
+    },
+    {
+        ar: "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ",
+        en: "Whoever relies upon Allah - then He is sufficient for him",
+        reference: "At-Talaq (65):3"
+    },
+    {
+        ar: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
+        en: "Indeed, Allah is with the patient",
+        reference: "Al-Baqarah (2):153"
+    },
+    {
+        ar: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً",
+        en: "Our Lord, give us good in this world and good in the Hereafter",
+        reference: "Al-Baqarah (2):201"
+    },
+    {
+        ar: "وَقُل رَّبِّ زِدْنِي عِلْمًا",
+        en: "My Lord, increase me in knowledge",
+        reference: "Ta-Ha (20):114"
+    },
+    {
+        ar: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",
+        en: "Allah does not burden a soul beyond that it can bear",
+        reference: "Al-Baqarah (2):286"
+    },
+    {
+        ar: "إِنَّ اللَّهَ غَفُورٌ رَّحِيمٌ",
+        en: "Indeed, Allah is Forgiving and Merciful",
+        reference: "Al-Baqarah (2):173"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ",
+        en: "Indeed, Allah loves those who rely [upon Him]",
+        reference: "Ali 'Imran (3):159"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ",
+        en: "Indeed, Allah loves those who are constantly repentant",
+        reference: "Al-Baqarah (2):222"
+    },
+    {
+        ar: "إِنَّ اللَّهَ مَعَ الْمُتَّقِينَ",
+        en: "Indeed, Allah is with those who fear Him",
+        reference: "Al-Baqarah (2):194"
+    },
+    {
+        ar: "إِنَّ اللَّهَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+        en: "Indeed, Allah is over all things competent",
+        reference: "Al-Baqarah (2):20"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُحِبُّ الْمُحْسِنِينَ",
+        en: "Indeed, Allah loves the doers of good",
+        reference: "Ali 'Imran (3):134"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُحِبُّ الصَّابِرِينَ",
+        en: "Indeed, Allah loves the patient",
+        reference: "Ali 'Imran (3):146"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُحِبُّ الْمُتَطَهِّرِينَ",
+        en: "Indeed, Allah loves those who purify themselves",
+        reference: "Al-Baqarah (2):222"
+    },
+    {
+        ar: "وَرَحْمَتِي وَسِعَتْ كُلَّ شَيْءٍ",
+        en: "My mercy encompasses all things",
+        reference: "Al-A'raf (7):156"
+    },
+    {
+        ar: "إِنَّ رَبِّي قَرِيبٌ مُّجِيبٌ",
+        en: "Indeed, my Lord is near and responsive",
+        reference: "Hud (11):61"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ",
+        en: "Indeed, Allah loves those who put their trust in Him",
+        reference: "Ali 'Imran (3):159"
+    },
+    {
+        ar: "وَعَسَى أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ",
+        en: "Perhaps you dislike a thing and it is good for you",
+        reference: "Al-Baqarah (2):216"
+    },
+    {
+        ar: "اللَّهُ نُورُ السَّمَاوَاتِ وَالْأَرْضِ",
+        en: "Allah is the Light of the heavens and the earth",
+        reference: "An-Nur (24):35"
+    },
+    {
+        ar: "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",
+        en: "Surely, by the remembrance of Allah hearts find rest",
+        reference: "Ar-Ra'd (13):28"
+    },
+    {
+        ar: "وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ",
+        en: "He is with you wherever you may be",
+        reference: "Al-Hadid (57):4"
+    },
+    {
+        ar: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
+        en: "For indeed, with hardship [will be] ease",
+        reference: "Ash-Sharh (94):5"
+    },
+    {
+        ar: "وَاللَّهُ خَيْرٌ حَافِظًا",
+        en: "Allah is the best of protectors",
+        reference: "Yusuf (12):64"
+    },
+    {
+        ar: "إِنَّ اللَّهَ لَطِيفٌ خَبِيرٌ",
+        en: "Indeed, Allah is Subtle and Acquainted",
+        reference: "Al-An'am (6):103"
+    },
+    {
+        ar: "وَاللَّهُ يَعْلَمُ وَأَنتُمْ لَا تَعْلَمُونَ",
+        en: "Allah knows and you do not know",
+        reference: "Al-Baqarah (2):216"
+    },
+    {
+        ar: "إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوْمٍ حَتَّىٰ يُغَيِّرُوا مَا بِأَنفُسِهِمْ",
+        en: "Indeed, Allah will not change the condition of a people until they change what is in themselves",
+        reference: "Ar-Ra'd (13):11"
+    },
+    {
+        ar: "وَمَا عِندَ اللَّهِ خَيْرٌ وَأَبْقَىٰ",
+        en: "What is with Allah is better and more lasting",
+        reference: "Al-Qasas (28):60"
+    },
+    {
+        ar: "إِنَّ اللَّهَ هُوَ الرَّزَّاقُ ذُو الْقُوَّةِ الْمَتِينُ",
+        en: "Indeed, it is Allah who is the [continual] Provider, the firm possessor of strength",
+        reference: "Adh-Dhariyat (51):58"
+    },
+    {
+        ar: "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ",
+        en: "Sufficient for us is Allah, and [He is] the best Disposer of affairs",
+        reference: "Ali 'Imran (3):173"
+    },
+    {
+        ar: "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+        en: "Whoever fears Allah - He will make for him a way out",
+        reference: "At-Talaq (65):2"
+    },
+    {
+        ar: "إِنَّ اللَّهَ يُدَافِعُ عَنِ الَّذِينَ آمَنُوا",
+        en: "Indeed, Allah defends those who have believed",
+        reference: "Al-Hajj (22):38"
+    },
+    {
+        ar: "وَكَفَىٰ بِاللَّهِ وَلِيًّا وَكَفَىٰ بِاللَّهِ نَصِيرًا",
+        en: "Allah is sufficient as an ally, and sufficient is Allah as a helper",
+        reference: "An-Nisa (4):45"
+    },
+    {
+        ar: "إِنَّ اللَّهَ سَمِيعٌ بَصِيرٌ",
+        en: "Indeed, Allah is Hearing and Seeing",
+        reference: "An-Nisa (4):58"
+    }
 ];
 
 const getQuoteOfTheDay = () => {
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
   return islamicQuotes[dayOfYear % islamicQuotes.length];
+};
+
+// Map transliterated Surah names to Arabic for reference localization
+const surahNameMap: Record<string, string> = {
+  "Ash-Sharh": "الشرح",
+  "Hud": "هود",
+  "Al-Baqarah": "البقرة",
+  "At-Talaq": "الطلاق",
+  "Ali 'Imran": "آل عمران",
+  "Ta-Ha": "طه",
+  "Ar-Ra'd": "الرعد",
+  "Al-Hadid": "الحديد",
+  "Yusuf": "يوسف",
+  "An-Nur": "النور",
+  "Al-An'am": "الأنعام",
+  "Al-A'raf": "الأعراف",
+  "An-Nisa": "النساء",
+  "Adh-Dhariyat": "الذاريات",
+  "Al-Qasas": "القصص",
+  "Al-Hajj": "الحج",
+};
+
+// Convert Western numerals to Eastern Arabic numerals
+const toArabicNumerals = (input: string) => input.replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+
+// Format a reference like "Ash-Sharh (94):6" based on language
+const formatReference = (reference: string, language: 'ar' | 'en') => {
+  if (language === 'en') return reference;
+  const match = reference.match(/^\s*(.*?)\s*\((\d+)\):(\d+)\s*$/);
+  if (match) {
+    const [, name, surahNum, ayahNum] = match;
+    const arabicName = surahNameMap[name.trim()] || name.trim();
+    const surahNumAr = toArabicNumerals(surahNum);
+    const ayahNumAr = toArabicNumerals(ayahNum);
+    return `سورة ${arabicName} (${surahNumAr}):${ayahNumAr}`;
+  }
+  // Fallback: just localize any digits present
+  return toArabicNumerals(reference);
 };
 
 const Home = () => {
@@ -149,11 +322,11 @@ const Home = () => {
   }, [user]);
 
   React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: any } }) => {
       setUser(session?.user ?? null);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
     });
 
@@ -372,7 +545,7 @@ const Home = () => {
               </p>
               
               <p className="text-xs text-muted-foreground font-medium tracking-wide">
-                {quoteOfDay.reference}
+                {settings.language === 'ar' ? formatReference(quoteOfDay.reference, 'ar') : formatReference(quoteOfDay.reference, 'en')}
               </p>
             </div>
           </div>
