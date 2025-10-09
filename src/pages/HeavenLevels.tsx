@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
-import { ArrowLeft, Cloud } from 'lucide-react';
+import { ArrowLeft, Cloud, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -11,18 +11,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-
-// ——————————————————————————————————————————————————————————
-// NOTE: This keeps your original content, fixes, and order.
-// Added: click-to-open Dialog with richer details in EN/AR.
-// ——————————————————————————————————————————————————————————
 
 const HeavenLevels = () => {
   const navigate = useNavigate();
@@ -42,8 +31,7 @@ const HeavenLevels = () => {
     close: isArabic ? 'إغلاق' : 'Close',
   };
 
-  // Reordered: lowest first → highest last
-  // Fixed earlier: "Dar Al-Khuld" → "Jannat Al-Khuld"; removed duplicate "Jannat Al-Firdaws"
+  // Lowest → Highest
   const levels = [
     {
       key: 'muqamah',
@@ -96,28 +84,19 @@ const HeavenLevels = () => {
     },
   ];
 
-  // Richer details for the Dialog (EN & AR).
-  // Keep it lightweight and accurate; you can extend sources later.
+  // Single-language details (auto from settings)
   const details = useMemo(() => ({
     muqamah: {
       ar: {
         title: 'دار المقامة',
         blurb: 'سماها الله ﴿دَارَ الْمُقَامَةِ﴾ أي الإقامة الدائمة بلا ظعن ولا ألم.',
-        points: [
-          'لا سقم ولا همّ ولا نصب.',
-          'إقامة مستقرة لا يعتريها تحول.',
-          'نعيم مقيم لا انقطاع له.',
-        ],
+        points: ['لا سقم ولا همّ ولا نصب.', 'إقامة مستقرة لا يعتريها تحول.', 'نعيم مقيم لا انقطاع له.'],
         refs: ['فاطر 35:35'],
       },
       en: {
         title: 'Dar Al-Muqamah',
         blurb: 'Named by Allah as the “Abode of Permanent Residence”—no departure, no pain.',
-        points: [
-          'No sickness, grief, or fatigue.',
-          'A settled, permanent stay—no moving on.',
-          'Uninterrupted, abiding bliss.',
-        ],
+        points: ['No sickness, grief, or fatigue.', 'A settled, permanent stay—no moving on.', 'Uninterrupted, abiding bliss.'],
         refs: ['Fatir 35:35'],
       },
     },
@@ -125,21 +104,13 @@ const HeavenLevels = () => {
       ar: {
         title: 'دار السلام',
         blurb: 'الله يدعو إلى دار السلام، فهي السلامة التامة من كل مخوف ومكروه.',
-        points: [
-          'لا خوف ولا حزن.',
-          'تحية سلام من الملائكة.',
-          'قرب من رحمة الله ورضوانه.',
-        ],
+        points: ['لا خوف ولا حزن.', 'تحية سلام من الملائكة.', 'قرب من رحمة الله ورضوانه.'],
         refs: ['يونس 10:25', 'الزمر 39:73'],
       },
       en: {
         title: 'Dar As-Salam',
         blurb: 'Allah calls to the “Abode of Peace”—perfect safety from all harm.',
-        points: [
-          'No fear, no sorrow.',
-          'Angels greet with peace.',
-          'Nearness to Allah’s mercy and pleasure.',
-        ],
+        points: ['No fear, no sorrow.', 'Angels greet with peace.', 'Nearness to Allah’s mercy and pleasure.'],
         refs: ['Yunus 10:25', 'Az-Zumar 39:73'],
       },
     },
@@ -147,21 +118,13 @@ const HeavenLevels = () => {
       ar: {
         title: 'جنة النعيم',
         blurb: 'نعيم ظاهر وباطن، دنيوي وأخروي، لا عين رأت ولا أذن سمعت.',
-        points: [
-          'نعيم القلب والروح والبدن.',
-          'أزواج مطهرة ونظر إلى وجه الله.',
-          'سرور دائم بلا انقطاع.',
-        ],
+        points: ['نعيم القلب والروح والبدن.', 'أزواج مطهرة ورؤية وجه الله.', 'سرور دائم بلا انقطاع.'],
         refs: ['لقمان 31:8', 'القلم 68:34'],
       },
       en: {
         title: 'Jannat an-Naʿīm',
         blurb: 'Bliss for body, heart, and soul—beyond what eyes have seen or ears have heard.',
-        points: [
-          'Inner and outer delights.',
-          'Pure spouses and the Vision of Allah.',
-          'Endless joy without interruption.',
-        ],
+        points: ['Inner and outer delights.', 'Pure spouses and the Vision of Allah.', 'Endless joy without interruption.'],
         refs: ['Luqman 31:8', 'Al-Qalam 68:34'],
       },
     },
@@ -169,21 +132,13 @@ const HeavenLevels = () => {
       ar: {
         title: 'جنة المأوى',
         blurb: 'مأوى المتقين، فيها قرب ومنزلة عند الله.',
-        points: [
-          'سكن وطمأنينة وملجأ.',
-          'يرتادها أهل البر والتقوى.',
-          'ذكرت مع سدرة المنتهى.',
-        ],
+        points: ['سكن وطمأنينة وملجأ.', 'يرتادها أهل البر والتقوى.', 'ذكرت مع سدرة المنتهى.'],
         refs: ['السجدة 32:19', 'النجم 53:15'],
       },
       en: {
         title: 'Jannat al-Maʾwa',
         blurb: 'A refuge for the righteous; a station of nearness and rest.',
-        points: [
-          'Dwelling, serenity, and shelter.',
-          'For people of piety and righteousness.',
-          'Mentioned near the Lote Tree of the utmost boundary.',
-        ],
+        points: ['Dwelling, serenity, and shelter.', 'For people of piety and righteousness.', 'Mentioned near the Lote Tree of the utmost boundary.'],
         refs: ['As-Sajdah 32:19', 'An-Najm 53:15'],
       },
     },
@@ -191,21 +146,13 @@ const HeavenLevels = () => {
       ar: {
         title: 'جنة عدن',
         blurb: 'جنات الإقامة والدوام، يدخلها الأنبياء والصديقون والشهداء والصالحون.',
-        points: [
-          'أنهار تجري من تحتها.',
-          'حُليّ وثياب سندس وإستبرق.',
-          'اجتماع الأهل والذرية بفضل الله.',
-        ],
+        points: ['أنهار تجري من تحتها.', 'حُليّ وثياب سندس وإستبرق.', 'اجتماع الأهل والذرية بفضل الله.'],
         refs: ['التوبة 9:72', 'الرعد 13:23', 'فاطر 35:33'],
       },
       en: {
         title: 'Jannat ʿAdn',
         blurb: 'Gardens of lasting residence for the prophets, truthful, martyrs, and righteous.',
-        points: [
-          'Rivers flow beneath.',
-          'Adornments and fine silk garments.',
-          'Families reunited by Allah’s grace.',
-        ],
+        points: ['Rivers flow beneath.', 'Adornments and fine silk garments.', 'Families reunited by Allah’s grace.'],
         refs: ['At-Tawbah 9:72', 'Ar-Raʿd 13:23', 'Fatir 35:33'],
       },
     },
@@ -213,21 +160,13 @@ const HeavenLevels = () => {
       ar: {
         title: 'جنة الخلد',
         blurb: 'خلود لا يفنى ولا يزول، نعيم دائم.',
-        points: [
-          'لا موت بعد اليوم.',
-          'إقامة مؤبدة في كرامة.',
-          'زيادة من فضل الله.',
-        ],
+        points: ['لا موت بعد اليوم.', 'إقامة مؤبدة في كرامة.', 'زيادة من فضل الله.'],
         refs: ['الفرقان 25:15'],
       },
       en: {
         title: 'Jannat al-Khuld',
         blurb: 'Unending eternity—abiding honor and delight.',
-        points: [
-          'No death thereafter.',
-          'Perpetual residence in honor.',
-          'Increase from Allah’s bounty.',
-        ],
+        points: ['No death thereafter.', 'Perpetual residence in honor.', 'Increase from Allah’s bounty.'],
         refs: ['Al-Furqan 25:15'],
       },
     },
@@ -235,21 +174,13 @@ const HeavenLevels = () => {
       ar: {
         title: 'الفردوس الأعلى',
         blurb: 'أعلى الجنة ووسطها، سقفها العرش، ومنها تفجر الأنهار. أُمرنا أن نسأل الله الفردوس.',
-        points: [
-          'أفضل الجنان وأعلاها.',
-          'أنهار الجنة من أعلاها.',
-          'حديث: إذا سألتم الله فاسألوه الفردوس.',
-        ],
+        points: ['أفضل الجنان وأعلاها.', 'أنهار الجنة من أعلاها.', 'حديث: إذا سألتم الله فاسألوه الفردوس.'],
         refs: ['الكهف 18:107', 'المؤمنون 23:11', 'صحيح البخاري'],
       },
       en: {
         title: 'Al-Firdaws al-Aʿla',
         blurb: 'The highest and middle of Paradise; its roof is the Throne; rivers spring from it. We’re taught to ask Allah for Firdaws.',
-        points: [
-          'The best and highest Garden.',
-          'Rivers of Paradise originate there.',
-          'Hadith: “If you ask Allah, ask Him for Firdaws.”',
-        ],
+        points: ['The best and highest Garden.', 'Rivers of Paradise originate there.', 'Hadith: “If you ask Allah, ask Him for Firdaws.”'],
         refs: ['Al-Kahf 18:107', 'Al-Mu’minun 23:11', 'Sahih al-Bukhari'],
       },
     },
@@ -286,16 +217,18 @@ const HeavenLevels = () => {
   };
 
   const active = activeIndex !== null ? levels[activeIndex] : null;
-  const activeDetail = active ? details[active.key as keyof typeof details] : null;
+  const activeDetail = active
+    ? details[active.key as keyof typeof details][isArabic ? 'ar' : 'en']
+    : null;
 
   return (
     <div className="relative min-h-screen pb-24">
-      {/* Background: aurora + radial grid */}
+      {/* Subtle aurora background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-sky-500/10" />
         <div className="absolute -top-16 -left-16 h-80 w-80 rounded-full bg-emerald-400/20 blur-3xl" />
         <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-teal-400/20 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(transparent_1px,rgba(255,255,255,0.02)_1px)] [background-size:20px_20px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(transparent_1px,rgba(255,255,255,0.03)_1px)] [background-size:22px_22px]" />
       </div>
 
       <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -327,7 +260,7 @@ const HeavenLevels = () => {
               tabIndex={0}
               onClick={() => handleOpen(index)}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleOpen(index)}
-              className="group hover:shadow-xl smooth-transition rounded-2xl border-white/10 bg-white/60 dark:bg-neutral-900/50 backdrop-blur-md hover:bg-white/70 dark:hover:bg-neutral-900/60 cursor-pointer"
+              className="group hover:shadow-xl smooth-transition rounded-3xl border-white/10 bg-white/60 dark:bg-neutral-900/50 backdrop-blur-md hover:bg-white/70 dark:hover:bg-neutral-900/60 cursor-pointer ring-1 ring-black/5"
             >
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">
@@ -353,7 +286,7 @@ const HeavenLevels = () => {
           ))}
         </div>
 
-        <Card className="rounded-2xl border-white/10 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur">
+        <Card className="rounded-3xl border-white/10 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur ring-1 ring-black/5">
           <CardHeader>
             <CardTitle className="tracking-tight">
               {isArabic ? features.titleAr : features.titleEn}
@@ -372,65 +305,71 @@ const HeavenLevels = () => {
         </Card>
       </div>
 
-      {/* Details Dialog */}
+      {/* Details Dialog — rebuilt to look premium */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl rounded-2xl border-white/10 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              {active ? (isArabic ? active.nameAr : active.nameEn) : ''}
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              {active ? (isArabic ? active.descAr : active.descEn) : ''}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent
+          className={[
+            // container
+            'w-[min(92vw,720px)] rounded-[28px] p-0 overflow-hidden',
+            // glass + border
+            'bg-white/70 dark:bg-neutral-900/70 backdrop-blur-2xl',
+            'border border-white/20 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.35)]',
+            // enter animation
+            'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
+            'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+          ].join(' ')}
+        >
+          {/* Hero header */}
+          <div className="relative">
+            <div className="h-28 bg-gradient-to-r from-emerald-500/25 via-teal-500/25 to-sky-500/25" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.35),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,0.25),transparent_40%)]" />
+            <button
+              onClick={() => setOpen(false)}
+              aria-label={content.close}
+              className="absolute right-4 top-4 inline-flex items-center justify-center h-9 w-9 rounded-xl bg-white/60 dark:bg-neutral-900/60 backdrop-blur ring-1 ring-white/20 hover:bg-white/70 dark:hover:bg-neutral-900/70 transition"
+            >
+              <X className="h-4 w-4" />
+            </button>
 
-          <Separator className="my-3" />
+            <div className="px-6 pb-5 -mt-10">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-white/70 dark:bg-neutral-900/70 backdrop-blur ring-1 ring-white/30 shadow-md">
+                <Cloud className="h-8 w-8 text-primary" />
+              </div>
+              <div className={['mt-4', isArabic ? 'text-right' : 'text-left'].join(' ')}>
+                <DialogHeader className="p-0">
+                  <DialogTitle className="text-2xl font-extrabold tracking-tight">
+                    {active ? (isArabic ? active.nameAr : active.nameEn) : ''}
+                  </DialogTitle>
+                  <DialogDescription className="text-muted-foreground mt-1">
+                    {active ? (isArabic ? active.descAr : active.descEn) : ''}
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+            </div>
+          </div>
 
-          <Tabs defaultValue={isArabic ? 'ar' : 'en'} className="w-full">
-            <TabsList className="grid grid-cols-2 w-full rounded-xl">
-              <TabsTrigger value="en">English</TabsTrigger>
-              <TabsTrigger value="ar">العربية</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="en" className="mt-4">
-              {activeDetail && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">{activeDetail.en.title}</h3>
-                  <p className="text-sm text-muted-foreground">{activeDetail.en.blurb}</p>
-                  <ul className="list-disc pl-5 space-y-2 text-sm">
-                    {activeDetail.en.points.map((p, i) => (
-                      <li key={i}>{p}</li>
-                    ))}
-                  </ul>
-                  <div className="text-xs text-primary/80">
-                    <span className="font-medium">Refs:</span> {activeDetail.en.refs.join(' • ')}
-                  </div>
+          {/* Body */}
+          <div className={['px-6 py-5', isArabic ? 'text-right' : 'text-left'].join(' ')}>
+            {activeDetail && (
+              <div className="space-y-4">
+                <p className="text-sm leading-relaxed">{activeDetail.blurb}</p>
+                <Separator className="my-2" />
+                <ul className={['space-y-2 text-sm', isArabic ? 'rtl:pr-4' : 'pl-4 list-disc'].join(' ')}>
+                  {activeDetail.points.map((p, i) => (
+                    <li key={i} className={isArabic ? '' : 'list-disc'}>{p}</li>
+                  ))}
+                </ul>
+                <div className="text-xs text-primary/80">
+                  <span className="font-medium">{isArabic ? 'المراجع:' : 'Refs:'}</span>{' '}
+                  {activeDetail.refs.join(' • ')}
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="ar" className="mt-4">
-              {activeDetail && (
-                <div className="space-y-4 text-right">
-                  <h3 className="text-lg font-semibold">{activeDetail.ar.title}</h3>
-                  <p className="text-sm text-muted-foreground">{activeDetail.ar.blurb}</p>
-                  <ul className="list-disc rtl:pl-0 rtl:pr-5 space-y-2 text-sm">
-                    {activeDetail.ar.points.map((p, i) => (
-                      <li key={i} className="rtl:list-[arabic] list-disc">{p}</li>
-                    ))}
-                  </ul>
-                  <div className="text-xs text-primary/80">
-                    <span className="font-medium">المراجع:</span> {activeDetail.ar.refs.join(' • ')}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6 flex justify-end">
-            <Button onClick={() => setOpen(false)} className="rounded-xl">
-              {content.close}
-            </Button>
+              </div>
+            )}
+            <div className={['mt-6 flex', isArabic ? 'justify-start' : 'justify-end'].join(' ')}>
+              <Button onClick={() => setOpen(false)} className="rounded-xl">
+                {content.close}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
