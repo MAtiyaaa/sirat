@@ -18,18 +18,20 @@ const HeavenLevels = () => {
       : 'Paradise has levels, some above others, the highest being Al-Firdaws Al-A\'la',
   };
 
+  // Reordered: lowest first → highest last
+  // Fixed: "Dar Al-Khuld" → "Jannat Al-Khuld"; removed duplicate "Jannat Al-Firdaws"
   const levels = [
     {
-      nameAr: 'الفردوس الأعلى',
-      nameEn: 'Al-Firdaws Al-A\'la',
-      descAr: 'أعلى درجات الجنة ووسطها، وهي أفضل الجنان، سقفها عرش الرحمن، ومنها تتفجر أنهار الجنة',
-      descEn: 'The highest and middle level of Paradise, its ceiling is the Throne of the Most Merciful, from which the rivers of Paradise spring forth',
+      nameAr: 'دار المقامة',
+      nameEn: 'Dar Al-Muqamah (Abode of Residence)',
+      descAr: 'دار الإقامة الدائمة التي لا ظعن فيها ولا رحيل',
+      descEn: 'The abode of permanent residence with no departure or travel',
     },
     {
-      nameAr: 'جنة عدن',
-      nameEn: 'Jannat Adn (Gardens of Eternity)',
-      descAr: 'جنة الإقامة الدائمة، وهي مقر الأنبياء والصديقين والشهداء والصالحين',
-      descEn: 'The Garden of eternal residence, home to prophets, the truthful, martyrs, and the righteous',
+      nameAr: 'دار السلام',
+      nameEn: 'Dar As-Salam (Abode of Peace)',
+      descAr: 'الدار الآمنة الخالية من كل آفة ومنغصات، فيها السلامة من كل بلاء',
+      descEn: 'The safe abode free from all calamities and troubles, where there is safety from all afflictions',
     },
     {
       nameAr: 'جنة النعيم',
@@ -44,28 +46,22 @@ const HeavenLevels = () => {
       descEn: 'The Garden of refuge and shelter to which the righteous retreat',
     },
     {
-      nameAr: 'دار السلام',
-      nameEn: 'Dar As-Salam (Abode of Peace)',
-      descAr: 'الدار الآمنة الخالية من كل آفة ومنغصات، فيها السلامة من كل بلاء',
-      descEn: 'The safe abode free from all calamities and troubles, where there is safety from all afflictions',
+      nameAr: 'جنة عدن',
+      nameEn: 'Jannat Adn (Gardens of Eternity)',
+      descAr: 'جنة الإقامة الدائمة، وهي مقر الأنبياء والصديقين والشهداء والصالحين',
+      descEn: 'The Garden of eternal residence, home to prophets, the truthful, martyrs, and the righteous',
     },
     {
-      nameAr: 'دار الخلد',
-      nameEn: 'Dar Al-Khuld (Abode of Eternity)',
-      descAr: 'دار البقاء الأبدي، لا موت فيها ولا فناء',
-      descEn: 'The abode of eternal permanence, with no death or perishing',
+      nameAr: 'جنة الخلد',
+      nameEn: 'Jannat Al-Khuld (Garden of Eternity)',
+      descAr: 'جنة الخلد والدوام، لا موت فيها ولا فناء',
+      descEn: 'The Garden of eternal permanence, with no death or perishing',
     },
     {
-      nameAr: 'جنة الفردوس',
-      nameEn: 'Jannat Al-Firdaws',
-      descAr: 'من أرفع درجات الجنة، فيها أعلى النعيم وأجله',
-      descEn: 'Among the highest levels of Paradise, containing the most sublime bliss',
-    },
-    {
-      nameAr: 'دار المقامة',
-      nameEn: 'Dar Al-Muqamah (Abode of Residence)',
-      descAr: 'دار الإقامة الدائمة التي لا ظعن فيها ولا رحيل',
-      descEn: 'The abode of permanent residence with no departure or travel',
+      nameAr: 'الفردوس الأعلى',
+      nameEn: 'Al-Firdaws Al-A\'la',
+      descAr: 'أعلى درجات الجنة ووسطها، وهي أفضل الجنان، سقفها عرش الرحمن، ومنها تتفجر أنهار الجنة',
+      descEn: 'The highest and middle level of Paradise, its ceiling is the Throne of the Most Merciful, from which the rivers of Paradise spring forth',
     },
   ];
 
