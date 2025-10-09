@@ -125,8 +125,10 @@ const Settings = () => {
     ar: {
       title: 'الإعدادات',
       account: 'الحساب',
+      myAccount: 'حسابي',
       appearance: 'المظهر',
       quran: 'القرآن',
+      prayer: 'الصلاة',
       autoLock: 'قفل تلقائي عند التشغيل',
       autoLockDesc: 'قفل الشاشة تلقائياً والتمرير مع الإمام عند تشغيل السورة',
       signOut: 'تسجيل الخروج',
@@ -143,6 +145,9 @@ const Settings = () => {
       trackingMode: 'طريقة التذكر',
       translationOff: 'الترجمة متوقفة',
       tafsirOff: 'التفسير متوقف',
+      translationOptions: {
+        transliteration: 'النقل الحرفي',
+      },
       themes: {
         light: 'فاتح',
         dark: 'داكن',
@@ -181,8 +186,10 @@ const Settings = () => {
     en: {
       title: 'Settings',
       account: 'Account',
+      myAccount: 'My Account',
       appearance: 'Appearance',
       quran: 'Quran',
+      prayer: 'Prayer',
       autoLock: 'Auto-lock When Playing',
       autoLockDesc: 'Automatically lock screen and scroll with imam when surah plays',
       signOut: 'Sign Out',
@@ -199,6 +206,9 @@ const Settings = () => {
       trackingMode: 'Reading Tracking',
       translationOff: 'Translation Off',
       tafsirOff: 'Tafsir Off',
+      translationOptions: {
+        transliteration: 'Transliteration',
+      },
       themes: {
         light: 'Light',
         dark: 'Dark',
@@ -236,17 +246,19 @@ const Settings = () => {
     },
   };
 
-  const t = content[settings.language];
+  const lang = (settings.language ?? 'en') as 'ar' | 'en';
+  const t = content[lang];
+  const isRTL = lang === 'ar';
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pb-12">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="max-w-2xl mx-auto space-y-6 pb-12">
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
+        className={`fixed top-6 ${isRTL ? 'right-6' : 'left-6'} z-50 rounded-full w-10 h-10`}
       >
-        <ArrowLeft className="h-5 w-5" />
+        <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
       </Button>
 
       {/* Header with Avatar */}
@@ -278,24 +290,24 @@ const Settings = () => {
             <>
               <Link to="/account">
                 <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 smooth-transition">
                       <User className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="font-medium">My Account</span>
+                    <span className="font-medium truncate">{t.myAccount}</span>
                   </div>
-                  <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180" />
+                  <ArrowLeft className={`h-4 w-4 text-muted-foreground ${isRTL ? '' : 'rotate-180'} shrink-0`} />
                 </button>
               </Link>
               <Link to="/chat-history">
                 <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 smooth-transition">
                       <MessageSquare className="h-5 w-5 text-purple-500" />
                     </div>
-                    <span className="font-medium">{t.chatHistory}</span>
+                    <span className="font-medium truncate">{t.chatHistory}</span>
                   </div>
-                  <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180" />
+                  <ArrowLeft className={`h-4 w-4 text-muted-foreground ${isRTL ? '' : 'rotate-180'} shrink-0`} />
                 </button>
               </Link>
               <button
@@ -305,7 +317,7 @@ const Settings = () => {
                 <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
                   <LogOut className="h-5 w-5 text-destructive" />
                 </div>
-                <span className="font-medium text-destructive">{t.signOut}</span>
+                <span className="font-medium text-destructive truncate">{t.signOut}</span>
               </button>
             </>
           ) : (
@@ -323,7 +335,7 @@ const Settings = () => {
           <div className="flex items-center justify-between">
             <Label className="font-medium">{t.language}</Label>
             <Select value={settings.language} onValueChange={(value: 'ar' | 'en') => updateSettings({ language: value })}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -336,7 +348,7 @@ const Settings = () => {
           <div className="flex items-center justify-between">
             <Label className="font-medium">{t.theme}</Label>
             <Select value={settings.theme} onValueChange={(value: any) => updateSettings({ theme: value })}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -356,18 +368,18 @@ const Settings = () => {
       <div className="space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.quran}</h2>
         <div className="glass-effect rounded-2xl p-5 border border-border/30 space-y-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
               <Label className="font-medium">{t.autoLock}</Label>
               <p className="text-xs text-muted-foreground mt-1">{t.autoLockDesc}</p>
             </div>
-            <Switch checked={autoLock} onCheckedChange={toggleAutoLock} className="shrink-0 mt-1" />
+            <Switch checked={autoLock} onCheckedChange={toggleAutoLock} />
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
             <Label className="font-medium">{t.fontType}</Label>
             <Select value={settings.fontType} onValueChange={(value: any) => updateSettings({ fontType: value })}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className={isRTL ? 'w-44' : 'w-32'}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -382,9 +394,9 @@ const Settings = () => {
           </div>
           <div className="h-px bg-border" />
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <Label className="font-medium shrink-0">{t.translationSource}</Label>
-              <Switch checked={settings.translationEnabled} onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })} className="shrink-0" />
+            <div className="flex items-center justify-between">
+              <Label className="font-medium">{t.translationSource}</Label>
+              <Switch checked={settings.translationEnabled} onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })} />
             </div>
             {settings.translationEnabled && (
               <Select value={settings.translationSource} onValueChange={(value) => updateSettings({ translationSource: value })}>
@@ -392,7 +404,7 @@ const Settings = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="transliteration">Transliteration</SelectItem>
+                  <SelectItem value="transliteration">{t.translationOptions?.transliteration || 'Transliteration'}</SelectItem>
                   <SelectItem value="en.sahih">Sahih International</SelectItem>
                   <SelectItem value="en.pickthall">Pickthall</SelectItem>
                   <SelectItem value="ar.muyassar">الميسر</SelectItem>
@@ -402,9 +414,9 @@ const Settings = () => {
           </div>
           <div className="h-px bg-border" />
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <Label className="font-medium shrink-0">{t.tafsirSource}</Label>
-              <Switch checked={settings.tafsirEnabled} onCheckedChange={(checked) => updateSettings({ tafsirEnabled: checked })} className="shrink-0" />
+            <div className="flex items-center justify-between">
+              <Label className="font-medium">{t.tafsirSource}</Label>
+              <Switch checked={settings.tafsirEnabled} onCheckedChange={(checked) => updateSettings({ tafsirEnabled: checked })} />
             </div>
             {settings.tafsirEnabled && (
               <Select value={settings.tafsirSource} onValueChange={(value) => updateSettings({ tafsirSource: value })}>
@@ -422,7 +434,7 @@ const Settings = () => {
           <div className="flex items-center justify-between">
             <Label className="font-medium">{t.trackingMode}</Label>
             <Select value={settings.readingTrackingMode} onValueChange={(value: any) => updateSettings({ readingTrackingMode: value })}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className={isRTL ? 'w-44' : 'w-32'}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -439,12 +451,12 @@ const Settings = () => {
 
       {/* Prayer */}
       <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">Prayer</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.prayer}</h2>
         <div className="glass-effect rounded-2xl p-5 border border-border/30">
           <div className="flex items-center justify-between">
             <Label className="font-medium">{t.prayerRegion}</Label>
             <Select value={settings.prayerTimeRegion || 'auto'} onValueChange={(value) => updateSettings({ prayerTimeRegion: value === 'auto' ? null : value })}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className={isRTL ? 'w-44' : 'w-32'}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -467,7 +479,7 @@ const Settings = () => {
                 <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
                   <RotateCcw className="h-5 w-5 text-destructive" />
                 </div>
-                <div className="flex-1 text-left">
+                <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'} min-w-0`}>
                   <p className="font-medium text-destructive">{t.resetProgress}</p>
                   <p className="text-xs text-muted-foreground">{t.resetWarning}</p>
                 </div>
