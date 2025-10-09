@@ -378,8 +378,8 @@ const Home = () => {
     },
     {
       icon: Scroll,
-      title: { ar: 'القصص', en: 'Stories' },
-      link: '/prophet-stories',
+      title: { ar: 'القصص والأسماء', en: 'Stories & Names' },
+      link: '/stories-and-names',
       gradient: 'from-indigo-500 to-purple-500',
     },
     {

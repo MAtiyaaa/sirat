@@ -4,7 +4,7 @@ import { Book, Clock, Sparkles, User, Settings, BookMarked, History, Repeat } fr
 import { Card } from '@/components/ui/card';
 
 interface NavigationCardProps {
-  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih';
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih' | 'stories-and-names';
   data?: {
     surahNumber?: number;
     ayahNumber?: number;
@@ -57,6 +57,16 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
           gradient: 'from-purple-500/20 via-pink-400/20 to-rose-500/20',
           iconBg: 'bg-purple-500/10',
           iconColor: 'text-purple-600 dark:text-purple-400',
+        };
+      case 'stories-and-names':
+        return {
+          icon: Book,
+          title: 'Stories and Names',
+          description: 'Islamic stories and names',
+          link: '/stories-and-names',
+          gradient: 'from-violet-500/20 via-purple-400/20 to-indigo-500/20',
+          iconBg: 'bg-violet-500/10',
+          iconColor: 'text-violet-600 dark:text-violet-400',
         };
       case 'account':
         return {
