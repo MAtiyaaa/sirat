@@ -11,7 +11,7 @@ const StoriesAndNames = () => {
   const isArabic = settings.language === 'ar';
 
   const content = {
-    title: isArabic ? 'القصص والأسماء' : 'Stories and Names',
+    title: isArabic ? 'تعليم' : 'Education',
     back: isArabic ? 'رجوع' : 'Back',
     cards: [
       {
