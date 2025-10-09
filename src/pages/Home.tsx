@@ -378,7 +378,7 @@ const Home = () => {
     },
     {
       icon: Scroll,
-      title: { ar: 'القصص والأسماء', en: 'Stories & Names' },
+      title: { ar: 'تعليم', en: 'Education' },
       link: '/stories-and-names',
       gradient: 'from-indigo-500 to-purple-500',
     },
