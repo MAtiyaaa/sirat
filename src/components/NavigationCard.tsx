@@ -61,7 +61,7 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
       case 'stories-and-names':
         return {
           icon: Book,
-          title: 'Stories and Names',
+          title: 'Education',
           description: 'Islamic stories and names',
           link: '/stories-and-names',
           gradient: 'from-violet-500/20 via-purple-400/20 to-indigo-500/20',
