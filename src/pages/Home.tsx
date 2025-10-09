@@ -457,8 +457,8 @@ const Home = () => {
             {/* Subtitle */}
             <p className="text-base text-muted-foreground font-light tracking-wide">
               {settings.language === 'ar' 
-                ? 'رفيقك الإسلامي الشامل'
-                : 'Your Complete Islamic Companion'}
+                ? 'اقرأ. تدبّر. تذكّر.'
+                : 'Read. Reflect. Remember.'}
             </p>
           </div>
         </div>
