@@ -356,12 +356,12 @@ const Settings = () => {
       <div className="space-y-3">
         <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.quran}</h2>
         <div className="glass-effect rounded-2xl p-5 border border-border/30 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <Label className="font-medium">{t.autoLock}</Label>
               <p className="text-xs text-muted-foreground mt-1">{t.autoLockDesc}</p>
             </div>
-            <Switch checked={autoLock} onCheckedChange={toggleAutoLock} />
+            <Switch checked={autoLock} onCheckedChange={toggleAutoLock} className="shrink-0 mt-1" />
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
@@ -382,9 +382,9 @@ const Settings = () => {
           </div>
           <div className="h-px bg-border" />
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="font-medium">{t.translationSource}</Label>
-              <Switch checked={settings.translationEnabled} onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })} />
+            <div className="flex items-center justify-between gap-3">
+              <Label className="font-medium shrink-0">{t.translationSource}</Label>
+              <Switch checked={settings.translationEnabled} onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })} className="shrink-0" />
             </div>
             {settings.translationEnabled && (
               <Select value={settings.translationSource} onValueChange={(value) => updateSettings({ translationSource: value })}>
@@ -402,9 +402,9 @@ const Settings = () => {
           </div>
           <div className="h-px bg-border" />
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="font-medium">{t.tafsirSource}</Label>
-              <Switch checked={settings.tafsirEnabled} onCheckedChange={(checked) => updateSettings({ tafsirEnabled: checked })} />
+            <div className="flex items-center justify-between gap-3">
+              <Label className="font-medium shrink-0">{t.tafsirSource}</Label>
+              <Switch checked={settings.tafsirEnabled} onCheckedChange={(checked) => updateSettings({ tafsirEnabled: checked })} className="shrink-0" />
             </div>
             {settings.tafsirEnabled && (
               <Select value={settings.tafsirSource} onValueChange={(value) => updateSettings({ tafsirSource: value })}>
