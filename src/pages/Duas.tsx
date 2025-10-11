@@ -220,7 +220,7 @@ const Duas = () => {
           {duas.map((dua) => {
             const Icon = dua.icon;
             return (
-              <div key={dua.id} className="glass-effect rounded-3xl p-6 space-y-4 border border-border/30 backdrop-blur-xl hover:border-primary/30 smooth-transition">
+              <div key={dua.id} className="neomorph rounded-3xl p-6 space-y-4 hover:neomorph-pressed smooth-transition">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
                     <Icon className="h-6 w-6 text-white" />
@@ -257,7 +257,7 @@ const Duas = () => {
         </h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {dhikr.map((item) => (
-            <div key={item.id} className="glass-effect rounded-3xl p-6 text-center space-y-3 border border-border/30 backdrop-blur-xl hover:border-primary/30 smooth-transition">
+            <div key={item.id} className="neomorph rounded-3xl p-6 text-center space-y-3 hover:neomorph-pressed smooth-transition">
               <p className={`text-2xl font-bold ${settings.fontType === 'quran' ? 'font-quran' : ''}`} dir="rtl">
                 {item.arabic}
               </p>
@@ -284,7 +284,7 @@ const Duas = () => {
         {/* Track Dhikr Card */}
         <div 
           onClick={() => navigate('/tasbih')}
-          className="relative overflow-hidden glass-effect rounded-2xl p-8 cursor-pointer hover:scale-[1.02] smooth-transition group border border-primary/20"
+          className="relative overflow-hidden neomorph rounded-2xl p-8 cursor-pointer hover:neomorph-pressed smooth-transition group"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10 opacity-0 group-hover:opacity-100 smooth-transition" />
           <div className="relative flex items-center justify-between">

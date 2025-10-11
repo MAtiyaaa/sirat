@@ -23,52 +23,13 @@ const HellLevels = () => {
   };
 
   const levels = [
-    {
-      nameAr: 'جهنم',
-      nameEn: 'Jahannam',
-      descAr: 'الطبقة الأولى من النار',
-      descEn: 'The first level of the Fire',
-      detailsAr: 'للمسلمين العصاة الذين يدخلون النار ثم يخرجون منها بشفاعة أو برحمة الله',
-      detailsEn: 'For sinful Muslims who will eventually exit through intercession or Allah\'s mercy',
-      references: [
-        { source: 'Quran', ref: '4:55', textAr: 'فَمِنْهُم مَّنْ آمَنَ بِهِ وَمِنْهُم مَّن صَدَّ عَنْهُ ۚ وَكَفَىٰ بِجَهَنَّمَ سَعِيرًا', textEn: 'And among them were those who believed in it, and among them were those who were averse to it. And sufficient is Hell as a blaze' },
-      ]
-    },
-    {
-      nameAr: 'لظى',
-      nameEn: 'Ladha',
-      descAr: 'الطبقة الثانية، نار شديدة اللهب',
-      descEn: 'The second level, an intensely blazing fire',
-      detailsAr: 'نار تتلظى وتشتعل، تنزع الجلد عن العظم',
-      detailsEn: 'A fire that blazes intensely, stripping skin from bone',
-      references: [
-        { source: 'Quran', ref: '70:15-16', textAr: 'كَلَّا ۖ إِنَّهَا لَظَىٰ * نَزَّاعَةً لِّلشَّوَىٰ', textEn: 'No! Indeed, it is the Flame [of Hell], a remover of exteriors' },
-      ]
-    },
-    {
-      nameAr: 'سقر',
-      nameEn: 'Saqar',
-      descAr: 'الطبقة الخامسة، نار لا تبقي ولا تذر',
-      descEn: 'The fifth level, a fire that spares nothing and leaves nothing',
-      detailsAr: 'تحرق الجلود وتسود الوجوه، لا تبقي على شيء ولا تذر شيئاً',
-      detailsEn: 'Burns the skin and blackens faces, sparing nothing and leaving nothing',
-      references: [
-        { source: 'Quran', ref: '74:26-27', textAr: 'سَأُصْلِيهِ سَقَرَ * وَمَا أَدْرَاكَ مَا سَقَرُ', textEn: 'I will drive him into Saqar. And what can make you know what is Saqar?' },
-        { source: 'Quran', ref: '74:28', textAr: 'لَا تُبْقِي وَلَا تَذَرُ', textEn: 'It lets nothing remain and leaves nothing [unburned]' },
-      ]
-    },
-    {
-      nameAr: 'الهاوية',
-      nameEn: 'Al-Hawiyah',
-      descAr: 'الطبقة السابعة وأسفل دركات النار',
-      descEn: 'The seventh and lowest level of the Fire',
-      detailsAr: 'للمنافقين الذين أظهروا الإيمان وأبطنوا الكفر، أشد العذاب',
-      detailsEn: 'For hypocrites who showed faith but concealed disbelief, the severest punishment',
-      references: [
-        { source: 'Quran', ref: '101:9-11', textAr: 'فَأُمُّهُ هَاوِيَةٌ * وَمَا أَدْرَاكَ مَا هِيَهْ * نَارٌ حَامِيَةٌ', textEn: 'His refuge will be an abyss. And what can make you know what that is? It is a Fire, intensely hot' },
-        { source: 'Quran', ref: '4:145', textAr: 'إِنَّ الْمُنَافِقِينَ فِي الدَّرْكِ الْأَسْفَلِ مِنَ النَّارِ', textEn: 'Indeed, the hypocrites will be in the lowest depths of the Fire' },
-      ]
-    },
+    { nameAr: 'جهنم', nameEn: 'Jahannam', descAr: 'الطبقة الأولى من النار', descEn: 'The first level of the Fire', detailsAr: 'للمسلمين العصاة الذين يدخلون النار ثم يخرجون منها بشفاعة أو برحمة الله', detailsEn: 'For sinful Muslims who will eventually exit through intercession or Allah\'s mercy', references: [{ source: 'Quran', ref: '4:55', textAr: 'فَمِنْهُم مَّنْ آمَنَ بِهِ وَمِنْهُم مَّن صَدَّ عَنْهُ ۚ وَكَفَىٰ بِجَهَنَّمَ سَعِيرًا', textEn: 'And among them were those who believed in it, and among them were those who were averse to it. And sufficient is Hell as a blaze' }] },
+    { nameAr: 'لظى', nameEn: 'Ladha', descAr: 'الطبقة الثانية، نار شديدة اللهب', descEn: 'The second level, an intensely blazing fire', detailsAr: 'نار تتلظى وتشتعل، تنزع الجلد عن العظم', detailsEn: 'A fire that blazes intensely, stripping skin from bone', references: [{ source: 'Quran', ref: '70:15-16', textAr: 'كَلَّا ۖ إِنَّهَا لَظَىٰ * نَزَّاعَةً لِّلشَّوَىٰ', textEn: 'No! Indeed, it is the Flame [of Hell], a remover of exteriors' }] },
+    { nameAr: 'الحطمة', nameEn: 'Al-Hutamah', descAr: 'الطبقة الثالثة، تحطم كل ما يلقى فيها', descEn: 'The third level, crushes everything thrown into it', detailsAr: 'نار تطلع على الأفئدة', detailsEn: 'A fire that reaches the hearts', references: [{ source: 'Quran', ref: '104:4-7', textAr: 'كَلَّا ۖ لَيُنبَذَنَّ فِي الْحُطَمَةِ * وَمَا أَدْرَاكَ مَا الْحُطَمَةُ * نَارُ اللَّهِ الْمُوقَدَةُ', textEn: 'No! He will surely be thrown into the Crusher. And what can make you know what is the Crusher? It is the fire of Allah, [eternally] fueled' }] },
+    { nameAr: 'سعير', nameEn: 'Sa\'ir', descAr: 'الطبقة الرابعة، نار مستعرة', descEn: 'The fourth level, blazing flames', detailsAr: 'نار شديدة الاشتعال والسعير', detailsEn: 'Intensely flaming and blazing fire', references: [{ source: 'Quran', ref: '4:10', textAr: 'إِنَّ الَّذِينَ يَأْكُلُونَ أَمْوَالَ الْيَتَامَىٰ ظُلْمًا إِنَّمَا يَأْكُلُونَ فِي بُطُونِهِمْ نَارًا ۖ وَسَيَصْلَوْنَ سَعِيرًا', textEn: 'Indeed, those who devour the property of orphans unjustly are only consuming into their bellies fire. And they will be burned in a Blaze' }] },
+    { nameAr: 'سقر', nameEn: 'Saqar', descAr: 'الطبقة الخامسة، نار لا تبقي ولا تذر', descEn: 'The fifth level, a fire that spares nothing and leaves nothing', detailsAr: 'تحرق الجلود وتسود الوجوه، لا تبقي على شيء ولا تذر شيئاً', detailsEn: 'Burns the skin and blackens faces, sparing nothing and leaving nothing', references: [{ source: 'Quran', ref: '74:26-28', textAr: 'سَأُصْلِيهِ سَقَرَ * وَمَا أَدْرَاكَ مَا سَقَرُ * لَا تُبْقِي وَلَا تَذَرُ', textEn: 'I will drive him into Saqar. And what can make you know what is Saqar? It lets nothing remain and leaves nothing [unburned]' }] },
+    { nameAr: 'الجحيم', nameEn: 'Al-Jahim', descAr: 'الطبقة السادسة، نار عظيمة شديدة التأجج', descEn: 'The sixth level, great intensely raging fire', detailsAr: 'نار شديدة الحرارة والتأجج', detailsEn: 'Fire of extreme heat and rage', references: [{ source: 'Quran', ref: '26:91', textAr: 'وَبُرِّزَتِ الْجَحِيمُ لِلْغَاوِينَ', textEn: 'And Hellfire will be brought forth for the deviators' }] },
+    { nameAr: 'الهاوية', nameEn: 'Al-Hawiyah', descAr: 'الطبقة السابعة وأسفل دركات النار', descEn: 'The seventh and lowest level of the Fire', detailsAr: 'للمنافقين الذين أظهروا الإيمان وأبطنوا الكفر، أشد العذاب', detailsEn: 'For hypocrites who showed faith but concealed disbelief, the severest punishment', references: [{ source: 'Quran', ref: '101:9-11', textAr: 'فَأُمُّهُ هَاوِيَةٌ * وَمَا أَدْرَاكَ مَا هِيَهْ * نَارٌ حَامِيَةٌ', textEn: 'His refuge will be an abyss. And what can make you know what that is? It is a Fire, intensely hot' }, { source: 'Quran', ref: '4:145', textAr: 'إِنَّ الْمُنَافِقِينَ فِي الدَّرْكِ الْأَسْفَلِ مِنَ النَّارِ', textEn: 'Indeed, the hypocrites will be in the lowest depths of the Fire' }] },
   ];
 
   const punishments = {

@@ -22,47 +22,16 @@ const NamesOfMuhammad = () => {
   };
 
   const names = [
-    { 
-      ar: 'محمد', 
-      en: 'Muhammad', 
-      meaning: 'The Praised One',
-      detailsAr: 'الكثير الخصال الحميدة، المحمود في السماوات والأرض',
-      detailsEn: 'One with abundant praiseworthy qualities, praised in the heavens and earth',
-      references: [
-        { source: 'Quran', ref: '3:144', textAr: 'وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ', textEn: 'Muhammad is not but a messenger' },
-        { source: 'Quran', ref: '48:29', textAr: 'مُّحَمَّدٌ رَّسُولُ اللَّهِ', textEn: 'Muhammad is the Messenger of Allah' },
-      ]
-    },
-    { 
-      ar: 'أحمد', 
-      en: 'Ahmad', 
-      meaning: 'Most Praiseworthy',
-      detailsAr: 'أكثر الناس حمداً لله، وأحق الناس بالحمد',
-      detailsEn: 'The one who praises Allah the most, and most deserving of praise',
-      references: [
-        { source: 'Quran', ref: '61:6', textAr: 'وَمُبَشِّرًا بِرَسُولٍ يَأْتِي مِن بَعْدِي اسْمُهُ أَحْمَدُ', textEn: 'Giving good tidings of a messenger to come after me, whose name is Ahmad' },
-      ]
-    },
-    { 
-      ar: 'الماحي', 
-      en: 'Al-Mahi', 
-      meaning: 'The Eraser (of disbelief)',
-      detailsAr: 'الذي يمحو الله به الكفر',
-      detailsEn: 'The one through whom Allah erases disbelief',
-      references: [
-        { source: 'Hadith', ref: 'Bukhari', textAr: 'أنا محمد وأحمد والماحي', textEn: 'I am Muhammad, Ahmad, and Al-Mahi' },
-      ]
-    },
-    { 
-      ar: 'خاتم النبيين', 
-      en: 'Khatam an-Nabiyyin', 
-      meaning: 'Seal of the Prophets',
-      detailsAr: 'آخر الأنبياء والمرسلين',
-      detailsEn: 'The last of the prophets and messengers',
-      references: [
-        { source: 'Quran', ref: '33:40', textAr: 'وَخَاتَمَ النَّبِيِّينَ', textEn: 'And [he is] the Seal of the Prophets' },
-      ]
-    },
+    { ar: 'محمد', en: 'Muhammad', meaning: 'The Praised One', detailsAr: 'الكثير الخصال الحميدة، المحمود في السماوات والأرض', detailsEn: 'One with abundant praiseworthy qualities, praised in the heavens and earth', references: [{ source: 'Quran', ref: '3:144', textAr: 'وَمَا مُحَمَّدٌ إِلَّا رَسُولٌ', textEn: 'Muhammad is not but a messenger' }, { source: 'Quran', ref: '48:29', textAr: 'مُّحَمَّدٌ رَّسُولُ اللَّهِ', textEn: 'Muhammad is the Messenger of Allah' }] },
+    { ar: 'أحمد', en: 'Ahmad', meaning: 'Most Praiseworthy', detailsAr: 'أكثر الناس حمداً لله، وأحق الناس بالحمد', detailsEn: 'The one who praises Allah the most, and most deserving of praise', references: [{ source: 'Quran', ref: '61:6', textAr: 'وَمُبَشِّرًا بِرَسُولٍ يَأْتِي مِن بَعْدِي اسْمُهُ أَحْمَدُ', textEn: 'Giving good tidings of a messenger to come after me, whose name is Ahmad' }] },
+    { ar: 'الماحي', en: 'Al-Mahi', meaning: 'The Eraser (of disbelief)', detailsAr: 'الذي يمحو الله به الكفر', detailsEn: 'The one through whom Allah erases disbelief', references: [{ source: 'Hadith', ref: 'Bukhari', textAr: 'أنا محمد وأحمد والماحي', textEn: 'I am Muhammad, Ahmad, and Al-Mahi' }] },
+    { ar: 'الحاشر', en: 'Al-Hashir', meaning: 'The Gatherer', detailsAr: 'الذي يُحشر الناس على قدمه', detailsEn: 'The one at whose feet people will be gathered', references: [{ source: 'Hadith', ref: 'Bukhari', textAr: 'والحاشر الذي يحشر الناس على قدمي', textEn: 'And Al-Hashir, the one at whose feet people will be gathered' }] },
+    { ar: 'العاقب', en: 'Al-Aqib', meaning: 'The Last', detailsAr: 'آخر الأنبياء', detailsEn: 'The last of the prophets', references: [{ source: 'Hadith', ref: 'Bukhari', textAr: 'والعاقب الذي ليس بعده نبي', textEn: 'And Al-Aqib, after whom there is no prophet' }] },
+    { ar: 'خاتم النبيين', en: 'Khatam an-Nabiyyin', meaning: 'Seal of the Prophets', detailsAr: 'آخر الأنبياء والمرسلين', detailsEn: 'The last of the prophets and messengers', references: [{ source: 'Quran', ref: '33:40', textAr: 'وَخَاتَمَ النَّبِيِّينَ', textEn: 'And [he is] the Seal of the Prophets' }] },
+    { ar: 'نبي الرحمة', en: 'Nabi ar-Rahmah', meaning: 'Prophet of Mercy', detailsAr: 'النبي المرسل رحمة للعالمين', detailsEn: 'The prophet sent as mercy to all worlds', references: [{ source: 'Quran', ref: '21:107', textAr: 'وَمَا أَرْسَلْنَاكَ إِلَّا رَحْمَةً لِّلْعَالَمِينَ', textEn: 'And We have not sent you except as a mercy to the worlds' }] },
+    { ar: 'السراج المنير', en: 'As-Siraj al-Munir', meaning: 'The Illuminating Lamp', detailsAr: 'المنير بالهداية والعلم', detailsEn: 'The one who illuminates with guidance and knowledge', references: [{ source: 'Quran', ref: '33:46', textAr: 'وَدَاعِيًا إِلَى اللَّهِ بِإِذْنِهِ وَسِرَاجًا مُّنِيرًا', textEn: 'And as one who invites to Allah by His permission, and an illuminating lamp' }] },
+    { ar: 'الأمين', en: 'Al-Amin', meaning: 'The Trustworthy', detailsAr: 'الأمين الذي ائتمنه الله على الوحي', detailsEn: 'The trustworthy one whom Allah entrusted with revelation', references: [{ source: 'Hadith', ref: 'Bukhari', textAr: 'كان يسمى الأمين', textEn: 'He was called Al-Amin (The Trustworthy)' }] },
+    { ar: 'الصادق', en: 'As-Sadiq', meaning: 'The Truthful', detailsAr: 'الصادق في قوله وفعله', detailsEn: 'The truthful in speech and action', references: [{ source: 'Hadith', ref: 'Bukhari', textAr: 'الصادق المصدوق', textEn: 'The truthful, the believed' }] },
   ];
 
   return (

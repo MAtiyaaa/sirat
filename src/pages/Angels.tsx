@@ -22,58 +22,13 @@ const Angels = () => {
   };
 
   const angels = [
-    {
-      nameAr: 'جبريل عليه السلام',
-      nameEn: 'Jibril (Gabriel)',
-      roleAr: 'ملك الوحي',
-      roleEn: 'Angel of Revelation',
-      descAr: 'أعظم الملائكة، موكل بإنزال الوحي على الأنبياء والرسل',
-      descEn: 'The greatest angel, responsible for delivering revelation to prophets and messengers',
-      detailsAr: 'روح القدس الذي نزل بالقرآن على قلب النبي محمد صلى الله عليه وسلم',
-      detailsEn: 'The Holy Spirit who brought down the Quran to the heart of Prophet Muhammad ﷺ',
-      references: [
-        { source: 'Quran', ref: '2:97', textAr: 'قُلْ مَن كَانَ عَدُوًّا لِّجِبْرِيلَ فَإِنَّهُ نَزَّلَهُ عَلَىٰ قَلْبِكَ', textEn: 'Say, "Whoever is an enemy to Gabriel - it is [none but] he who has brought the Qur\'an down upon your heart' },
-      ]
-    },
-    {
-      nameAr: 'ميكائيل عليه السلام',
-      nameEn: 'Mika\'il (Michael)',
-      roleAr: 'ملك الرزق',
-      roleEn: 'Angel of Sustenance',
-      descAr: 'موكل بإنزال المطر وإنبات النبات والرزق',
-      descEn: 'Responsible for bringing rain, plant growth, and provisions',
-      detailsAr: 'الملك الموكل بالقطر والنبات، يدبر أمور الرزق بإذن الله',
-      detailsEn: 'The angel in charge of rain and plants, managing sustenance by Allah\'s permission',
-      references: [
-        { source: 'Quran', ref: '2:98', textAr: 'مَن كَانَ عَدُوًّا لِّلَّهِ وَمَلَائِكَتِهِ وَرُسُلِهِ وَجِبْرِيلَ وَمِيكَالَ', textEn: 'Whoever is an enemy to Allah and His angels and His messengers and Gabriel and Michael' },
-      ]
-    },
-    {
-      nameAr: 'إسرافيل عليه السلام',
-      nameEn: 'Israfil',
-      roleAr: 'ملك الصور',
-      roleEn: 'Angel of the Trumpet',
-      descAr: 'موكل بالنفخ في الصور يوم القيامة',
-      descEn: 'Tasked with blowing the trumpet on the Day of Judgment',
-      detailsAr: 'ينفخ في الصور نفختين: نفخة الفناء ونفخة البعث',
-      detailsEn: 'Will blow the trumpet twice: the blast of destruction and the blast of resurrection',
-      references: [
-        { source: 'Quran', ref: '39:68', textAr: 'وَنُفِخَ فِي الصُّورِ فَصَعِقَ مَن فِي السَّمَاوَاتِ', textEn: 'And the Horn will be blown, and whoever is in the heavens will fall dead' },
-      ]
-    },
-    {
-      nameAr: 'ملك الموت عليه السلام',
-      nameEn: 'Malak al-Mawt (Azrael)',
-      roleAr: 'ملك الموت',
-      roleEn: 'Angel of Death',
-      descAr: 'موكل بقبض الأرواح عند الموت',
-      descEn: 'Responsible for taking souls at the time of death',
-      detailsAr: 'يقبض أرواح العباد عندما يأتي أجلهم المحدد',
-      detailsEn: 'Takes the souls of servants when their appointed time comes',
-      references: [
-        { source: 'Quran', ref: '32:11', textAr: 'قُلْ يَتَوَفَّاكُم مَّلَكُ الْمَوْتِ الَّذِي وُكِّلَ بِكُمْ', textEn: 'Say, "The angel of death will take you who has been entrusted with you' },
-      ]
-    },
+    { nameAr: 'جبريل عليه السلام', nameEn: 'Jibril (Gabriel)', roleAr: 'ملك الوحي', roleEn: 'Angel of Revelation', descAr: 'أعظم الملائكة، موكل بإنزال الوحي على الأنبياء والرسل', descEn: 'The greatest angel, responsible for delivering revelation to prophets and messengers', detailsAr: 'روح القدس الذي نزل بالقرآن على قلب النبي محمد صلى الله عليه وسلم', detailsEn: 'The Holy Spirit who brought down the Quran to the heart of Prophet Muhammad ﷺ', references: [{ source: 'Quran', ref: '2:97', textAr: 'قُلْ مَن كَانَ عَدُوًّا لِّجِبْرِيلَ فَإِنَّهُ نَزَّلَهُ عَلَىٰ قَلْبِكَ', textEn: 'Say, "Whoever is an enemy to Gabriel - it is [none but] he who has brought the Qur\'an down upon your heart' }] },
+    { nameAr: 'ميكائيل عليه السلام', nameEn: 'Mika\'il (Michael)', roleAr: 'ملك الرزق', roleEn: 'Angel of Sustenance', descAr: 'موكل بإنزال المطر وإنبات النبات والرزق', descEn: 'Responsible for bringing rain, plant growth, and provisions', detailsAr: 'الملك الموكل بالقطر والنبات، يدبر أمور الرزق بإذن الله', detailsEn: 'The angel in charge of rain and plants, managing sustenance by Allah\'s permission', references: [{ source: 'Quran', ref: '2:98', textAr: 'مَن كَانَ عَدُوًّا لِّلَّهِ وَمَلَائِكَتِهِ وَرُسُلِهِ وَجِبْرِيلَ وَمِيكَالَ', textEn: 'Whoever is an enemy to Allah and His angels and His messengers and Gabriel and Michael' }] },
+    { nameAr: 'إسرافيل عليه السلام', nameEn: 'Israfil', roleAr: 'ملك الصور', roleEn: 'Angel of the Trumpet', descAr: 'موكل بالنفخ في الصور يوم القيامة', descEn: 'Tasked with blowing the trumpet on the Day of Judgment', detailsAr: 'ينفخ في الصور نفختين: نفخة الفناء ونفخة البعث', detailsEn: 'Will blow the trumpet twice: the blast of destruction and the blast of resurrection', references: [{ source: 'Quran', ref: '39:68', textAr: 'وَنُفِخَ فِي الصُّورِ فَصَعِقَ مَن فِي السَّمَاوَاتِ', textEn: 'And the Horn will be blown, and whoever is in the heavens will fall dead' }] },
+    { nameAr: 'ملك الموت عليه السلام', nameEn: 'Malak al-Mawt (Azrael)', roleAr: 'ملك الموت', roleEn: 'Angel of Death', descAr: 'موكل بقبض الأرواح عند الموت', descEn: 'Responsible for taking souls at the time of death', detailsAr: 'يقبض أرواح العباد عندما يأتي أجلهم المحدد', detailsEn: 'Takes the souls of servants when their appointed time comes', references: [{ source: 'Quran', ref: '32:11', textAr: 'قُلْ يَتَوَفَّاكُم مَّلَكُ الْمَوْتِ الَّذِي وُكِّلَ بِكُمْ', textEn: 'Say, "The angel of death will take you who has been entrusted with you' }] },
+    { nameAr: 'رضوان عليه السلام', nameEn: 'Ridwan', roleAr: 'خازن الجنة', roleEn: 'Keeper of Paradise', descAr: 'الملك الموكل بالجنة وخزانتها', descEn: 'The angel in charge of Paradise and its treasures', detailsAr: 'يستقبل أهل الجنة ويفتح لهم أبوابها', detailsEn: 'Welcomes the people of Paradise and opens its gates for them', references: [{ source: 'Hadith', ref: 'Muslim', textAr: 'رضوان خازن الجنة', textEn: 'Ridwan, the keeper of Paradise' }] },
+    { nameAr: 'مالك عليه السلام', nameEn: 'Malik', roleAr: 'خازن النار', roleEn: 'Keeper of Hellfire', descAr: 'الملك الموكل بالنار وعذابها', descEn: 'The angel in charge of Hellfire and its punishment', detailsAr: 'لا يضحك أبداً ولا يبتسم من شدة ما يرى من عذاب النار', detailsEn: 'Never laughs or smiles due to the severity of what he sees of the Fire\'s punishment', references: [{ source: 'Quran', ref: '43:77', textAr: 'وَنَادَوْا يَا مَالِكُ لِيَقْضِ عَلَيْنَا رَبُّكَ', textEn: 'And they will call, "O Malik, let your Lord put an end to us!"' }] },
+    { nameAr: 'الكرام الكاتبين', nameEn: 'Al-Kiram al-Katibin', roleAr: 'الملائكة الحفظة', roleEn: 'The Noble Scribes', descAr: 'الملائكة الموكلون بكتابة أعمال بني آدم', descEn: 'The angels tasked with recording the deeds of humans', detailsAr: 'اثنان مع كل إنسان: أحدهما عن يمينه يكتب الحسنات، والآخر عن شماله يكتب السيئات', detailsEn: 'Two with each person: one on the right records good deeds, the other on the left records bad deeds', references: [{ source: 'Quran', ref: '82:10-12', textAr: 'وَإِنَّ عَلَيْكُمْ لَحَافِظِينَ * كِرَامًا كَاتِبِينَ * يَعْلَمُونَ مَا تَفْعَلُونَ', textEn: 'And indeed, [appointed] over you are keepers, Noble and recording; They know whatever you do' }] },
   ];
 
   return (
