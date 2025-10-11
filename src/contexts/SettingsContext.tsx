@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
-export type Theme = 'light' | 'dark' | 'gold' | 'pink' | 'green' | 'system';
+export type Theme = 'light' | 'dark' | 'gold' | 'pink' | 'green' | 'neumorphic' | 'system';
 export type FontType = 'quran' | 'amiri' | 'scheherazade' | 'lateef' | 'noto-naskh' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
 
@@ -51,7 +51,7 @@ const loadInitialSettings = (): Settings => {
 
 // Apply theme immediately on load
 const applyTheme = (theme: Theme) => {
-  document.documentElement.classList.remove('light', 'dark', 'gold', 'pink', 'green');
+  document.documentElement.classList.remove('light', 'dark', 'gold', 'pink', 'green', 'neumorphic');
   
   if (theme === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -195,7 +195,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (settings.theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handleChange = (e: MediaQueryListEvent) => {
-        document.documentElement.classList.remove('light', 'dark', 'gold', 'pink', 'green');
+        document.documentElement.classList.remove('light', 'dark', 'gold', 'pink', 'green', 'neumorphic');
         document.documentElement.classList.add(e.matches ? 'dark' : 'light');
       };
       

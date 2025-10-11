@@ -203,6 +203,46 @@ All colors MUST be HSL.
     --glass-bg: 140 30% 98% / 0.7;
     --glass-border: 145 63% 42% / 0.18;
   }
+  
+  .neumorphic {
+    /* Neumorphic Theme - Monochromatic with soft shadows */
+    --background: 0 0% 88%;
+    --foreground: 0 0% 25%;
+    
+    --card: 0 0% 88%;
+    --card-foreground: 0 0% 25%;
+    
+    --popover: 0 0% 88%;
+    --popover-foreground: 0 0% 25%;
+    
+    --primary: 0 0% 50%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 82%;
+    --secondary-foreground: 0 0% 25%;
+    
+    --muted: 0 0% 82%;
+    --muted-foreground: 0 0% 45%;
+    
+    --accent: 0 0% 70%;
+    --accent-foreground: 0 0% 25%;
+    
+    --destructive: 0 60% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 50%;
+    
+    --glass-bg: 0 0% 88%;
+    --glass-border: 0 0% 88%;
+    
+    /* Neumorphic shadows */
+    --neomorph-shadow-light: -8px -8px 16px hsl(0 0% 100% / 0.7);
+    --neomorph-shadow-dark: 8px 8px 16px hsl(0 0% 0% / 0.15);
+    --neomorph-inset-light: inset -4px -4px 8px hsl(0 0% 100% / 0.7);
+    --neomorph-inset-dark: inset 4px 4px 8px hsl(0 0% 0% / 0.15);
+  }
 }
 
 @layer base {
@@ -263,6 +303,40 @@ All colors MUST be HSL.
   .apple-shadow {
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1),
                 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Neumorphic effects */
+  .neomorph {
+    box-shadow: var(--neomorph-shadow-light), var(--neomorph-shadow-dark);
+    border: none;
+  }
+  
+  .neomorph-inset {
+    box-shadow: var(--neomorph-inset-light), var(--neomorph-inset-dark);
+    border: none;
+  }
+  
+  .neomorph-pressed {
+    box-shadow: var(--neomorph-inset-light), var(--neomorph-inset-dark);
+    transform: scale(0.98);
+  }
+  
+  .neumorphic .glass-effect {
+    background: hsl(var(--background));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  
+  .neumorphic button,
+  .neumorphic .neomorph-interactive {
+    box-shadow: var(--neomorph-shadow-light), var(--neomorph-shadow-dark);
+    border: none;
+  }
+  
+  .neumorphic button:active,
+  .neumorphic .neomorph-interactive:active {
+    box-shadow: var(--neomorph-inset-light), var(--neomorph-inset-dark);
+    transform: scale(0.98);
   }
 
   @keyframes fade-in {

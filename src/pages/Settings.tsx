@@ -154,6 +154,7 @@ const Settings = () => {
         gold: 'ذهبي',
         pink: 'وردي',
         green: 'أخضر',
+        neumorphic: 'نيومورفيك',
         system: 'حسب النظام',
       },
       fonts: {
@@ -215,6 +216,7 @@ const Settings = () => {
         gold: 'Gold',
         pink: 'Pink',
         green: 'Green',
+        neumorphic: 'Neumorphic',
         system: 'System',
       },
       fonts: {
@@ -358,6 +360,7 @@ const Settings = () => {
                 <SelectItem value="gold">{t.themes.gold}</SelectItem>
                 <SelectItem value="pink">{t.themes.pink}</SelectItem>
                 <SelectItem value="green">{t.themes.green}</SelectItem>
+                <SelectItem value="neumorphic">{t.themes.neumorphic}</SelectItem>
               </SelectContent>
             </Select>
           </div>
