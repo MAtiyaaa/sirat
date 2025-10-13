@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
-  ArrowRight,
   Bed,
   BedDouble,
   BookOpen,
@@ -32,7 +31,12 @@ import {
   Landmark,
   CheckCircle2,
   Copy,
+  Utensils,
+  RefreshCcw,
 } from "lucide-react";
+
+// shadcn/ui Select (nice dropdown)
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 /* ----------------------------------------------------------------
    Types
@@ -76,7 +80,7 @@ type CategoryKey =
 
 interface Dua {
   id: string;
-  icon?: React.ComponentType<any>; // optional, we’ll safely fallback
+  icon?: React.ComponentType<any>; // optional; safe fallback
   categories: CategoryKey[];
   titleAr: string;
   titleEn: string;
@@ -96,7 +100,7 @@ const CAT_META: Record<CategoryKey, { labelEn: string; labelAr: string; icon: Re
   evening: { labelEn: "Evening", labelAr: "المساء", icon: Moon },
   sleep: { labelEn: "Before Sleep", labelAr: "قبل النوم", icon: BedDouble },
   waking: { labelEn: "Upon Waking", labelAr: "عند الاستيقاظ", icon: Bed },
-  eating: { labelEn: "Food & Drink", labelAr: "الطعام والشراب", icon: Home }, // we’ll show utensil icon on cards
+  eating: { labelEn: "Food & Drink", labelAr: "الطعام والشراب", icon: Utensils },
   home: { labelEn: "Home", labelAr: "المنزل", icon: Home },
   travel: { labelEn: "Travel", labelAr: "السفر", icon: Plane },
   protection: { labelEn: "Protection", labelAr: "الحفظ والحماية", icon: Shield },
@@ -128,14 +132,10 @@ const CAT_META: Record<CategoryKey, { labelEn: string; labelAr: string; icon: Re
   general: { labelEn: "General", labelAr: "عام", icon: MapPin },
 };
 
-// Safe getters (prevents crashes if something is off)
-const FALLBACK_CATEGORY: CategoryKey = "general";
-const getCatMeta = (key: CategoryKey) => CAT_META[key] ?? CAT_META[FALLBACK_CATEGORY];
-const FallbackIcon = Shield;
+const FALLBACK_ICON = Shield;
 
 /* ----------------------------------------------------------------
    Duas dataset (expanded, categorized)
-   Notes: Arabic text uses standard versions; transliterations are concise.
 ------------------------------------------------------------------*/
 const ALL_DUAS: Dua[] = [
   // Morning / Evening
@@ -211,7 +211,7 @@ const ALL_DUAS: Dua[] = [
   },
   {
     id: "before-eating",
-    // icon intentionally omitted to prove safe fallback works
+    icon: Utensils,
     categories: ["eating", "gratitude"],
     titleAr: "قبل الطعام",
     titleEn: "Before Eating",
@@ -222,7 +222,7 @@ const ALL_DUAS: Dua[] = [
   },
   {
     id: "after-eating",
-    icon: Home, // (card icon only; category chip uses CAT_META)
+    icon: Utensils,
     categories: ["eating", "gratitude"],
     titleAr: "بعد الطعام",
     titleEn: "After Eating",
@@ -472,7 +472,7 @@ const ALL_DUAS: Dua[] = [
     categories: ["meeting", "character", "guidance"],
     titleAr: "افتتاح الكلام",
     titleEn: "Opening Speech",
-    arabic: "الْحَمْدُ لِلّٰهِ، نَحْمَدُهُ وَنَسْتَعِينُهُ... (خطبة الحاجة المشهورة باختصار)",
+    arabic: "الْحَمْدُ لِلّٰهِ، نَحْمَدُهُ وَنَسْتَعِينُهُ... (خطبة الحاجة المختصرة)",
     transliteration: "Al-ḥamdu lillāh, naḥmaduhu wa nastaʿīnu... (khuṭbat al-ḥājah abridged)",
     translation: "All praise is for Allah; we praise Him and seek His help... (abridged).",
     reference: "Abu Dawud",
@@ -493,16 +493,12 @@ const Duas: React.FC = () => {
   const showTranslit = settings.translationEnabled && settings.translationSource === "transliteration";
   const showTranslation = settings.translationEnabled && settings.translationSource !== "transliteration";
 
-  // Build categories from data, but only keep those that exist in CAT_META
+  // Available categories based on data (stable order)
   const categoriesInUse: CategoryKey[] = useMemo(() => {
-    const set = new Set<CategoryKey>(["all"]);
-    for (const d of ALL_DUAS) {
-      for (const c of d.categories) {
-        if (CAT_META[c]) set.add(c);
-        else console.warn(`[Duas] Unknown category key in a dua: "${c}" — skipping chip.`);
-      }
-    }
-    return Array.from(set);
+    const base: CategoryKey[] = ["all"];
+    const set = new Set<CategoryKey>();
+    for (const d of ALL_DUAS) for (const c of d.categories) set.add(c);
+    return base.concat([...set].filter((c) => c in CAT_META));
   }, []);
 
   const filtered = useMemo(() => {
@@ -523,165 +519,191 @@ const Duas: React.FC = () => {
     const textToCopy = langIsAr ? dua.arabic : showTranslit ? dua.transliteration || dua.translation : dua.translation;
     try {
       await navigator.clipboard.writeText(textToCopy);
-    } catch (e) {
-      console.warn("[Duas] Clipboard copy failed:", e);
+    } catch {
+      /* optional: toast */
     }
   };
 
+  const resetFilters = () => {
+    setCategory("all");
+    setQuery("");
+  };
+
   return (
-    <div className="max-w-6xl mx-auto px-4 pb-20">
+    <div className="relative min-h-[100dvh]">
+      {/* Background: soft radial and gradient overlay */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background" />
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl opacity-50" />
+        <div className="absolute top-1/2 -right-24 h-80 w-80 rounded-full bg-secondary/20 blur-3xl opacity-40" />
+      </div>
+
       {/* Back */}
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
+        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
 
-      {/* Header */}
-      <div className="text-center space-y-4 pt-12">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-            {t("Dua & Athkar", "الأدعية والأذكار")}
+      {/* Hero */}
+      <header className="pt-16 md:pt-20 text-center px-4">
+        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+          <span className="bg-gradient-to-br from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent">
+            {t("Dua & Athkar Library", "مكتبة الأدعية والأذكار")}
           </span>
         </h1>
-        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
           {t(
-            "Authentic daily supplications, neatly organized by moments of your day.",
-            "أدعية يومية صحيحة، مصنّفة بعناية حسب لحظات يومك.",
+            "Authentic daily supplications, beautifully organized. Read, search, and copy instantly.",
+            "أدعية يومية صحيحة مصمّمة بعناية. تصفّح، وابحث، وانسخ فورًا.",
           )}
         </p>
-      </div>
+      </header>
 
-      {/* Controls */}
-      <div className="mt-8 flex flex-col gap-4">
-        {/* Search */}
-        <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("Search duas, Arabic or English…", "ابحث عن دعاء بالعربية أو الإنجليزية…")}
-            className="w-full rounded-2xl border bg-background px-12 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-            dir={langIsAr ? "rtl" : "ltr"}
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        </div>
+      {/* Controls Bar */}
+      <section className="mt-8 md:mt-10 px-4">
+        <div className="sticky top-16 z-30">
+          <div className="rounded-2xl border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50 p-3 md:p-4 shadow-sm">
+            <div className="grid gap-3 md:grid-cols-[1fr_300px_auto] items-center">
+              {/* Search */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t("Search duas in Arabic or English…", "ابحث عن دعاء بالعربية أو الإنجليزية…")}
+                  className="w-full rounded-xl border bg-background px-11 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+                  dir={langIsAr ? "rtl" : "ltr"}
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              </div>
 
-        {/* Categories (guarded) */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-          {categoriesInUse.map((key) => {
-            const meta = getCatMeta(key);
-            if (!meta) return null; // extra guard (shouldn’t happen)
-            const Icon = meta.icon || CheckCircle2;
-            const active = category === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setCategory(key)}
-                className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition ${
-                  active ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{t(meta.labelEn, meta.labelAr)}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+              {/* Pretty Dropdown (shadcn Select) */}
+              <div className="flex items-center gap-2">
+                <Select value={category} onValueChange={(val) => setCategory(val as CategoryKey)}>
+                  <SelectTrigger className="w-full rounded-xl h-11 border bg-background">
+                    <SelectValue placeholder={t("Select category", "اختر التصنيف")} aria-label="category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-80">
+                    {categoriesInUse.map((key) => {
+                      const meta = CAT_META[key];
+                      const Icon = meta?.icon || FALLBACK_ICON;
+                      return (
+                        <SelectItem key={key} value={key} className="flex items-center">
+                          <div className="flex items-center gap-2">
+                            <Icon className="h-4 w-4" />
+                            <span>{t(meta.labelEn, meta.labelAr)}</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
 
-      {/* Count */}
-      <div className="mt-3 text-sm text-muted-foreground">
-        {t("Showing", "المعروض")} {filtered.length} {t("duas", "دعاء")}
-      </div>
-
-      {/* Grid of duas */}
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        {filtered.map((dua) => {
-          const IconComp = dua.icon || FallbackIcon;
-          return (
-            <div key={dua.id} className="relative rounded-3xl border bg-card p-6 shadow-sm hover:shadow-md transition">
-              {/* Icon + Title */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
-                    <IconComp className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <div className="leading-tight">
-                    <h3 className="text-base md:text-lg font-semibold">{langIsAr ? dua.titleAr : dua.titleEn}</h3>
-                    {dua.reference && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t("Ref:", "المصدر:")} {dua.reference}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Copy */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full"
-                  onClick={() => handleCopy(dua)}
-                  title={t("Copy", "نسخ")}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  {t("Copy", "نسخ")}
+              {/* Reset */}
+              <div className="flex md:justify-end">
+                <Button variant="outline" onClick={resetFilters} className="rounded-xl h-11">
+                  <RefreshCcw className="h-4 w-4 mr-2" />
+                  {t("Reset", "إعادة الضبط")}
                 </Button>
               </div>
-
-              {/* Arabic */}
-              <div className="mt-4">
-                <p className={`text-xl leading-relaxed ${settings.fontType === "quran" ? "font-quran" : ""}`} dir="rtl">
-                  {dua.arabic}
-                </p>
-              </div>
-
-              {/* Transliteration or Translation per settings */}
-              {showTranslit && dua.transliteration && (
-                <p className="mt-3 text-sm text-muted-foreground italic">{dua.transliteration}</p>
-              )}
-              {showTranslation && <p className="mt-3 text-sm text-muted-foreground">{dua.translation}</p>}
-
-              {/* Badges */}
-              <div className="mt-4 flex flex-wrap gap-2">
-                {dua.repeat && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-1">
-                    ×{dua.repeat} {t("times", "مرات")}
-                  </span>
-                )}
-                {dua.categories.slice(0, 3).map((c) => {
-                  if (c === "all" || !CAT_META[c]) {
-                    if (!CAT_META[c]) {
-                      console.warn(`[Duas] Badge skip unknown category: "${c}"`);
-                    }
-                    return null;
-                  }
-                  return (
-                    <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-2 py-1">
-                      {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
-                    </span>
-                  );
-                })}
-              </div>
             </div>
-          );
-        })}
-      </div>
 
-      {/* Tip */}
-      <div className="mt-8 rounded-2xl border p-5 text-sm text-muted-foreground flex items-start gap-3">
-        <ArrowRight className="h-4 w-4 mt-0.5" />
-        <p>
-          {t(
-            "Tip: Use the category chips above or search in Arabic/English. The copy button copies in your current language.",
-            "نصيحة: استخدم التصنيفات بالأعلى أو ابحث بالعربية/الإنجليزية. زر النسخ ينسخ باللغة الحالية لديك.",
-          )}
-        </p>
-      </div>
+            {/* Count */}
+            <div className="mt-3 text-xs md:text-sm text-muted-foreground">
+              {t("Showing", "المعروض")} {filtered.length} {t("duas", "دعاء")}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid of Duas */}
+      <main className="px-4 mt-6 mb-20">
+        {filtered.length === 0 ? (
+          <div className="rounded-2xl border p-8 text-center text-muted-foreground bg-background/50 backdrop-blur">
+            {t("No results. Try a different search or category.", "لا توجد نتائج. جرّب بحثًا أو تصنيفًا مختلفًا.")}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {filtered.map((dua) => {
+              const IconComp = dua.icon || FALLBACK_ICON;
+              return (
+                <article
+                  key={dua.id}
+                  className="group relative overflow-hidden rounded-3xl border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 shadow-sm transition hover:shadow-md"
+                >
+                  {/* Accent glow */}
+                  <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl transition group-hover:bg-primary/20" />
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow">
+                        <IconComp className="h-6 w-6 text-primary-foreground" />
+                      </div>
+                      <div className="leading-tight">
+                        <h3 className="text-base md:text-lg font-semibold">{langIsAr ? dua.titleAr : dua.titleEn}</h3>
+                        {dua.reference && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {t("Ref:", "المصدر:")} {dua.reference}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => handleCopy(dua)}
+                      title={t("Copy", "نسخ")}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      {t("Copy", "نسخ")}
+                    </Button>
+                  </div>
+
+                  {/* Arabic */}
+                  <div className="mt-4">
+                    <p
+                      className={`text-xl leading-relaxed ${settings.fontType === "quran" ? "font-quran" : ""}`}
+                      dir="rtl"
+                    >
+                      {dua.arabic}
+                    </p>
+                  </div>
+
+                  {/* Transliteration / Translation */}
+                  {showTranslit && dua.transliteration && (
+                    <p className="mt-3 text-sm text-muted-foreground italic">{dua.transliteration}</p>
+                  )}
+                  {showTranslation && <p className="mt-3 text-sm text-muted-foreground">{dua.translation}</p>}
+
+                  {/* Meta badges */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {dua.repeat && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-1">
+                        ×{dua.repeat} {t("times", "مرات")}
+                      </span>
+                    )}
+                    {dua.categories.slice(0, 3).map((c) => {
+                      if (c === "all" || !(c in CAT_META)) return null;
+                      return (
+                        <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-2 py-1">
+                          {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </main>
     </div>
   );
 };
