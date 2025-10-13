@@ -19,7 +19,7 @@ import StoriesAndNames from "./pages/StoriesAndNames";
 import NamesOfAllah from "./pages/NamesOfAllah";
 import NamesOfMuhammad from "./pages/NamesOfMuhammad";
 import Angels from "./pages/Angels";
-import HeavenLevels from "./pages/HeavenLevels";
+import DoorsOfHeaven from "./pages/DoorsOfHeaven";
 import HellLevels from "./pages/HellLevels";
 import Qalam from "./pages/Qalam";
 import ChatHistory from "./pages/ChatHistory";
@@ -61,7 +61,7 @@ const App = () => (
             <Route path="/names-of-allah" element={<NamesOfAllah />} />
             <Route path="/names-of-muhammad" element={<NamesOfMuhammad />} />
             <Route path="/angels" element={<Angels />} />
-            <Route path="/heaven-levels" element={<HeavenLevels />} />
+            <Route path="/heaven-levels" element={<DoorsOfHeaven />} />
             <Route path="/hell-levels" element={<HellLevels />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/settings" element={<Settings />} />
