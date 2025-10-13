@@ -32,7 +32,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // ---------- Types ----------
-type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+type IconType = React.ElementType;
 
 interface Dua {
   id: number | string;
@@ -195,6 +195,13 @@ async function fetchRepoDuas(): Promise<Dua[]> {
   return all;
 }
 
+function getIconComponent(d: { icon?: any; category?: string }): IconType {
+  const candidate = d?.icon || pickIconFromCategory(d?.category) || ICONS.default;
+  if (typeof candidate === "function") return candidate as IconType;
+  if (candidate && typeof candidate === "object" && "render" in candidate) return candidate as IconType;
+  return ICONS.default;
+}
+
 // ---------- Your defaults (complete, unchanged text) ----------
 const DEFAULT_DUAS: Dua[] = [
   {
@@ -262,7 +269,7 @@ const DEFAULT_DUAS: Dua[] = [
   },
   {
     id: 6,
-    icon: Sparkles, // heart was used, but Sparkles looks cleaner in the set
+    icon: Sparkles,
     titleAr: "دعاء بعد الطعام",
     titleEn: "After Eating",
     arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
@@ -577,11 +584,6 @@ const Duas: React.FC = () => {
     );
   }
 
-  function IconFor(d: Dua) {
-    const IconComp: IconType = d.icon || pickIconFromCategory(d.category) || ICONS.default;
-    return <IconComp className="h-6 w-6 text-white" />;
-  }
-
   // Toggle bookmark
   async function toggleBookmark(dua: Dua) {
     const key = dua.hash ?? String(dua.id);
@@ -756,7 +758,7 @@ const Duas: React.FC = () => {
           {filtered.map((dua) => {
             const key = dua.hash ?? String(dua.id);
             const isBookmarked = !!bookmarkSet[key];
-            const Icon = () => IconFor(dua);
+            const IconComp = getIconComponent(dua);
 
             return (
               <div
@@ -766,7 +768,7 @@ const Duas: React.FC = () => {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg group-hover:scale-105 smooth-transition">
-                      <Icon />
+                      <IconComp className="h-6 w-6 text-white" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">
