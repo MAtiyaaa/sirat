@@ -185,6 +185,90 @@ const ALL_DUAS: Dua[] = [
     reference: "Abu Dawud; Tirmidhi",
     repeat: 3,
   },
+  {
+    id: "morning-dhikr-1",
+    icon: Sun,
+    categories: ["morning", "gratitude", "protection"],
+    titleAr: "دعاء الصباح الأول",
+    titleEn: "Morning Supplication 1",
+    arabic: "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ",
+    transliteration: "Allāhumma bika asbaḥnā, wa bika amsaynā, wa bika naḥyā, wa bika namūtu, wa ilaykan-nushūr.",
+    translation:
+      "O Allah, by Your grace we reach the morning, by Your grace we reach the evening, by Your grace we live, and by Your grace we die, and to You is the resurrection.",
+    reference: "Abu Dawud, Tirmidhi",
+  },
+  {
+    id: "morning-dhikr-2",
+    icon: Sun,
+    categories: ["morning", "gratitude", "protection"],
+    titleAr: "دعاء الصباح الثاني",
+    titleEn: "Morning Supplication 2",
+    arabic:
+      "أَصْبَحْنَا عَلَى فِطْرَةِ الْإِسْلَامِ، وَعَلَى كَلِمَةِ الْإِخْلَاصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ حَنِيفًا مُسْلِمًا وَمَا كَانَ مِنَ الْمُشْرِكِينَ",
+    transliteration:
+      "Asbaḥnā ʿalā fitratil-islām, wa ʿalā kalimatil-ikhlāṣ, wa ʿalā dīni nabiyyinā Muḥammadin ṣallallāhu ʿalayhi wa sallam, wa ʿalā millati abīnā Ibrāhīma ḥanīfan muslimā wa mā kāna minal-mushrikīn.",
+    translation:
+      "We have reached the morning following the natural disposition of Islam, the word of sincerity, the religion of our Prophet Muhammad, the religion of our father Abraham, upright in devotion to Allah, never associating partners with Him.",
+    reference: "Ahmad",
+  },
+  {
+    id: "morning-dhikr-3",
+    icon: Sun,
+    categories: ["morning", "protection"],
+    titleAr: "دعاء الصباح الثالث",
+    titleEn: "Morning Supplication 3",
+    arabic:
+      "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ",
+    transliteration:
+      "Subḥānallāhi wa biḥamdihī ʿadada khalqihī, wa riḍā nafsihī, wa zinata ʿarshihī, wa midāda kalimātihī.",
+    translation:
+      "Glory is to Allah and praise is to Him, according to the number of His creations, equal to His pleasure, equal to the weight of His Throne, and equal to the ink used in recording His words.",
+    reference: "Muslim",
+    repeat: 3,
+  },
+  {
+    id: "evening-dhikr-1",
+    icon: Moon,
+    categories: ["evening", "gratitude", "protection"],
+    titleAr: "دعاء المساء الأول",
+    titleEn: "Evening Supplication 1",
+    arabic:
+      "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+    transliteration:
+      "Allāhumma anta rabbī lā ilāha illā anta, khalaqtanī wa anā ʿabduka, wa anā ʿalā ʿahdika wa waʿdika mā istaṭaʿtu, aʿūdhu bika min sharri mā ṣanaʿtu, abūʾu laka bi niʿmatika ʿalayya, wa abūʾu laka bi dhanbī faghfir lī fa innahu lā yaghfirudhunūba illā anta.",
+    translation:
+      "O Allah, You are my Lord, none has the right to be worshipped except You, You created me and I am Your servant and I abide by Your covenant and promise as best I can, I seek refuge in You from the evil of what I have done, I acknowledge Your favor upon me and I acknowledge my sin, so forgive me, for verily none can forgive sin except You.",
+    reference: "Bukhari",
+  },
+  {
+    id: "evening-dhikr-2",
+    icon: Moon,
+    categories: ["evening", "protection"],
+    titleAr: "دعاء المساء الثاني",
+    titleEn: "Evening Supplication 2",
+    arabic:
+      "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+    transliteration:
+      "Amsaynā wa amsal-mulku lillāh, wal-ḥamdu lillāh, lā ilāha illallāhu waḥdahu lā sharīka lah, lahul-mulku wa lahul-ḥamdu wa huwa ʿalā kulli shayʾin qadīr, rabbi as'aluka khayra mā fī hādhihil-laylati wa khayra mā baʿdahā, wa aʿūdhu bika min sharri mā fī hādhihil-laylati wa sharri mā baʿdahā, rabbi aʿūdhu bika minal-kasali wa sū'il-kibar, rabbi aʿūdhu bika min ʿadhābin fin-nāri wa ʿadhābin fil-qabr.",
+    translation:
+      "We have reached the evening and at this evening all sovereignty belongs to Allah, and all praise is for Allah. None has the right to be worshipped except Allah, alone without partner. To Him belongs all sovereignty and praise, and He is over all things omnipotent. My Lord, I ask You for the good of this night and the good of what follows it, and I seek refuge in You from the evil of this night and the evil of what follows it. My Lord, I seek refuge in You from laziness and the evils of old age. My Lord, I seek refuge in You from the punishment of the Fire and the punishment of the grave.",
+    reference: "Muslim",
+  },
+  {
+    id: "evening-dhikr-3",
+    icon: Moon,
+    categories: ["evening", "protection"],
+    titleAr: "دعاء المساء الثالث",
+    titleEn: "Evening Supplication 3",
+    arabic:
+      "بِاسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+    transliteration:
+      "Bismillāhil-ladhī lā yaḍurru maʿa ismihī shayʾun fil-arḍi wa lā fis-samāʾi wa huwas-samīʿul-ʿalīm.",
+    translation:
+      "In the name of Allah, with whose name nothing on earth or in heaven can cause harm, and He is the All-Hearing, the All-Knowing.",
+    reference: "Abu Dawud, Tirmidhi",
+    repeat: 3,
+  },
 
   // Waking / Sleep / Eating
   {
@@ -199,6 +283,18 @@ const ALL_DUAS: Dua[] = [
     reference: "Bukhari",
   },
   {
+    id: "upon-waking-2",
+    icon: Bed,
+    categories: ["waking", "gratitude"],
+    titleAr: "دعاء الاستيقاظ الثاني",
+    titleEn: "Upon Waking 2",
+    arabic: "الْحَمْدُ لِلَّهِ الَّذِي عَافَانِي فِي جَسَدِي وَرَدَّ عَلَيَّ رُوحِي، وَأَذِنَ لِي بِذِكْرِهِ",
+    transliteration: "Al-ḥamdu lillāhil-ladhī ʿāfānī fī jasadī wa radda ʿalayya rūḥī, wa adhina lī bi dhikrih.",
+    translation:
+      "All praise is for Allah who has restored my health, returned my soul, and allowed me to remember Him.",
+    reference: "Tirmidhi",
+  },
+  {
     id: "before-sleep",
     icon: BedDouble,
     categories: ["sleep", "protection"],
@@ -208,6 +304,45 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Bismika Allāhumma amūtu wa aḥyā.",
     translation: "In Your name, O Allah, I die and I live.",
     reference: "Bukhari",
+  },
+  {
+    id: "before-sleep-2",
+    icon: BedDouble,
+    categories: ["sleep", "protection"],
+    titleAr: "دعاء النوم الثاني",
+    titleEn: "Before Sleep 2",
+    arabic: "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ",
+    transliteration: "Allāhumma qinī ʿadhābaka yawma tabʿathu ʿibādak.",
+    translation: "O Allah, protect me from Your punishment on the Day You resurrect Your servants.",
+    reference: "Tirmidhi",
+  },
+  {
+    id: "before-sleep-3",
+    icon: BedDouble,
+    categories: ["sleep", "protection"],
+    titleAr: "دعاء النوم الثالث",
+    titleEn: "Before Sleep 3",
+    arabic:
+      "بِاسْمِكَ رَبِّ وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِنْ أَمْسَكْتَ نَفْسِي فَارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ",
+    transliteration:
+      "Bismika rabbi waḍaʿtu janbī, wa bika arfaʿuh, fa in amsakta nafsī farḥamhā, wa in arsaltahā faḥfaẓhā bimā taḥfaẓu bihi ʿibādakaṣ-ṣāliḥīn.",
+    translation:
+      "In Your name, my Lord, I place my side, and by Your will I raise it. If You take my soul, have mercy on it, and if You release it, protect it with that which You protect Your righteous servants.",
+    reference: "Bukhari, Muslim",
+  },
+  {
+    id: "before-sleep-4",
+    icon: BedDouble,
+    categories: ["sleep", "protection"],
+    titleAr: "دعاء النوم الرابع",
+    titleEn: "Before Sleep 4",
+    arabic:
+      "اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ، وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ",
+    transliteration:
+      "Allāhumma aslamtu nafsī ilayk, wa fawwaḍtu amrī ilayk, wa wajjahtu wajhī ilayk, wa alja'tu ẓahrī ilayk, raghbatan wa rahbatan ilayk, lā malja'a wa lā manjā minka illā ilayk, āmantu bikitābikal-ladhī anzalta, wa binabiyyikal-ladhī arsalta.",
+    translation:
+      "O Allah, I have submitted my soul to You, and I have entrusted my affairs to You, and I have turned my face to You, and I have sought refuge in You out of desire and fear of You. There is no refuge or escape from You except to You. I have believed in Your Book which You have revealed, and in Your Prophet whom You have sent.",
+    reference: "Bukhari, Muslim",
   },
   {
     id: "before-eating",
@@ -221,6 +356,17 @@ const ALL_DUAS: Dua[] = [
     reference: "Abu Dawud",
   },
   {
+    id: "before-eating-2",
+    icon: Utensils,
+    categories: ["eating", "gratitude"],
+    titleAr: "قبل الطعام الثاني",
+    titleEn: "Before Eating 2",
+    arabic: "اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ",
+    transliteration: "Allāhumma bārik lanā fīmā razaqtanā wa qinā ʿadhāban-nār.",
+    translation: "O Allah, bless what You have provided us with and protect us from the punishment of the Fire.",
+    reference: "Muslim",
+  },
+  {
     id: "after-eating",
     icon: Utensils,
     categories: ["eating", "gratitude"],
@@ -230,6 +376,31 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Al-ḥamdu lillāhil-ladhī aṭʿamanā wa saqānā wa jaʿalanā Muslimīn.",
     translation: "All praise is for Allah who fed us, gave us drink, and made us Muslims.",
     reference: "Tirmidhi",
+  },
+  {
+    id: "after-eating-2",
+    icon: Utensils,
+    categories: ["eating", "gratitude"],
+    titleAr: "بعد الطعام الثاني",
+    titleEn: "After Eating 2",
+    arabic:
+      "الْحَمْدُ لِلَّهِ كَثِيرًا طَيِّبًا مُبَارَكًا فِيهِ، غَيْرَ مَكْفِيٍّ وَلَا مُوَدَّعٍ وَلَا مُسْتَغْنًى عَنْهُ رَبُّنَا",
+    transliteration:
+      "Al-ḥamdu lillāhi kaṭīran ṭayyiban mubārakan fīh, ghayra makfiyyin wa lā mawwadaʿin wa lā mustaghnan ʿanhu rabbunā.",
+    translation:
+      "All praise is for Allah, abundant, pure, and blessed, a praise that is insufficient, cannot be abandoned, and from which we cannot be independent, our Lord.",
+    reference: "Bukhari",
+  },
+  {
+    id: "forgetting-bismillah",
+    icon: Utensils,
+    categories: ["eating", "gratitude"],
+    titleAr: "نسيان البسملة",
+    titleEn: "Forgetting Bismillah",
+    arabic: "بِسْمِ اللَّهِ أَوَّلَهُ وَآخِرَهُ",
+    transliteration: "Bismillāhi awwalahu wa ākhirahu.",
+    translation: "In the name of Allah at its beginning and its end.",
+    reference: "Abu Dawud, Tirmidhi",
   },
 
   // Home / Travel
@@ -245,6 +416,20 @@ const ALL_DUAS: Dua[] = [
     reference: "Abu Dawud",
   },
   {
+    id: "enter-home-2",
+    icon: Home,
+    categories: ["home", "protection"],
+    titleAr: "دخول المنزل الثاني",
+    titleEn: "Entering Home 2",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ، بِاسْمِ اللَّهِ وَلَجْنَا، وَبِاسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا",
+    transliteration:
+      "Allāhumma innī as'aluka khayral-mawliji wa khayral-makhraji, bismillāhi walajnā, wa bismillāhi kharajnā, wa ʿalallāhi rabbinā tawakkalnā.",
+    translation:
+      "O Allah, I ask You for the best of entering and the best of exiting. In the name of Allah we enter, in the name of Allah we leave, and upon our Lord we rely.",
+    reference: "Abu Dawud",
+  },
+  {
     id: "leave-home",
     icon: MapPin,
     categories: ["home", "travel", "protection"],
@@ -254,6 +439,20 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Bismillāh, tawakkaltu ʿalallāh, lā ḥawla wa lā quwwata illā billāh.",
     translation: "In the name of Allah, I rely upon Allah; there is no might nor power except with Allah.",
     reference: "Tirmidhi",
+  },
+  {
+    id: "leave-home-2",
+    icon: MapPin,
+    categories: ["home", "travel", "protection"],
+    titleAr: "الخروج من المنزل الثاني",
+    titleEn: "Leaving Home 2",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أَضِلَّ أَوْ أُضَلَّ، أَوْ أَزِلَّ أَوْ أُزَلَّ، أَوْ أَظْلِمَ أَوْ أُظْلَمَ، أَوْ أَجْهَلَ أَوْ يُجْهَلَ عَلَيَّ",
+    transliteration:
+      "Allāhumma innī aʿūdhu bika an aḍilla aw uḍalla, aw azilla aw uzalla, aw aẓlima aw uẓlama, aw ajhala aw yujhala ʿalayya.",
+    translation:
+      "O Allah, I seek refuge in You from going astray or being led astray, from slipping or being made to slip, from oppressing or being oppressed, from acting ignorantly or being treated ignorantly.",
+    reference: "Abu Dawud, Tirmidhi, Ibn Majah",
   },
   {
     id: "travel",
@@ -266,6 +465,31 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Subḥānal-ladhī sakhkhara lanā hādhā wa mā kunnā lahu muqrinīn, wa innā ilā rabbinā lamunqalibūn.",
     translation:
       "Glory be to Him who subjected this to us, and we could not have done so on our own. Surely, to our Lord we will return.",
+    reference: "Muslim",
+  },
+  {
+    id: "travel-2",
+    icon: Plane,
+    categories: ["travel", "protection"],
+    titleAr: "دعاء السفر الثاني",
+    titleEn: "Travel 2",
+    arabic:
+      "اللَّهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَذَا الْبِرَّ وَالتَّقْوَى، وَمِنَ الْعَمَلِ مَا تَرْضَى، اللَّهُمَّ هَوِّنْ عَلَيْنَا سَفَرَنَا هَذَا وَاطْوِ عَنَّا بُعْدَهُ، اللَّهُمَّ أَنْتَ الصَّاحِبُ فِي السَّفَرِ، وَالْخَلِيفَةُ فِي الْأَهْلِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ وَعْثَاءِ السَّفَرِ، وَكَآبَةِ الْمَنْظَرِ، وَسُوءِ الْمُنْقَلَبِ فِي الْمَالِ وَالْأَهْلِ",
+    transliteration:
+      "Allāhumma innā nas'aluka fī safarinā hādhal-birra wat-taqwā, wa minal-ʿamali mā tarḍā, Allāhumma hawwin ʿalaynā safaranā hādhā wa ṭwi ʿannā buʿdahu, Allāhumma antaṣ-ṣāḥibu fis-safar, wal-khalīfatu fil-ahli, Allāhumma innī aʿūdhu bika min waʿthā'is-safar, wa kābatil-manẓar, wa sū'il-munqabali fil-māli wal-ahli.",
+    translation:
+      "O Allah, we ask You on this journey for righteousness and piety, and for deeds that please You. O Allah, make this journey easy for us and shorten its distance. O Allah, You are the Companion on the journey and the Successor over the family. O Allah, I seek refuge in You from the hardships of travel, from having a bad appearance, and from bad outcomes in wealth and family.",
+    reference: "Muslim",
+  },
+  {
+    id: "travel-return",
+    icon: Plane,
+    categories: ["travel", "gratitude"],
+    titleAr: "دعاء العودة من السفر",
+    titleEn: "Returning from Travel",
+    arabic: "آيِبُونَ، تَائِبُونَ، عَابِدُونَ، لِرَبِّنَا حَامِدُونَ",
+    transliteration: "Āyibūn, tā'ibūn, ʿābidūn, li-rabbinā ḥāmidūn.",
+    translation: "We return, repentant, worshipping, and praising our Lord.",
     reference: "Muslim",
   },
 
@@ -282,6 +506,31 @@ const ALL_DUAS: Dua[] = [
     reference: "Muslim",
   },
   {
+    id: "protection-words-2",
+    icon: Shield,
+    categories: ["protection", "general"],
+    titleAr: "الاستعاذة الثانية",
+    titleEn: "Seeking Protection 2",
+    arabic:
+      "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّةِ مِنْ غَضَبِهِ وَعِقَابِهِ، وَشَرِّ عِبَادِهِ، وَمِنْ هَمَزَاتِ الشَّيَاطِينِ وَأَنْ يَحْضُرُونِ",
+    transliteration:
+      "Aʿūdhu bikalimātillāhit-tāmmati min ghaḍabihi wa ʿiqābih, wa sharri ʿibādih, wa min hamazātish-shayāṭīni wa an yaḥḍurūn.",
+    translation:
+      "I seek refuge in the perfect words of Allah from His wrath and punishment, from the evil of His servants, and from the whisperings of devils and their presence.",
+    reference: "Abu Dawud, Tirmidhi",
+  },
+  {
+    id: "protection-words-3",
+    icon: Shield,
+    categories: ["protection", "general"],
+    titleAr: "الاستعاذة الثالثة",
+    titleEn: "Seeking Protection 3",
+    arabic: "أَعُوذُ بِاللَّهِ السَّمِيعِ الْعَلِيمِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+    transliteration: "Aʿūdhu billāhis-samīʿil-ʿalīmi minash-shayṭānir-rajīm.",
+    translation: "I seek refuge in Allah, the All-Hearing, the All-Knowing, from the accursed Satan.",
+    reference: "Quran 41:36",
+  },
+  {
     id: "calamity",
     icon: Info,
     categories: ["calamity", "protection", "patience"],
@@ -291,6 +540,17 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Innā lillāhi wa innā ilayhi rājiʿūn.",
     translation: "Surely we belong to Allah and to Him we shall return.",
     reference: "Qur'an 2:156",
+  },
+  {
+    id: "calamity-2",
+    icon: Info,
+    categories: ["calamity", "protection", "patience"],
+    titleAr: "عند المصيبة الثانية",
+    titleEn: "When Afflicted 2",
+    arabic: "اللَّهُمَّ أَجِرْنِي فِي مُصِيبَتِي وَأَخْلِفْ لِي خَيْرًا مِنْهَا",
+    transliteration: "Allāhumma ajirnī fī muṣībatī wa akhlif lī khayran minhā.",
+    translation: "O Allah, reward me in my affliction and compensate me with something better.",
+    reference: "Muslim",
   },
 
   // Knowledge / Study
@@ -304,6 +564,34 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Rabbi zidnī ʿilmā.",
     translation: "My Lord, increase me in knowledge.",
     reference: "Qur'an 20:114",
+  },
+  {
+    id: "knowledge-2",
+    icon: BookOpen,
+    categories: ["knowledge", "study", "guidance"],
+    titleAr: "طلب العلم الثاني",
+    titleEn: "Seeking Knowledge 2",
+    arabic:
+      "اللَّهُمَّ انْفَعْنِي بِمَا عَلَّمْتَنِي، وَعَلِّمْنِي مَا يَنْفَعُنِي، وَزِدْنِي عِلْمًا، الْحَمْدُ لِلَّهِ عَلَى كُلِّ حَالٍ، وَأَعُوذُ بِاللَّهِ مِنْ حَالِ أَهْلِ النَّارِ",
+    transliteration:
+      "Allāhumma nfaʿnī bimā ʿallamtanī, wa ʿallimnī mā yanfaʿunī, wa zidnī ʿilmā, al-ḥamdu lillāhi ʿalā kulli ḥālin, wa aʿūdhu billāhi min ḥāli ahlin-nār.",
+    translation:
+      "O Allah, benefit me with what You have taught me, and teach me what will benefit me, and increase me in knowledge. Praise is to Allah in all circumstances, and I seek refuge in Allah from the condition of the people of the Fire.",
+    reference: "Ibn Majah",
+  },
+  {
+    id: "study",
+    icon: BookOpen,
+    categories: ["study", "knowledge", "guidance"],
+    titleAr: "دعاء قبل الدراسة",
+    titleEn: "Before Studying",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَسْتَوْدِعُكَ مَا عَلَّمْتَنِيهِ فَارْدُدْهُ إِلَيَّ عِنْدَ حَاجَتِي إِلَيْهِ وَلَا تَنْسَنِيهِ يَا رَبَّ الْعَالَمِينَ",
+    transliteration:
+      "Allāhumma innī astawdiʿuka mā ʿallamtanīhi fardudhu ilayya ʿinda ḥājatī ilayhi wa lā tansanīhi yā rabbal-ʿālamīn.",
+    translation:
+      "O Allah, I entrust to You what You have taught me, so return it to me when I need it, and do not make me forget it, O Lord of the worlds.",
+    reference: "Hisnul Muslim",
   },
 
   // Forgiveness / Repentance / Patience
@@ -319,6 +607,70 @@ const ALL_DUAS: Dua[] = [
     reference: "Bukhari",
   },
   {
+    id: "forgiveness-1",
+    icon: Sparkles,
+    categories: ["forgiveness", "repentance", "general"],
+    titleAr: "دعاء الاستغفار الأول",
+    titleEn: "Seeking Forgiveness 1",
+    arabic: "أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ، الْحَيَّ الْقَيُّومَ، وَأَتُوبُ إِلَيْهِ",
+    transliteration: "Astaghfirullāhal-ʿaẓīmalladhī lā ilāha illā huwa, al-ḥayyal-qayyūm, wa atūbu ilayh.",
+    translation:
+      "I seek forgiveness from Allah the Mighty, besides whom there is none worthy of worship, the Ever-Living, the Sustainer, and I turn to Him in repentance.",
+    reference: "Abu Dawud, Tirmidhi",
+  },
+  {
+    id: "forgiveness-2",
+    icon: Sparkles,
+    categories: ["forgiveness", "repentance", "general"],
+    titleAr: "دعاء الاستغفار الثاني",
+    titleEn: "Seeking Forgiveness 2",
+    arabic: "رَبَّنَا ظَلَمْنَا أَنْفُسَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ",
+    transliteration: "Rabbana ẓalamnā anfusanā wa in lam taghfir lanā wa tarḥamnā lanakūnanna minal-khāsirīn.",
+    translation:
+      "Our Lord, we have wronged ourselves, and if You do not forgive us and have mercy upon us, we will be among the losers.",
+    reference: "Quran 7:23",
+  },
+  {
+    id: "forgiveness-3",
+    icon: Sparkles,
+    categories: ["forgiveness", "repentance", "general"],
+    titleAr: "دعاء الاستغفار الثالث",
+    titleEn: "Seeking Forgiveness 3",
+    arabic:
+      "اللَّهُمَّ اغْفِرْ لِي ذَنْبِي كُلَّهُ، دِقَّهُ وَجِلَّهُ، وَأَوَّلَهُ وَآخِرَهُ، وَعَلَانِيَتَهُ وَسِرَّهُ",
+    transliteration:
+      "Allāhumma ighfir lī dhanbī kullahu, diqqahu wa jillahu, wa awwalahu wa ākhirahu, wa ʿalāniyatahu wa sirrahu.",
+    translation:
+      "O Allah, forgive me all my sins, the small and the great, the first and the last, the open and the hidden.",
+    reference: "Muslim",
+  },
+  {
+    id: "repentance-1",
+    icon: Sparkles,
+    categories: ["repentance", "forgiveness", "general"],
+    titleAr: "دعاء التوبة الأول",
+    titleEn: "Repentance 1",
+    arabic: "أَتُوبُ إِلَى اللَّهِ",
+    transliteration: "Atūbu ilallāh.",
+    translation: "I turn to Allah in repentance.",
+    reference: "Tirmidhi",
+    repeat: 100,
+  },
+  {
+    id: "repentance-2",
+    icon: Sparkles,
+    categories: ["repentance", "forgiveness", "general"],
+    titleAr: "دعاء التوبة الثاني",
+    titleEn: "Repentance 2",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَتُوبُ إِلَيْكَ مِنْ كُلِّ ذَنْبٍ أَذْنَبْتُهُ عَمْدًا أَوْ خَطَأً، سِرًّا أَوْ عَلَانِيَةً، وَأَتُوبُ إِلَيْكَ مِنَ الذُّنُوبِ الَّتِي أَنْتَ أَعْلَمُ بِهَا مِنِّي",
+    transliteration:
+      "Allāhumma innī atūbu ilayka min kulli dhanbin adhanbtuhu ʿamdan aw khaṭan, sirran aw ʿalāniyatan, wa atūbu ilayka minadh-dhunūbi allatī anta aʿlamu bihā minnī.",
+    translation:
+      "O Allah, I turn to You in repentance from every sin I have committed, intentionally or unintentionally, secretly or openly, and I turn to You from the sins that You know better than I do.",
+    reference: "Hisnul Muslim",
+  },
+  {
     id: "patience-dua",
     icon: AlarmClock,
     categories: ["patience", "general"],
@@ -328,6 +680,17 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Rabbana afrigh ʿalaynā ṣabrā.",
     translation: "Our Lord, pour upon us patience.",
     reference: "Qur'an 2:250",
+  },
+  {
+    id: "patience-dua-2",
+    icon: AlarmClock,
+    categories: ["patience", "general"],
+    titleAr: "طلب الصبر الثاني",
+    titleEn: "Asking for Patience 2",
+    arabic: "رَبَّنَا لَا تُؤَاخِذْنَا إِنْ نَسِينَا أَوْ أَخْطَأْنَا",
+    transliteration: "Rabbana lā tu'ākhidhnā in nasīnā aw akhta'nā.",
+    translation: "Our Lord, do not impose blame upon us if we forget or make a mistake.",
+    reference: "Quran 2:286",
   },
 
   // Parents / Marriage / Mercy / Character
@@ -343,6 +706,17 @@ const ALL_DUAS: Dua[] = [
     reference: "Qur'an 17:24",
   },
   {
+    id: "parents-2",
+    icon: Users,
+    categories: ["parents", "mercy", "character"],
+    titleAr: "دعاء للوالدين الثاني",
+    titleEn: "For Parents 2",
+    arabic: "رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ",
+    transliteration: "Rabbighfir lī wa liwālidayya wal-lil-mu'minīna yawma yaqūm-ul-ḥisāb.",
+    translation: "My Lord, forgive me and my parents and the believers on the Day the account is established.",
+    reference: "Quran 14:41",
+  },
+  {
     id: "spouse-love",
     icon: Heart,
     categories: ["marriage", "mercy", "character"],
@@ -352,6 +726,53 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Rabbana hab lanā min azwājinā wa dhurriyyātinā qurrata aʿyun.",
     translation: "Our Lord, grant us from our spouses and offspring comfort to our eyes.",
     reference: "Qur'an 25:74",
+  },
+  {
+    id: "marriage-1",
+    icon: Heart,
+    categories: ["marriage", "guidance"],
+    titleAr: "دعاء للمتزوج",
+    titleEn: "For the Newly Married",
+    arabic: "بَارَكَ اللَّهُ لَكَ، وَبَارَكَ عَلَيْكَ، وَجَمَعَ بَيْنَكُمَا فِي خَيْرٍ",
+    transliteration: "Bārakallāhu laka, wa bāraka ʿalayka, wa jamaʿa baynakumā fī khayr.",
+    translation: "May Allah bless you, and shower His blessings upon you, and unite you both in goodness.",
+    reference: "Abu Dawud, Tirmidhi",
+  },
+  {
+    id: "marriage-2",
+    icon: Heart,
+    categories: ["marriage", "guidance"],
+    titleAr: "دعاء عند ليلة الزفاف",
+    titleEn: "On Wedding Night",
+    arabic: "اللَّهُمَّ بَارِكْ لِي فِي أَهْلِي وَبَارِكْ لَهُمْ فِيَّ",
+    transliteration: "Allāhumma bārik lī fī ahlī wa bārik lahum fīya.",
+    translation: "O Allah, bless my family for me and bless me for them.",
+    reference: "Ibn Majah",
+  },
+  {
+    id: "character-1",
+    icon: Handshake,
+    categories: ["character", "mercy", "general"],
+    titleAr: "حسن الخلق",
+    titleEn: "Good Character",
+    arabic: "اللَّهُمَّ أَحْسِنْ خُلُقِي",
+    transliteration: "Allāhumma aḥsin khuluqī.",
+    translation: "O Allah, improve my character.",
+    reference: "Hisnul Muslim",
+  },
+  {
+    id: "character-2",
+    icon: Handshake,
+    categories: ["character", "mercy", "general"],
+    titleAr: "دعاء حسن الخلق الثاني",
+    titleEn: "Good Character 2",
+    arabic:
+      "اللَّهُمَّ اهْدِنِي لِأَحْسَنِ الْأَخْلَاقِ لَا يَهْدِي لِأَحْسَنِهَا إِلَّا أَنْتَ، وَاصْرِفْ عَنِّي سَيِّئَهَا لَا يَصْرِفُ عَنِّي سَيِّئَهَا إِلَّا أَنْتَ",
+    transliteration:
+      "Allāhumma hdinī li-aḥsani-l-akhlāq lā yahdī li-aḥsanihā illā anta, wa ṣrif ʿannī sayyi'ahā lā yaṣrifu ʿannī sayyi'ahā illā anta.",
+    translation:
+      "O Allah, guide me to the best of manners, for none can guide to the best of them except You, and turn away from me evil manners, for none can turn away evil manners from me except You.",
+    reference: "Muslim",
   },
 
   // Rizq / Work
@@ -368,6 +789,29 @@ const ALL_DUAS: Dua[] = [
     reference: "Tirmidhi",
   },
   {
+    id: "rizq-2",
+    icon: Coins,
+    categories: ["rizq", "work", "gratitude"],
+    titleAr: "طلب الرزق الثاني",
+    titleEn: "Provision 2",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ وَرَحْمَتِكَ فَإِنَّهُ لَا يَمْلِكُهَا إِلَّا أَنْتَ",
+    transliteration: "Allāhumma innī as'aluka min faḍlika wa raḥmatika fa innahu lā yamlikuhā illā anta.",
+    translation: "O Allah, I ask You for Your bounty and mercy, for none possesses them except You.",
+    reference: "Hisnul Muslim",
+  },
+  {
+    id: "rizq-3",
+    icon: Coins,
+    categories: ["rizq", "work", "gratitude"],
+    titleAr: "طلب الرزق الثالث",
+    titleEn: "Provision 3",
+    arabic:
+      "اللَّهُمَّ بَارِكْ لِي فِي رِزْقِي وَلَا تَجْعَلْ لِي فِي شَيْءٍ مِنْهُ حَاجَةً إِلَى أَحَدٍ مِنْ خَلْقِكَ",
+    transliteration: "Allāhumma bārik lī fī rizqī wa lā tajʿal lī fī shay'in minhu ḥājatan ilā aḥadin min khalqik.",
+    translation: "O Allah, bless my provision and do not make me in need of any of Your creation for any part of it.",
+    reference: "Hisnul Muslim",
+  },
+  {
     id: "work-ease",
     icon: Briefcase,
     categories: ["work", "guidance"],
@@ -377,6 +821,28 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Rabbi yassir wa lā tuʿassir, wa tammim bil-khayr.",
     translation: "My Lord, make it easy and do not make it difficult; complete it with goodness.",
     reference: "Duʿāʾ mashhūr",
+  },
+  {
+    id: "work-1",
+    icon: Briefcase,
+    categories: ["work", "guidance"],
+    titleAr: "دعاء عند بدء العمل",
+    titleEn: "Starting Work",
+    arabic: "بِسْمِ اللَّهِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
+    transliteration: "Bismillāh, Allāhumma innī as'aluka min faḍlik.",
+    translation: "In the name of Allah, O Allah, I ask You for Your bounty.",
+    reference: "Hisnul Muslim",
+  },
+  {
+    id: "work-2",
+    icon: Briefcase,
+    categories: ["work", "guidance"],
+    titleAr: "دعاء عند الانتهاء من العمل",
+    titleEn: "Finishing Work",
+    arabic: "الْحَمْدُ لِلَّهِ الَّذِي بِنِعْمَتِهِ تَتِمُّ الصَّالِحَاتُ",
+    transliteration: "Al-ḥamdu lillāhil-ladhī bi niʿmatihī tatimmuṣ-ṣāliḥāt.",
+    translation: "Praise is to Allah by whose grace good deeds are completed.",
+    reference: "Hisnul Muslim",
   },
 
   // Anxiety / Health / Illness / Visiting sick
@@ -392,6 +858,33 @@ const ALL_DUAS: Dua[] = [
     reference: "Bukhari",
   },
   {
+    id: "anxiety-2",
+    icon: Gauge,
+    categories: ["anxiety", "guidance", "protection"],
+    titleAr: "ذهاب الهمّ الثاني",
+    titleEn: "Removal of Worry 2",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحُزْنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْجُبْنِ وَالْبُخْلِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+    transliteration:
+      "Allāhumma innī aʿūdhu bika minal-hammi wal-ḥuzni, wal-ʿajzi wal-kasali, wal-jubni wal-bukhli, wa ḍalaʿid-dayni wa ghalabatir-rijāl.",
+    translation:
+      "O Allah, I seek refuge in You from worry and grief, from incapacity and laziness, from cowardice and miserliness, from being overwhelmed by debt and from being overpowered by men.",
+    reference: "Bukhari",
+  },
+  {
+    id: "anxiety-3",
+    icon: Gauge,
+    categories: ["anxiety", "guidance", "protection"],
+    titleAr: "ذهاب الهمّ الثالث",
+    titleEn: "Removal of Worry 3",
+    arabic: "حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",
+    transliteration: "Ḥasbiyallāhu lā ilāha illā huwa, ʿalayhi tawakkaltu wa huwa rabbul-ʿarshil-ʿaẓīm.",
+    translation:
+      "Allah is sufficient for me. There is none worthy of worship except Him. I have placed my trust in Him, and He is the Lord of the Mighty Throne.",
+    reference: "Quran 9:129",
+    repeat: 7,
+  },
+  {
     id: "illness",
     icon: Hospital,
     categories: ["illness", "health", "mercy"],
@@ -403,15 +896,71 @@ const ALL_DUAS: Dua[] = [
     reference: "Bukhari; Muslim",
   },
   {
+    id: "illness-2",
+    icon: Hospital,
+    categories: ["illness", "health", "mercy"],
+    titleAr: "دعاء المريض الثاني",
+    titleEn: "For the Sick 2",
+    arabic: "اللَّهُمَّ اشْفِهِ شِفَاءً لَا يُغَادِرُ سَقَمًا",
+    transliteration: "Allāhumma shfih shifā'an lā yughādiru saqaman.",
+    translation: "O Allah, heal him with a healing that leaves no illness.",
+    reference: "Bukhari",
+  },
+  {
+    id: "illness-3",
+    icon: Hospital,
+    categories: ["illness", "health", "mercy"],
+    titleAr: "دعاء المريض الثالث",
+    titleEn: "For the Sick 3",
+    arabic: "أَسْأَلُ اللَّهَ الْعَظِيمَ رَبَّ الْعَرْشِ الْعَظِيمِ أَنْ يَشْفِيَكَ",
+    transliteration: "As'alullāhal-ʿaẓīma rabba-l-ʿarshil-ʿaẓīmi an yashfīyak.",
+    translation: "I ask Allah the Mighty, Lord of the Mighty Throne, to heal you.",
+    reference: "Abu Dawud, Tirmidhi",
+  },
+  {
     id: "visiting-sick",
     icon: MessageSquareHeart,
     categories: ["visiting_sick", "mercy"],
     titleAr: "عند عيادة المريض",
     titleEn: "When Visiting the Sick",
-    arabic: "لَا بَأْسَ طَهُورٌ إِنْ شَاءَ اللّٰهُ",
+    arabic: "لَا بَأْسَ طَهُورٌ إِنْ شَاءَ اللَّهُ",
     transliteration: "Lā baʾsa ṭahūrun in shāʾa Allāh.",
     translation: "No harm; it is purification, if Allah wills.",
     reference: "Bukhari",
+  },
+  {
+    id: "visiting-sick-2",
+    icon: MessageSquareHeart,
+    categories: ["visiting_sick", "mercy"],
+    titleAr: "دعاء للمريض عند زيارته",
+    titleEn: "Dua for the Sick During Visit",
+    arabic: "اللَّهُمَّ أَذْهِبِ الْهَمَّ، وَاشْفِ السَّقَمَ، وَارْحَمْ رَحْمَتَكَ",
+    transliteration: "Allāhumma adhhibil-hamma, washfis-saqama, warḥam raḥmatak.",
+    translation: "O Allah, remove the worry, heal the affliction, and have mercy on Your mercy.",
+    reference: "Hisnul Muslim",
+  },
+  {
+    id: "health-1",
+    icon: Hospital,
+    categories: ["health", "gratitude", "protection"],
+    titleAr: "دعاء للصحة",
+    titleEn: "For Health",
+    arabic: "اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي",
+    transliteration: "Allāhumma ʿāfinī fī badanī, Allāhumma ʿāfinī fī samʿī, Allāhumma ʿāfinī fī baṣarī.",
+    translation:
+      "O Allah, grant me well-being in my body, O Allah, grant me well-being in my hearing, O Allah, grant me well-being in my sight.",
+    reference: "Abu Dawud",
+  },
+  {
+    id: "health-2",
+    icon: Hospital,
+    categories: ["health", "gratitude", "protection"],
+    titleAr: "دعاء للصحة الثاني",
+    titleEn: "For Health 2",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ",
+    transliteration: "Allāhumma innī as'alukal-ʿafwa wal-ʿāfiyata fid-dunyā wal-ākhirah.",
+    translation: "O Allah, I ask You for pardon and well-being in this life and the next.",
+    reference: "Tirmidhi",
   },
 
   // Rain / Weather
@@ -425,6 +974,28 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Allāhumma ṣayiban nāfiʿā.",
     translation: "O Allah, let it be a beneficial rain.",
     reference: "Bukhari",
+  },
+  {
+    id: "rain-dua-2",
+    icon: CloudRain,
+    categories: ["rain", "mercy"],
+    titleAr: "عند سماع الرعد",
+    titleEn: "When Hearing Thunder",
+    arabic: "سُبْحَانَ الَّذِي يُسَبِّحُ الرَّعْدُ بِحَمْدِهِ وَالْمَلَائِكَةُ مِنْ خِيفَتِهِ",
+    transliteration: "Subḥānal-ladhī yusabbiḥur-raʿdu biḥamdihi wal-malā'ikatu min khīfatih.",
+    translation: "Glory is to Him, whom thunder glorifies with His praise, and the angels from fear of Him.",
+    reference: "Malik, Tirmidhi",
+  },
+  {
+    id: "rain-dua-3",
+    icon: CloudRain,
+    categories: ["rain", "mercy"],
+    titleAr: "دعاء الاستسقاء",
+    titleEn: "Prayer for Rain",
+    arabic: "اللَّهُمَّ أَغِثْنَا، اللَّهُمَّ أَغِثْنَا، اللَّهُمَّ أَغِثْنَا",
+    transliteration: "Allāhumma aghithnā, Allāhumma aghithnā, Allāhumma aghithnā.",
+    translation: "O Allah, give us rain, O Allah, give us rain, O Allah, give us rain.",
+    reference: "Bukhari, Muslim",
   },
 
   // Istikhara
@@ -456,6 +1027,56 @@ const ALL_DUAS: Dua[] = [
     reference: "Muslim",
   },
   {
+    id: "after-wudu-2",
+    icon: Droplet,
+    categories: ["wudu", "salah", "protection"],
+    titleAr: "دعاء بعد الوضوء الثاني",
+    titleEn: "After Wudu 2",
+    arabic: "اللَّهُمَّ اجْعَلْنِي مِنَ التَّوَّابِينَ، وَاجْعَلْنِي مِنَ الْمُتَطَهِّرِينَ",
+    transliteration: "Allāhumma ijʿalnī minat-tawwabīn, wajʿalnī minal-mutaṭahhirīn.",
+    translation: "O Allah, make me of those who repent and make me of those who purify themselves.",
+    reference: "Tirmidhi",
+  },
+  {
+    id: "before-wudu",
+    icon: Droplet,
+    categories: ["wudu", "salah"],
+    titleAr: "قبل الوضوء",
+    titleEn: "Before Wudu",
+    arabic: "بِسْمِ اللَّهِ",
+    transliteration: "Bismillāh.",
+    translation: "In the name of Allah.",
+    reference: "Abu Dawud",
+  },
+  {
+    id: "salah-start",
+    icon: Landmark,
+    categories: ["salah", "guidance"],
+    titleAr: "افتتاح الصلاة",
+    titleEn: "Opening Prayer",
+    arabic:
+      "اللَّهُمَّ بَاعِدْ بَيْنِي وَبَيْنَ خَطَايَايَ كَمَا بَاعَدْتَ بَيْنَ الْمَشْرِقِ وَالْمَغْرِبِ، اللَّهُمَّ نَقِّنِي مِنَ الْخَطَايَا كَمَا يُنَقَّى الثَّوْبُ الْأَبْيَضُ مِنَ الدَّنَسِ، اللَّهُمَّ اغْسِلْ خَطَايَايَ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ",
+    transliteration:
+      "Allāhumma bāʿid baynī wa bayna khaṭāyāya kamā bāʿadta baynal-mashriqi wal-maghrib, Allāhumma naqqinī minal-khaṭāyā kamā yunaqqath-thawbul-abyaḍu minad-danas, Allāhummaghsil khaṭāyāya bil-mā'ith-thalji wal-barad.",
+    translation:
+      "O Allah, distance me from my sins as You have distanced the east from the west. O Allah, cleanse me of my sins as a white garment is cleansed of dirt. O Allah, wash away my sins with water, snow and hail.",
+    reference: "Bukhari, Muslim",
+  },
+  {
+    id: "salah-end",
+    icon: Landmark,
+    categories: ["salah", "gratitude"],
+    titleAr: "بعد الصلاة",
+    titleEn: "After Prayer",
+    arabic:
+      "أَسْتَغْفِرُ اللَّهَ (ثَلَاثًا)، اللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+    transliteration:
+      "Astagfirullāh (thalāthan), Allāhumma antas-salām, wa minkas-salām, tabārakta yā dhā-l-jalāli wal-ikrām.",
+    translation:
+      "I seek forgiveness from Allah (three times), O Allah, You are Peace and from You comes peace, blessed are You, O Possessor of majesty and honor.",
+    reference: "Muslim",
+  },
+  {
     id: "enter-graveyard",
     icon: Landmark,
     categories: ["graveyard", "mercy"],
@@ -467,6 +1088,17 @@ const ALL_DUAS: Dua[] = [
     reference: "Muslim",
   },
   {
+    id: "graveyard-dua",
+    icon: Landmark,
+    categories: ["graveyard", "mercy"],
+    titleAr: "دعاء في المقابر",
+    titleEn: "Dua in the Graveyard",
+    arabic: "اللَّهُمَّ اغْفِرْ لِأَهْلِ الْقُبُورِ الْمُؤْمِنِينَ وَالْمُؤْمِنَاتِ، وَالْمُسْلِمِينَ وَالْمُسْلِمَاتِ",
+    transliteration: "Allāhumma ighfir li-ahli-l-qubūril-mu'minīna wal-mu'mināt, wal-muslimīna wal-muslimāt.",
+    translation: "O Allah, forgive the believing men and women, and the Muslim men and women of the graves.",
+    reference: "Hisnul Muslim",
+  },
+  {
     id: "meeting-speech",
     icon: MessageSquareHeart,
     categories: ["meeting", "character", "guidance"],
@@ -476,6 +1108,228 @@ const ALL_DUAS: Dua[] = [
     transliteration: "Al-ḥamdu lillāh, naḥmaduhu wa nastaʿīnu... (khuṭbat al-ḥājah abridged)",
     translation: "All praise is for Allah; we praise Him and seek His help... (abridged).",
     reference: "Abu Dawud",
+  },
+  {
+    id: "meeting-dua",
+    icon: MessageSquareHeart,
+    categories: ["meeting", "character", "guidance"],
+    titleAr: "دعاء المجلس",
+    titleEn: "Gathering Dua",
+    arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+    transliteration: "Rabbana ātinā fid-dunyā ḥasanatan wa fil-ākhirati ḥasanatan wa qinā ʿadhāban-nār.",
+    translation:
+      "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.",
+    reference: "Quran 2:201",
+  },
+  {
+    id: "meeting-end",
+    icon: MessageSquareHeart,
+    categories: ["meeting", "character", "guidance"],
+    titleAr: "ختام المجلس",
+    titleEn: "Closing a Gathering",
+    arabic:
+      "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أَنْتَ، أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ",
+    transliteration: "Subḥānakallāhumma wa biḥamdik, ashhadu an lā ilāha illā anta, astaghfiruka wa atūbu ilayk.",
+    translation:
+      "Glory is to You, O Allah, and praise. I bear witness that there is none worthy of worship but You. I seek Your forgiveness and turn to You in repentance.",
+    reference: "Abu Dawud, Tirmidhi",
+  },
+
+  // Debt / Financial
+  {
+    id: "debt-dua",
+    icon: Coins,
+    categories: ["debt", "rizq", "guidance"],
+    titleAr: "دعاء الدين",
+    titleEn: "For Debt",
+    arabic: "اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ",
+    transliteration: "Allāhumma ikfinī biḥalālika ʿan ḥarāmik, wa aghninī bi-faḍlika ʿamman siwāk.",
+    translation:
+      "O Allah, suffice me with what You have made lawful over what You have made unlawful, and enrich me by Your bounty over all others.",
+    reference: "Tirmidhi",
+  },
+  {
+    id: "debt-dua-2",
+    icon: Coins,
+    categories: ["debt", "rizq", "guidance"],
+    titleAr: "دعاء الدين الثاني",
+    titleEn: "For Debt 2",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+    transliteration:
+      "Allāhumma innī aʿūdhu bika minal-hammi wal-ḥuzni, wal-ʿajzi wal-kasali, wal-bukhli wal-jubni, wa ḍalaʿid-dayni wa ghalabatir-rijāl.",
+    translation:
+      "O Allah, I seek refuge in You from worry and grief, from incapacity and laziness, from miserliness and cowardice, from being overwhelmed by debt and from being overpowered by men.",
+    reference: "Bukhari",
+  },
+  {
+    id: "debt-dua-3",
+    icon: Coins,
+    categories: ["debt", "rizq", "guidance"],
+    titleAr: "دعاء الدين الثالث",
+    titleEn: "For Debt 3",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي",
+    transliteration: "Allāhumma innī as'alukal-ʿafwa wal-ʿāfiyata fī dīnī wa dunyāya wa ahlī wa mālī.",
+    translation:
+      "O Allah, I ask You for pardon and well-being in my religion, my worldly affairs, my family and my wealth.",
+    reference: "Abu Dawud",
+  },
+
+  // Gratitude
+  {
+    id: "gratitude-dua",
+    icon: CheckCircle2,
+    categories: ["gratitude", "general"],
+    titleAr: "دعاء الشكر",
+    titleEn: "Gratitude Dua",
+    arabic:
+      "اللَّهُمَّ لَكَ الْحَمْدُ كُلُّهُ، اللَّهُمَّ لَا قَابِضَ لِمَا بَسَطْتَ، وَلَا بَاسِطَ لِمَا قَبَضْتَ، وَلَا هَادِيَ لِمَنْ أَضْلَلْتَ، وَلَا مُضِلَّ لِمَنْ هَدَيْتَ، وَلَا مُعْطِيَ لِمَا مَنَعْتَ، وَلَا مَانِعَ لِمَا أَعْطَيْتَ، اللَّهُمَّ لَكَ الْحَمْدُ عَلَى كُلِّ حَالٍ",
+    transliteration:
+      "Allāhumma lakal-ḥamdu kulluh, Allāhumma lā qābiḍa limā basaṭta, wa lā bāsiṭa limā qabaḍta, wa lā hādiya liman aḍlalta, wa lā muḍilla liman hadayta, wa lā muʿṭiya limā manaʿta, wa lā māniʿa limā aʿṭayta, Allāhumma lakal-ḥamdu ʿalā kulli ḥāl.",
+    translation:
+      "O Allah, all praise is Yours. O Allah, there is none who can withhold what You give, and none can give what You withhold, and no wealth or fortune can benefit anyone against Your will. O Allah, all praise is Yours in every condition.",
+    reference: "Ibn Majah",
+  },
+  {
+    id: "gratitude-dua-2",
+    icon: CheckCircle2,
+    categories: ["gratitude", "general"],
+    titleAr: "دعاء الشكر الثاني",
+    titleEn: "Gratitude Dua 2",
+    arabic: "الْحَمْدُ لِلَّهِ الَّذِي بِنِعْمَتِهِ تَتِمُّ الصَّالِحَاتُ",
+    transliteration: "Al-ḥamdu lillāhil-ladhī bi niʿmatihī tatimmuṣ-ṣāliḥāt.",
+    translation: "Praise is to Allah by whose grace good deeds are completed.",
+    reference: "Hisnul Muslim",
+  },
+  {
+    id: "gratitude-dua-3",
+    icon: CheckCircle2,
+    categories: ["gratitude", "general"],
+    titleAr: "دعاء الشكر الثالث",
+    titleEn: "Gratitude Dua 3",
+    arabic:
+      "اللَّهُمَّ لَكَ الْحَمْدُ شُكْرًا لَكَ، وَمَعْذِرَةً إِلَيْكَ، وَمَعْصِيَةً لَكَ، وَتَوْبَةً لَكَ، وَصَبْرًا لَكَ، وَرِضًا بِقَضَائِكَ، وَذُلًّا لَكَ، وَعُزًّا بِكَ، وَتَوَكُّلًا عَلَيْكَ",
+    transliteration:
+      "Allāhumma lakal-ḥamdu shukran laka, wa maʿdhiratan ilayka, wa maʿṣiyatan laka, wa tawbatan laka, wa ṣabran laka, wa riḍan bi-qaḍā'ika, wa dhullan laka, wa ʿuzzan bika, wa tawakkulan ʿalayka.",
+    translation:
+      "O Allah, to You is all praise as gratitude to You, as an apology to You, as a disobedience to You, as a repentance to You, as patience for You, as contentment with Your decree, as humility to You, as honor through You, and as reliance upon You.",
+    reference: "Hisnul Muslim",
+  },
+
+  // Guidance
+  {
+    id: "guidance-dua",
+    icon: Compass,
+    categories: ["guidance", "general"],
+    titleAr: "دعاء الهداية",
+    titleEn: "Guidance Dua",
+    arabic: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+    transliteration: "Ihdināṣ-ṣirāṭal-mustaqīm.",
+    translation: "Guide us to the straight path.",
+    reference: "Quran 1:6",
+  },
+  {
+    id: "guidance-dua-2",
+    icon: Compass,
+    categories: ["guidance", "general"],
+    titleAr: "دعاء الهداية الثاني",
+    titleEn: "Guidance Dua 2",
+    arabic:
+      "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِنْ لَدُنْكَ رَحْمَةً إِنَّكَ أَنْتَ الْوَهَّابُ",
+    transliteration:
+      "Rabbana lā tuzigh qulūbanā baʿda idh hadaytanā wa hab lanā min ladunka raḥmatan innaka antal-wahhāb.",
+    translation:
+      "Our Lord, let not our hearts deviate after You have guided us, and grant us mercy from Yourself. Indeed, You are the Bestower.",
+    reference: "Quran 3:8",
+  },
+  {
+    id: "guidance-dua-3",
+    icon: Compass,
+    categories: ["guidance", "general"],
+    titleAr: "دعاء الهداية الثالث",
+    titleEn: "Guidance Dua 3",
+    arabic: "رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَثَبِّتْ أَقْدَامَنَا وَانْصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
+    transliteration: "Rabbana afrigh ʿalaynā ṣabran wa thabbit aqdāmanā wanṣurnā ʿalal-qawmil-kāfirīn.",
+    translation:
+      "Our Lord, pour upon us patience and make our feet firm and assist us against the disbelieving people.",
+    reference: "Quran 2:250",
+  },
+
+  // General
+  {
+    id: "general-dua-1",
+    icon: MapPin,
+    categories: ["general", "gratitude"],
+    titleAr: "دعاء عام الأول",
+    titleEn: "General Dua 1",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى وَالْعَفَافَ وَالْغِنَى",
+    transliteration: "Allāhumma innī as'alukal-hudā wat-tuqā wal-ʿafāf wal-ghinā.",
+    translation: "O Allah, I ask You for guidance, piety, chastity and self-sufficiency.",
+    reference: "Muslim",
+  },
+  {
+    id: "general-dua-2",
+    icon: MapPin,
+    categories: ["general", "protection"],
+    titleAr: "دعاء عام الثاني",
+    titleEn: "General Dua 2",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، وَأَعُوذُ بِكَ مِنْ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ، وَأَعُوذُ بِكَ مِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ",
+    transliteration:
+      "Allāhumma innī aʿūdhu bika min ʿadhābil-qabr, wa aʿūdhu bika min fitnatil-masīḥid-dajjāl, wa aʿūdhu bika min fitnatil-maḥyā wal-mamāt.",
+    translation:
+      "O Allah, I seek refuge in You from the punishment of the grave, and I seek refuge in You from the trial of the False Messiah, and I seek refuge in You from the trials of life and death.",
+    reference: "Bukhari, Muslim",
+  },
+  {
+    id: "general-dua-3",
+    icon: MapPin,
+    categories: ["general", "protection"],
+    titleAr: "دعاء عام الثالث",
+    titleEn: "General Dua 3",
+    arabic:
+      "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ جَهْدِ الْبَلَاءِ، وَدَرَكِ الشَّقَاءِ، وَسُوءِ الْقَضَاءِ، وَشَمَاتَةِ الْأَعْدَاءِ",
+    transliteration:
+      "Allāhumma innī aʿūdhu bika min jahdil-balā', wa darakish-shaqā', wa sū'il-qaḍā', wa shāmatatil-aʿdā'.",
+    translation:
+      "O Allah, I seek refuge in You from the severity of calamity, from overwhelming misery, from an evil decree, and from the rejoicing of enemies.",
+    reference: "Bukhari",
+  },
+  {
+    id: "general-dua-4",
+    icon: MapPin,
+    categories: ["general", "protection"],
+    titleAr: "دعاء عام الرابع",
+    titleEn: "General Dua 4",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْجَنَّةَ وَأَعُوذُ بِكَ مِنَ النَّارِ",
+    transliteration: "Allāhumma innī as'alukal-jannah wa aʿūdhu bika minan-nār.",
+    translation: "O Allah, I ask You for Paradise and I seek refuge in You from the Fire.",
+    reference: "Abu Dawud",
+  },
+  {
+    id: "general-dua-5",
+    icon: MapPin,
+    categories: ["general", "protection"],
+    titleAr: "دعاء عام الخامس",
+    titleEn: "General Dua 5",
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا",
+    transliteration: "Allāhumma innī as'aluka ʿilman nāfiʿan, wa rizqan ṭayyiban, wa ʿamalan mutaqabbalan.",
+    translation: "O Allah, I ask You for beneficial knowledge, good provision, and accepted deeds.",
+    reference: "Ibn Majah",
+  },
+  {
+    id: "general-dua-6",
+    icon: MapPin,
+    categories: ["general", "protection"],
+    titleAr: "دعاء عام السادس",
+    titleEn: "General Dua 6",
+    arabic:
+      "اللَّهُمَّ أَصْلِحْ لِي دِينِي الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ",
+    transliteration:
+      "Allāhumma aṣliḥ lī dīnī alladhī huwa ʿiṣmatu amrī, wa aṣliḥ lī dunyāya allatī fīhā maʿāshī, wa aṣliḥ lī ākhiratī allatī fīhā maʿādī, wajʿalil-ḥayāta ziyādatan lī fī kulli khayr, wajʿalil-mawta rāḥatan lī min kulli sharr.",
+    translation:
+      "O Allah, rectify my religion which is the safeguard of my affairs, rectify my worldly affairs wherein is my livelihood, and rectify my Hereafter wherein is my return. Make life for me an increase in all good, and make death for me a relief from all evil.",
+    reference: "Muslim",
   },
 ];
 
