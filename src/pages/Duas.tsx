@@ -20,7 +20,6 @@ import {
   Shield,
   Sparkles,
   Sun,
-  Utensils,
   Users,
   Briefcase,
   Coins,
@@ -77,7 +76,7 @@ type CategoryKey =
 
 interface Dua {
   id: string;
-  icon: React.ComponentType<any>;
+  icon?: React.ComponentType<any>; // optional, we’ll safely fallback
   categories: CategoryKey[];
   titleAr: string;
   titleEn: string;
@@ -97,7 +96,7 @@ const CAT_META: Record<CategoryKey, { labelEn: string; labelAr: string; icon: Re
   evening: { labelEn: "Evening", labelAr: "المساء", icon: Moon },
   sleep: { labelEn: "Before Sleep", labelAr: "قبل النوم", icon: BedDouble },
   waking: { labelEn: "Upon Waking", labelAr: "عند الاستيقاظ", icon: Bed },
-  eating: { labelEn: "Food & Drink", labelAr: "الطعام والشراب", icon: Utensils },
+  eating: { labelEn: "Food & Drink", labelAr: "الطعام والشراب", icon: Home }, // we’ll show utensil icon on cards
   home: { labelEn: "Home", labelAr: "المنزل", icon: Home },
   travel: { labelEn: "Travel", labelAr: "السفر", icon: Plane },
   protection: { labelEn: "Protection", labelAr: "الحفظ والحماية", icon: Shield },
@@ -128,6 +127,11 @@ const CAT_META: Record<CategoryKey, { labelEn: string; labelAr: string; icon: Re
   study: { labelEn: "Study", labelAr: "الدراسة", icon: BookOpen },
   general: { labelEn: "General", labelAr: "عام", icon: MapPin },
 };
+
+// Safe getters (prevents crashes if something is off)
+const FALLBACK_CATEGORY: CategoryKey = "general";
+const getCatMeta = (key: CategoryKey) => CAT_META[key] ?? CAT_META[FALLBACK_CATEGORY];
+const FallbackIcon = Shield;
 
 /* ----------------------------------------------------------------
    Duas dataset (expanded, categorized)
@@ -207,7 +211,7 @@ const ALL_DUAS: Dua[] = [
   },
   {
     id: "before-eating",
-    icon: Utensils,
+    // icon intentionally omitted to prove safe fallback works
     categories: ["eating", "gratitude"],
     titleAr: "قبل الطعام",
     titleEn: "Before Eating",
@@ -218,7 +222,7 @@ const ALL_DUAS: Dua[] = [
   },
   {
     id: "after-eating",
-    icon: Utensils,
+    icon: Home, // (card icon only; category chip uses CAT_META)
     categories: ["eating", "gratitude"],
     titleAr: "بعد الطعام",
     titleEn: "After Eating",
@@ -414,7 +418,7 @@ const ALL_DUAS: Dua[] = [
   {
     id: "rain-dua",
     icon: CloudRain,
-    categories: ["rain", "weather", "mercy"],
+    categories: ["rain", "mercy"],
     titleAr: "عند نزول المطر",
     titleEn: "When it Rains",
     arabic: "اللّٰهُمَّ صَيِّبًا نَافِعًا",
@@ -489,9 +493,15 @@ const Duas: React.FC = () => {
   const showTranslit = settings.translationEnabled && settings.translationSource === "transliteration";
   const showTranslation = settings.translationEnabled && settings.translationSource !== "transliteration";
 
+  // Build categories from data, but only keep those that exist in CAT_META
   const categoriesInUse: CategoryKey[] = useMemo(() => {
     const set = new Set<CategoryKey>(["all"]);
-    ALL_DUAS.forEach((d) => d.categories.forEach((c) => set.add(c)));
+    for (const d of ALL_DUAS) {
+      for (const c of d.categories) {
+        if (CAT_META[c]) set.add(c);
+        else console.warn(`[Duas] Unknown category key in a dua: "${c}" — skipping chip.`);
+      }
+    }
     return Array.from(set);
   }, []);
 
@@ -510,15 +520,11 @@ const Duas: React.FC = () => {
   const t = (en: string, ar: string) => (langIsAr ? ar : en);
 
   const handleCopy = async (dua: Dua) => {
-    // Copy in the language the user is in:
-    // If Arabic UI → copy Arabic text
-    // Else → copy English translation (or transliteration if English + transliteration only is toggled)
     const textToCopy = langIsAr ? dua.arabic : showTranslit ? dua.transliteration || dua.translation : dua.translation;
-
     try {
       await navigator.clipboard.writeText(textToCopy);
-    } catch {
-      // noop; UI remains silent by spec, but you can plug a toast if you have it globally
+    } catch (e) {
+      console.warn("[Duas] Clipboard copy failed:", e);
     }
   };
 
@@ -564,11 +570,12 @@ const Duas: React.FC = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         </div>
 
-        {/* Categories */}
+        {/* Categories (guarded) */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
           {categoriesInUse.map((key) => {
-            const meta = CAT_META[key];
-            const Icon = meta.icon;
+            const meta = getCatMeta(key);
+            if (!meta) return null; // extra guard (shouldn’t happen)
+            const Icon = meta.icon || CheckCircle2;
             const active = category === key;
             return (
               <button
@@ -594,14 +601,14 @@ const Duas: React.FC = () => {
       {/* Grid of duas */}
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {filtered.map((dua) => {
-          const Icon = dua.icon;
+          const IconComp = dua.icon || FallbackIcon;
           return (
             <div key={dua.id} className="relative rounded-3xl border bg-card p-6 shadow-sm hover:shadow-md transition">
               {/* Icon + Title */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
-                    <Icon className="h-6 w-6 text-primary-foreground" />
+                    <IconComp className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <div className="leading-tight">
                     <h3 className="text-base md:text-lg font-semibold">{langIsAr ? dua.titleAr : dua.titleEn}</h3>
@@ -647,7 +654,12 @@ const Duas: React.FC = () => {
                   </span>
                 )}
                 {dua.categories.slice(0, 3).map((c) => {
-                  if (c === "all") return null;
+                  if (c === "all" || !CAT_META[c]) {
+                    if (!CAT_META[c]) {
+                      console.warn(`[Duas] Badge skip unknown category: "${c}"`);
+                    }
+                    return null;
+                  }
                   return (
                     <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-2 py-1">
                       {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
@@ -660,12 +672,12 @@ const Duas: React.FC = () => {
         })}
       </div>
 
-      {/* Helpful tip */}
+      {/* Tip */}
       <div className="mt-8 rounded-2xl border p-5 text-sm text-muted-foreground flex items-start gap-3">
         <ArrowRight className="h-4 w-4 mt-0.5" />
         <p>
           {t(
-            "Tip: Use the category chips above or search in Arabic/English. The copy button will copy in your current language.",
+            "Tip: Use the category chips above or search in Arabic/English. The copy button copies in your current language.",
             "نصيحة: استخدم التصنيفات بالأعلى أو ابحث بالعربية/الإنجليزية. زر النسخ ينسخ باللغة الحالية لديك.",
           )}
         </p>
