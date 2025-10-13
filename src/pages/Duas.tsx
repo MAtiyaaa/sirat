@@ -25,6 +25,8 @@ import {
   Copy,
   Check,
   Bookmark,
+  Layers,
+  Tags,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -42,7 +44,8 @@ interface Dua {
   arabic: string;
   transliteration: string;
   translation: string;
-  category?: string;
+  category?: string; // normalized main category
+  subcategory?: string; // normalized subcategory
   tags?: string[];
   ref?: string;
   sourceFile?: string;
@@ -71,6 +74,97 @@ const ICONS: Record<string, IconType> = {
   default: Sparkles,
 };
 
+// ---------- Category normalization ----------
+
+// Curated main categories (in display order)
+const MAIN_CATEGORY_ORDER = ["Daily", "Personal", "Life", "General"] as const;
+type MainCategory = (typeof MAIN_CATEGORY_ORDER)[number];
+
+// Per-main-category sort order of subcategories
+const SUBCATEGORY_ORDER: Record<MainCategory, string[]> = {
+  Daily: ["Morning Adhkar", "Evening Adhkar", "After Salah", "Selected Duas", "Daily Dua"],
+  Personal: ["Protection", "Forgiveness", "Guidance", "Knowledge", "Family"],
+  Life: ["Food", "Home", "Travel", "Sleep / Waking", "Sleep / Before Sleep", "Wudu", "Rain"],
+  General: [],
+};
+
+const AR_LABELS: Record<string, string> = {
+  // main cats
+  Daily: "يومي",
+  Personal: "شخصي",
+  Life: "حياة",
+  General: "عام",
+  // subcats
+  "Morning Adhkar": "أذكار الصباح",
+  "Evening Adhkar": "أذكار المساء",
+  "After Salah": "أذكار بعد الصلاة",
+  "Selected Duas": "أدعية مختارة",
+  "Daily Dua": "أدعية يومية",
+  Protection: "حفظ",
+  Forgiveness: "استغفار",
+  Guidance: "استخارة/هداية",
+  Knowledge: "علم",
+  Family: "الوالدين/الأسرة",
+  Food: "طعام",
+  Home: "المنزل",
+  Travel: "السفر",
+  "Sleep / Waking": "الاستيقاظ",
+  "Sleep / Before Sleep": "قبل النوم",
+  Wudu: "الوضوء",
+  Rain: "المطر",
+};
+
+// Map GitHub path / raw hints to nice (main, sub) categories
+function normalizeCategoryFromPath(
+  path: string,
+  rawHints: { category?: string; section?: string; group?: string; tags?: string[] },
+): { main: MainCategory; sub: string } {
+  const p = path.toLowerCase();
+  const hints = [rawHints.category, rawHints.section, rawHints.group, ...(rawHints.tags || [])]
+    .filter(Boolean)
+    .map((s) => String(s).toLowerCase());
+
+  const has = (...keys: string[]) => [p, ...hints].some((s) => keys.some((k) => s.includes(k)));
+
+  // Daily collections from repo
+  if (has("morning-dhikr", "الصباح", "morning")) return { main: "Daily", sub: "Morning Adhkar" };
+  if (has("evening-dhikr", "المساء", "evening")) return { main: "Daily", sub: "Evening Adhkar" };
+  if (has("dhikr-after-salah", "بعد الصلاة", "after salah", "adhkar after salah"))
+    return { main: "Daily", sub: "After Salah" };
+  if (has("daily-dua", "daily dua")) return { main: "Daily", sub: "Daily Dua" };
+  if (has("selected-dua", "selected duas")) return { main: "Daily", sub: "Selected Duas" };
+
+  // Life situations
+  if (has("food", "eat", "طعام", "أكل")) return { main: "Life", sub: "Food" };
+  if (has("home", "house", "منزل")) return { main: "Life", sub: "Home" };
+  if (has("travel", "سفر")) return { main: "Life", sub: "Travel" };
+  if (has("sleep", "نوم", "before sleep"))
+    return { main: "Life", sub: p.includes("before") ? "Sleep / Before Sleep" : "Sleep / Waking" };
+  if (has("wudu", "وضوء")) return { main: "Life", sub: "Wudu" };
+  if (has("rain", "مطر")) return { main: "Life", sub: "Rain" };
+
+  // Personal / spiritual
+  if (has("protection", "حفظ", "عافية", "وقاية")) return { main: "Personal", sub: "Protection" };
+  if (has("forgive", "استغفار")) return { main: "Personal", sub: "Forgiveness" };
+  if (has("istikhara", "guidance", "استخارة", "هداية")) return { main: "Personal", sub: "Guidance" };
+  if (has("knowledge", "علم")) return { main: "Personal", sub: "Knowledge" };
+  if (has("parent", "والدين", "family")) return { main: "Personal", sub: "Family" };
+
+  // Fallbacks for noisy folders like `core` etc.
+  if (has("core")) return { main: "Daily", sub: "Selected Duas" };
+
+  // Default
+  return { main: "General", sub: "Selected Duas" };
+}
+
+function displayMain(main: MainCategory, lang: "ar" | "en"): string {
+  return lang === "ar" ? (AR_LABELS[main] ?? main) : main;
+}
+
+function displaySub(sub: string, lang: "ar" | "en"): string {
+  return lang === "ar" ? (AR_LABELS[sub] ?? sub) : sub;
+}
+
 // ---------- Utils ----------
 const GH_LIST_URL = "https://api.github.com/repos/fitrahive/dua-dhikr/contents/data?ref=main";
 
@@ -81,25 +175,32 @@ function slugify(s: string) {
     .replace(/(^-|-$)/g, "");
 }
 
-function pickIconFromCategory(cat?: string): IconType {
-  if (!cat) return ICONS.default;
-  const key = cat.toLowerCase();
-  if (key.includes("morning") || key.includes("صباح")) return ICONS.sun;
-  if (key.includes("evening") || key.includes("مساء")) return ICONS.moon;
-  if (key.includes("sleep") || key.includes("نوم")) return ICONS.sleep;
-  if (key.includes("wudu") || key.includes("وضوء")) return ICONS.wudu;
-  if (key.includes("home") || key.includes("منزل") || key.includes("house")) return ICONS.home;
-  if (key.includes("travel") || key.includes("سفر")) return ICONS.travel;
-  if (key.includes("protect") || key.includes("حفظ") || key.includes("عافية")) return ICONS.protection;
-  if (key.includes("knowledge") || key.includes("علم")) return ICONS.knowledge;
-  if (key.includes("parent") || key.includes("والدين")) return ICONS.parents;
-  if (key.includes("rain") || key.includes("مطر")) return ICONS.rain;
-  if (key.includes("istikhara") || key.includes("استخارة")) return ICONS.istikhara;
-  if (key.includes("food") || key.includes("طعام") || key.includes("eat")) return ICONS.food;
+function pickIconFromCategory(main?: string, sub?: string): IconType {
+  const cat = `${main || ""} ${sub || ""}`.toLowerCase();
+  if (cat.includes("morning")) return ICONS.sun;
+  if (cat.includes("evening")) return ICONS.moon;
+  if (cat.includes("sleep") && cat.includes("before")) return ICONS.sleep;
+  if (cat.includes("waking")) return ICONS.waking;
+  if (cat.includes("wudu")) return ICONS.wudu;
+  if (cat.includes("home")) return ICONS.home;
+  if (cat.includes("travel")) return ICONS.travel;
+  if (cat.includes("protect")) return ICONS.protection;
+  if (cat.includes("knowledge")) return ICONS.knowledge;
+  if (cat.includes("parent") || cat.includes("family")) return ICONS.parents;
+  if (cat.includes("rain")) return ICONS.rain;
+  if (cat.includes("istikhara") || cat.includes("guidance")) return ICONS.istikhara;
+  if (cat.includes("food")) return ICONS.food;
   return ICONS.default;
 }
 
-function normalizeDua(raw: any, fallbackCategory: string, sourceFile: string, idx: number): Dua {
+function getIconComponent(d: { icon?: any; category?: string; subcategory?: string }): IconType {
+  const candidate = d?.icon || pickIconFromCategory(d?.category, d?.subcategory) || ICONS.default;
+  if (typeof candidate === "function") return candidate as IconType;
+  if (candidate && typeof candidate === "object" && "render" in candidate) return candidate as IconType;
+  return ICONS.default;
+}
+
+function normalizeDua(raw: any, relPath: string, idx: number): Dua {
   const arabic = raw.arabic ?? raw.dua_arabic ?? raw.dua ?? raw.text ?? "";
   const transliteration = raw.transliteration ?? raw.translit ?? raw.transcription ?? "";
   const translation = raw.translation ?? raw.en ?? raw.meaning ?? "";
@@ -107,15 +208,21 @@ function normalizeDua(raw: any, fallbackCategory: string, sourceFile: string, id
     raw.titleEn ?? raw.title_en ?? raw.title ?? raw.name ?? raw.topic ?? (raw.tags?.[0] ? String(raw.tags[0]) : "Dua");
   const titleAr = raw.titleAr ?? raw.title_ar ?? raw.title_arabic ?? raw.titleArabic ?? titleEn;
 
-  const category = raw.category ?? raw.section ?? raw.group ?? fallbackCategory;
+  // NEW: normalize main/sub categories based on path + raw hints
+  const { main, sub } = normalizeCategoryFromPath(relPath, {
+    category: raw.category,
+    section: raw.section,
+    group: raw.group,
+    tags: raw.tags,
+  });
 
   const tags: string[] | undefined =
     raw.tags && Array.isArray(raw.tags) ? raw.tags.map((t: any) => String(t)) : undefined;
 
   const ref = raw.reference ?? raw.source ?? raw.ref ?? "";
-  const hashSeed = `${sourceFile}:${idx}:${String(arabic).slice(0, 50)}`;
+  const hashSeed = `${relPath}:${idx}:${String(arabic).slice(0, 50)}`;
   const hash = slugify(hashSeed);
-  const icon = pickIconFromCategory(category);
+  const icon = pickIconFromCategory(main, sub);
 
   return {
     id: hash,
@@ -125,10 +232,11 @@ function normalizeDua(raw: any, fallbackCategory: string, sourceFile: string, id
     arabic: String(arabic || ""),
     transliteration: String(transliteration || ""),
     translation: String(translation || ""),
-    category,
+    category: main,
+    subcategory: sub,
     tags,
     ref,
-    sourceFile,
+    sourceFile: relPath,
     hash,
   };
 }
@@ -149,7 +257,7 @@ async function getDirectoryRecursive(pathUrl: string, acc: any[] = []): Promise<
 }
 
 async function fetchRepoDuas(): Promise<Dua[]> {
-  const CACHE_KEY = "duaRepoCacheV1";
+  const CACHE_KEY = "duaRepoCacheV2"; // bump cache key because of new normalization
   const CACHE_TTL = 1000 * 60 * 60 * 24 * 7;
   try {
     const cachedRaw = localStorage.getItem(CACHE_KEY);
@@ -171,17 +279,15 @@ async function fetchRepoDuas(): Promise<Dua[]> {
       if (!rawRes.ok) continue;
       const content = await rawRes.json();
       const relPath: string = file.path || file.name || "unknown.json";
-      const pathParts = relPath.split("/");
-      const cat = pathParts.length > 2 ? pathParts.slice(1, -1).join(" / ") : "General";
 
       if (Array.isArray(content)) {
         content.forEach((item, i) => {
-          all.push(normalizeDua(item, cat, relPath, i));
+          all.push(normalizeDua(item, relPath, i));
         });
       } else if (content && typeof content === "object") {
         const items = Array.isArray(content.items) ? content.items : [content];
         items.forEach((item: any, i: number) => {
-          all.push(normalizeDua(item, cat, relPath, i));
+          all.push(normalizeDua(item, relPath, i));
         });
       }
     } catch {
@@ -195,14 +301,7 @@ async function fetchRepoDuas(): Promise<Dua[]> {
   return all;
 }
 
-function getIconComponent(d: { icon?: any; category?: string }): IconType {
-  const candidate = d?.icon || pickIconFromCategory(d?.category) || ICONS.default;
-  if (typeof candidate === "function") return candidate as IconType;
-  if (candidate && typeof candidate === "object" && "render" in candidate) return candidate as IconType;
-  return ICONS.default;
-}
-
-// ---------- Your defaults (complete, unchanged text) ----------
+// ---------- Local defaults (mapped to new categories) ----------
 const DEFAULT_DUAS: Dua[] = [
   {
     id: 1,
@@ -213,7 +312,8 @@ const DEFAULT_DUAS: Dua[] = [
     transliteration: "Asbahna wa asbahal-mulku lillah, walhamdu lillah",
     translation:
       "We have reached the morning and at this very time unto Allah belongs all sovereignty, and all praise is for Allah",
-    category: "Daily / Morning",
+    category: "Daily",
+    subcategory: "Morning Adhkar",
     sourceFile: "local-default",
     hash: "default-1",
   },
@@ -226,7 +326,8 @@ const DEFAULT_DUAS: Dua[] = [
     transliteration: "Amsayna wa amsal-mulku lillah, walhamdu lillah",
     translation:
       "We have reached the evening and at this very time unto Allah belongs all sovereignty, and all praise is for Allah",
-    category: "Daily / Evening",
+    category: "Daily",
+    subcategory: "Evening Adhkar",
     sourceFile: "local-default",
     hash: "default-2",
   },
@@ -239,7 +340,8 @@ const DEFAULT_DUAS: Dua[] = [
     transliteration: "Alhamdu lillahil-ladhi ahyana ba'da ma amatana wa ilayhin-nushur",
     translation:
       "All praise is for Allah who gave us life after having taken it from us and unto Him is the resurrection",
-    category: "Sleep / Waking",
+    category: "Life",
+    subcategory: "Sleep / Waking",
     sourceFile: "local-default",
     hash: "default-3",
   },
@@ -251,7 +353,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
     transliteration: "Bismika Allahumma amutu wa ahya",
     translation: "In Your name O Allah, I die and I live",
-    category: "Sleep / Before Sleep",
+    category: "Life",
+    subcategory: "Sleep / Before Sleep",
     sourceFile: "local-default",
     hash: "default-4",
   },
@@ -263,7 +366,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "بِسْمِ اللَّهِ وَعَلَى بَرَكَةِ اللَّهِ",
     transliteration: "Bismillahi wa ala barakatillah",
     translation: "In the name of Allah and with the blessings of Allah",
-    category: "Food",
+    category: "Life",
+    subcategory: "Food",
     sourceFile: "local-default",
     hash: "default-5",
   },
@@ -275,7 +379,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
     transliteration: "Alhamdu lillahil-ladhi at'amana wa saqana wa ja'alana muslimin",
     translation: "All praise is due to Allah who has fed us and given us drink and made us Muslims",
-    category: "Food",
+    category: "Life",
+    subcategory: "Food",
     sourceFile: "local-default",
     hash: "default-6",
   },
@@ -290,7 +395,8 @@ const DEFAULT_DUAS: Dua[] = [
       "Ashhadu an la ilaha illallahu wahdahu la sharika lah, wa ashhadu anna Muhammadan 'abduhu wa rasuluh",
     translation:
       "I bear witness that none has the right to be worshipped except Allah, alone without partner, and I bear witness that Muhammad is His slave and Messenger",
-    category: "Wudu",
+    category: "Life",
+    subcategory: "Wudu",
     sourceFile: "local-default",
     hash: "default-7",
   },
@@ -302,7 +408,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا",
     transliteration: "Bismillahi walajna, wa bismillahi kharajna, wa 'alallahi rabbina tawakkalna",
     translation: "In the name of Allah we enter, in the name of Allah we leave, and upon our Lord we place our trust",
-    category: "Home",
+    category: "Life",
+    subcategory: "Home",
     sourceFile: "local-default",
     hash: "default-8",
   },
@@ -316,7 +423,8 @@ const DEFAULT_DUAS: Dua[] = [
     transliteration: "Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila rabbina lamunqalibun",
     translation:
       "Glory is to Him Who has subjected this to us, and we could never have it by our efforts. Surely, unto our Lord we are returning",
-    category: "Travel",
+    category: "Life",
+    subcategory: "Travel",
     sourceFile: "local-default",
     hash: "default-9",
   },
@@ -328,7 +436,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
     transliteration: "A'udhu bikalimatillahit-tammati min sharri ma khalaq",
     translation: "I seek refuge in the perfect words of Allah from the evil of what He has created",
-    category: "Protection",
+    category: "Personal",
+    subcategory: "Protection",
     sourceFile: "local-default",
     hash: "default-10",
   },
@@ -340,7 +449,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "رَبِّ زِدْنِي عِلْمًا",
     transliteration: "Rabbi zidni 'ilma",
     translation: "My Lord, increase me in knowledge",
-    category: "Knowledge",
+    category: "Personal",
+    subcategory: "Knowledge",
     sourceFile: "local-default",
     hash: "default-11",
   },
@@ -353,7 +463,8 @@ const DEFAULT_DUAS: Dua[] = [
     transliteration: "Astaghfirullaha al-'Azeem alladhi la ilaha illa Huwal-Hayyul-Qayyum wa atubu ilayh",
     translation:
       "I seek forgiveness from Allah the Mighty, Whom there is none worthy of worship except Him, The Living, The Eternal, and I repent to Him",
-    category: "Forgiveness",
+    category: "Personal",
+    subcategory: "Forgiveness",
     sourceFile: "local-default",
     hash: "default-12",
   },
@@ -365,7 +476,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا",
     transliteration: "Rabbir-hamhuma kama rabbayani saghira",
     translation: "My Lord, have mercy upon them as they brought me up when I was small",
-    category: "Family",
+    category: "Personal",
+    subcategory: "Family",
     sourceFile: "local-default",
     hash: "default-13",
   },
@@ -377,7 +489,8 @@ const DEFAULT_DUAS: Dua[] = [
     arabic: "اللَّهُمَّ صَيِّبًا نَافِعًا",
     transliteration: "Allahumma sayyiban nafi'a",
     translation: "O Allah, let it be a beneficial rain",
-    category: "Rain",
+    category: "Life",
+    subcategory: "Rain",
     sourceFile: "local-default",
     hash: "default-14",
   },
@@ -392,7 +505,8 @@ const DEFAULT_DUAS: Dua[] = [
       "Allahumma inni astakhiruka bi'ilmika, wa astaqdiruka biqudratika, wa as'aluka min fadlikal-'azim, fa innaka taqdiru wa la aqdir, wa ta'lamu wa la a'lam, wa anta 'allamul-ghuyub",
     translation:
       "O Allah, I seek Your guidance through Your knowledge, and I seek ability through Your power, and I ask You of Your great bounty. You have power; I have none. And You know; I know not. You are the Knower of hidden things",
-    category: "Guidance / Istikhara",
+    category: "Personal",
+    subcategory: "Guidance",
     sourceFile: "local-default",
     hash: "default-15",
   },
@@ -433,7 +547,8 @@ const Duas: React.FC = () => {
   const [errorRepo, setErrorRepo] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeMain, setActiveMain] = useState<MainCategory | "All">("All");
+  const [activeSub, setActiveSub] = useState<string>("All");
 
   const [user, setUser] = useState<any>(null);
   const [bookmarkSet, setBookmarkSet] = useState<Record<string, boolean>>(() => {
@@ -529,37 +644,85 @@ const Duas: React.FC = () => {
     return base;
   }, [repoDuas]);
 
-  // Categories
-  const categories = useMemo(() => {
+  // Build main + sub sets
+  const mainCategories = useMemo(() => {
+    const set = new Set<MainCategory>();
+    allDuas.forEach((d) => {
+      if (d.category && (MAIN_CATEGORY_ORDER as readonly string[]).includes(d.category)) {
+        set.add(d.category as MainCategory);
+      }
+    });
+    const arr = Array.from(set);
+    // Sort by our curated order
+    arr.sort((a, b) => MAIN_CATEGORY_ORDER.indexOf(a) - MAIN_CATEGORY_ORDER.indexOf(b));
+    return ["All", ...arr] as const;
+  }, [allDuas]);
+
+  const subCategories = useMemo(() => {
     const set = new Set<string>();
     allDuas.forEach((d) => {
-      if (d.category && d.category.trim()) set.add(d.category);
+      if (activeMain !== "All" && d.category !== activeMain) return;
+      if (d.subcategory) set.add(d.subcategory);
     });
-    return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
-  }, [allDuas]);
+    const arr = Array.from(set);
+    // Sort by curated order for the chosen main, else alpha
+    if (activeMain !== "All") {
+      const desired = SUBCATEGORY_ORDER[activeMain] || [];
+      arr.sort((a, b) => {
+        const ia = desired.indexOf(a);
+        const ib = desired.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+    } else {
+      arr.sort((a, b) => a.localeCompare(b));
+    }
+    return ["All", ...arr];
+  }, [allDuas, activeMain]);
 
   // Filter + search
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return allDuas.filter((d) => {
-      if (activeCategory !== "All" && (d.category ?? "") !== activeCategory) return false;
-      if (!q) return true;
-      const hay = [
-        d.titleAr,
-        d.titleEn,
-        d.arabic,
-        d.transliteration,
-        d.translation,
-        d.category ?? "",
-        (d.tags ?? []).join(" "),
-        d.ref ?? "",
-        d.sourceFile ?? "",
-      ]
-        .join(" ")
-        .toLowerCase();
-      return hay.includes(q);
-    });
-  }, [allDuas, query, activeCategory]);
+    return (
+      allDuas
+        .filter((d) => {
+          if (activeMain !== "All" && d.category !== activeMain) return false;
+          if (activeSub !== "All" && d.subcategory !== activeSub) return false;
+          if (!q) return true;
+          const hay = [
+            d.titleAr,
+            d.titleEn,
+            d.arabic,
+            d.transliteration,
+            d.translation,
+            d.category ?? "",
+            d.subcategory ?? "",
+            (d.tags ?? []).join(" "),
+            d.ref ?? "",
+            d.sourceFile ?? "",
+          ]
+            .join(" ")
+            .toLowerCase();
+          return hay.includes(q);
+        })
+        // sort by main order, then sub order for a consistent listing
+        .sort((a, b) => {
+          const ia = MAIN_CATEGORY_ORDER.indexOf((a.category as MainCategory) || "General");
+          const ib = MAIN_CATEGORY_ORDER.indexOf((b.category as MainCategory) || "General");
+          if (ia !== ib) return ia - ib;
+          const main = (a.category as MainCategory) || "General";
+          const subs = SUBCATEGORY_ORDER[main] || [];
+          const sa = subs.indexOf(a.subcategory || "");
+          const sb = subs.indexOf(b.subcategory || "");
+          if (sa === -1 && sb === -1) return (a.subcategory || "").localeCompare(b.subcategory || "");
+          if (sa === -1) return 1;
+          if (sb === -1) return -1;
+          return sa - sb;
+        })
+    );
+  }, [allDuas, query, activeMain, activeSub]);
 
   // Copy
   const [copiedId, setCopiedId] = useState<string | number | null>(null);
@@ -619,6 +782,7 @@ const Duas: React.FC = () => {
         translation: dua.translation ?? null,
         category: dua.category ?? null,
         source_file: dua.sourceFile ?? null,
+        subcategory: dua.subcategory ?? null,
       };
       const { error } = await sbAny.from("dua_bookmarks").insert(payload);
       if (error) {
@@ -630,6 +794,8 @@ const Duas: React.FC = () => {
     }
   }
 
+  const lang = settings.language === "ar" ? "ar" : "en";
+
   return (
     <div className="max-w-6xl mx-auto space-y-8 px-4 pb-16">
       {/* Back */}
@@ -638,7 +804,7 @@ const Duas: React.FC = () => {
         size="icon"
         onClick={() => navigate(-1)}
         className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
-        aria-label={settings.language === "ar" ? "رجوع" : "Back"}
+        aria-label={lang === "ar" ? "رجوع" : "Back"}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
@@ -647,28 +813,28 @@ const Duas: React.FC = () => {
       <div className="text-center space-y-4 pt-8">
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
           <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-            {settings.language === "ar" ? "الأدعية والأذكار" : "Daily Duas & Dhikr"}
+            {lang === "ar" ? "الأدعية والأذكار" : "Daily Duas & Dhikr"}
           </span>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-light">
-          {settings.language === "ar"
-            ? "أدعية من السنة مصنفة حسب الموضوع، مع بحث وإشارات مرجعية"
-            : "Supplications from the Sunnah, organized by category with search & bookmarks"}
+          {lang === "ar"
+            ? "أدعية من السنة مصنفة بتصنيف مرتب وواضح، مع بحث وإشارات مرجعية"
+            : "Supplications from the Sunnah, organized with clean categories, plus search & bookmarks"}
         </p>
 
         {/* Search + Reset */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 justify-center pt-2">
-          <div className="flex items-center gap-2 neomorph rounded-2xl px-3 py-2 w-full md:w-[460px]">
+          <div className="flex items-center gap-2 neomorph rounded-2xl px-3 py-2 w-full md:w-[560px]">
             <Search className="h-5 w-5 opacity-70" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={settings.language === "ar" ? "ابحث عن دعاء أو فئة..." : "Search dua or category..."}
+              placeholder={lang === "ar" ? "ابحث عن دعاء..." : "Search duas..."}
               className="bg-transparent outline-none w-full text-sm"
               aria-label="Search duas"
             />
             <Button variant="ghost" size="sm" onClick={() => setQuery("")}>
-              {settings.language === "ar" ? "مسح" : "Clear"}
+              {lang === "ar" ? "مسح" : "Clear"}
             </Button>
           </div>
 
@@ -677,36 +843,63 @@ const Duas: React.FC = () => {
               variant="outline"
               className="rounded-2xl"
               onClick={() => {
-                setActiveCategory("All");
+                setActiveMain("All");
+                setActiveSub("All");
                 setQuery("");
               }}
-              title={settings.language === "ar" ? "تصفير" : "Reset"}
+              title={lang === "ar" ? "تصفير" : "Reset"}
             >
               <RefreshCcw className="h-4 w-4 mr-2" />
-              {settings.language === "ar" ? "تصفير" : "Reset"}
+              {lang === "ar" ? "تصفير" : "Reset"}
             </Button>
           </div>
         </div>
 
-        {/* Category chips */}
+        {/* Category chips (Main) */}
         <div className="flex flex-wrap gap-2 justify-center pt-1">
           <span className="inline-flex items-center gap-2 text-sm opacity-70">
-            <FolderOpen className="h-4 w-4" />
-            {settings.language === "ar" ? "الفئات:" : "Categories:"}
+            <Layers className="h-4 w-4" />
+            {lang === "ar" ? "الفئات الرئيسية:" : "Main categories:"}
           </span>
           <div className="w-full" />
-          {categories.map((cat) => (
+          {mainCategories.map((main) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={String(main)}
+              onClick={() => {
+                setActiveMain(main as MainCategory | "All");
+                setActiveSub("All");
+              }}
               className={`px-3 py-1.5 rounded-full text-sm border smooth-transition ${
-                activeCategory === cat
+                activeMain === main
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-background/50 hover:bg-background border-border"
               }`}
-              title={cat}
+              title={String(main)}
             >
-              {cat}
+              {main === "All" ? (lang === "ar" ? "الكل" : "All") : displayMain(main as MainCategory, lang)}
+            </button>
+          ))}
+        </div>
+
+        {/* Subcategory chips */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          <span className="inline-flex items-center gap-2 text-sm opacity-70">
+            <Tags className="h-4 w-4" />
+            {lang === "ar" ? "الفئات الفرعية:" : "Subcategories:"}
+          </span>
+          <div className="w-full" />
+          {subCategories.map((sub) => (
+            <button
+              key={sub}
+              onClick={() => setActiveSub(sub)}
+              className={`px-3 py-1.5 rounded-full text-sm border smooth-transition ${
+                activeSub === sub
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background/50 hover:bg-background border-border"
+              }`}
+              title={sub}
+            >
+              {sub === "All" ? (lang === "ar" ? "الكل" : "All") : displaySub(sub, lang)}
             </button>
           ))}
         </div>
@@ -714,43 +907,39 @@ const Duas: React.FC = () => {
         {/* Status line */}
         <div className="text-sm text-muted-foreground flex items-center justify-center gap-3">
           <Filter className="h-4 w-4" />
-          {settings.language === "ar" ? `النتائج: ${filtered.length} دعاء` : `Results: ${filtered.length} duas`}
+          {lang === "ar" ? `النتائج: ${filtered.length} دعاء` : `Results: ${filtered.length} duas`}
           <span className="opacity-60">•</span>
           <Globe className="h-4 w-4" />
           {loadingRepo
-            ? settings.language === "ar"
-              ? "يتم جلب محتوى GitHub..."
+            ? lang === "ar"
+              ? "جاري جلب محتوى GitHub..."
               : "Loading from GitHub..."
             : errorRepo
-              ? settings.language === "ar"
+              ? lang === "ar"
                 ? "تعذر التحميل، عرض المحتوى المحلي"
                 : "Load failed, showing local defaults"
-              : settings.language === "ar"
-                ? "مُدْمَج مع مستودع GitHub"
-                : "Merged with GitHub"}
+              : lang === "ar"
+                ? "مُدمج مع المستودع"
+                : "Merged with repository"}
           {loadingBookmarks && (
-            <span className="opacity-60">
-              • {settings.language === "ar" ? "تحميل المحفوظات..." : "Loading bookmarks..."}
-            </span>
+            <span className="opacity-60">• {lang === "ar" ? "تحميل المحفوظات..." : "Loading bookmarks..."}</span>
           )}
         </div>
       </div>
 
       {/* Duas Grid */}
       <div className="space-y-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">
-          {settings.language === "ar" ? "الأدعية" : "Duas"}
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">{lang === "ar" ? "الأدعية" : "Duas"}</h2>
 
         {loadingRepo && (
           <div className="text-center text-sm text-muted-foreground">
-            {settings.language === "ar" ? "جارٍ تحميل الأدعية من المستودع..." : "Fetching duas from repository..."}
+            {lang === "ar" ? "جارٍ تحميل الأدعية من المستودع..." : "Fetching duas from repository..."}
           </div>
         )}
 
         {errorRepo && (
           <div className="text-center text-sm text-red-600">
-            {settings.language === "ar" ? `خطأ: ${errorRepo}` : `Error: ${errorRepo}`}
+            {lang === "ar" ? `خطأ: ${errorRepo}` : `Error: ${errorRepo}`}
           </div>
         )}
 
@@ -772,10 +961,21 @@ const Duas: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">
-                        {settings.language === "ar" && dua.titleAr ? dua.titleAr : dua.titleEn || "Dua"}
+                        {lang === "ar" && dua.titleAr ? dua.titleAr : dua.titleEn || "Dua"}
                       </h3>
-                      <div className="text-xs text-muted-foreground">
-                        {dua.category || (settings.language === "ar" ? "عام" : "General")}
+                      <div className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+                        <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          {dua.category
+                            ? displayMain(dua.category as MainCategory, lang)
+                            : lang === "ar"
+                              ? "عام"
+                              : "General"}
+                        </span>
+                        {dua.subcategory && (
+                          <span className="px-2 py-0.5 rounded-full bg-secondary/20">
+                            {displaySub(dua.subcategory, lang)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -784,7 +984,7 @@ const Duas: React.FC = () => {
                     <CopyBtn
                       id={`copy-${key}`}
                       text={[
-                        settings.language === "ar" && dua.titleAr ? dua.titleAr : dua.titleEn || "",
+                        lang === "ar" && dua.titleAr ? dua.titleAr : dua.titleEn || "",
                         dua.arabic,
                         settings.translationEnabled && settings.translationSource === "transliteration"
                           ? dua.transliteration || ""
@@ -804,10 +1004,10 @@ const Duas: React.FC = () => {
                       className={`w-9 h-9 rounded-full ${isBookmarked ? "bg-primary/10 text-primary" : ""}`}
                       title={
                         isBookmarked
-                          ? settings.language === "ar"
+                          ? lang === "ar"
                             ? "إزالة الإشارة"
                             : "Remove bookmark"
-                          : settings.language === "ar"
+                          : lang === "ar"
                             ? "إضافة إشارة"
                             : "Add bookmark"
                       }
@@ -837,7 +1037,7 @@ const Duas: React.FC = () => {
                   ))}
                   {dua.ref && (
                     <span className="text-xs text-muted-foreground ml-auto">
-                      {settings.language === "ar" ? `مرجع: ${dua.ref}` : `Ref: ${dua.ref}`}
+                      {lang === "ar" ? `مرجع: ${dua.ref}` : `Ref: ${dua.ref}`}
                     </span>
                   )}
                 </div>
@@ -849,9 +1049,7 @@ const Duas: React.FC = () => {
 
       {/* Dhikr */}
       <div className="space-y-4">
-        <h2 className="text-2xl md:text-3xl font-bold text-center">
-          {settings.language === "ar" ? "الأذكار" : "Daily Dhikr"}
-        </h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center">{lang === "ar" ? "الأذكار" : "Daily Dhikr"}</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {DEFAULT_DHIKR.map((item) => (
             <div
@@ -889,9 +1087,9 @@ const Duas: React.FC = () => {
                 <CircleDot className="h-7 w-7 text-primary-foreground" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-bold">{settings.language === "ar" ? "تتبعها" : "Track Them"}</h3>
+                <h3 className="text-xl font-bold">{lang === "ar" ? "تتبعها" : "Track Them"}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {settings.language === "ar" ? "التسبيح الرقمي" : "Digital Tasbih Counter"}
+                  {lang === "ar" ? "التسبيح الرقمي" : "Digital Tasbih Counter"}
                 </p>
               </div>
             </div>
@@ -902,9 +1100,9 @@ const Duas: React.FC = () => {
 
       {/* Footer note */}
       <div className="text-center text-xs text-muted-foreground">
-        {settings.language === "ar"
-          ? "ملاحظة: يتم جلب الأدعية من GitHub ودمجها مع المحتوى المحلي. تُحفَظ الإشارات في حسابك عند تسجيل الدخول، وإلا فمحليًا."
-          : "Note: Duas are fetched from GitHub and merged with local defaults. Bookmarks save to your account if signed in, otherwise locally."}
+        {lang === "ar"
+          ? "ملاحظة: تُنظَّم الأقسام تلقائيًا إلى رئيسية وفرعية لعرض أنظف. تُحفَظ الإشارات في حسابك عند تسجيل الدخول، وإلا فمحليًا."
+          : "Note: Categories are auto-normalized into main/sub for a cleaner view. Bookmarks save to your account if signed in, otherwise locally."}
       </div>
     </div>
   );
