@@ -368,7 +368,7 @@ const Home = () => {
     {
       icon: Moon,
       title: { ar: 'الصلاة', en: 'Prayer' },
-      link: '/wudu',
+      link: '/prayer',
       gradient: 'from-sky-500 to-blue-500',
     },
     {
