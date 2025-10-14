@@ -11,12 +11,12 @@ const JerusalemLandmarksMap = () => {
   const back = ar ? "رجوع" : "Back";
 
   // Center: Al-Aqsa / Haram al-Sharif (approx)
-  const LAT = 31.7767;
-  const LON = 35.2353;
+  const LAT = 31.777956;
+  const LON = 35.235343;
 
   // Prebuilt OSM embed & full link (no keys, no libs)
   // BBox = [minLon,minLat,maxLon,maxLat]
-  const OSM_EMBED = `https://www.openstreetmap.org/export/embed.html?bbox=${35.223}%2C${31.768}%2C${35.247}%2C${31.785}&layer=mapnik&marker=${LAT}%2C${LON}`;
+  const OSM_EMBED = `https://www.openstreetmap.org/export/embed.html?bbox=${35.235343}%2C${31.777956}%2C${35.235343}%2C${31.777956}&layer=mapnik&marker=${LAT}%2C${LON}`;
   const OSM_LINK = `https://www.openstreetmap.org/?mlat=${LAT}&mlon=${LON}#map=17/${LAT}/${LON}`;
 
   const landmarks = [
