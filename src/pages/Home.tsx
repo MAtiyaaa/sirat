@@ -380,7 +380,7 @@ const Home = () => {
     {
       icon: Scroll,
       title: { ar: 'تعليم', en: 'Education' },
-      link: '/stories-and-names',
+      link: '/education',
       gradient: 'from-indigo-500 to-purple-500',
     },
     {
