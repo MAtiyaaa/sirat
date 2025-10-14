@@ -130,6 +130,39 @@ export type Database = {
         }
         Relationships: []
       }
+      dua_bookmarks: {
+        Row: {
+          category: string | null
+          created_at: string
+          dua_arabic: string | null
+          dua_english: string | null
+          dua_title: string
+          dua_transliteration: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          dua_arabic?: string | null
+          dua_english?: string | null
+          dua_title: string
+          dua_transliteration?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          dua_arabic?: string | null
+          dua_english?: string | null
+          dua_title?: string
+          dua_transliteration?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hadith_bookmarks: {
         Row: {
           book_name: string | null

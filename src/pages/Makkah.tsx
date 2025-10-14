@@ -1,95 +1,72 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Book, Heart, Users, Sparkles, Cloud, Flame, ArrowLeft, MapPin } from "lucide-react";
+import { MapPin, ArrowLeft, Star, History, Eye, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const StoriesAndNames = () => {
+const Makkah = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const isArabic = settings.language === "ar";
 
   const content = {
-    title: isArabic ? "تعليم" : "Education",
+    title: isArabic ? "مكة المكرمة" : "Makkah",
     back: isArabic ? "رجوع" : "Back",
     cards: [
       {
-        icon: Book,
-        titleAr: "قصص الأنبياء",
-        titleEn: "Prophet Stories",
-        descAr: "تعلم من قصص الأنبياء والرسل",
-        descEn: "Learn from the stories of prophets and messengers",
-        link: "/prophet-stories",
-        gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20",
-        iconBg: "bg-purple-500/10",
-        iconColor: "text-purple-600 dark:text-purple-400",
-      },
-      {
-        icon: Heart,
-        titleAr: "أسماء الله الحسنى",
-        titleEn: "99 Names of Allah",
-        descAr: "الأسماء الحسنى ومعانيها",
-        descEn: "The beautiful names and their meanings",
-        link: "/names-of-allah",
-        gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20",
-        iconBg: "bg-emerald-500/10",
-        iconColor: "text-emerald-600 dark:text-emerald-400",
-      },
-      {
-        icon: Sparkles,
-        titleAr: "أسماء النبي محمد",
-        titleEn: "Names of Muhammad",
-        descAr: "أسماء وألقاب النبي صلى الله عليه وسلم",
-        descEn: "Names and titles of Prophet Muhammad ﷺ",
-        link: "/names-of-muhammad",
+        icon: Star,
+        titleAr: "فضل الكعبة",
+        titleEn: "Significance of the Kaaba",
+        descAr: "أهمية وفضل بيت الله الحرام",
+        descEn: "The importance and virtues of the Sacred House",
+        link: "/makkah/kaaba-significance",
         gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20",
         iconBg: "bg-amber-500/10",
         iconColor: "text-amber-600 dark:text-amber-400",
       },
       {
-        icon: Users,
-        titleAr: "الملائكة",
-        titleEn: "Angels",
-        descAr: "تعرف على الملائكة ومهامهم",
-        descEn: "Learn about angels and their duties",
-        link: "/angels",
-        gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20",
-        iconBg: "bg-blue-500/10",
-        iconColor: "text-blue-600 dark:text-blue-400",
+        icon: History,
+        titleAr: "تاريخ الكعبة",
+        titleEn: "History of the Kaaba",
+        descAr: "رحلة عبر تاريخ البيت العتيق",
+        descEn: "A journey through the history of the Ancient House",
+        link: "/makkah/kaaba-history",
+        gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20",
+        iconBg: "bg-purple-500/10",
+        iconColor: "text-purple-600 dark:text-purple-400",
       },
       {
-        icon: Cloud,
-        titleAr: "درجات الجنة",
-        titleEn: "Doors of Heaven",
-        descAr: "درجات الجنة ونعيمها",
-        descEn: "Doors of Paradise and its blessings",
-        link: "/heaven-levels",
+        icon: Eye,
+        titleAr: "البث المباشر",
+        titleEn: "Live View",
+        descAr: "شاهد الكعبة مباشرة",
+        descEn: "Watch the Kaaba live",
+        link: "/makkah/live-view",
         gradient: "from-green-500/20 via-emerald-400/20 to-teal-500/20",
         iconBg: "bg-green-500/10",
         iconColor: "text-green-600 dark:text-green-400",
       },
       {
-        icon: Flame,
-        titleAr: "دركات جهنم",
-        titleEn: "Levels of Hell",
-        descAr: "دركات النار وعذابها",
-        descEn: "Levels of Hellfire and its punishment",
-        link: "/hell-levels",
-        gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20",
-        iconBg: "bg-red-500/10",
-        iconColor: "text-red-600 dark:text-red-400",
+        icon: Users,
+        titleAr: "العمرة",
+        titleEn: "Umrah",
+        descAr: "خطوات أداء العمرة",
+        descEn: "Steps to perform Umrah",
+        link: "/makkah/umrah",
+        gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20",
+        iconBg: "bg-blue-500/10",
+        iconColor: "text-blue-600 dark:text-blue-400",
       },
       {
         icon: MapPin,
-        titleAr: "المدن المقدسة",
-        titleEn: "Holy Cities",
-        descAr: "مكة والمدينة المنورة",
-        descEn: "Makkah and Madinah",
-        link: "/holy-cities",
-        gradient: "from-cyan-500/20 via-blue-400/20 to-indigo-500/20",
-        iconBg: "bg-cyan-500/10",
-        iconColor: "text-cyan-600 dark:text-cyan-400",
+        titleAr: "الحج",
+        titleEn: "Hajj",
+        descAr: "أركان وخطوات الحج",
+        descEn: "Pillars and steps of Hajj",
+        link: "/makkah/hajj",
+        gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20",
+        iconBg: "bg-red-500/10",
+        iconColor: "text-red-600 dark:text-red-400",
       },
     ],
   };
@@ -98,7 +75,7 @@ const StoriesAndNames = () => {
     <div className="min-h-screen pb-20">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 neomorph hover:neomorph-pressed">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-bold">{content.title}</h1>
@@ -114,7 +91,7 @@ const StoriesAndNames = () => {
                     className={`absolute inset-0 bg-gradient-to-br ${card.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
                   />
 
-                  <Card className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6">
+                  <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
                     <div className="flex items-center gap-4">
                       <div
                         className={`flex-shrink-0 w-14 h-14 rounded-xl ${card.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}
@@ -146,4 +123,4 @@ const StoriesAndNames = () => {
   );
 };
 
-export default StoriesAndNames;
+export default Makkah;

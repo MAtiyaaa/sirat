@@ -30,6 +30,17 @@ import Bookmarks from "./pages/Bookmarks";
 import Tasbih from "./pages/Tasbih";
 import Zakat from "./pages/Zakat";
 import NotFound from "./pages/NotFound";
+import HolyCities from "./pages/HolyCities";
+import Makkah from "./pages/Makkah";
+import MakkahKaabaSignificance from "./pages/MakkahKaabaSignificance";
+import MakkahKaabaHistory from "./pages/MakkahKaabaHistory";
+import MakkahLiveView from "./pages/MakkahLiveView";
+import MakkahUmrah from "./pages/MakkahUmrah";
+import MakkahHajj from "./pages/MakkahHajj";
+import Madinah from "./pages/Madinah";
+import MadinahSignificance from "./pages/MadinahSignificance";
+import MadinahHistory from "./pages/MadinahHistory";
+import MadinahLiveView from "./pages/MadinahLiveView";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +74,17 @@ const App = () => (
             <Route path="/angels" element={<Angels />} />
             <Route path="/heaven-levels" element={<DoorsOfHeaven />} />
             <Route path="/hell-levels" element={<HellLevels />} />
+            <Route path="/holy-cities" element={<HolyCities />} />
+            <Route path="/makkah" element={<Makkah />} />
+            <Route path="/makkah/kaaba-significance" element={<MakkahKaabaSignificance />} />
+            <Route path="/makkah/kaaba-history" element={<MakkahKaabaHistory />} />
+            <Route path="/makkah/live-view" element={<MakkahLiveView />} />
+            <Route path="/makkah/umrah" element={<MakkahUmrah />} />
+            <Route path="/makkah/hajj" element={<MakkahHajj />} />
+            <Route path="/madinah" element={<Madinah />} />
+            <Route path="/madinah/significance" element={<MadinahSignificance />} />
+            <Route path="/madinah/history" element={<MadinahHistory />} />
+            <Route path="/madinah/live-view" element={<MadinahLiveView />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/account" element={<Account />} />
