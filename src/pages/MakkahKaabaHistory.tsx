@@ -9,61 +9,129 @@ const MakkahKaabaHistory = () => {
   const { settings } = useSettings();
 
   const content = {
-    title: settings.language === 'ar' ? 'تاريخ الكعبة المشرفة' : 'History of the Kaaba',
-    back: settings.language === 'ar' ? 'رجوع' : 'Back',
-    description: settings.language === 'ar' 
-      ? 'رحلة عبر تاريخ بيت الله الحرام من بنائه إلى يومنا هذا'
-      : "A journey through the history of Allah's Sacred House from its construction to today",
+    title: settings.language === "ar" ? "تاريخ الكعبة المشرفة" : "History of the Kaaba",
+    back: settings.language === "ar" ? "رجوع" : "Back",
+    description:
+      settings.language === "ar"
+        ? "رحلة عبر تاريخ بيت الله الحرام من بنائه إلى يومنا هذا"
+        : "A journey through the history of Allah's Sacred House from its construction to today",
   };
 
   const timeline = [
-    { 
-      titleAr: 'بناء آدم عليه السلام', 
-      titleEn: 'Built by Adam (AS)', 
-      descAr: 'يُروى أن آدم عليه السلام هو أول من بنى الكعبة بأمر من الله، وكان ذلك أول بيت وُضع للناس في الأرض للعبادة',
-      descEn: 'It is narrated that Adam (AS) was the first to build the Kaaba by Allah\'s command, making it the first house of worship on earth'
+    {
+      titleAr: "بناء آدم عليه السلام",
+      titleEn: "Built by Adam (AS)",
+      descAr:
+        "يُروى أن آدم عليه السلام هو أول من بنى الكعبة بأمر من الله، وكان ذلك أول بيت وُضع للناس في الأرض للعبادة.",
+      descEn:
+        "It is narrated that Adam (AS) was the first to build the Kaaba by Allah’s command, making it the first house of worship on earth.",
     },
-    { 
-      titleAr: 'إعادة بناء إبراهيم وإسماعيل', 
-      titleEn: 'Rebuilt by Ibrahim and Ismail', 
-      descAr: 'بعد الطوفان، أمر الله إبراهيم وابنه إسماعيل عليهما السلام برفع قواعد البيت الحرام، قال تعالى: "وَإِذْ يَرْفَعُ إِبْرَاهِيمُ الْقَوَاعِدَ مِنَ الْبَيْتِ وَإِسْمَاعِيلُ" (البقرة: 127)',
-      descEn: 'After the flood, Allah commanded Ibrahim and his son Ismail (AS) to raise the foundations of the Sacred House. Allah says: "And [mention] when Ibrahim was raising the foundations of the House and [with him] Ismail" (2:127)'
+    {
+      titleAr: "إعادة بناء إبراهيم وإسماعيل",
+      titleEn: "Rebuilt by Ibrahim and Ismail",
+      descAr:
+        'بعد الطوفان، أمر الله إبراهيم وابنه إسماعيل عليهما السلام برفع قواعد البيت الحرام: "وَإِذْ يَرْفَعُ إِبْرَاهِيمُ الْقَوَاعِدَ مِنَ الْبَيْتِ وَإِسْمَاعِيلُ" (البقرة: 127).',
+      descEn:
+        "After the flood, Allah commanded Ibrahim and his son Ismail (AS) to raise the foundations of the Sacred House (Qur’an 2:127).",
     },
-    { 
-      titleAr: 'الحجر الأسود', 
-      titleEn: 'The Black Stone', 
-      descAr: 'أثناء البناء، جاء جبريل عليه السلام بالحجر الأسود من الجنة ووضعه إبراهيم في ركن الكعبة، وهو حجر أبيض من الجنة اسودّ من خطايا بني آدم',
-      descEn: 'During construction, Jibreel (AS) brought the Black Stone from Paradise and Ibrahim placed it in the corner of the Kaaba. It was originally white but turned black from the sins of mankind'
+    {
+      titleAr: "الحجر الأسود",
+      titleEn: "The Black Stone",
+      descAr:
+        "جاء جبريل عليه السلام بالحجر الأسود من الجنة فوضعه إبراهيم في ركن الكعبة. كان أبيض ثم اسودّ من خطايا بني آدم.",
+      descEn:
+        "Jibreel (AS) brought the Black Stone from Paradise and Ibrahim placed it in the corner of the Kaaba. It was originally white but turned black from the sins of mankind.",
     },
-    { 
-      titleAr: 'دعاء إبراهيم', 
-      titleEn: "Ibrahim's Prayer", 
-      descAr: 'دعا إبراهيم عليه السلام: "رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ" (البقرة: 127)، ودعا أن يبعث الله في ذريته نبياً، فكان محمد صلى الله عليه وسلم',
-      descEn: 'Ibrahim prayed: "Our Lord, accept [this] from us. Indeed, You are the Hearing, the Knowing" (2:127). He also prayed for a prophet from his progeny, and that was Muhammad ﷺ'
+    {
+      titleAr: "دعاء إبراهيم",
+      titleEn: "Ibrahim's Prayer",
+      descAr:
+        'قال: "رَبَّنَا تَقَبَّلْ مِنَّا ۖ إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ" (البقرة: 127)، ودعا أن يبعث الله في ذريته نبيًا فكان محمد ﷺ.',
+      descEn:
+        "He prayed: “Our Lord, accept [this] from us. Indeed, You are the Hearing, the Knowing” (2:127), and supplicated for a prophet from his progeny—Muhammad ﷺ.",
     },
-    { 
-      titleAr: 'عصر قريش', 
-      titleEn: 'The Quraysh Era', 
-      descAr: 'قبل البعثة النبوية بخمس سنوات، أعادت قريش بناء الكعبة بعد تصدعها، وشارك النبي محمد صلى الله عليه وسلم وهو شاب في نقل الحجارة، وحلّ النزاع في وضع الحجر الأسود بحكمته',
-      descEn: 'Five years before prophethood, Quraysh rebuilt the Kaaba after it cracked. Young Muhammad ﷺ helped carry stones and wisely resolved the dispute over placing the Black Stone'
+
+    // Year of the Elephant
+    {
+      titleAr: "عام الفيل (~570م)",
+      titleEn: "Year of the Elephant (~570 CE)",
+      descAr:
+        "حاول أبرهة هدم الكعبة بجيشٍ يضم فيلة، فحفظ الله بيته وأرسل عليهم طيرًا أبابيل كما في سورة الفيل (القرآن 105). رسّخ الحدث قُدسية البيت بين العرب.",
+      descEn:
+        "Abraha marched to demolish the Kaaba with an army including elephants, but Allah protected His House—birds in flocks pelted them (Surah al-Fil, Qur’an 105)—cementing its sanctity.",
     },
-    { 
-      titleAr: 'فتح مكة', 
-      titleEn: 'The Conquest of Makkah', 
-      descAr: 'في السنة الثامنة للهجرة، فتح النبي محمد صلى الله عليه وسلم مكة، ودخل الكعبة وحطم الأصنام التي كانت بداخلها وحولها، وطهّر البيت من الشرك',
-      descEn: 'In the 8th year of Hijra, Prophet Muhammad ﷺ conquered Makkah, entered the Kaaba, destroyed the idols inside and around it, and purified the House from shirk'
+
+    // Quraysh Kiswah policy (annual single covering)
+    {
+      titleAr: "سياسة قريش في الكسوة: إزالة الكسوات المتراكمة واعتماد السنوية",
+      titleEn: "Quraysh Kiswah Policy: Removing Old Layers & Annual Replacement",
+      descAr:
+        "في الجاهلية تراكمت كسوات متعددة على الكعبة. أزالت قريش الكسوات القديمة لتخفيف الثقل والخطر، ثم اعتمدت كسوة واحدة تُجدد سنويًا، وأصبح تعظيم البيت بكسوة واحدة عادة راسخة.",
+      descEn:
+        "In pre-Islamic times, multiple Kiswah layers accumulated on the Kaaba. Quraysh removed the old coverings to reduce weight and risk, adopting a single Kiswah renewed annually—setting a lasting practice.",
     },
-    { 
-      titleAr: 'عبر التاريخ', 
-      titleEn: 'Throughout History', 
-      descAr: 'على مر العصور، تم ترميم وتوسعة الكعبة والمسجد الحرام عدة مرات، وكانت الكعبة دائماً محط أنظار المسلمين ومقصدهم في الحج والعمرة',
-      descEn: 'Throughout the ages, the Kaaba and the Sacred Mosque were renovated and expanded several times. The Kaaba has always been the focus of Muslims and their destination for Hajj and Umrah'
+
+    // Ground-up reconstructions (from the foundations)
+    {
+      titleAr: "إعادة بناء قريش من الأساس (~605م)",
+      titleEn: "Quraysh Ground-Up Rebuild (~605 CE)",
+      descAr:
+        "بعد تَصدُّع الكعبة، هدمتها قريش حتى الأساس وأعادت بناءها، ورفعت الباب، ولم تُدخل الحِجْر، وحَكَمَ النبي ﷺ شابًا في وضع الحجر الأسود فجمع القبائل على رضًا.",
+      descEn:
+        "After structural damage, Quraysh demolished the Kaaba down to the foundations and rebuilt it, raising the door and excluding the Hijr. Young Muhammad ﷺ resolved the Black Stone dispute with wisdom.",
     },
-    { 
-      titleAr: 'كسوة الكعبة', 
-      titleEn: 'The Kiswah', 
-      descAr: 'تُكسى الكعبة بثوب من الحرير الأسود المطرز بالذهب، ويتم تغييرها سنوياً يوم عرفة، وهي تقليد إسلامي عريق يرمز لتعظيم بيت الله',
-      descEn: 'The Kaaba is covered with a black silk cloth embroidered with gold, replaced annually on the Day of Arafah. This is an ancient Islamic tradition symbolizing the glorification of Allah\'s House'
+
+    {
+      titleAr: "فتح مكة (8 هـ / 630م)",
+      titleEn: "The Conquest of Makkah (8 AH / 630 CE)",
+      descAr: "دخل النبي ﷺ مكة وطهّر الكعبة من الأصنام وأبطل الشعائر الوثنية حولها.",
+      descEn:
+        "The Prophet ﷺ entered Makkah, purified the Kaaba of idols, and abolished the pagan rites surrounding it.",
+    },
+
+    {
+      titleAr: "إعادة بناء ابن الزبير من الأساس (683م)",
+      titleEn: "Ibn al-Zubayr Ground-Up Reconstruction (683 CE)",
+      descAr:
+        "بعد احتراقها خلال حصار مكة، هدم عبد الله بن الزبير الكعبة حتى القواعد وبناها على قواعد إبراهيم، وأدخل الحِجْر وجعل لها بابين على الأرض كما تمنى النبي ﷺ.",
+      descEn:
+        "After a fire during the siege of Makkah, ʿAbdullah ibn al-Zubayr demolished the Kaaba to the foundations and rebuilt it on Ibrahim’s footprint, including the Hijr and adding two ground-level doors as the Prophet ﷺ had wished.",
+    },
+
+    {
+      titleAr: "بناء الحجاج في عهد عبد الملك (693م)",
+      titleEn: "Al-Hajjaj/ʿAbd al-Malik Reconstruction (693 CE)",
+      descAr:
+        "بأمر الخليفة عبد الملك، أعاد الحجاج بناء الكعبة على هيئة قريش السابقة، فأخرج الحِجْر وأبقى بابًا واحدًا مرتفعًا.",
+      descEn:
+        "By order of Caliph ʿAbd al-Malik, al-Hajjaj rebuilt the Kaaba to the earlier Quraysh layout—removing the Hijr from the enclosed structure and restoring a single raised door.",
+    },
+
+    {
+      titleAr: "إعادة البناء العثمانية بعد السيل (1629م)",
+      titleEn: "Ottoman Ground-Up Reconstruction after Flood (1629 CE)",
+      descAr:
+        "تسبّبت السيول بانهيارات كبيرة، فأُعيد بناء جدران الكعبة من الأساس في العهد العثماني مع تقوية الدعائم واستبدال الأسقف والأخشاب.",
+      descEn:
+        "Severe flooding caused major collapses; under the Ottomans the Kaaba’s walls were rebuilt from the foundations, with reinforced supports and new roofing/timbers.",
+    },
+
+    // Modern large-scale restoration (not ground-up)
+    {
+      titleAr: "الترميم الشامل الحديث (1996–1997م)",
+      titleEn: "Comprehensive Modern Restoration (1996–1997)",
+      descAr:
+        "أكبر عملية ترميم حديثة دون هدم من الأساس: ترقيم الأحجار وتنظيفها، تدعيم الجدران والقواعد، واستبدال السقف والأخشاب مع الإبقاء على مواضع الأحجار الأصلية.",
+      descEn:
+        "The most extensive modern restoration (not from the ground up): stones were numbered and cleaned, walls and foundation reinforced, and the roof/timbers replaced while preserving the original stone positions.",
+    },
+
+    {
+      titleAr: "كسوة الكعبة اليوم",
+      titleEn: "The Kiswah Today",
+      descAr: "تُصنع الكسوة من الحرير الأسود الموشّى بالذهب وتُبدّل سنويًا يوم عرفة تعظيمًا لبيت الله.",
+      descEn:
+        "The Kiswah is black silk embroidered with gold and is replaced annually on the Day of Arafah to honor Allah’s House.",
     },
   ];
 
@@ -86,11 +154,11 @@ const MakkahKaabaHistory = () => {
             <Card key={index} className="neomorph hover:neomorph-inset transition-all">
               <CardHeader>
                 <CardTitle className="text-xl font-bold">
-                  {settings.language === 'ar' ? event.titleAr : event.titleEn}
+                  {settings.language === "ar" ? event.titleAr : event.titleEn}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm leading-relaxed">{settings.language === 'ar' ? event.descAr : event.descEn}</p>
+                <p className="text-sm leading-relaxed">{settings.language === "ar" ? event.descAr : event.descEn}</p>
               </CardContent>
             </Card>
           ))}
