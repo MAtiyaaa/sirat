@@ -49,6 +49,7 @@ import JerusalemQiblaChange from "./pages/JerusalemQiblaChange";
 import JerusalemLiveView from "./pages/JerusalemLiveView";
 import JerusalemPrayer from "./pages/JerusalemPrayer";
 import JerusalemLandmarksMap from "./pages/JerusalemLandmarksMap";
+import MosqueLocator from "./pages/MosqueLocator";
 
 const queryClient = new QueryClient();
 
@@ -75,7 +76,7 @@ const App = () => (
                   <Route path="/zakat" element={<Zakat />} />
                   <Route path="/prayer" element={<Wudu />} />
                   <Route path="/wudu" element={<Wudu />} />
-                  <Route path="/stories-and-names" element={<StoriesAndNames />} />
+                  <Route path="/education" element={<StoriesAndNames />} />
                   <Route path="/prophet-stories" element={<ProphetStories />} />
                   <Route path="/names-of-allah" element={<NamesOfAllah />} />
                   <Route path="/names-of-muhammad" element={<NamesOfMuhammad />} />
@@ -101,6 +102,7 @@ const App = () => (
                   <Route path="/jerusalem/live-view" element={<JerusalemLiveView />} />
                   <Route path="/jerusalem/prayer" element={<JerusalemPrayer />} />
                   <Route path="/jerusalem/landmarks-map" element={<JerusalemLandmarksMap />} />
+                  <Route path="/mosquelocator" element={<MosqueLocator />} />
 
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/settings" element={<Settings />} />
