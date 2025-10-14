@@ -41,6 +41,14 @@ import Madinah from "./pages/Madinah";
 import MadinahSignificance from "./pages/MadinahSignificance";
 import MadinahHistory from "./pages/MadinahHistory";
 import MadinahLiveView from "./pages/MadinahLiveView";
+import Jerusalem from "./pages/Jerusalem";
+import JerusalemAqsaSignificance from "./pages/JerusalemAqsaSignificance";
+import JerusalemAqsaHistory from "./pages/JerusalemAqsaHistory";
+import JerusalemIsraMiraj from "./pages/JerusalemIsraMiraj";
+import JerusalemQiblaChange from "./pages/JerusalemQiblaChange";
+import JerusalemLiveView from "./pages/JerusalemLiveView";
+import JerusalemPrayer from "./pages/JerusalemPrayer";
+import JerusalemLandmarksMap from "./pages/JerusalemLandmarksMap";
 
 const queryClient = new QueryClient();
 
@@ -54,43 +62,52 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Layout>
-              <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/quran" element={<Quran />} />
-            <Route path="/quran/:surahNumber" element={<SurahDetail />} />
-            <Route path="/qalam" element={<Qalam />} />
-            <Route path="/chat-history" element={<ChatHistory />} />
-            <Route path="/info" element={<Info />} />
-            <Route path="/duas" element={<Duas />} />
-            <Route path="/hadith" element={<Hadith />} />
-            <Route path="/tasbih" element={<Tasbih />} />
-            <Route path="/zakat" element={<Zakat />} />
-            <Route path="/prayer" element={<Wudu />} />
-            <Route path="/wudu" element={<Wudu />} />
-            <Route path="/stories-and-names" element={<StoriesAndNames />} />
-            <Route path="/prophet-stories" element={<ProphetStories />} />
-            <Route path="/names-of-allah" element={<NamesOfAllah />} />
-            <Route path="/names-of-muhammad" element={<NamesOfMuhammad />} />
-            <Route path="/angels" element={<Angels />} />
-            <Route path="/heaven-levels" element={<DoorsOfHeaven />} />
-            <Route path="/hell-levels" element={<HellLevels />} />
-            <Route path="/holy-cities" element={<HolyCities />} />
-            <Route path="/makkah" element={<Makkah />} />
-            <Route path="/makkah/kaaba-significance" element={<MakkahKaabaSignificance />} />
-            <Route path="/makkah/kaaba-history" element={<MakkahKaabaHistory />} />
-            <Route path="/makkah/live-view" element={<MakkahLiveView />} />
-            <Route path="/makkah/umrah" element={<MakkahUmrah />} />
-            <Route path="/makkah/hajj" element={<MakkahHajj />} />
-            <Route path="/madinah" element={<Madinah />} />
-            <Route path="/madinah/significance" element={<MadinahSignificance />} />
-            <Route path="/madinah/history" element={<MadinahHistory />} />
-            <Route path="/madinah/live-view" element={<MadinahLiveView />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/bookmarks" element={<Bookmarks />} />
-            <Route path="*" element={<NotFound />} />
-              </Routes>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/quran" element={<Quran />} />
+                  <Route path="/quran/:surahNumber" element={<SurahDetail />} />
+                  <Route path="/qalam" element={<Qalam />} />
+                  <Route path="/chat-history" element={<ChatHistory />} />
+                  <Route path="/info" element={<Info />} />
+                  <Route path="/duas" element={<Duas />} />
+                  <Route path="/hadith" element={<Hadith />} />
+                  <Route path="/tasbih" element={<Tasbih />} />
+                  <Route path="/zakat" element={<Zakat />} />
+                  <Route path="/prayer" element={<Wudu />} />
+                  <Route path="/wudu" element={<Wudu />} />
+                  <Route path="/stories-and-names" element={<StoriesAndNames />} />
+                  <Route path="/prophet-stories" element={<ProphetStories />} />
+                  <Route path="/names-of-allah" element={<NamesOfAllah />} />
+                  <Route path="/names-of-muhammad" element={<NamesOfMuhammad />} />
+                  <Route path="/angels" element={<Angels />} />
+                  <Route path="/heaven-levels" element={<DoorsOfHeaven />} />
+                  <Route path="/hell-levels" element={<HellLevels />} />
+                  <Route path="/holy-cities" element={<HolyCities />} />
+                  <Route path="/makkah" element={<Makkah />} />
+                  <Route path="/makkah/kaaba-significance" element={<MakkahKaabaSignificance />} />
+                  <Route path="/makkah/kaaba-history" element={<MakkahKaabaHistory />} />
+                  <Route path="/makkah/live-view" element={<MakkahLiveView />} />
+                  <Route path="/makkah/umrah" element={<MakkahUmrah />} />
+                  <Route path="/makkah/hajj" element={<MakkahHajj />} />
+                  <Route path="/madinah" element={<Madinah />} />
+                  <Route path="/madinah/significance" element={<MadinahSignificance />} />
+                  <Route path="/madinah/history" element={<MadinahHistory />} />
+                  <Route path="/madinah/live-view" element={<MadinahLiveView />} />
+                  <Route path="/jerusalem" element={<Jerusalem />} />
+                  <Route path="/jerusalem/aqsa-significance" element={<JerusalemAqsaSignificance />} />
+                  <Route path="/jerusalem/aqsa-history" element={<JerusalemAqsaHistory />} />
+                  <Route path="/jerusalem/isra-miraj" element={<JerusalemIsraMiraj />} />
+                  <Route path="/jerusalem/qibla-change" element={<JerusalemQiblaChange />} />
+                  <Route path="/jerusalem/live-view" element={<JerusalemLiveView />} />
+                  <Route path="/jerusalem/prayer" element={<JerusalemPrayer />} />
+                  <Route path="/jerusalem/landmarks-map" element={<JerusalemLandmarksMap />} />
+
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/bookmarks" element={<Bookmarks />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
               </Layout>
             </BrowserRouter>
           </TooltipProvider>
