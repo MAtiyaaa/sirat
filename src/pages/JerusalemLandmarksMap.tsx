@@ -74,8 +74,8 @@ const JerusalemLandmarksMap = () => {
         </div>
         <p className="text-muted-foreground">
           {ar
-            ? "خريطة تفاعلية مباشرة من OpenStreetMap (بدون إعدادات إضافية)، مع نظرة سريعة على أبرز المعالم."
-            : "Interactive OpenStreetMap embed (no setup required), plus a quick look at key landmarks."}
+            ? "القدس، فلسطين (تحت الاحتلال الإسرائيلي)"
+            : "Al Quds, Palestine (Occupied by Israel)"}
         </p>
 
         {/* OSM Map (no API key, no deps) */}
