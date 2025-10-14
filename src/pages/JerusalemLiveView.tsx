@@ -1,81 +1,79 @@
-import { useSettings } from "@/contexts/SettingsContext";
-import { Card } from "@/components/ui/card";
-import { Eye, Link as LinkIcon, Video } from "lucide-react";
+// src/pages/JerusalemLiveView.tsx
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ExternalLink } from "lucide-react";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const JerusalemLiveView = () => {
+  const navigate = useNavigate();
   const { settings } = useSettings();
-  const ar = settings.language === "ar";
+  const isAr = settings.language === "ar";
 
-  const feeds = [
-    {
-      key: "aqsa",
-      titleAr: "ساحة الأقصى",
-      titleEn: "Al-Aqsa Courtyard",
-      descAr: "مشاهدة مباشرة للساحات (عند توفر رابط بث).",
-      descEn: "Live courtyard feed (add a stream URL when available).",
-      src: "https://www.youtube.com/embed/?autoplay=0", // placeholder
-    },
-    {
-      key: "dome",
-      titleAr: "قبة الصخرة",
-      titleEn: "Dome of the Rock",
-      descAr: "مشاهدة مباشرة لقبة الصخرة (رابط تجريبي).",
-      descEn: "Live view of the Dome of the Rock (placeholder URL).",
-      src: "https://www.youtube.com/embed/?autoplay=0",
-    },
-    {
-      key: "panorama",
-      titleAr: "جولة بانورامية",
-      titleEn: "Panoramic Tour",
-      descAr: "أضف رابط جولة 360° عند توفره.",
-      descEn: "Add a 360° tour URL when available.",
-      src: "https://www.youtube.com/embed/?autoplay=0",
-    },
-  ];
+  // Primary: Official Al-Aqsa live channel on YouTube (Jerusalem Endowments / Al-Aqsa streams)
+  const PRIMARY_URL = "https://www.youtube.com/@livebroadcastal-aqsa3717/live";
+
+  // Muslim-friendly fallbacks that aggregate/relay Al-Aqsa streams
+  const ALT_ISLAMICITY = "https://www.islamicity.org/source/live-broadcast-al-aqsa/";
+  const ALT_MAKKAHLIVE = "https://makkahlive.net/masjid_al-aqsa.aspx";
+
+  useEffect(() => {
+    window.location.href = PRIMARY_URL;
+  }, []);
+
+  const content = {
+    title: isAr ? "البث المباشر للمسجد الأقصى" : "Al-Aqsa Mosque Live View",
+    redirecting: isAr ? "جاري التحويل..." : "Redirecting...",
+    back: isAr ? "رجوع" : "Back",
+    manual: isAr ? "إذا لم يتم التحويل تلقائياً، اضغط هنا" : "If not redirected automatically, click here",
+    alt1: isAr ? "بديل: بث الأقصى عبر Islamicity" : "Fallback: Al-Aqsa via Islamicity",
+    alt2: isAr ? "بديل: بث الأقصى عبر MakkahLive" : "Fallback: Al-Aqsa via MakkahLive",
+  };
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Eye className="h-7 w-7 text-primary" />
-            {ar ? "البث المباشر للأقصى" : "Al-Aqsa Live View"}
-          </h1>
-          <p className="text-muted-foreground">
-            {ar
-              ? "أدرج روابط بث موثوقة (YouTube، منصات رسمية) لعرض المشاهد المباشرة."
-              : "Embed trusted streams (YouTube or official platforms) for live views."}
-          </p>
-        </header>
+    <div className="min-h-screen bg-background p-4 md:p-6 flex flex-col items-center justify-center">
+      <div className="max-w-2xl mx-auto space-y-6 text-center">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="mb-4 neomorph hover:neomorph-pressed"
+        >
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          {content.back}
+        </Button>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          {feeds.map((f) => (
-            <Card key={f.key} className="neomorph hover:neomorph-inset smooth-transition p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-lg">{ar ? f.titleAr : f.titleEn}</h3>
-                <Video className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-sm text-muted-foreground">{ar ? f.descAr : f.descEn}</p>
-              <div className="aspect-video rounded-xl overflow-hidden bg-muted">
-                <iframe
-                  src={f.src}
-                  title={ar ? f.titleAr : f.titleEn}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="secondary" className="gap-2" asChild>
-                  <a href={f.src} target="_blank" rel="noreferrer">
-                    <LinkIcon className="h-4 w-4" />
-                    {ar ? "فتح في نافذة جديدة" : "Open in new tab"}
-                  </a>
-                </Button>
-              </div>
-            </Card>
-          ))}
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          {content.title}
+        </h1>
+
+        <p className="text-xl text-muted-foreground mb-8">
+          {content.redirecting}
+        </p>
+
+        {/* Manual primary link */}
+        <Button
+          onClick={() => (window.location.href = PRIMARY_URL)}
+          className="neomorph hover:neomorph-pressed"
+          size="lg"
+        >
+          <ExternalLink className="h-5 w-5 mr-2" />
+          {content.manual}
+        </Button>
+
+        {/* Fallbacks (Aqsa-only) */}
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Button asChild variant="secondary" className="neomorph hover:neomorph-pressed">
+            <a href={ALT_ISLAMICITY} target="_blank" rel="noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              {content.alt1}
+            </a>
+          </Button>
+          <Button asChild variant="secondary" className="neomorph hover:neomorph-pressed">
+            <a href={ALT_MAKKAHLIVE} target="_blank" rel="noreferrer">
+              <ExternalLink className="h-4 w-4 mr-2" />
+              {content.alt2}
+            </a>
+          </Button>
         </div>
       </div>
     </div>
