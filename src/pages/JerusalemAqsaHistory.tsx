@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card } from "@/components/ui/card";
-import { History, Landmark, Layers, ShieldCheck, FlameKindling } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, History, Landmark, Layers, ShieldCheck, FlameKindling } from "lucide-react";
 
 type TItem = {
   icon: any;
@@ -13,91 +15,51 @@ type TItem = {
 };
 
 const JerusalemAqsaHistory = () => {
+  const navigate = useNavigate();
   const { settings } = useSettings();
   const ar = settings.language === "ar";
+  const back = ar ? "رجوع" : "Back";
 
   const timeline: TItem[] = [
-    {
-      icon: Landmark,
-      titleAr: "مكان مبارك مذكور في القرآن",
-      titleEn: "A Blessed Locale in the Qur’an",
-      descAr:
-        "ارتبط ذكر المسجد الأقصى بالإسراء، وبُورك ما حوله، وكان مركزًا للأنبياء عبر التاريخ.",
-      descEn:
-        "Al-Aqsa is tied to the Night Journey, blessed in its surroundings, and a center for many prophets through history.",
-      badgeAr: "القرآن",
-      badgeEn: "Qur’anic",
-    },
-    {
-      icon: History,
-      titleAr: "الفتح العادل (15هـ/637م)",
-      titleEn: "Just Entry (15 AH / 637 CE)",
-      descAr:
-        "دخول الخليفة عمر بن الخطاب رضي الله عنه إلى القدس بعهد أمان، واحترام للناس ودور العبادة.",
-      descEn:
-        "Caliph ʿUmar entered with a pact of safety, showing respect for people and places of worship.",
-      badgeAr: "الراشدون",
-      badgeEn: "Rashidun",
-    },
-    {
-      icon: Layers,
-      titleAr: "العهد الأموي وبناء المعالم",
-      titleEn: "Umayyad Monumental Works",
-      descAr:
-        "تشييد قبة الصخرة (691–692م) والجامع القبلي (حوالي 705م)، وإحياء عمران الحرم الشريف.",
-      descEn:
-        "Construction of the Dome of the Rock (691–692 CE) and the Qibli Mosque (~705 CE), revitalizing the sanctuary’s fabric.",
-      badgeAr: "أموي",
-      badgeEn: "Umayyad",
-    },
-    {
-      icon: ShieldCheck,
-      titleAr: "التحرير والإحياء (1187م)",
-      titleEn: "Restoration after Liberation (1187 CE)",
-      descAr:
-        "قيام صلاح الدين الأيوبي بإعادة تعظيم الأقصى وتطهيره وإعمار مؤسساته بعد حقبة صليبية.",
-      descEn:
-        "Salah al-Din restored the sanctity of Al-Aqsa and reinvigorated its institutions following Crusader rule.",
-      badgeAr: "أيوبي/مملوكي",
-      badgeEn: "Ayyubid/Mamluk",
-    },
-    {
-      icon: History,
-      titleAr: "العهد العثماني",
-      titleEn: "Ottoman Era",
-      descAr:
-        "أعمال ترميم وصيانة للأروقة والأسقف والزخارف عبر قرون طويلة، مع رعاية أوقاف واسعة.",
-      descEn:
-        "Centuries of repairs to porticoes, roofs, and ornamentation, with sustained waqf patronage.",
-      badgeAr: "عثماني",
-      badgeEn: "Ottoman",
-    },
-    {
-      icon: FlameKindling,
-      titleAr: "حريق المنبر (1969م) وما تلاه",
-      titleEn: "Minbar Arson (1969) & After",
-      descAr:
-        "تعرض منبر صلاح الدين للحرق؛ أعقب ذلك مشاريع ترميم وإعادة إنشاء المنبر وإصلاحات شاملة.",
-      descEn:
-        "Salah al-Din’s minbar was burned; subsequent decades saw restoration programs and reconstruction of the pulpit.",
-      badgeAr: "حديث",
-      badgeEn: "Modern",
-    },
+    { icon: Landmark, titleAr: "مكان مبارك مذكور في القرآن", titleEn: "A Blessed Locale in the Qur’an",
+      descAr: "ارتبط ذكر المسجد الأقصى بالإسراء، وبُورك ما حوله، وكان مركزًا للأنبياء عبر التاريخ.",
+      descEn: "Al-Aqsa is tied to the Night Journey, blessed in its surroundings, and a center for many prophets through history.",
+      badgeAr: "القرآن", badgeEn: "Qur’anic" },
+    { icon: History, titleAr: "الفتح العادل (15هـ/637م)", titleEn: "Just Entry (15 AH / 637 CE)",
+      descAr: "دخول الخليفة عمر بن الخطاب رضي الله عنه إلى القدس بعهد أمان، واحترام للناس ودور العبادة.",
+      descEn: "Caliph ʿUmar entered with a pact of safety, showing respect for people and places of worship.",
+      badgeAr: "الراشدون", badgeEn: "Rashidun" },
+    { icon: Layers, titleAr: "العهد الأموي وبناء المعالم", titleEn: "Umayyad Monumental Works",
+      descAr: "تشييد قبة الصخرة (691–692م) والجامع القبلي (حوالي 705م)، وإحياء عمران الحرم الشريف.",
+      descEn: "Construction of the Dome of the Rock (691–692 CE) and the Qibli Mosque (~705 CE), revitalizing the sanctuary’s fabric.",
+      badgeAr: "أموي", badgeEn: "Umayyad" },
+    { icon: ShieldCheck, titleAr: "التحرير والإحياء (1187م)", titleEn: "Restoration after Liberation (1187 CE)",
+      descAr: "قيام صلاح الدين الأيوبي بإعادة تعظيم الأقصى وتطهيره وإعمار مؤسساته بعد حقبة صليبية.",
+      descEn: "Salah al-Din restored the sanctity of Al-Aqsa and reinvigorated its institutions following Crusader rule.",
+      badgeAr: "أيوبي/مملوكي", badgeEn: "Ayyubid/Mamluk" },
+    { icon: History, titleAr: "العهد العثماني", titleEn: "Ottoman Era",
+      descAr: "أعمال ترميم وصيانة للأروقة والأسقف والزخارف عبر قرون طويلة، مع رعاية أوقاف واسعة.",
+      descEn: "Centuries of repairs to porticoes, roofs, and ornamentation, with sustained waqf patronage.",
+      badgeAr: "عثماني", badgeEn: "Ottoman" },
+    { icon: FlameKindling, titleAr: "حريق المنبر (1969م) وما تلاه", titleEn: "Minbar Arson (1969) & After",
+      descAr: "تعرض منبر صلاح الدين للحرق؛ أعقب ذلك مشاريع ترميم وإعادة إنشاء المنبر وإصلاحات شاملة.",
+      descEn: "Salah al-Din’s minbar was burned; subsequent decades saw restoration programs and reconstruction of the pulpit.",
+      badgeAr: "حديث", badgeEn: "Modern" },
   ];
 
   return (
     <div className="min-h-screen pb-20">
       <div className="max-w-3xl mx-auto p-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-bold">
-            {ar ? "تاريخ القدس والمسجد الأقصى" : "History of Jerusalem & Al-Aqsa"}
-          </h1>
-          <p className="text-muted-foreground">
-            {ar
-              ? "محطات مختصرة توضّح تطور المكان وأبرز أعمال البناء والترميم."
+        <div className="flex items-center gap-4 mb-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 neomorph hover:neomorph-pressed" aria-label={back}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-3xl font-bold">{ar ? "تاريخ القدس والمسجد الأقصى" : "History of Jerusalem & Al-Aqsa"}</h1>
+        </div>
+        <p className="text-muted-foreground">
+          {ar ? "محطات مختصرة توضّح تطور المكان وأبرز أعمال البناء والترميم."
               : "A concise timeline of key phases, construction, and restorations."}
-          </p>
-        </header>
+        </p>
 
         <div className="grid gap-4">
           {timeline.map((t, i) => {
@@ -112,9 +74,7 @@ const JerusalemAqsaHistory = () => {
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-lg">
-                          {ar ? t.titleAr : t.titleEn}
-                        </h3>
+                        <h3 className="font-semibold text-lg">{ar ? t.titleAr : t.titleEn}</h3>
                         <span className="text-xs rounded-full px-2 py-0.5 bg-primary/10 text-primary">
                           {ar ? t.badgeAr : t.badgeEn}
                         </span>
