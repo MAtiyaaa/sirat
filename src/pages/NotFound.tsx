@@ -57,7 +57,6 @@ const NotFound = () => {
         : "Looks like you’ve ventured off the path. Choose your destination.",
       home: ar ? "الذهاب للرئيسية" : "Go Home",
       back: ar ? "رجوع" : "Back",
-      curated: ar ? "وجهات مقترحة" : "Suggested Destinations",
       // Decorative basmala watermark (purely aesthetic)
       basmala: "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
     }),
@@ -169,11 +168,6 @@ const NotFound = () => {
           <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         </div>
 
-        {/* Curated grid */}
-        <div className="mt-8 w-full max-w-5xl">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">{ui.curated}</div>
-          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {items.map((item, i) => {
@@ -193,9 +187,6 @@ const NotFound = () => {
                         <Icon className="h-6 w-6 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <div className="truncate font-semibold">
-                          {ar ? item.title.ar : item.title.en}
-                        </div>
                       </div>
                     </div>
                   </Card>
