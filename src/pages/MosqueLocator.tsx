@@ -17,7 +17,7 @@ import {
   Map as MapIcon,
 } from "lucide-react";
 
-// ---- lightweight helpers -------------------------------------------------
+// ---------- lightweight helpers ----------
 function useCdnResource(hrefOrSrc: string, type: "css" | "js") {
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -70,6 +70,30 @@ function debounce<T extends (...args: any[]) => void>(fn: T, ms: number) {
   };
 }
 
+// Lucide-style MapPin as an inline SVG icon for Leaflet
+function pinIcon(options?: { color?: string; fill?: string }) {
+  const color = options?.color ?? "#10b981"; // emerald stroke
+  const fill = options?.fill ?? "#10b981";   // emerald fill
+
+  const svg = `
+    <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="12" cy="22" rx="5.5" ry="2" fill="rgba(0,0,0,0.18)"></ellipse>
+      <path d="M12 22c-4.2-4.3-6-7.5-6-10a6 6 0 1 1 12 0c0 2.5-1.8 5.7-6 10Z"
+            fill="${fill}" stroke="${color}" stroke-width="1.5" />
+      <circle cx="12" cy="11" r="2.5" fill="white" stroke="${color}" stroke-width="1.5"/>
+    </svg>
+  `.trim();
+
+  // @ts-ignore
+  return (window as any).L.divIcon({
+    className: "pin-icon",
+    html: svg,
+    iconSize: [28, 28],
+    iconAnchor: [14, 26],   // tip sits near bottom
+    popupAnchor: [0, -26],
+  });
+}
+
 type Mosque = {
   id: string | number;
   name: string;
@@ -79,7 +103,7 @@ type Mosque = {
   addr?: string;
 };
 
-// ---- component -----------------------------------------------------------
+// ---------- component ----------
 const MosqueLocator = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
@@ -111,7 +135,7 @@ const MosqueLocator = () => {
   const userMarkerRef = useRef<any>(null);
   const mosqueLayersRef = useRef<any>(null); // a layer group to manage pins
 
-  // simple mobile check for responsive list rendering
+  // responsive switch for list rendering
   const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth < 640);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
@@ -123,8 +147,8 @@ const MosqueLocator = () => {
     () => ({
       title: ar ? "خريطة مساجد قريبة" : "Nearby Mosques Map",
       subtitle: ar
-        ? "نحدّد موقعك تلقائيًا. كَبّر/صغِّر أو حرّك الخريطة لتحميل مساجد أكثر من نفس العرض."
-        : "We’ll ask for your location automatically. Zoom or pan to load more mosques for the current view.",
+        ? "نحدّد موقعك تلقائيًا. كَبّر/صغِّر أو حرّك الخريطة لتحميل المزيد حسب عرض الخريطة."
+        : "We’ll ask for your location automatically. Zoom or pan to load more based on the current view.",
       locate: ar ? "إعادة تحديد الموقع" : "Refresh my location",
       locating: ar ? "جاري تحديد موقعك..." : "Locating you...",
       openMaps: ar ? "افتح في الخرائط" : "Open in Maps",
@@ -146,7 +170,7 @@ const MosqueLocator = () => {
     [ar]
   );
 
-  // ---- ask for location automatically on mount
+  // ask for location automatically on mount
   useEffect(() => {
     getLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -178,7 +202,7 @@ const MosqueLocator = () => {
     );
   };
 
-  // ---- Overpass query for current map bounds
+  // Overpass query for current map bounds
   const fetchMosquesForBounds = useCallback(
     async (bounds: any) => {
       try {
@@ -244,14 +268,13 @@ const MosqueLocator = () => {
     [ar, loc]
   );
 
-  // ---- init map & wire events
+  // init map & wire events
   useEffect(() => {
     if (!leafletCssReady || !leafletJsReady || !mapDivRef.current) return;
     // @ts-ignore
     const L = (window as any).L as typeof import("leaflet");
     if (!L) return;
 
-    // create map
     if (!mapRef.current) {
       mapRef.current = L.map(mapDivRef.current, {
         center: loc ? [loc.lat, loc.lon] : [24.7136, 46.6753], // fallback: Riyadh
@@ -264,11 +287,9 @@ const MosqueLocator = () => {
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(mapRef.current);
 
-      // a layer group for mosque pins
       mosqueLayersRef.current = L.layerGroup().addTo(mapRef.current);
     }
 
-    // show user marker
     if (loc) {
       const userIcon = L.divIcon({
         className: "user-marker",
@@ -284,7 +305,6 @@ const MosqueLocator = () => {
       mapRef.current.setView([loc.lat, loc.lon], 14);
     }
 
-    // debounced bounds fetch
     const debouncedFetch = debounce(() => {
       const b = mapRef.current.getBounds();
       fetchMosquesForBounds(b);
@@ -299,7 +319,7 @@ const MosqueLocator = () => {
     };
   }, [leafletCssReady, leafletJsReady, loc, ar, fetchMosquesForBounds]);
 
-  // ---- draw pins only (no labels on map)
+  // draw real pins (MapPin icon), names stay in the list only
   useEffect(() => {
     // @ts-ignore
     const L = (window as any).L as typeof import("leaflet");
@@ -308,19 +328,18 @@ const MosqueLocator = () => {
     mosqueLayersRef.current.clearLayers();
 
     mosques.forEach((m) => {
-      const pin = L.circleMarker([m.lat, m.lon], {
-        radius: 6,
-        color: "#10b981",
-        weight: 2,
-        fillColor: "#10b981",
-        fillOpacity: 0.7,
-      });
-      pin.on("click", () => setSelected(m));
-      pin.addTo(mosqueLayersRef.current);
+      const marker = L.marker([m.lat, m.lon], {
+        icon: pinIcon({ color: "#10b981", fill: "#10b981" }),
+        zIndexOffset: 500,
+        keyboard: false,
+        riseOnHover: true,
+      }).addTo(mosqueLayersRef.current);
+
+      marker.on("click", () => setSelected(m));
     });
   }, [mosques]);
 
-  // ---- sorting/table helpers
+  // sorting/table helpers
   const onSort = (key: "name" | "dist") => {
     if (sortKey === key) setSortAsc((s) => !s);
     else {
@@ -344,7 +363,7 @@ const MosqueLocator = () => {
   const formatDistance = (m: number) =>
     m >= 1000 ? `${(m / 1000).toFixed(1)} ${ui.km}` : `${Math.round(m)} ${ui.meters}`;
 
-  // ---- app chooser (Google / Apple / Waze) -------------------
+  // app chooser
   const openInApp = (m: Mosque, app: "google" | "apple" | "waze") => {
     let url = "";
     const label = encodeURIComponent(m.name);
@@ -380,9 +399,11 @@ const MosqueLocator = () => {
 
   return (
     <div className="min-h-screen pb-28">
-      {/* Lower Leaflet z-index globally so other dialogs/menus appear above it */}
+      {/* Keep other menus/sheets above Leaflet; add pin hover polish */}
       <style>{`
         .leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 1 !important; }
+        .pin-icon { transition: transform 120ms ease, filter 120ms ease; will-change: transform; }
+        .pin-icon:hover { transform: translateY(-2px) scale(1.04); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
       `}</style>
 
       <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -397,7 +418,7 @@ const MosqueLocator = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
+        <div>
             <h1 className="text-3xl font-bold">{ui.title}</h1>
             <p className="text-muted-foreground">{ui.subtitle}</p>
           </div>
@@ -552,7 +573,7 @@ const MosqueLocator = () => {
         </div>
       </div>
 
-      {/* App chooser / Share modal — extremely high z-index so it stays above the map */}
+      {/* App chooser / Share modal — huge z-index so it stays above the map */}
       {selected && (
         <div
           className="fixed inset-0 z-[10000] bg-black/40 flex items-end md:items-center md:justify-center"
