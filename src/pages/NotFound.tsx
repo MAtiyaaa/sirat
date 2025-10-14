@@ -29,7 +29,7 @@ const NotFound = () => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
-  // Subtle starfield
+  // Aurora + stars background setup
   const starsRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = starsRef.current;
@@ -58,17 +58,18 @@ const NotFound = () => {
       home: ar ? "الذهاب للرئيسية" : "Go Home",
       back: ar ? "رجوع" : "Back",
       curated: ar ? "وجهات مقترحة" : "Suggested Destinations",
+      // Decorative basmala watermark (purely aesthetic)
       basmala: "بِسْمِ ٱللَّٰهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
     }),
     [ar]
   );
 
-  // Items: exact gradients you gave
+  // Cards list (uses your exact list; adjust the mosques link if your route differs)
   const items: Array<{
     icon: any;
     title: { ar: string; en: string };
     link: string;
-    gradient: string; // "from-x-500 to-y-500"
+    gradient: string;
   }> = [
     { icon: Book,          title: { ar: "القرآن",     en: "Quran" },      link: "/quran",          gradient: "from-blue-500 to-cyan-500" },
     { icon: MessageSquare, title: { ar: "قلم",        en: "Qalam" },      link: "/qalam",          gradient: "from-purple-500 to-pink-500" },
@@ -79,13 +80,13 @@ const NotFound = () => {
     { icon: Calculator,    title: { ar: "الزكاة",     en: "Zakat" },      link: "/zakat",          gradient: "from-amber-500 to-yellow-500" },
     { icon: Scroll,        title: { ar: "تعليم",      en: "Education" },  link: "/education",      gradient: "from-indigo-500 to-purple-500" },
     { icon: Bookmark,      title: { ar: "المحفوظات",  en: "Bookmarks" },  link: "/bookmarks",      gradient: "from-rose-500 to-pink-500" },
-    // adjust if your route is /mosques instead
+    // If your route is /mosques (from earlier), change link to "/mosques"
     { icon: MapPin,        title: { ar: "المساجد",    en: "Mosques" },    link: "/mosquelocator",  gradient: "from-violet-500 to-purple-500" },
   ];
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Background */}
+      {/* Background base */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background" />
 
       {/* Aurora layers */}
@@ -98,7 +99,7 @@ const NotFound = () => {
       {/* Stars */}
       <div ref={starsRef} className="pointer-events-none absolute inset-0" />
 
-      {/* Basmala watermark */}
+      {/* Watermark basmala */}
       <div className="pointer-events-none absolute inset-x-0 bottom-8 flex justify-center opacity-15">
         <div className="text-2xl md:text-3xl font-semibold select-none tracking-wide">
           {ui.basmala}
@@ -107,11 +108,17 @@ const NotFound = () => {
 
       {/* Local animations */}
       <style>{`
-        @keyframes floatStar { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
-        @keyframes pulse { 0%,100% { transform: scale(1); opacity: .7 } 50% { transform: scale(1.06); opacity: .9 } }
+        @keyframes floatStar {
+          0%, 100% { transform: translateY(0px) }
+          50% { transform: translateY(-6px) }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.7; }
+          50% { transform: scale(1.06); opacity: 0.9; }
+        }
         @keyframes glowPulse {
           0%,100% { text-shadow: 0 0 0px rgba(34,197,94,0), 0 0 0px rgba(59,130,246,0) }
-          50% { text-shadow: 0 0 22px rgba(34,197,94,.25), 0 0 36px rgba(59,130,246,.18) }
+          50% { text-shadow: 0 0 22px rgba(34,197,94,0.25), 0 0 36px rgba(59,130,246,0.18) }
         }
       `}</style>
 
@@ -125,35 +132,23 @@ const NotFound = () => {
             className="neomorph hover:neomorph-pressed gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            {ui.back}
+            {ar ? "رجوع" : "Back"}
           </Button>
-          {/* Removed the “crafted with excellence” chip */}
-          <div />
         </div>
 
-        {/* Hero 404 (responsive clamp to avoid overflow) */}
+        {/* Hero 404 */}
         <div className="relative text-center">
           <div
-            className="font-black bg-clip-text text-transparent
+            className="text-[92px] md:text-[140px] leading-none font-black bg-clip-text text-transparent
                        bg-gradient-to-br from-primary via-emerald-400 to-cyan-400
-                       animate-[glowPulse_3s_ease-in-out_infinite] leading-none"
-            style={{
-              letterSpacing: "-0.04em",
-              fontSize: "clamp(64px, 14vw, 136px)",
-            }}
+                       animate-[glowPulse_3s_ease-in-out_infinite]"
+            style={{ letterSpacing: "-0.04em" }}
           >
             404
           </div>
           <div className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-            <h1
-              className="font-semibold"
-              style={{ fontSize: "clamp(20px, 3.4vw, 32px)", lineHeight: 1.2 }}
-            >
-              {ui.title}
-            </h1>
-            <p className="mt-2" style={{ fontSize: "clamp(14px, 2.2vw, 18px)" }}>
-              {ui.sub}
-            </p>
+            <h1 className="text-2xl md:text-3xl font-semibold">{ui.title}</h1>
+            <p className="mt-2">{ui.sub}</p>
           </div>
 
           {/* Big Home CTA */}
@@ -185,7 +180,7 @@ const NotFound = () => {
               const Icon = item.icon;
               return (
                 <div key={i} className="relative overflow-hidden group">
-                  {/* Gradient glow on hover using exact gradient */}
+                  {/* Glow hover */}
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${item.gradient} rounded-2xl blur-2xl opacity-0 group-hover:opacity-40 smooth-transition`}
                   />
@@ -194,21 +189,13 @@ const NotFound = () => {
                     onClick={() => navigate(item.link)}
                   >
                     <div className="flex items-center gap-4">
-                      {/* Icon with the same gradient (stroke/“text” gradient) */}
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-xl bg-primary/5 group-hover:scale-105 smooth-transition`}
-                      >
-                        <Icon className={`h-6 w-6 text-transparent bg-clip-text bg-gradient-to-r ${item.gradient}`} />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 group-hover:scale-105 smooth-transition">
+                        <Icon className="h-6 w-6 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <div
-                          className="font-semibold truncate break-words"
-                          style={{ fontSize: "clamp(14px, 2.4vw, 16px)" }}
-                          title={ar ? item.title.ar : item.title.en}
-                        >
+                        <div className="truncate font-semibold">
                           {ar ? item.title.ar : item.title.en}
                         </div>
-                        {/* Removed subtext: just icon + name */}
                       </div>
                     </div>
                   </Card>
@@ -218,6 +205,7 @@ const NotFound = () => {
           </div>
         </div>
 
+        {/* Footer spacer for elegance */}
         <div className="h-10" />
       </div>
     </div>
