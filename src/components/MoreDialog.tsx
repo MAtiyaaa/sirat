@@ -12,6 +12,7 @@ import {
   CircleDot,
   Hand,
   Scroll,
+  MapPin,
   Calculator
 } from 'lucide-react';
 import { toast } from 'sonner';
