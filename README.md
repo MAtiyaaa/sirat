@@ -18,7 +18,7 @@
 
   <p align="center">
     <a href="https://sir-at.app">
-      <img src="https://img.shields.io/badge/🌐_Live_Demo-sir--at.app-0891b2?style=for-the-badge" alt="Live Demo">
+      <img src="https://img.shields.io/badge/🌐_Live_Demo-sir--at.app-0891b2?style=for-the-badge" alt="Live">
     </a>
     <a href="#features">
       <img src="https://img.shields.io/badge/Features-🌟-f97316?style=for-the-badge" alt="Features">
