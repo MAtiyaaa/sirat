@@ -29,6 +29,7 @@ const MoreDialog = () => {
       tasbih: 'التسبيح',
       zakat: 'الزكاة',
       stories: 'تعليم',
+      mosque: 'المساجد'
       bookmarks: 'الإشارات المرجعية',
       account: 'الحساب',
       settings: 'الإعدادات',
@@ -40,6 +41,7 @@ const MoreDialog = () => {
       tasbih: 'Tasbih',
       zakat: 'Zakat',
       stories: 'Education',
+      mosque: 'Mosques',
       bookmarks: 'Bookmarks',
       account: 'Account',
       settings: 'Settings',
@@ -51,9 +53,10 @@ const MoreDialog = () => {
   const menuItems = [
     { icon: BookOpen, label: t.hadith, path: '/hadith' },
     { icon: Hand, label: t.duas, path: '/duas' },
-    { icon: Scroll, label: t.stories, path: '/stories-and-names' },
+    { icon: Scroll, label: t.stories, path: '/education' },
     { icon: CircleDot, label: t.tasbih, path: '/tasbih' },
     { icon: Calculator, label: t.zakat, path: '/zakat' },
+    { icon: MapPin, label: t.mosque, path: '/mosquelocator' },
     { icon: Bookmark, label: t.bookmarks, path: '/bookmarks' },
     { icon: User, label: t.account, path: '/account' },
     { icon: SettingsIcon, label: t.settings, path: '/settings' },
