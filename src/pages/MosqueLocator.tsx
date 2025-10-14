@@ -14,9 +14,10 @@ import {
   Share2,
   X,
   ArrowUpDown,
+  Map as MapIcon,
 } from "lucide-react";
 
-// --- helpers -------------------------------------------------
+// ---- lightweight helpers -------------------------------------------------
 function useCdnResource(hrefOrSrc: string, type: "css" | "js") {
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -61,7 +62,6 @@ function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-// simple debounce
 function debounce<T extends (...args: any[]) => void>(fn: T, ms: number) {
   let t: number | undefined;
   return (...args: Parameters<T>) => {
@@ -79,7 +79,7 @@ type Mosque = {
   addr?: string;
 };
 
-// --- component -----------------------------------------------
+// ---- component -----------------------------------------------------------
 const MosqueLocator = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
@@ -92,11 +92,11 @@ const MosqueLocator = () => {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Mosque | null>(null);
 
-  // sorting for table
+  // sorting for desktop table
   const [sortKey, setSortKey] = useState<"name" | "dist">("dist");
   const [sortAsc, setSortAsc] = useState(true);
 
-  // Leaflet CDN (no install needed)
+  // Leaflet via CDN (no installs)
   const leafletCssReady = useCdnResource(
     "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
     "css"
@@ -109,14 +109,22 @@ const MosqueLocator = () => {
   const mapRef = useRef<any>(null);
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const userMarkerRef = useRef<any>(null);
-  const mosqueMarkersRef = useRef<any[]>([]);
+  const mosqueLayersRef = useRef<any>(null); // a layer group to manage pins
+
+  // simple mobile check for responsive list rendering
+  const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth < 640);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const ui = useMemo(
     () => ({
       title: ar ? "خريطة مساجد قريبة" : "Nearby Mosques Map",
       subtitle: ar
-        ? "نحدّد موقعك تلقائيًا. زُوم للخارج/الداخل لتحميل المزيد حسب عرض الخريطة."
-        : "We’ll ask for your location automatically. Zoom/pan to load more based on the current view.",
+        ? "نحدّد موقعك تلقائيًا. كَبّر/صغِّر أو حرّك الخريطة لتحميل مساجد أكثر من نفس العرض."
+        : "We’ll ask for your location automatically. Zoom or pan to load more mosques for the current view.",
       locate: ar ? "إعادة تحديد الموقع" : "Refresh my location",
       locating: ar ? "جاري تحديد موقعك..." : "Locating you...",
       openMaps: ar ? "افتح في الخرائط" : "Open in Maps",
@@ -124,17 +132,21 @@ const MosqueLocator = () => {
       meters: ar ? "م" : "m",
       km: ar ? "كم" : "km",
       noResults: ar ? "لا توجد مساجد ضمن هذه المنطقة." : "No mosques in this view.",
-      listTitle: ar ? "قائمة المساجد" : "Mosques List",
+      listTitle: ar ? "المساجد" : "Mosques",
       nameCol: ar ? "الاسم" : "Name",
       distCol: ar ? "المسافة" : "Distance",
       actionsCol: ar ? "إجراءات" : "Actions",
       close: ar ? "إغلاق" : "Close",
       options: ar ? "خيارات" : "Options",
+      chooseApp: ar ? "اختر تطبيق الخرائط" : "Choose a maps app",
+      google: "Google Maps",
+      apple: "Apple Maps",
+      waze: "Waze",
     }),
     [ar]
   );
 
-  // --- geolocation: ask automatically on mount
+  // ---- ask for location automatically on mount
   useEffect(() => {
     getLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,7 +178,7 @@ const MosqueLocator = () => {
     );
   };
 
-  // --- Overpass query using current map bounds (loads more as you zoom out)
+  // ---- Overpass query for current map bounds
   const fetchMosquesForBounds = useCallback(
     async (bounds: any) => {
       try {
@@ -179,7 +191,6 @@ const MosqueLocator = () => {
         const north = bounds.getNorth();
         const east = bounds.getEast();
 
-        // Overpass bbox query
         const q = `[out:json][timeout:25];
         (
           node["amenity"="place_of_worship"]["religion"="muslim"](${south},${west},${north},${east});
@@ -195,12 +206,11 @@ const MosqueLocator = () => {
         });
         const json = await res.json();
 
-        // dedupe & normalize
         const centerRef = loc ?? { lat: (south + north) / 2, lon: (west + east) / 2 };
-        const next: Mosque[] =
+        const list: Mosque[] =
           (json.elements || [])
             .map((el: any) => {
-              const center = el.center || el; // nodes have lat/lon
+              const center = el.center || el;
               if (!center?.lat || !center?.lon) return null;
               const name =
                 el.tags?.name ??
@@ -222,10 +232,8 @@ const MosqueLocator = () => {
             })
             .filter(Boolean) || [];
 
-        // sort by distance by default
-        next.sort((a: Mosque, b: Mosque) => a.dist - b.dist);
-
-        setMosques(next);
+        list.sort((a, b) => a.dist - b.dist);
+        setMosques(list);
       } catch (e) {
         console.error(e);
         setError(ar ? "تعذّر جلب النتائج." : "Failed to fetch results.");
@@ -236,17 +244,17 @@ const MosqueLocator = () => {
     [ar, loc]
   );
 
-  // --- Initialize & wire map to bounds-based fetching
+  // ---- init map & wire events
   useEffect(() => {
     if (!leafletCssReady || !leafletJsReady || !mapDivRef.current) return;
     // @ts-ignore
     const L = (window as any).L as typeof import("leaflet");
     if (!L) return;
 
-    // create map once
+    // create map
     if (!mapRef.current) {
       mapRef.current = L.map(mapDivRef.current, {
-        center: loc ? [loc.lat, loc.lon] : [24.7136, 46.6753], // fallback center: Riyadh
+        center: loc ? [loc.lat, loc.lon] : [24.7136, 46.6753], // fallback: Riyadh
         zoom: loc ? 14 : 5,
         zoomControl: false,
       });
@@ -255,36 +263,35 @@ const MosqueLocator = () => {
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap contributors",
       }).addTo(mapRef.current);
+
+      // a layer group for mosque pins
+      mosqueLayersRef.current = L.layerGroup().addTo(mapRef.current);
     }
 
-    // if we have a location later, recenter and put user marker
+    // show user marker
     if (loc) {
-      mapRef.current.setView([loc.lat, loc.lon], 14);
-
       const userIcon = L.divIcon({
         className: "user-marker",
         html: `<div class="rounded-full bg-primary/90 text-background text-[10px] px-2 py-1 shadow">${ar ? "أنت" : "You"}</div>`,
         iconSize: [40, 20],
         iconAnchor: [20, 10],
       });
-
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng([loc.lat, loc.lon]);
       } else {
         userMarkerRef.current = L.marker([loc.lat, loc.lon], { icon: userIcon }).addTo(mapRef.current);
       }
+      mapRef.current.setView([loc.lat, loc.lon], 14);
     }
 
-    // debounced fetch on move/zoom end
+    // debounced bounds fetch
     const debouncedFetch = debounce(() => {
       const b = mapRef.current.getBounds();
       fetchMosquesForBounds(b);
     }, 400);
 
     mapRef.current.on("moveend zoomend", debouncedFetch);
-
-    // initial fetch for current view
-    debouncedFetch();
+    debouncedFetch(); // initial
 
     return () => {
       mapRef.current?.off("moveend", debouncedFetch);
@@ -292,39 +299,62 @@ const MosqueLocator = () => {
     };
   }, [leafletCssReady, leafletJsReady, loc, ar, fetchMosquesForBounds]);
 
-  // --- draw markers whenever list changes
+  // ---- draw pins only (no labels on map)
   useEffect(() => {
     // @ts-ignore
     const L = (window as any).L as typeof import("leaflet");
-    if (!L || !mapRef.current) return;
+    if (!L || !mapRef.current || !mosqueLayersRef.current) return;
 
-    mosqueMarkersRef.current.forEach((m) => m.remove());
-    mosqueMarkersRef.current = [];
+    mosqueLayersRef.current.clearLayers();
 
     mosques.forEach((m) => {
-      const icon = L.divIcon({
-        className: "mosque-marker",
-        html: `<div class="rounded-xl bg-background text-primary border border-primary/30 px-2 py-1 shadow neomorph">${m.name.replace(
-          /"/g,
-          "&quot;"
-        )}</div>`,
-        iconSize: [120, 24],
-        iconAnchor: [60, 12],
+      const pin = L.circleMarker([m.lat, m.lon], {
+        radius: 6,
+        color: "#10b981",
+        weight: 2,
+        fillColor: "#10b981",
+        fillOpacity: 0.7,
       });
-      const marker = L.marker([m.lat, m.lon], { icon }).addTo(mapRef.current);
-      marker.on("click", () => setSelected(m));
-      mosqueMarkersRef.current.push(marker);
+      pin.on("click", () => setSelected(m));
+      pin.addTo(mosqueLayersRef.current);
     });
   }, [mosques]);
+
+  // ---- sorting/table helpers
+  const onSort = (key: "name" | "dist") => {
+    if (sortKey === key) setSortAsc((s) => !s);
+    else {
+      setSortKey(key);
+      setSortAsc(true);
+    }
+  };
+
+  const sorted = useMemo(() => {
+    const copy = [...mosques];
+    copy.sort((a, b) => {
+      const valA = sortKey === "name" ? a.name.toLowerCase() : a.dist;
+      const valB = sortKey === "name" ? b.name.toLowerCase() : b.dist;
+      if (valA < valB) return sortAsc ? -1 : 1;
+      if (valA > valB) return sortAsc ? 1 : -1;
+      return 0;
+    });
+    return copy.slice(0, 50);
+  }, [mosques, sortKey, sortAsc]);
 
   const formatDistance = (m: number) =>
     m >= 1000 ? `${(m / 1000).toFixed(1)} ${ui.km}` : `${Math.round(m)} ${ui.meters}`;
 
-  const openMapsFor = (m: Mosque) => {
-    const isApple = /iPhone|iPad|Macintosh/i.test(navigator.userAgent);
-    const url = isApple
-      ? `http://maps.apple.com/?q=${encodeURIComponent(m.name)}&ll=${m.lat},${m.lon}`
-      : `https://www.google.com/maps/search/?api=1&query=${m.lat},${m.lon}`;
+  // ---- app chooser (Google / Apple / Waze) -------------------
+  const openInApp = (m: Mosque, app: "google" | "apple" | "waze") => {
+    let url = "";
+    const label = encodeURIComponent(m.name);
+    if (app === "google") {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}&destination_place_id=&travelmode=driving`;
+    } else if (app === "apple") {
+      url = `http://maps.apple.com/?daddr=${m.lat},${m.lon}&q=${label}`;
+    } else {
+      url = `https://waze.com/ul?ll=${m.lat},${m.lon}&navigate=yes`;
+    }
     window.open(url, "_blank");
   };
 
@@ -348,30 +378,13 @@ const MosqueLocator = () => {
     }
   };
 
-  // sort table
-  const sorted = useMemo(() => {
-    const copy = [...mosques];
-    copy.sort((a, b) => {
-      const valA = sortKey === "name" ? a.name.toLowerCase() : a.dist;
-      const valB = sortKey === "name" ? b.name.toLowerCase() : b.dist;
-      if (valA < valB) return sortAsc ? -1 : 1;
-      if (valA > valB) return sortAsc ? 1 : -1;
-      return 0;
-    });
-    return copy.slice(0, 50); // cap table rows
-  }, [mosques, sortKey, sortAsc]);
-
-  const onSort = (key: "name" | "dist") => {
-    if (sortKey === key) {
-      setSortAsc((s) => !s);
-    } else {
-      setSortKey(key);
-      setSortAsc(true);
-    }
-  };
-
   return (
     <div className="min-h-screen pb-28">
+      {/* Lower Leaflet z-index globally so other dialogs/menus appear above it */}
+      <style>{`
+        .leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 1 !important; }
+      `}</style>
+
       <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -397,17 +410,13 @@ const MosqueLocator = () => {
             className="neomorph hover:neomorph-pressed gap-2"
             variant="default"
           >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <LocateFixed className="h-4 w-4" />
-            )}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
             {loading ? (ar ? "جاري التحميل..." : "Loading...") : ui.locate}
           </Button>
         </div>
 
         {/* Map */}
-        <Card className="relative neomorph h-[460px] overflow-hidden">
+        <Card className="relative neomorph h-[460px] overflow-hidden z-0">
           <div className="absolute inset-0">
             <div ref={mapDivRef} className="w-full h-full" />
             {!leafletJsReady || !leafletCssReady ? (
@@ -421,85 +430,129 @@ const MosqueLocator = () => {
           </div>
         </Card>
 
-        {/* Table */}
+        {/* Results */}
         <div className="relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-teal-400/10 to-cyan-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
           <Card className="relative neomorph hover:neomorph-inset smooth-transition p-0">
             <div className="px-4 py-3 border-b flex items-center justify-between">
-              <h2 className="font-semibold">{ui.listTitle}</h2>
+              <div className="flex items-center gap-2">
+                <MapIcon className="h-4 w-4 text-primary" />
+                <h2 className="font-semibold">{ui.listTitle}</h2>
+              </div>
               <div className="text-xs text-muted-foreground">
-                {ar ? "يتم تحديثها مع تحريك/تكبير الخريطة" : "Updates as you move/zoom the map"}
+                {ar ? "تتحدّث القائمة مع تحريك/تكبير الخريطة" : "Updates as you move/zoom the map"}
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-muted-foreground">
-                  <tr className="border-b">
-                    <th className="text-left px-4 py-2 w-[42px]">#</th>
-                    <th
-                      className="text-left px-4 py-2 cursor-pointer select-none"
-                      onClick={() => onSort("name")}
-                    >
-                      <div className="inline-flex items-center gap-1">
-                        {ui.nameCol} <ArrowUpDown className="h-3.5 w-3.5" />
-                      </div>
-                    </th>
-                    <th
-                      className="text-left px-4 py-2 cursor-pointer select-none whitespace-nowrap"
-                      onClick={() => onSort("dist")}
-                    >
-                      <div className="inline-flex items-center gap-1">
-                        {ui.distCol} <ArrowUpDown className="h-3.5 w-3.5" />
-                      </div>
-                    </th>
-                    <th className="text-left px-4 py-2">{ui.actionsCol}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sorted.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-6 text-muted-foreground">
-                        {error ? error : ui.noResults}
-                      </td>
-                    </tr>
-                  ) : (
-                    sorted.map((m, i) => (
-                      <tr key={m.id} className="border-b hover:bg-muted/40 smooth-transition">
-                        <td className="px-4 py-2">{i + 1}</td>
-                        <td className="px-4 py-2">
-                          <div className="font-medium">{m.name}</div>
-                          {m.addr && (
-                            <div className="text-xs text-muted-foreground truncate max-w-[42ch]">{m.addr}</div>
-                          )}
-                        </td>
-                        <td className="px-4 py-2 whitespace-nowrap">
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                            {formatDistance(m.dist)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              className="neomorph hover:neomorph-pressed gap-2"
-                              onClick={() => setSelected(m)}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              {ui.options}
-                            </Button>
+
+            {/* Mobile: cards | Desktop: table */}
+            {isMobile ? (
+              <div className="p-4 grid gap-3">
+                {mosques.length === 0 ? (
+                  <p className="text-muted-foreground">{error ? error : ui.noResults}</p>
+                ) : (
+                  sorted.map((m) => (
+                    <div key={m.id} className="relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-emerald-400/10 to-cyan-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+                      <Card className="relative neomorph hover:neomorph-inset smooth-transition p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <MapPin className="h-5 w-5 text-primary" />
                           </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <h3 className="font-semibold truncate">{m.name}</h3>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                                {formatDistance(m.dist)}
+                              </span>
+                            </div>
+                            {m.addr && (
+                              <p className="text-sm text-muted-foreground truncate">{m.addr}</p>
+                            )}
+                            <div className="mt-3 flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                className="neomorph hover:neomorph-pressed gap-2"
+                                onClick={() => setSelected(m)}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                {ui.options}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-muted-foreground">
+                    <tr className="border-b">
+                      <th className="text-left px-4 py-2 w-[42px]">#</th>
+                      <th className="text-left px-4 py-2 cursor-pointer select-none" onClick={() => onSort("name")}>
+                        <div className="inline-flex items-center gap-1">
+                          {ui.nameCol} <ArrowUpDown className="h-3.5 w-3.5" />
+                        </div>
+                      </th>
+                      <th
+                        className="text-left px-4 py-2 cursor-pointer select-none whitespace-nowrap"
+                        onClick={() => onSort("dist")}
+                      >
+                        <div className="inline-flex items-center gap-1">
+                          {ui.distCol} <ArrowUpDown className="h-3.5 w-3.5" />
+                        </div>
+                      </th>
+                      <th className="text-left px-4 py-2">{ui.actionsCol}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sorted.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-4 py-6 text-muted-foreground">
+                          {error ? error : ui.noResults}
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    ) : (
+                      sorted.map((m, i) => (
+                        <tr key={m.id} className="border-b hover:bg-muted/40 smooth-transition">
+                          <td className="px-4 py-2">{i + 1}</td>
+                          <td className="px-4 py-2">
+                            <div className="font-medium">{m.name}</div>
+                            {m.addr && (
+                              <div className="text-xs text-muted-foreground truncate max-w-[52ch]">{m.addr}</div>
+                            )}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                              {formatDistance(m.dist)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                className="neomorph hover:neomorph-pressed gap-2"
+                                onClick={() => setSelected(m)}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                {ui.options}
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Card>
         </div>
       </div>
 
-      {/* Modal / Action Sheet — forced on top of Leaflet with a huge z-index */}
+      {/* App chooser / Share modal — extremely high z-index so it stays above the map */}
       {selected && (
         <div
           className="fixed inset-0 z-[10000] bg-black/40 flex items-end md:items-center md:justify-center"
@@ -530,17 +583,36 @@ const MosqueLocator = () => {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-3 gap-3">
               <Button
                 className="neomorph hover:neomorph-pressed gap-2"
-                onClick={() => openMapsFor(selected)}
+                onClick={() => openInApp(selected, "google")}
               >
                 <Navigation className="h-4 w-4" />
-                {ui.openMaps}
+                {ui.google}
               </Button>
               <Button
                 variant="secondary"
                 className="neomorph hover:neomorph-pressed gap-2"
+                onClick={() => openInApp(selected, "apple")}
+              >
+                <Navigation className="h-4 w-4" />
+                {ui.apple}
+              </Button>
+              <Button
+                variant="secondary"
+                className="neomorph hover:neomorph-pressed gap-2"
+                onClick={() => openInApp(selected, "waze")}
+              >
+                <Navigation className="h-4 w-4" />
+                {ui.waze}
+              </Button>
+            </div>
+
+            <div className="mt-3">
+              <Button
+                variant="ghost"
+                className="w-full neomorph hover:neomorph-pressed gap-2"
                 onClick={() => shareMosque(selected)}
               >
                 <Share2 className="h-4 w-4" />
