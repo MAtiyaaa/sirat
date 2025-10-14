@@ -29,7 +29,7 @@ const MoreDialog = () => {
       tasbih: 'التسبيح',
       zakat: 'الزكاة',
       stories: 'تعليم',
-      mosque: 'المساجد'
+      mosque: 'المساجد',
       bookmarks: 'الإشارات المرجعية',
       account: 'الحساب',
       settings: 'الإعدادات',
