@@ -9,7 +9,8 @@ import {
   CircleDot, 
   Scroll, 
   Bookmark, 
-  User, 
+  User,
+  MapPin,
   Settings as SettingsIcon,
   Moon,
   History,
@@ -389,9 +390,9 @@ const Home = () => {
       gradient: 'from-rose-500 to-pink-500',
     },
     {
-      icon: History,
-      title: { ar: 'السجل', en: 'History' },
-      link: '/chat-history',
+      icon: MapPin,
+      title: { ar: 'المساجد', en: 'Mosques' },
+      link: '/mosquelocator',
       gradient: 'from-violet-500 to-purple-500',
     },
     {
