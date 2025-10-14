@@ -31,6 +31,15 @@ const HolyCities = () => {
         gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20",
         iconBg: "bg-blue-500/10",
       },
+      {
+        titleAr: "القدس",
+        titleEn: "Jerusalem",
+        descAr: "المسجد الأقصى وبيت المقدس",
+        descEn: "Al-Aqsa Mosque and Bayt al-Maqdis",
+        link: "/jerusalem",
+        gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20",
+        iconBg: "bg-amber-500/10",
+      },
     ],
   };
 
@@ -38,7 +47,12 @@ const HolyCities = () => {
     <div className="min-h-screen pb-20">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 neomorph hover:neomorph-pressed">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0 neomorph hover:neomorph-pressed"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-bold">{content.title}</h1>
@@ -51,7 +65,6 @@ const HolyCities = () => {
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${card.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
                 />
-
                 <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
                   <div className="flex items-center gap-4">
                     <div
