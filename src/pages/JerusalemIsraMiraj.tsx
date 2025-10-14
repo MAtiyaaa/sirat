@@ -1,61 +1,43 @@
+import { useNavigate } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card } from "@/components/ui/card";
-import { Book, ArrowRightLeft, Stars, Navigation } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Book, ArrowRightLeft, Stars, Navigation } from "lucide-react";
 
 const JerusalemIsraMiraj = () => {
+  const navigate = useNavigate();
   const { settings } = useSettings();
   const ar = settings.language === "ar";
+  const back = ar ? "رجوع" : "Back";
 
   const steps = [
-    {
-      icon: Navigation,
-      titleAr: "الإسراء",
-      titleEn: "Al-Isra’",
-      descAr:
-        "انتقال النبي ﷺ ليلاً من المسجد الحرام إلى المسجد الأقصى بإعجاز رباني.",
-      descEn:
-        "The Prophet ﷺ traveled by night from the Sacred Mosque to Al-Aqsa by divine miracle.",
-    },
-    {
-      icon: Stars,
-      titleAr: "المعراج",
-      titleEn: "Al-Miʿrāj",
-      descAr:
-        "العروج من الأقصى إلى السماوات العلا ولِّقاء الأنبياء وفرض الصلوات.",
-      descEn:
-        "Ascent from Al-Aqsa through the heavens, meeting prophets; prayers were prescribed.",
-    },
-    {
-      icon: Book,
-      titleAr: "دلالات",
-      titleEn: "Significations",
-      descAr:
-        "تثبيت القلب، مركزية الصلاة، ورابطة الأنبياء ووحدة الرسالات.",
-      descEn:
-        "Strengthening the heart, centrality of salah, and unity across prophetic messages.",
-    },
-    {
-      icon: ArrowRightLeft,
-      titleAr: "العودة",
-      titleEn: "Return",
-      descAr:
-        "عاد النبي ﷺ من الرحلة المباركة، وبشّر المؤمنين بفرج ونور.",
-      descEn:
-        "The Prophet ﷺ returned, bringing assurance and light to the believers.",
-    },
+    { icon: Navigation, titleAr: "الإسراء", titleEn: "Al-Isra’",
+      descAr: "انتقال النبي ﷺ ليلاً من المسجد الحرام إلى المسجد الأقصى بإعجاز رباني.",
+      descEn: "The Prophet ﷺ traveled by night from the Sacred Mosque to Al-Aqsa by divine miracle." },
+    { icon: Stars, titleAr: "المعراج", titleEn: "Al-Miʿrāj",
+      descAr: "العروج من الأقصى إلى السماوات العلا ولِّقاء الأنبياء وفرض الصلوات.",
+      descEn: "Ascent from Al-Aqsa through the heavens, meeting prophets; prayers were prescribed." },
+    { icon: Book, titleAr: "دلالات", titleEn: "Significations",
+      descAr: "تثبيت القلب، مركزية الصلاة، ورابطة الأنبياء ووحدة الرسالات.",
+      descEn: "Strengthening the heart, centrality of salah, and unity across prophetic messages." },
+    { icon: ArrowRightLeft, titleAr: "العودة", titleEn: "Return",
+      descAr: "عاد النبي ﷺ من الرحلة المباركة، وبشّر المؤمنين بفرج ونور.",
+      descEn: "The Prophet ﷺ returned, bringing assurance and light to the believers." },
   ];
 
   return (
     <div className="min-h-screen pb-20">
       <div className="max-w-3xl mx-auto p-6 space-y-6">
-        <header className="space-y-2">
+        <div className="flex items-center gap-4 mb-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 neomorph hover:neomorph-pressed" aria-label={back}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <h1 className="text-3xl font-bold">{ar ? "الإسراء والمعراج" : "Al-Isra’ & Al-Miʿrāj"}</h1>
-          <p className="text-muted-foreground">
-            {ar
-              ? "صفحة تعريفية مُركّزة حول أهم محطات الرحلة المباركة ودلالاتها."
+        </div>
+        <p className="text-muted-foreground">
+          {ar ? "صفحة تعريفية مُركّزة حول أهم محطات الرحلة المباركة ودلالاتها."
               : "A focused overview of the Night Journey, its phases, and meanings."}
-          </p>
-        </header>
+        </p>
 
         <div className="grid gap-4">
           {steps.map((s, i) => {
