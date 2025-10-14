@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, RotateCcw } from 'lucide-react';
+import { Plus, Minus, RotateCcw, ArrowLeft } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/select';
 
 const Tasbih = () => {
+  const navigate = useNavigate();
   const { settings } = useSettings();
   const [count, setCount] = useState(0);
   const [selectedDhikr, setSelectedDhikr] = useState('subhanallah');
@@ -22,15 +24,29 @@ const Tasbih = () => {
       { value: 'allahuakbar', label: 'الله أكبر', text: 'اللَّهُ أَكْبَرُ' },
       { value: 'lailahaillallah', label: 'لا إله إلا الله', text: 'لَا إِلَٰهَ إِلَّا اللَّهُ' },
       { value: 'astaghfirullah', label: 'أستغفر الله', text: 'أَسْتَغْفِرُ اللَّهَ' },
+      { value: 'astaghfirullah_atubu', label: 'أستغفر الله وأتوب إليه', text: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ' },
+      { value: 'subhan_bihamdih', label: 'سبحان الله وبحمده', text: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ' },
+      { value: 'subhan_alazim', label: 'سبحان الله العظيم', text: 'سُبْحَانَ اللَّهِ الْعَظِيمِ' },
+      { value: 'salawat', label: 'اللهم صلِّ على محمد', text: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ' },
+      { value: 'hasbunallah', label: 'حسبنا الله ونعم الوكيل', text: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ' },
+      { value: 'yunus', label: 'دعاء يونس', text: 'لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ' },
+      { value: 'rabbighfir', label: 'رب اغفر لي وتب عليّ', text: 'رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ' },
       { value: 'lahaula', label: 'لا حول ولا قوة إلا بالله', text: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ' },
     ],
     en: [
       { value: 'subhanallah', label: 'SubhanAllah', text: 'سُبْحَانَ اللَّهِ' },
       { value: 'alhamdulillah', label: 'Alhamdulillah', text: 'الْحَمْدُ لِلَّهِ' },
-      { value: 'allahuakbar', label: 'Allahu Akbar', text: 'اللَّهُ أَكْبَرُ' },
+      { value: 'allahuakbar', label: 'Allahu Akbar', text: 'اللَّـهُ أَكْبَرُ' },
       { value: 'lailahaillallah', label: 'La ilaha illallah', text: 'لَا إِلَٰهَ إِلَّا اللَّهُ' },
       { value: 'astaghfirullah', label: 'Astaghfirullah', text: 'أَسْتَغْفِرُ اللَّهَ' },
-      { value: 'lahaula', label: 'La hawla wala quwwata', text: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ' },
+      { value: 'astaghfirullah_atubu', label: 'Astaghfirullah wa atubu ilayh', text: 'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ' },
+      { value: 'subhan_bihamdih', label: 'SubhanAllahi wa bihamdih', text: 'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ' },
+      { value: 'subhan_alazim', label: 'SubhanAllahi al-azim', text: 'سُبْحَانَ اللَّهِ الْعَظِيمِ' },
+      { value: 'salawat', label: 'Salawat (Blessings on the Prophet ﷺ)', text: 'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ' },
+      { value: 'hasbunallah', label: 'HasbunAllahu wa ni‘mal wakeel', text: 'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ' },
+      { value: 'yunus', label: 'Dua of Yunus (AS)', text: 'لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ' },
+      { value: 'rabbighfir', label: 'Rabbighfir li wa tub ‘alayya', text: 'رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ' },
+      { value: 'lahaula', label: 'La hawla wa la quwwata', text: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ' },
     ],
   };
 
@@ -41,6 +57,7 @@ const Tasbih = () => {
       selectDhikr: 'اختر الذكر',
       reset: 'إعادة تعيين',
       counter: 'العدد',
+      back: 'رجوع',
     },
     en: {
       title: 'Tasbih',
@@ -48,6 +65,7 @@ const Tasbih = () => {
       selectDhikr: 'Select Dhikr',
       reset: 'Reset',
       counter: 'Count',
+      back: 'Back',
     },
   };
 
@@ -61,8 +79,21 @@ const Tasbih = () => {
 
   return (
     <div className="min-h-screen space-y-6 pb-6">
-      {/* Header */}
-      <div className="text-center space-y-4 py-6 px-4">
+      {/* Header + Back */}
+      <div className="px-4 pt-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(-1)}
+          aria-label={t.back}
+          className="neomorph hover:neomorph-pressed"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Title */}
+      <div className="text-center space-y-4 px-4">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
           <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
             {t.title}
@@ -79,7 +110,14 @@ const Tasbih = () => {
           <label className="text-sm font-medium text-muted-foreground">
             {t.selectDhikr}
           </label>
-          <Select value={selectedDhikr} onValueChange={setSelectedDhikr}>
+          <Select
+            value={selectedDhikr}
+            onValueChange={(v) => {
+              setSelectedDhikr(v);
+              // optional: reset counter when changing dhikr (comment out if not desired)
+              setCount(0);
+            }}
+          >
             <SelectTrigger className="h-12 text-base glass-effect">
               <SelectValue />
             </SelectTrigger>
@@ -98,12 +136,9 @@ const Tasbih = () => {
       <div className="px-4">
         <div className="glass-effect rounded-3xl p-8 md:p-12 border border-primary/30 backdrop-blur-xl apple-shadow">
           <div className="text-center space-y-6">
-            {/* Arabic Text */}
             <p className="text-4xl md:text-6xl font-bold quran-font text-primary">
               {currentDhikr?.text}
             </p>
-            
-            {/* Transliteration */}
             <p className="text-lg md:text-xl text-muted-foreground">
               {currentDhikr?.label}
             </p>
@@ -125,10 +160,9 @@ const Tasbih = () => {
         </div>
       </div>
 
-      {/* Control Buttons */}
+      {/* Controls */}
       <div className="px-4 space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          {/* Decrement Button */}
           <Button
             onClick={decrement}
             size="lg"
@@ -138,7 +172,6 @@ const Tasbih = () => {
             <Minus className="h-8 w-8" />
           </Button>
 
-          {/* Increment Button */}
           <Button
             onClick={increment}
             size="lg"
@@ -148,7 +181,6 @@ const Tasbih = () => {
           </Button>
         </div>
 
-        {/* Reset Button */}
         <Button
           onClick={reset}
           size="lg"
@@ -160,13 +192,13 @@ const Tasbih = () => {
         </Button>
       </div>
 
-      {/* Info Card */}
+      {/* Hint */}
       <div className="px-4">
         <div className="glass-effect rounded-2xl p-6 border border-border/50 backdrop-blur-xl">
           <p className="text-sm text-muted-foreground text-center leading-relaxed">
-            {settings.language === 'ar' 
+            {settings.language === 'ar'
               ? 'استخدم الأزرار للعد. يمكنك تغيير الذكر من القائمة أعلاه.'
-              : 'Use the buttons to count. You can change the dhikr from the dropdown above.'}
+              : 'Use the buttons to count. You can switch the dhikr from the dropdown above.'}
           </p>
         </div>
       </div>
