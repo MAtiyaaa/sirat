@@ -25,7 +25,9 @@ import {
   Bookmark,
   Search,
   Eye,
-  Lock
+  Lock,
+  Share2,
+  Link as LinkIcon
 } from 'lucide-react';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import {
@@ -69,6 +71,26 @@ const SurahDetail = () => {
   const [ayahPages, setAyahPages] = useState<Record<number, number>>({});
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // --- Share helpers (new) ---
+  const shareOrCopy = async (url: string, title?: string, text?: string) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ url, title, text });
+        return;
+      }
+    } catch {
+      // fall through to copy
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
+    } catch {
+      toast.error(settings.language === 'ar' ? 'تعذر نسخ الرابط' : 'Could not copy link');
+    }
+  };
+  const surahUrl = () => `${window.location.origin}/quran/${surahNumber}`;
+  const ayahUrl = (ayahNum: number) => `${window.location.origin}/quran/${surahNumber}?ayah=${ayahNum}`;
 
   useEffect(() => {
     loadSurah();
@@ -742,7 +764,7 @@ const SurahDetail = () => {
   useEffect(() => {
     if (!playingSurah || !isPlaying || playingSurah !== parseInt(surahNumber!)) return;
     
-    const isLocked = window.quranLockState;
+    const isLocked = (window as any).quranLockState;
     if (!isLocked) return;
 
     const scrollToCurrentAyah = () => {
@@ -866,6 +888,19 @@ const SurahDetail = () => {
           >
             <Bookmark className={`h-5 w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
           </Button>
+
+          {/* Share Surah (new) */}
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => shareOrCopy(surahUrl(), settings.language === 'ar' ? surahData.name : surahData.englishName)}
+              variant="outline"
+              size="icon"
+              className="rounded-full w-12 h-12"
+              title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -995,6 +1030,27 @@ const SurahDetail = () => {
                   title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark ayah'}
                 >
                   <Bookmark className={`h-4 w-4 ${bookmarkedAyahs.has(ayah.numberInSurah) ? 'fill-primary text-primary' : ''}`} />
+                </Button>
+
+                {/* Share Ayah (new) */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() =>
+                    shareOrCopy(
+                      ayahUrl(ayah.numberInSurah),
+                      settings.language === 'ar'
+                        ? `${surahData.name} - آية ${ayah.numberInSurah}`
+                        : `${surahData.englishName} - Ayah ${ayah.numberInSurah}`,
+                      settings.language === 'ar'
+                        ? `مشاركة آية ${ayah.numberInSurah} من ${surahData.name}`
+                        : `Share Ayah ${ayah.numberInSurah} from ${surahData.englishName}`
+                    )
+                  }
+                  className="rounded-full"
+                  title={settings.language === 'ar' ? 'مشاركة الآية' : 'Share ayah'}
+                >
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
