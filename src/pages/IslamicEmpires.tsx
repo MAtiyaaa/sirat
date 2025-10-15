@@ -183,7 +183,7 @@ const IslamicEmpires = () => {
   const sorted = [...cards].sort((a, b) => a.start - b.start);
 
   const content = {
-    title: isArabic ? "الإمبراطوريات الإسلامية عبر التاريخ" : "Islamic Empires (Selector)",
+    title: isArabic ? "الإمبراطوريات الإسلامية عبر التاريخ" : "Islamic Empires",
     back: isArabic ? "رجوع" : "Back",
   };
 
