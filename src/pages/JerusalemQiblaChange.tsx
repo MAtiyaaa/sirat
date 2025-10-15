@@ -29,12 +29,14 @@ const JerusalemQiblaChange = () => {
     <div className="min-h-screen pb-20">
       <div className="max-w-3xl mx-auto p-6 space-y-6">
         <div className="flex items-center gap-4 mb-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 neomorph hover:neomorph-pressed" aria-label={back}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 glass-effect hover:glass-effect-hover" aria-label={back}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">{ar ? "تحويل القبلة" : "Change of Qibla"}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+            {ar ? "تحويل القبلة" : "Change of Qibla"}
+          </h1>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-base md:text-lg">
           {ar ? "ملخص موجز عن القبلة الأولى ثم التحويل إلى المسجد الحرام ودلالاته."
               : "A brief on the first Qibla and the transformation to Makkah—meanings and lessons."}
         </p>
@@ -45,12 +47,12 @@ const JerusalemQiblaChange = () => {
             return (
               <div key={i} className="relative overflow-hidden group">
                 <div className={`absolute inset-0 bg-gradient-to-br ${b.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
-                <Card className="relative neomorph hover:neomorph-inset smooth-transition p-5">
+                <Card className="relative glass-effect hover:glass-effect-hover smooth-transition p-6 border border-border/30">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-105 smooth-transition">
                       <Icon className="h-6 w-6 text-primary" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1 flex-1">
                       <h3 className="font-semibold text-lg">{ar ? b.titleAr : b.titleEn}</h3>
                       <p className="text-sm text-muted-foreground">{ar ? b.descAr : b.descEn}</p>
                     </div>

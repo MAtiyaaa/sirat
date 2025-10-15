@@ -240,13 +240,13 @@ const Quran = () => {
 
   return (
     <div className="space-y-6 pb-6">
-      <div className="text-center space-y-4 py-6 px-4">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+      <div className="text-center space-y-4 py-8 px-4">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+          <span className="bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm">
             {settings.language === 'ar' ? 'القرآن الكريم' : 'The Holy Quran'}
           </span>
         </h1>
-        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
           {settings.language === 'ar' 
             ? 'اختر سورة للقراءة'
             : 'Select a surah to read'}
@@ -255,13 +255,13 @@ const Quran = () => {
 
       {/* Search Bar */}
       <div className="px-4">
-        <div className="relative">
+        <div className="relative max-w-2xl mx-auto">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={settings.language === 'ar' ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search for a surah or page number...'}
-            className="pl-12 h-14 rounded-2xl glass-effect border-border/50 text-base"
+            className="pl-12 h-16 rounded-3xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg"
           />
         </div>
       </div>
@@ -362,16 +362,16 @@ const Quran = () => {
       })()}
 
       {overallProgress > 0 && (
-        <div className="glass-effect rounded-3xl p-8 space-y-4 border border-border/50 apple-shadow mx-4">
+        <div className="glass-effect rounded-3xl p-8 space-y-5 border border-border/30 apple-shadow mx-4 backdrop-blur-xl">
           <div className="flex items-center justify-between">
-            <span className="text-base font-semibold">
+            <span className="text-lg font-bold">
               {settings.language === 'ar' ? 'التقدم الإجمالي' : 'Overall Progress'}
             </span>
-            <span className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+            <span className="text-3xl font-bold bg-gradient-to-br from-primary via-primary to-primary/70 bg-clip-text text-transparent drop-shadow-sm">
               {overallProgress.toFixed(1)}%
             </span>
           </div>
-          <Progress value={overallProgress} className="h-4" />
+          <Progress value={overallProgress} className="h-3" />
         </div>
       )}
 
@@ -386,10 +386,10 @@ const Quran = () => {
               to={`/quran/${surah.number}`}
               className="block"
             >
-              <div className="glass-effect rounded-3xl p-6 md:p-8 smooth-transition hover:scale-[1.02] apple-shadow hover:shadow-xl border border-border/50 hover:border-border backdrop-blur-xl">
+              <div className="glass-effect rounded-3xl p-6 md:p-8 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-2xl border border-border/30 hover:border-primary/30 backdrop-blur-xl">
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary font-bold">{surah.number}</span>
+                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-lg">
+                    <span className="text-primary font-bold text-lg">{surah.number}</span>
                   </div>
 
                   <div className="flex-1 min-w-0">

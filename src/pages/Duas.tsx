@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,11 @@ import {
   Copy,
   Utensils,
   RefreshCcw,
+  Bookmark,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 // shadcn/ui Select (nice dropdown)
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1339,9 +1343,90 @@ const ALL_DUAS: Dua[] = [
 const Duas: React.FC = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [bookmarkedDuas, setBookmarkedDuas] = useState<Set<string>>(new Set());
 
   const [category, setCategory] = useState<CategoryKey>("all");
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    // Get user session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    loadBookmarks();
+  }, [user]);
+
+  const loadBookmarks = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('dua_bookmarks')
+      .select('dua_title')
+      .eq('user_id', user.id);
+
+    if (data) {
+      setBookmarkedDuas(new Set(data.map(b => b.dua_title)));
+    }
+  };
+
+  const toggleBookmark = async (dua: Dua) => {
+    if (!user) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      navigate('/auth');
+      return;
+    }
+
+    const isBookmarked = bookmarkedDuas.has(dua.titleEn);
+
+    if (isBookmarked) {
+      const { error } = await supabase
+        .from('dua_bookmarks')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('dua_title', dua.titleEn);
+
+      if (error) {
+        toast.error(settings.language === 'ar' ? 'فشل الحذف' : 'Failed to remove');
+        return;
+      }
+
+      setBookmarkedDuas(prev => {
+        const next = new Set(prev);
+        next.delete(dua.titleEn);
+        return next;
+      });
+      toast.success(settings.language === 'ar' ? 'تم الحذف' : 'Bookmark removed');
+    } else {
+      const { error } = await supabase
+        .from('dua_bookmarks')
+        .insert({
+          user_id: user.id,
+          dua_title: dua.titleEn,
+          dua_arabic: dua.arabic,
+          dua_transliteration: dua.transliteration || null,
+          dua_english: dua.translation,
+          category: dua.categories[0] || 'general',
+        });
+
+      if (error) {
+        toast.error(settings.language === 'ar' ? 'فشل الحفظ' : 'Failed to bookmark');
+        return;
+      }
+
+      setBookmarkedDuas(prev => new Set(prev).add(dua.titleEn));
+      toast.success(settings.language === 'ar' ? 'تم الحفظ' : 'Bookmarked');
+    }
+  };
 
   const langIsAr = settings.language === "ar";
   const showTranslit = settings.translationEnabled && settings.translationSource === "transliteration";
@@ -1385,9 +1470,9 @@ const Duas: React.FC = () => {
 
   return (
     <div className="relative min-h-[100dvh]">
-      {/* Background: soft radial and gradient overlay */}
+      {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-background to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl opacity-50" />
         <div className="absolute top-1/2 -right-24 h-80 w-80 rounded-full bg-secondary/20 blur-3xl opacity-40" />
       </div>
@@ -1508,16 +1593,29 @@ const Duas: React.FC = () => {
                       </div>
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-full"
-                      onClick={() => handleCopy(dua)}
-                      title={t("Copy", "نسخ")}
-                    >
-                      <Copy className="h-4 w-4 mr-2" />
-                      {t("Copy", "نسخ")}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => toggleBookmark(dua)}
+                        title={bookmarkedDuas.has(dua.titleEn) ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+                      >
+                        <Bookmark className={`h-4 w-4 mr-2 ${bookmarkedDuas.has(dua.titleEn) ? 'fill-primary text-primary' : ''}`} />
+                        {bookmarkedDuas.has(dua.titleEn) ? t("Saved", "محفوظ") : t("Save", "حفظ")}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full"
+                        onClick={() => handleCopy(dua)}
+                        title={t("Copy", "نسخ")}
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        {t("Copy", "نسخ")}
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Arabic */}

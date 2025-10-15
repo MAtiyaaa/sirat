@@ -38,7 +38,7 @@ const Jerusalem = () => {
       {
         icon: Book,
         titleAr: "الإسراء والمعراج",
-        titleEn: "Al-Isrā’ & Al-Miʿrāj",
+        titleEn: "Al-Isrā' & Al-Miʿrāj",
         descAr: "الرحلة المباركة ودلالاتها",
         descEn: "The blessed night journey and its meanings",
         link: "/jerusalem/isra-miraj",
@@ -95,18 +95,20 @@ const Jerusalem = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
+      <div className="max-w-3xl mx-auto p-6 space-y-6">
         <div className="flex items-center gap-4 mb-6">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="shrink-0 neomorph hover:neomorph-pressed"
+            className="shrink-0 glass-effect hover:glass-effect-hover"
             aria-label={content.back}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">{content.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+            {content.title}
+          </h1>
         </div>
 
         <div className="grid gap-4">
@@ -118,7 +120,7 @@ const Jerusalem = () => {
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${card.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
                   />
-                  <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
+                  <Card className="relative glass-effect hover:glass-effect-hover smooth-transition backdrop-blur-xl p-6 border border-border/30">
                     <div className="flex items-center gap-4">
                       <div
                         className={`flex-shrink-0 w-14 h-14 rounded-xl ${card.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}
