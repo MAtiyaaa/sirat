@@ -1,83 +1,52 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ArrowLeft,
-  Bed,
-  BedDouble,
-  BookOpen,
-  CloudRain,
-  Compass,
-  Droplet,
-  Home,
-  Info,
-  MapPin,
-  Moon,
-  Plane,
   Search,
-  Shield,
-  Sparkles,
-  Sun,
-  Users,
-  Briefcase,
-  Coins,
-  Gauge,
-  Handshake,
-  Heart,
-  Hospital,
-  AlarmClock,
-  MessageSquareHeart,
-  Landmark,
-  CheckCircle2,
-  Copy,
-  Utensils,
   RefreshCcw,
   Bookmark,
+  Share2,
+  Sun,
+  Moon,
+  Bed,
+  BedDouble,
+  Utensils,
+  Home,
+  Plane,
+  Shield,
+  BookOpen,
+  Sparkles,
+  Users,
+  CloudRain,
+  Droplet,
+  Landmark,
+  Compass,
+  Hospital,
+  Gauge,
+  MessageSquareHeart,
+  CheckCircle2,
+  MapPin,
+  Briefcase,
+  Coins,
+  Heart,
+  Info,
+  Handshake,
+  AlarmClock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-/* ----------------------------------------------------------------
-   Types
-------------------------------------------------------------------*/
+/* ------------------ Types ------------------ */
 type CategoryKey =
-  | "all"
-  | "morning"
-  | "evening"
-  | "sleep"
-  | "waking"
-  | "eating"
-  | "home"
-  | "travel"
-  | "protection"
-  | "knowledge"
-  | "forgiveness"
-  | "parents"
-  | "rain"
-  | "istikhara"
-  | "wudu"
-  | "salah"
-  | "guidance"
-  | "health"
-  | "anxiety"
-  | "gratitude"
-  | "rizq"
-  | "repentance"
-  | "patience"
-  | "character"
-  | "mercy"
-  | "marriage"
-  | "work"
-  | "calamity"
-  | "illness"
-  | "visiting_sick"
-  | "graveyard"
-  | "meeting"
-  | "debt"
-  | "study"
-  | "general";
+  | "all" | "morning" | "evening" | "sleep" | "waking" | "eating" | "home" | "travel" | "protection"
+  | "knowledge" | "forgiveness" | "parents" | "rain" | "istikhara" | "wudu" | "salah" | "guidance"
+  | "health" | "anxiety" | "gratitude" | "rizq" | "repentance" | "patience" | "character" | "mercy"
+  | "marriage" | "work" | "calamity" | "illness" | "visiting_sick" | "graveyard" | "meeting"
+  | "debt" | "study" | "general";
 
 interface Dua {
   id: string;
@@ -92,9 +61,7 @@ interface Dua {
   repeat?: number;
 }
 
-/* ----------------------------------------------------------------
-   Category metadata
-------------------------------------------------------------------*/
+/* ------------------ Category meta ------------------ */
 const CAT_META: Record<CategoryKey, { labelEn: string; labelAr: string; icon: React.ComponentType<any> }> = {
   all: { labelEn: "All", labelAr: "الكل", icon: CheckCircle2 },
   morning: { labelEn: "Morning", labelAr: "الصباح", icon: Sun },
@@ -134,7 +101,6 @@ const CAT_META: Record<CategoryKey, { labelEn: string; labelAr: string; icon: Re
 };
 
 const FALLBACK_ICON = Shield;
-
 /* ----------------------------------------------------------------
    Duas dataset (expanded, categorized)
 ------------------------------------------------------------------*/
@@ -1334,12 +1300,11 @@ const ALL_DUAS: Dua[] = [
   },
 ];
 
-/* ----------------------------------------------------------------
-   Component
-------------------------------------------------------------------*/
 const Duas: React.FC = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [user, setUser] = useState<any>(null);
   const [bookmarkedDuas, setBookmarkedDuas] = useState<Set<string>>(new Set());
 
@@ -1347,78 +1312,101 @@ const Duas: React.FC = () => {
   const [query, setQuery] = useState("");
   const [selectedDua, setSelectedDua] = useState<Dua | null>(null);
 
-  // HARD-FIX: stop horizontal scroll/blank right space on mobile
-  useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtml = html.style.overflowX;
-    const prevBody = body.style.overflowX;
-    html.style.overflowX = "hidden";
-    body.style.overflowX = "hidden";
-    return () => {
-      html.style.overflowX = prevHtml;
-      body.style.overflowX = prevBody;
-    };
-  }, []);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) =>
-      setUser(session?.user ?? null)
-    );
-    return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    loadBookmarks();
-  }, [user]);
-
-  const loadBookmarks = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("dua_bookmarks").select("dua_title").eq("user_id", user.id);
-    if (data) setBookmarkedDuas(new Set(data.map((b) => b.dua_title)));
-  };
-
-  const toggleBookmark = async (dua: Dua) => {
-    if (!user) {
-      toast.error(settings.language === "ar" ? "يجب تسجيل الدخول أولاً" : "Please sign in first");
-      navigate("/auth");
-      return;
-    }
-    const isBookmarked = bookmarkedDuas.has(dua.titleEn);
-    if (isBookmarked) {
-      const { error } = await supabase
-        .from("dua_bookmarks")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("dua_title", dua.titleEn);
-      if (error) return toast.error(settings.language === "ar" ? "فشل الحذف" : "Failed to remove");
-      setBookmarkedDuas((prev) => {
-        const next = new Set(prev);
-        next.delete(dua.titleEn);
-        return next;
-      });
-      toast.success(settings.language === "ar" ? "تم الحذف" : "Bookmark removed");
-    } else {
-      const { error } = await supabase.from("dua_bookmarks").insert({
-        user_id: user.id,
-        dua_title: dua.titleEn,
-        dua_arabic: dua.arabic,
-        dua_transliteration: dua.transliteration || null,
-        dua_english: dua.translation,
-        category: dua.categories[0] || "general",
-      });
-      if (error) return toast.error(settings.language === "ar" ? "فشل الحفظ" : "Failed to bookmark");
-      setBookmarkedDuas((prev) => new Set(prev).add(dua.titleEn));
-      toast.success(settings.language === "ar" ? "تم الحفظ" : "Bookmarked");
-    }
-  };
-
   const langIsAr = settings.language === "ar";
   const showTranslit = settings.translationEnabled && settings.translationSource === "transliteration";
   const showTranslation = settings.translationEnabled && settings.translationSource !== "transliteration";
   const t = (en: string, ar: string) => (langIsAr ? ar : en);
 
+  /* ---------- Auth / bookmarks ---------- */
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_ev, session) =>
+      setUser(session?.user ?? null)
+    );
+    return () => subscription.unsubscribe();
+  }, []);
+  useEffect(() => {
+    (async () => {
+      if (!user) return;
+      const { data } = await supabase.from("dua_bookmarks").select("dua_title").eq("user_id", user.id);
+      if (data) setBookmarkedDuas(new Set(data.map((b) => b.dua_title)));
+    })();
+  }, [user]);
+
+  const toggleBookmark = async (dua: Dua) => {
+    if (!user) {
+      toast.error(langIsAr ? "يجب تسجيل الدخول أولاً" : "Please sign in first");
+      navigate("/auth");
+      return;
+    }
+    const key = dua.titleEn;
+    const isSaved = bookmarkedDuas.has(key);
+    if (isSaved) {
+      const { error } = await supabase
+        .from("dua_bookmarks")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("dua_title", key);
+      if (error) return toast.error(langIsAr ? "فشل الحذف" : "Failed to remove");
+      setBookmarkedDuas((p) => {
+        const n = new Set(p);
+        n.delete(key);
+        return n;
+      });
+      toast.success(langIsAr ? "تم الحذف" : "Bookmark removed");
+    } else {
+      const { error } = await supabase.from("dua_bookmarks").insert({
+        user_id: user.id,
+        dua_title: key,
+        dua_arabic: dua.arabic,
+        dua_transliteration: dua.transliteration || null,
+        dua_english: dua.translation,
+        category: dua.categories[0] || "general",
+      });
+      if (error) return toast.error(langIsAr ? "فشل الحفظ" : "Failed to bookmark");
+      setBookmarkedDuas((p) => new Set(p).add(key));
+      toast.success(langIsAr ? "تم الحفظ" : "Bookmarked");
+    }
+  };
+
+  /* ---------- Share (no copy button) ---------- */
+  const buildShareUrl = (dua: Dua) => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    params.set("dua", dua.id);
+    url.search = params.toString();
+    return url.toString();
+  };
+
+  const shareDua = async (dua: Dua) => {
+    const url = buildShareUrl(dua);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: langIsAr ? dua.titleAr : dua.titleEn,
+          text: langIsAr ? dua.arabic : dua.translation,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success(t("Link copied", "تم نسخ الرابط"));
+      }
+    } catch {
+      await navigator.clipboard.writeText(url);
+      toast.success(t("Link copied", "تم نسخ الرابط"));
+    }
+  };
+
+  /* ---------- Deep link open ---------- */
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const duaId = params.get("dua");
+    if (!duaId) return;
+    const d = ALL_DUAS.find((x) => x.id === duaId);
+    if (d) setSelectedDua(d);
+  }, [location.search]);
+
+  /* ---------- Categories / filter ---------- */
   const categoriesInUse: CategoryKey[] = useMemo(() => {
     const base: CategoryKey[] = ["all"];
     const set = new Set<CategoryKey>();
@@ -1427,25 +1415,38 @@ const Duas: React.FC = () => {
   }, []);
 
   const filtered = useMemo(() => {
-    const byCat = category === "all" ? ALL_DUAS : ALL_DUAS.filter((d) => d.categories.includes(category));
+    const byCat =
+      category === "all" ? ALL_DUAS : ALL_DUAS.filter((d) => d.categories.includes(category));
     if (!query.trim()) return byCat;
     const q = query.toLowerCase();
     return byCat.filter((d) => {
-      const fields = [d.titleAr, d.titleEn, d.arabic, d.transliteration ?? "", d.translation, d.reference ?? ""]
+      const fields = [
+        d.titleAr,
+        d.titleEn,
+        d.arabic,
+        d.transliteration ?? "",
+        d.translation,
+        d.reference ?? "",
+      ]
         .join(" ")
         .toLowerCase();
       return fields.includes(q);
     });
   }, [category, query]);
 
-  const handleCopy = async (dua: Dua) => {
-    const textToCopy = langIsAr ? dua.arabic : showTranslit ? dua.transliteration || dua.translation : dua.translation;
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      toast.success(t("Copied", "تم النسخ"));
-    } catch {
-      toast.error(t("Copy failed", "فشل النسخ"));
-    }
+  const openDetail = (dua: Dua) => {
+    setSelectedDua(dua);
+    const params = new URLSearchParams(location.search);
+    params.set("dua", dua.id);
+    window.history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+  };
+
+  const closeDetail = () => {
+    setSelectedDua(null);
+    const params = new URLSearchParams(location.search);
+    params.delete("dua");
+    const next = params.toString() ? `${location.pathname}?${params.toString()}` : location.pathname;
+    window.history.replaceState(null, "", next);
   };
 
   const resetFilters = () => {
@@ -1453,26 +1454,28 @@ const Duas: React.FC = () => {
     setQuery("");
   };
 
-  /* ---------------------- Detail “page” ---------------------- */
+  /* ===================== DETAIL VIEW ===================== */
   if (selectedDua) {
     const Icon = selectedDua.icon || FALLBACK_ICON;
+    const saved = bookmarkedDuas.has(selectedDua.titleEn);
     return (
       <div
-        className="relative min-h-[100dvh] w-full overflow-x-hidden overscroll-x-none touch-pan-y"
+        className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-visible"
         dir={langIsAr ? "rtl" : "ltr"}
       >
-        {/* Back to list (local back) */}
+        {/* Back */}
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setSelectedDua(null)}
+          onClick={closeDetail}
           className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
           aria-label={t("Back", "رجوع")}
+          title={t("Back", "رجوع")}
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
 
-        {/* Background */}
+        {/* Soft background */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
           <div className="absolute left-1/2 -translate-x-1/2 top-[-6rem] h-72 w-72 rounded-full bg-primary/20 blur-3xl opacity-40" />
@@ -1493,13 +1496,39 @@ const Duas: React.FC = () => {
           )}
         </div>
 
-        {/* Body */}
+        {/* Card */}
         <div className="max-w-3xl mx-auto px-4 mt-6 space-y-6 pb-24">
-          <div className="glass-effect rounded-3xl p-6 border border-border/30 backdrop-blur-xl">
+          <Card className="glass-effect rounded-3xl p-6 border border-border/30 backdrop-blur-xl">
+            {/* ACTION ROW — Bookmark LEFT, Share RIGHT */}
+            <div className="flex items-center justify-between mb-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleBookmark(selectedDua)}
+                className="rounded-full"
+                title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+                aria-label={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+              >
+                <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => shareDua(selectedDua)}
+                className="rounded-full"
+                title={t("Share", "مشاركة")}
+                aria-label={t("Share", "مشاركة")}
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Arabic */}
             <p className={`text-2xl leading-relaxed ${settings.fontType === "quran" ? "font-quran" : ""}`} dir="rtl">
               {selectedDua.arabic}
             </p>
 
+            {/* Transliteration / Translation */}
             {showTranslit && selectedDua.transliteration && (
               <p className="mt-4 text-sm text-muted-foreground italic" dir="ltr">
                 {selectedDua.transliteration}
@@ -1511,6 +1540,7 @@ const Duas: React.FC = () => {
               </p>
             )}
 
+            {/* Meta chips */}
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {selectedDua.repeat && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-1">
@@ -1526,42 +1556,17 @@ const Duas: React.FC = () => {
                 );
               })}
             </div>
-          </div>
-
-          {/* Actions – ICON ONLY */}
-          <div className={`flex ${langIsAr ? "justify-start" : "justify-end"} gap-2`}>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full"
-              onClick={() => toggleBookmark(selectedDua)}
-              title={bookmarkedDuas.has(selectedDua.titleEn) ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-              aria-label={bookmarkedDuas.has(selectedDua.titleEn) ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-            >
-              <Bookmark className={`h-4 w-4 ${bookmarkedDuas.has(selectedDua.titleEn) ? "fill-primary text-primary" : ""}`} />
-            </Button>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full"
-              onClick={() => handleCopy(selectedDua)}
-              title={t("Copy", "نسخ")}
-              aria-label={t("Copy", "نسخ")}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
+          </Card>
         </div>
       </div>
     );
   }
 
-  /* ---------------------- List view ---------------------- */
+  /* ===================== LIST VIEW ===================== */
   return (
     <div
-      className="relative min-h-[100dvh] w-full overflow-x-hidden overscroll-x-none touch-pan-y"
-      dir={settings.language === "ar" ? "rtl" : "ltr"}
+      className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-visible"
+      dir={langIsAr ? "rtl" : "ltr"}
     >
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
@@ -1570,13 +1575,14 @@ const Duas: React.FC = () => {
         <div className="absolute right-1/2 translate-x-1/2 bottom-[-7rem] h-80 w-80 rounded-full bg-secondary/20 blur-3xl opacity-40" />
       </div>
 
-      {/* Global back */}
+      {/* Back */}
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate(-1)}
         className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
-        aria-label={settings.language === "ar" ? "رجوع" : "Back"}
+        aria-label={t("Back", "رجوع")}
+        title={t("Back", "رجوع")}
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
@@ -1585,70 +1591,67 @@ const Duas: React.FC = () => {
       <header className="pt-16 md:pt-20 text-center px-4">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
           <span className="bg-gradient-to-br from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent">
-            {settings.language === "ar" ? "مكتبة الأدعية والأذكار" : "Dua & Athkar Library"}
+            {langIsAr ? "مكتبة الأدعية والأذكار" : "Dua & Athkar Library"}
           </span>
         </h1>
         <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-          {settings.language === "ar"
-            ? "أدعية يومية صحيحة مصمّمة بعناية. تصفّح، وابحث، وانسخ فورًا."
-            : "Authentic daily supplications, beautifully organized. Read, search, and copy instantly."}
+          {langIsAr
+            ? "أدعية يومية صحيحة مصمّمة بعناية. تصفّح وابحث واحفظ وشارك."
+            : "Authentic daily supplications, beautifully organized. Browse, search, bookmark, and share."}
         </p>
       </header>
 
-      {/* Controls */}
+      {/* Controls (NOT sticky → avoids inner scrollbar) */}
       <section className="mt-8 md:mt-10 px-4">
-        <div className="sticky top-16 z-30">
-          <div className="rounded-2xl border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50 p-3 md:p-4 shadow-sm">
-            <div className="grid gap-3 md:grid-cols-[1fr_300px_auto] items-center">
-              {/* Search */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={
-                    settings.language === "ar" ? "ابحث عن دعاء بالعربية أو الإنجليزية…" : "Search duas in Arabic or English…"
-                  }
-                  className="w-full rounded-xl border bg-background px-11 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              </div>
-
-              {/* Category */}
-              <div className="flex items-center gap-2">
-                <Select value={category} onValueChange={(val) => setCategory(val as CategoryKey)}>
-                  <SelectTrigger className="w-full rounded-xl h-11 border bg-background">
-                    <SelectValue placeholder={settings.language === "ar" ? "اختر التصنيف" : "Select category"} />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-80">
-                    {categoriesInUse.map((key) => {
-                      const meta = CAT_META[key];
-                      const Icon = meta?.icon || FALLBACK_ICON;
-                      return (
-                        <SelectItem key={key} value={key} className="flex items-center">
-                          <div className="flex items-center gap-2">
-                            <Icon className="h-4 w-4" />
-                            <span>{settings.language === "ar" ? meta.labelAr : meta.labelEn}</span>
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Reset */}
-              <div className="flex md:justify-end">
-                <Button variant="outline" onClick={resetFilters} className="rounded-xl h-11">
-                  <RefreshCcw className="h-4 w-4 mr-2" />
-                  {settings.language === "ar" ? "إعادة الضبط" : "Reset"}
-                </Button>
-              </div>
+        <div className="rounded-2xl border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50 p-3 md:p-4 shadow-sm">
+          <div className="grid gap-3 md:grid-cols-[1fr_300px_auto] items-center">
+            {/* Search */}
+            <div className="relative">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("Search duas in Arabic or English…", "ابحث عن دعاء بالعربية أو الإنجليزية…")}
+                className="w-full rounded-xl border bg-background px-11 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+              />
+              <Search className={`${langIsAr ? "right-3" : "left-3"} absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
             </div>
 
-            <div className="mt-3 text-xs md:text-sm text-muted-foreground">
-              {(settings.language === "ar" ? "المعروض" : "Showing") + " " + filtered.length + " " + (settings.language === "ar" ? "دعاء" : "duas")}
+            {/* Category */}
+            <div className="flex items-center gap-2">
+              <Select value={category} onValueChange={(val) => setCategory(val as CategoryKey)}>
+                <SelectTrigger className="w-full rounded-xl h-11 border bg-background">
+                  <SelectValue placeholder={t("Select category", "اختر التصنيف")} />
+                </SelectTrigger>
+                {/* dropdown can scroll independently when OPEN, but it's portal-based; no extra page scrollbar */}
+                <SelectContent>
+                  {categoriesInUse.map((key) => {
+                    const meta = CAT_META[key];
+                    const Icon = meta?.icon || FALLBACK_ICON;
+                    return (
+                      <SelectItem key={key} value={key} className="flex items-center">
+                        <div className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          <span>{t(meta.labelEn, meta.labelAr)}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Reset */}
+            <div className="flex md:justify-end">
+              <Button variant="outline" onClick={resetFilters} className="rounded-xl h-11">
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                {t("Reset", "إعادة الضبط")}
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-3 text-xs md:text-sm text-muted-foreground">
+            {`${t("Showing", "المعروض")} ${filtered.length} ${t("duas", "دعاء")}`}
           </div>
         </div>
       </section>
@@ -1657,7 +1660,7 @@ const Duas: React.FC = () => {
       <main className="px-4 mt-6 pb-24">
         {filtered.length === 0 ? (
           <div className="rounded-2xl border p-8 text-center text-muted-foreground bg-background/50 backdrop-blur">
-            {settings.language === "ar" ? "لا توجد نتائج. جرّب بحثًا أو تصنيفًا مختلفًا." : "No results. Try a different search or category."}
+            {t("No results. Try a different search or category.", "لا توجد نتائج. جرّب بحثًا أو تصنيفًا مختلفًا.")}
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -1667,49 +1670,48 @@ const Duas: React.FC = () => {
               return (
                 <article
                   key={dua.id}
-                  onClick={() => setSelectedDua(dua)}
+                  onClick={() => openDetail(dua)}
                   className="group relative overflow-hidden rounded-3xl border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 shadow-sm transition hover:shadow-md cursor-pointer"
                 >
-                  {/* Header */}
+                  {/* Header row */}
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow shrink-0">
                         <IconComp className="h-6 w-6 text-primary-foreground" />
                       </div>
-                      <div className="leading-tight">
-                        <h3 className="text-base md:text-lg font-semibold">
-                          {settings.language === "ar" ? dua.titleAr : dua.titleEn}
+                      <div className="leading-tight min-w-0">
+                        <h3 className="text-base md:text-lg font-semibold break-words">
+                          {langIsAr ? dua.titleAr : dua.titleEn}
                         </h3>
                         {dua.reference && (
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {settings.language === "ar" ? "المصدر:" : "Ref:"} {dua.reference}
+                          <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                            {t("Ref:", "المصدر:")} {dua.reference}
                           </p>
                         )}
                       </div>
                     </div>
 
-                    {/* ICON-ONLY actions (stop click bubbling) */}
+                    {/* Actions (stop bubbling) */}
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline"
                         size="icon"
                         className="rounded-full"
                         onClick={() => toggleBookmark(dua)}
-                        title={saved ? (settings.language === "ar" ? "إزالة الإشارة" : "Remove bookmark") : (settings.language === "ar" ? "حفظ" : "Bookmark")}
-                        aria-label={saved ? (settings.language === "ar" ? "إزالة الإشارة" : "Remove bookmark") : (settings.language === "ar" ? "حفظ" : "Bookmark")}
+                        title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+                        aria-label={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
                       >
                         <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
                       </Button>
-
                       <Button
                         variant="outline"
                         size="icon"
                         className="rounded-full"
-                        onClick={() => handleCopy(dua)}
-                        title={settings.language === "ar" ? "نسخ" : "Copy"}
-                        aria-label={settings.language === "ar" ? "نسخ" : "Copy"}
+                        onClick={() => shareDua(dua)}
+                        title={t("Share", "مشاركة")}
+                        aria-label={t("Share", "مشاركة")}
                       >
-                        <Copy className="h-4 w-4" />
+                        <Share2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -1728,23 +1730,23 @@ const Duas: React.FC = () => {
                     </p>
                   )}
                   {showTranslation && (
-                    <p className={`mt-3 text-sm text-muted-foreground ${settings.language === "ar" ? "text-right" : ""}`}>
+                    <p className={`mt-3 text-sm text-muted-foreground ${langIsAr ? "text-right" : ""}`}>
                       {dua.translation}
                     </p>
                   )}
 
-                  {/* Meta */}
+                  {/* Meta chips */}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {dua.repeat && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-1">
-                        ×{dua.repeat} {settings.language === "ar" ? "مرات" : "times"}
+                        ×{dua.repeat} {t("times", "مرات")}
                       </span>
                     )}
                     {dua.categories.slice(0, 3).map((c) => {
                       if (c === "all" || !(c in CAT_META)) return null;
                       return (
                         <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-2 py-1">
-                          {settings.language === "ar" ? CAT_META[c].labelAr : CAT_META[c].labelEn}
+                          {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
                         </span>
                       );
                     })}
