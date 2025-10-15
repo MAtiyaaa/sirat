@@ -106,7 +106,7 @@ const App = () => (
                   <Route path="/jerusalem/landmarks-map" element={<JerusalemLandmarksMap />} />
                   <Route path="/mosquelocator" element={<MosqueLocator />} />
                   <Route path="/empires" element={<IslamicEmpires />} />
-                  <Route path="/rashidun" element={<RashidunCaliphs />} />
+                  <Route path="/empires/rashidun" element={<RashidunCaliphs />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
