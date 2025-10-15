@@ -192,7 +192,7 @@ const HellLevels: React.FC = () => {
   const [selected, setSelected] = React.useState<Level | null>(null);
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 overflow-x-hidden">
       {/* Header */}
       <div className="max-w-2xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -205,9 +205,9 @@ const HellLevels: React.FC = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
             <Flame className="h-6 w-6 text-destructive" />
-            <h1 className="text-3xl font-bold">{content.title}</h1>
+            <h1 className="text-3xl font-bold break-words">{content.title}</h1>
           </div>
         </div>
 
@@ -246,15 +246,15 @@ const HellLevels: React.FC = () => {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1">
+                          <h3 className="font-semibold text-lg mb-1 break-words">
                             {ar ? lvl.nameAr : lvl.nameEn}
                           </h3>
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {ar ? lvl.descAr : lvl.descEn}
                           </p>
                           <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
-                            <BookOpen className="h-4 w-4" />
-                            {ar ? lvl.detailsAr : lvl.detailsEn}
+                            <BookOpen className="h-4 w-4 shrink-0" />
+                            <span className="break-words">{ar ? lvl.detailsAr : lvl.detailsEn}</span>
                           </p>
                         </div>
 
@@ -310,11 +310,11 @@ const HellLevels: React.FC = () => {
                     >
                       <Flame className={`h-7 w-7 ${tone.iconColor}`} />
                     </div>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-semibold mb-1">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-2xl font-semibold mb-1 break-words">
                         {ar ? selected.nameAr : selected.nameEn}
                       </h2>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground break-words">
                         {ar ? selected.descAr : selected.descEn}
                       </p>
                     </div>
@@ -328,19 +328,19 @@ const HellLevels: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
               <div className="text-xs uppercase text-muted-foreground">{content.descLabel}</div>
-              <div className={`text-sm mt-1 ${ar ? "text-right" : ""}`}>
+              <div className={`text-sm mt-1 ${ar ? "text-right" : ""} break-words`}>
                 {ar ? selected.descAr : selected.descEn}
               </div>
             </Card>
             <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
               <div className="text-xs uppercase text-muted-foreground">{content.detailsLabel}</div>
-              <div className={`text-sm mt-1 ${ar ? "text-right" : ""}`}>
+              <div className={`text-sm mt-1 ${ar ? "text-right" : ""} break-words`}>
                 {ar ? selected.detailsAr : selected.detailsEn}
               </div>
             </Card>
           </div>
 
-          {/* References */}
+          {/* References (wrapped) */}
           {selected.references?.length > 0 && (
             <div className="grid gap-3 mb-2">
               <h3 className="font-semibold text-destructive">{content.referencesLabel}</h3>
@@ -348,7 +348,7 @@ const HellLevels: React.FC = () => {
                 <Button
                   key={i}
                   variant="outline"
-                  className="w-full neomorph hover:neomorph-pressed justify-start h-auto py-3 border-destructive/30"
+                  className="w-full neomorph hover:neomorph-pressed justify-start h-auto py-3 border-destructive/30 whitespace-normal"
                   onClick={() => {
                     if (ref.source === "Quran") {
                       const surahNum = ref.ref.split(":")[0];
@@ -356,11 +356,11 @@ const HellLevels: React.FC = () => {
                     }
                   }}
                 >
-                  <div className="flex flex-col gap-1 w-full text-left">
-                    <div className="font-semibold text-sm text-destructive">
+                  <div className="flex flex-col gap-1 w-full text-left min-w-0">
+                    <div className="font-semibold text-sm text-destructive break-words whitespace-normal hyphens-auto">
                       {ref.source} {ref.ref}
                     </div>
-                    <div className={`text-xs text-muted-foreground ${ar ? "text-right arabic-regal" : ""}`}>
+                    <div className={`text-xs text-muted-foreground break-words whitespace-normal hyphens-auto ${ar ? "text-right arabic-regal" : ""}`}>
                       {ar ? ref.textAr : ref.textEn}
                     </div>
                   </div>
