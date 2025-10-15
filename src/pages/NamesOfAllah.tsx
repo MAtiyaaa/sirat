@@ -20,7 +20,7 @@ const NamesOfAllah = () => {
     detailsLabel: isArabic ? 'التفاصيل' : 'Details',
     referencesLabel: isArabic ? 'المراجع' : 'References',
   };
-
+  
   const names = [
     { ar: 'الرَّحْمَن', en: 'Ar-Rahman', meaning: 'The Most Merciful', detailsAr: 'ذو الرحمة الواسعة التي وسعت كل شيء', detailsEn: 'The One whose Mercy encompasses all creation', references: [{ source: 'Quran', ref: '1:3', textAr: 'الرَّحْمَٰنِ الرَّحِيمِ', textEn: 'The Most Merciful, the Bestower of Mercy' }] },
     { ar: 'الرَّحِيم', en: 'Ar-Raheem', meaning: 'The Bestower of Mercy', detailsAr: 'الذي يرحم عباده المؤمنين رحمة خاصة', detailsEn: 'The One who bestows special mercy on believers', references: [{ source: 'Quran', ref: '1:3', textAr: 'الرَّحْمَٰنِ الرَّحِيمِ', textEn: 'The Most Merciful, the Bestower of Mercy' }] },
@@ -122,72 +122,145 @@ const NamesOfAllah = () => {
     { ar: 'الصَّبُور', en: 'As-Sabur', meaning: 'The Most Patient', detailsAr: 'الصبور الذي لا يعجل بالعقوبة', detailsEn: 'The One who does not hasten punishment', references: [{ source: 'Hadith', ref: 'Tirmidhi', textAr: 'وَاللَّهُ صَبُورٌ', textEn: 'And Allah is Most Patient' }] },
   ];
 
+ 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">{content.title}</h1>
+    <div className="min-h-screen pb-24"
+         dir={isArabic ? 'rtl' : 'ltr'}>
+      {/* Empire backdrop */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        {/* marble-ish base */}
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_600px_at_50%_-10%,rgba(255,230,180,0.15),transparent_70%),radial-gradient(800px_400px_at_90%_120%,rgba(180,210,255,0.12),transparent_60%)]" />
+        {/* vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_10%,transparent,rgba(0,0,0,0.08))]" />
+      </div>
+
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        {/* Imperial Header */}
+        <div className="relative overflow-hidden rounded-3xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-yellow-400/10 to-rose-400/10" />
+          <div className="relative border rounded-3xl border-amber-400/30 bg-background/40 backdrop-blur-xl shadow-[inset_0_0_0_1px_rgba(255,255,255,.06)]">
+            <div className="flex items-center gap-4 p-4 sm:p-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="shrink-0 rounded-xl border border-amber-400/30 hover:bg-amber-500/10"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-amber-500/10 border border-amber-400/30 grid place-items-center shadow-[0_0_0_1px_rgba(255,255,255,.04)]">
+                  <Heart className="h-6 w-6 text-amber-500" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight
+                                 [font-variant:small-caps] text-amber-600 dark:text-amber-400">
+                    {content.title}
+                  </h1>
+                  <div className="mt-1 text-sm sm:text-base text-muted-foreground">
+                    {content.intro}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* gilded divider */}
+            <div className="h-px bg-gradient-to-r from-transparent via-amber-400/50 to-transparent" />
+            <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-50/40 dark:bg-amber-500/5 px-3 py-1 text-[12px] sm:text-xs text-amber-700 dark:text-amber-300">
+                <span className="i-lucide-crown hidden sm:block" />
+                <span>{isArabic ? 'تصميم إمبراطوري • مذهّب' : 'Empire Design • Gilded'}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <p className="text-muted-foreground text-center mb-8">{content.intro}</p>
-
+        {/* Names — Empire cards in an accordion */}
         <Accordion type="multiple" className="space-y-4">
           {names.map((name, index) => (
-            <AccordionItem key={index} value={`name-${index}`} className="border-0">
-              <Card className="overflow-hidden neomorph-interactive">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="text-left space-y-2">
-                      <div className="text-2xl font-bold text-primary">{name.ar}</div>
-                      <div className="text-sm font-semibold">{name.en}</div>
-                      <div className="text-xs text-muted-foreground">{name.meaning}</div>
+            <AccordionItem
+              key={index}
+              value={`name-${index}`}
+              className="border-0"
+            >
+              <Card
+                className="overflow-hidden rounded-3xl border border-amber-400/30 bg-background/60
+                           shadow-[0_10px_30px_-10px_rgba(0,0,0,.25)]
+                           hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,.35)]
+                           transition-shadow duration-300"
+              >
+                {/* golden aura */}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent" />
+
+                <AccordionTrigger className="px-5 sm:px-6 py-5 sm:py-6 hover:no-underline">
+                  <div className="w-full flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-2xl bg-amber-500/10 border border-amber-400/30 grid place-items-center">
+                        <span className="text-lg sm:text-xl font-bold text-amber-600">{index + 1}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xl sm:text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+                          {name.ar}
+                        </div>
+                        <div className="text-sm sm:text-base font-semibold opacity-90">
+                          {name.en}
+                        </div>
+                        <div className="mt-1 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-50/50 dark:bg-amber-500/10 px-2.5 py-1 text-[11px] sm:text-xs text-amber-800 dark:text-amber-200">
+                          {name.meaning}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* chevron crafted look */}
+                    <div className="shrink-0 h-9 w-9 rounded-full border border-amber-400/40 bg-amber-500/10 grid place-items-center">
+                      <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-6 pb-4">
-                  <div className="space-y-4 pt-2">
-                    <div>
-                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+
+                <AccordionContent className="px-5 sm:px-6 pb-6">
+                  <div className="space-y-6 pt-1">
+                    {/* Details block */}
+                    <div className="rounded-2xl border border-amber-400/30 bg-background/60 p-4 sm:p-5">
+                      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300 font-semibold">
                         <BookOpen className="h-4 w-4" />
                         {content.detailsLabel}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
+                      </div>
+                      <p className={`mt-2 text-sm sm:text-[15px] leading-relaxed text-muted-foreground ${isArabic ? 'text-right arabic-regal' : ''}`}>
                         {isArabic ? name.detailsAr : name.detailsEn}
                       </p>
                     </div>
+
+                    {/* References */}
                     {name.references && name.references.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold mb-2">{content.referencesLabel}</h4>
-                        <div className="space-y-2">
-                          {name.references.map((ref, refIndex) => (
-                            <button
-                              key={refIndex}
-                              onClick={() => {
-                                if (ref.source === 'Quran') {
-                                  const [surah, ayah] = ref.ref.split(':');
-                                  navigate(`/quran/${surah}`);
-                                }
-                              }}
-                              className="w-full text-left p-3 rounded-lg bg-primary/5 hover:bg-primary/10 smooth-transition border border-primary/20"
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-primary">{ref.source} {ref.ref}</span>
-                              </div>
-                              <p className="text-sm mt-1">{isArabic ? ref.textAr : ref.textEn}</p>
-                            </button>
-                          ))}
-                        </div>
+                      <div className="space-y-3">
+                        <div className="text-amber-700 dark:text-amber-300 font-semibold">{content.referencesLabel}</div>
+                        {name.references.map((ref, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              if (ref.source === 'Quran') {
+                                const [surah] = ref.ref.split(':');
+                                navigate(`/quran/${surah}`);
+                              }
+                            }}
+                            className="w-full text-left rounded-2xl border border-amber-400/30
+                                       bg-gradient-to-br from-amber-50/70 via-amber-50/40 to-transparent
+                                       dark:from-amber-500/10 dark:via-amber-500/5 dark:to-transparent
+                                       hover:from-amber-100/80 hover:via-amber-50/60 hover:to-amber-500/5
+                                       transition-colors p-4"
+                          >
+                            <div className="text-[12px] sm:text-xs font-medium text-amber-700 dark:text-amber-300">
+                              {ref.source} {ref.ref}
+                            </div>
+                            <p className={`mt-1 text-sm text-muted-foreground ${isArabic ? 'text-right arabic-regal' : ''}`}>
+                              {isArabic ? ref.textAr : ref.textEn}
+                            </p>
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>
