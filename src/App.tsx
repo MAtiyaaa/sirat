@@ -52,6 +52,16 @@ import JerusalemLandmarksMap from "./pages/JerusalemLandmarksMap";
 import MosqueLocator from "./pages/MosqueLocator";
 import IslamicEmpires from "./pages/IslamicEmpires";
 import RashidunCaliphs from "./pages/RashidunCaliphs";
+import UmayyadOverview from "./pages/UmayyadOverview";
+import AbbasidOverview from "./pages/AbbasidOverview";
+import FatimidOverview from "./pages/FatimidOverview";
+import SeljukOverview from "./pages/SeljukOverview";
+import AlmohadOverview from "./pages/AlmohadOverview";
+import DelhiSultanateOverview from "./pages/DelhiSultanateOverview";
+import OttomanOverview from "./pages/OttomanOverview";
+import TimuridOverview from "./pages/TimuridOverview";
+import SafavidOverview from "./pages/SafavidOverview";
+import MughalOverview from "./pages/MughalOverview";
 
 const queryClient = new QueryClient();
 
@@ -107,6 +117,16 @@ const App = () => (
                   <Route path="/mosquelocator" element={<MosqueLocator />} />
                   <Route path="/empires" element={<IslamicEmpires />} />
                   <Route path="/empires/rashidun" element={<RashidunCaliphs />} />
+                  <Route path="/empires/umayyad" element={<UmayyadOverview />} />
+                  <Route path="/empires/abbasid" element={<AbbasidOverview />} />
+                  <Route path="/empires/fatimid" element={<FatimidOverview />} />
+                  <Route path="/empires/seljuk" element={<SeljukOverview />} />
+                  <Route path="/empires/almohad" element={<AlmohadOverview />} />
+                  <Route path="/empires/delhi-sultanate" element={<DelhiSultanateOverview />} />
+                  <Route path="/empires/ottoman" element={<OttomanOverview />} />
+                  <Route path="/empires/timurid" element={<TimuridOverview />} />
+                  <Route path="/empires/safavid" element={<SafavidOverview />} />
+                  <Route path="/empires/mughal" element={<MughalOverview />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
