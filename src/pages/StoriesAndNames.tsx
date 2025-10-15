@@ -26,6 +26,17 @@ const StoriesAndNames = () => {
         iconColor: "text-purple-600 dark:text-purple-400",
       },
       {
+        icon: Book,
+        titleAr: "التاريخ الإسلامي",
+        titleEn: "Islamic History",
+        descAr: "محطات التاريخ الإسلامي عبر العصور",
+        descEn: "Key phases of Islamic history through the ages",
+        link: "/islamichistory",
+        gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20",
+        iconBg: "bg-emerald-500/10",
+        iconColor: "text-emerald-600 dark:text-emerald-400",
+      },
+      {
         icon: MapPin,
         titleAr: "المدن المقدسة",
         titleEn: "Holy Cities",
