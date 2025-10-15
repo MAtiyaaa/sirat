@@ -25,9 +25,7 @@ import {
   Bookmark,
   Search,
   Eye,
-  Lock,
-  Share2,
-  Link as LinkIcon
+  Share2
 } from 'lucide-react';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import {
@@ -72,21 +70,21 @@ const SurahDetail = () => {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // --- Share helpers (new) ---
-  const shareOrCopy = async (url: string, title?: string, text?: string) => {
+  // --- Share helpers (only URL, no title/text) ---
+  const shareOrCopy = async (url: string) => {
     try {
       if (navigator.share) {
-        await navigator.share({ url, title, text });
+        await navigator.share({ url });
         return;
       }
+      throw new Error('no web share'); // force to clipboard if not supported
     } catch {
-      // fall through to copy
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
-    } catch {
-      toast.error(settings.language === 'ar' ? 'تعذر نسخ الرابط' : 'Could not copy link');
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
+      } catch {
+        toast.error(settings.language === 'ar' ? 'تعذر مشاركة الرابط' : 'Could not share link');
+      }
     }
   };
   const surahUrl = () => `${window.location.origin}/quran/${surahNumber}`;
@@ -95,13 +93,12 @@ const SurahDetail = () => {
   useEffect(() => {
     loadSurah();
     setHasRestoredScroll(false);
-    setHasUserScrolled(false); // Reset scroll flag when switching surahs
+    setHasUserScrolled(false);
     loadUser();
     loadBookmarks();
     saveLastViewed();
     loadNextSurahInfo();
 
-    // Only save position when entering surah with an ayah parameter
     if (surahNumber && initialAyah) {
       localStorage.setItem('quran_last_position', JSON.stringify({ 
         surahNumber: parseInt(surahNumber), 
@@ -109,7 +106,6 @@ const SurahDetail = () => {
       }));
     }
 
-    // Handle URL param for direct ayah navigation
     if (initialAyah) {
       setTimeout(() => {
         const element = document.querySelector(`[data-ayah="${initialAyah}"]`);
@@ -130,20 +126,16 @@ const SurahDetail = () => {
 
       let ayahNumber: number | null = null;
 
-      // Determine which tracking mode to use
       const trackingMode = settings.readingTrackingMode;
 
       if (trackingMode === 'auto') {
-        // Get the most recent ayah from all tracking methods
         const promises = [
-          // Scroll position
           supabase
             .from('reading_progress')
             .select('ayah_number, updated_at')
             .eq('user_id', session.user.id)
             .eq('surah_number', parseInt(surahNumber))
             .maybeSingle(),
-          // Bookmarks
           supabase
             .from('bookmarks')
             .select('ayah_number, created_at')
@@ -153,7 +145,6 @@ const SurahDetail = () => {
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle(),
-          // Reciting
           supabase
             .from('ayah_interactions')
             .select('ayah_number, updated_at')
@@ -163,7 +154,6 @@ const SurahDetail = () => {
             .order('updated_at', { ascending: false })
             .limit(1)
             .maybeSingle(),
-          // Click
           supabase
             .from('ayah_interactions')
             .select('ayah_number, updated_at')
@@ -177,7 +167,6 @@ const SurahDetail = () => {
 
         const results = await Promise.all(promises);
         
-        // Find the most recent entry
         let mostRecent: { ayah: number; time: string } | null = null;
         
         results.forEach((result, index) => {
@@ -185,7 +174,6 @@ const SurahDetail = () => {
             const timeField = index === 0 || index === 2 || index === 3 ? 'updated_at' : 'created_at';
             const time = result.data[timeField] as string;
             const ayah = result.data.ayah_number;
-            
             if (!mostRecent || new Date(time) > new Date(mostRecent.time)) {
               mostRecent = { ayah, time };
             }
@@ -194,7 +182,6 @@ const SurahDetail = () => {
         
         ayahNumber = mostRecent?.ayah || null;
       } else if (trackingMode === 'scroll') {
-        // Get from reading progress (scroll position)
         const { data } = await supabase
           .from('reading_progress')
           .select('ayah_number')
@@ -203,7 +190,6 @@ const SurahDetail = () => {
           .maybeSingle();
         ayahNumber = data?.ayah_number || null;
       } else if (trackingMode === 'bookmark') {
-        // Get last bookmarked ayah
         const { data } = await supabase
           .from('bookmarks')
           .select('ayah_number')
@@ -215,7 +201,6 @@ const SurahDetail = () => {
           .maybeSingle();
         ayahNumber = data?.ayah_number || null;
       } else if (trackingMode === 'reciting') {
-        // Get last recited ayah
         const { data } = await supabase
           .from('ayah_interactions')
           .select('ayah_number')
@@ -227,7 +212,6 @@ const SurahDetail = () => {
           .maybeSingle();
         ayahNumber = data?.ayah_number || null;
       } else if (trackingMode === 'click') {
-        // Get last clicked/interacted ayah
         const { data } = await supabase
           .from('ayah_interactions')
           .select('ayah_number')
@@ -261,67 +245,44 @@ const SurahDetail = () => {
     if (!surahData) return;
 
     const handleScroll = () => {
-      // Mark that user has actually scrolled
-      if (!hasUserScrolled) {
-        setHasUserScrolled(true);
-        console.log('[Scroll] User has scrolled - enabling progress tracking');
-      }
+      if (!hasUserScrolled) setHasUserScrolled(true);
 
       const ayahElements = document.querySelectorAll('[data-ayah]');
       let maxVisible = 1;
 
       ayahElements.forEach((el) => {
         const rect = el.getBoundingClientRect();
-        // Check if element is in viewport (with some buffer at top)
         if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
           const ayahNum = parseInt(el.getAttribute('data-ayah') || '1');
           if (ayahNum > maxVisible) maxVisible = ayahNum;
         }
       });
 
-      console.log('[Scroll] Detected ayah:', maxVisible, 'in surah:', surahNumber);
       setLastVisibleAyah(maxVisible);
 
-      // Save to localStorage immediately
       if (surahNumber) {
         localStorage.setItem('quran_last_position', JSON.stringify({ 
           surahNumber: parseInt(surahNumber), 
           ayahNumber: maxVisible 
         }));
-        console.log('[Scroll] Saved to localStorage - Surah:', surahNumber, 'Ayah:', maxVisible);
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-
     return () => window.removeEventListener('scroll', handleScroll);
   }, [surahData, surahNumber, hasUserScrolled]);
 
   // Save progress to database (only when user has actually scrolled)
   useEffect(() => {
-    // Only save if user has actually scrolled
-    if (!hasUserScrolled) {
-      console.log('[DB Save] Skipping - user has not scrolled yet');
-      return;
-    }
-
-    // Don't save ayah 1 unless user explicitly scrolled there
-    if (lastVisibleAyah === 1 && !hasRestoredScroll) {
-      console.log('[DB Save] Skipping - still at ayah 1 with no scroll restoration');
-      return;
-    }
+    if (!hasUserScrolled) return;
+    if (lastVisibleAyah === 1 && !hasRestoredScroll) return;
 
     const saveProgress = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user || !surahNumber) {
-        console.log('[DB Save] Skipping - no session or surah number');
-        return;
-      }
+      if (!session?.user || !surahNumber) return;
 
       try {
-        console.log('[DB Save] Saving progress - Surah:', surahNumber, 'Ayah:', lastVisibleAyah);
-        
-        const { error } = await supabase
+        await supabase
           .from('reading_progress')
           .upsert({
             user_id: session.user.id,
@@ -333,18 +294,12 @@ const SurahDetail = () => {
             onConflict: 'user_id,surah_number',
             ignoreDuplicates: false,
           });
-        
-        if (error) {
-          console.error('[DB Save] Error saving scroll progress:', error);
-        } else {
-          console.log('[DB Save] Successfully saved - Surah:', surahNumber, 'Ayah:', lastVisibleAyah);
-        }
       } catch (error) {
         console.error('[DB Save] Exception saving scroll progress:', error);
       }
     };
 
-    const timeoutId = setTimeout(saveProgress, 2000); // Debounce saves
+    const timeoutId = setTimeout(saveProgress, 2000);
     return () => clearTimeout(timeoutId);
   }, [lastVisibleAyah, surahNumber, hasUserScrolled, hasRestoredScroll]);
 
@@ -355,16 +310,11 @@ const SurahDetail = () => {
 
   const loadNextSurahInfo = async () => {
     if (!surahNumber || parseInt(surahNumber) >= 114) return;
-    
     const nextSurahNum = parseInt(surahNumber) + 1;
-    
     try {
-      // Fetch next surah data
       const surahs = await fetchSurahs();
       const nextSurah = surahs.find(s => s.number === nextSurahNum);
       setNextSurahData(nextSurah);
-      
-      // Check for progress on next surah
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         const { data: progressData } = await supabase
@@ -373,7 +323,6 @@ const SurahDetail = () => {
           .eq('user_id', session.user.id)
           .eq('surah_number', nextSurahNum)
           .maybeSingle();
-        
         setNextSurahProgress(progressData?.ayah_number || 0);
       }
     } catch (error) {
@@ -385,7 +334,6 @@ const SurahDetail = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user || !surahNumber) return;
 
-    // Load surah bookmark
     const { data: surahBookmark } = await supabase
       .from('bookmarks')
       .select('id')
@@ -396,7 +344,6 @@ const SurahDetail = () => {
 
     setIsSurahBookmarked(!!surahBookmark);
 
-    // Load ayah bookmarks
     const { data: ayahBookmarks } = await supabase
       .from('bookmarks')
       .select('ayah_number')
@@ -414,7 +361,7 @@ const SurahDetail = () => {
     if (!session?.user || !surahNumber) return;
 
     try {
-      const { error } = await supabase
+      await supabase
         .from('last_viewed_surah')
         .upsert({
           user_id: session.user.id,
@@ -423,10 +370,6 @@ const SurahDetail = () => {
         }, {
           onConflict: 'user_id'
         });
-      
-      if (error) {
-        console.error('Error saving last viewed:', error);
-      }
     } catch (error) {
       console.error('Error saving last viewed:', error);
     }
@@ -492,7 +435,6 @@ const SurahDetail = () => {
         });
         toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
       } else {
-        // Add bookmark
         await supabase
           .from('bookmarks')
           .insert({
@@ -502,7 +444,6 @@ const SurahDetail = () => {
             bookmark_type: 'ayah'
           });
         
-        // Track bookmark interaction
         await supabase
           .from('ayah_interactions')
           .upsert({
@@ -526,13 +467,11 @@ const SurahDetail = () => {
   };
 
   const handleAyahChat = async (ayah: any) => {
-    // Update last visible ayah
     setLastVisibleAyah(ayah.numberInSurah);
     
-    // Track click interaction
     if (user && surahNumber) {
       try {
-        const { error } = await supabase
+        await supabase
           .from('ayah_interactions')
           .upsert({
             user_id: user.id,
@@ -544,10 +483,6 @@ const SurahDetail = () => {
             onConflict: 'user_id,surah_number,ayah_number,interaction_type',
             ignoreDuplicates: false,
           });
-        
-        if (error) {
-          console.error('Error saving interaction:', error);
-        }
       } catch (error) {
         console.error('Error saving interaction:', error);
       }
@@ -563,9 +498,7 @@ const SurahDetail = () => {
       const arabic = await fetchSurahArabic(parseInt(surahNumber));
       setSurahData(arabic);
       
-      // Fetch translation or transliteration based on settings
       if (settings.translationEnabled) {
-        // Use 'en.transliteration' edition for transliteration
         const edition = settings.translationSource === 'transliteration' 
           ? 'en.transliteration' 
           : settings.translationSource;
@@ -575,45 +508,29 @@ const SurahDetail = () => {
         setTranslation(null);
       }
       
-      // Auto-load word-by-word and page numbers for all ayahs
       if (arabic?.ayahs) {
         const wordPromises = arabic.ayahs.map((ayah: any) => 
           fetchWordByWord(parseInt(surahNumber), ayah.numberInSurah)
             .then(words => ({ ayahNumber: ayah.numberInSurah, words }))
-            .catch(error => {
-              console.error(`Error loading word by word for ayah ${ayah.numberInSurah}:`, error);
-              return null;
-            })
+            .catch(() => null)
         );
-        
-        // Load page numbers for all ayahs
         const pagePromises = arabic.ayahs.map((ayah: any) =>
           getPageNumber(parseInt(surahNumber), ayah.numberInSurah)
             .then(page => ({ ayahNumber: ayah.numberInSurah, page }))
-            .catch(error => {
-              console.error(`Error loading page number for ayah ${ayah.numberInSurah}:`, error);
-              return null;
-            })
+            .catch(() => null)
         );
-        
         const [wordResults, pageResults] = await Promise.all([
           Promise.all(wordPromises),
           Promise.all(pagePromises)
         ]);
-        
         const newWordData: Record<number, any[]> = {};
         wordResults.forEach(result => {
-          if (result) {
-            newWordData[result.ayahNumber] = result.words;
-          }
+          if (result) newWordData[result.ayahNumber] = result.words;
         });
         setWordData(newWordData);
-        
         const newPageData: Record<number, number> = {};
         pageResults.forEach(result => {
-          if (result && result.page) {
-            newPageData[result.ayahNumber] = result.page;
-          }
+          if (result && result.page) newPageData[result.ayahNumber] = result.page;
         });
         setAyahPages(newPageData);
       }
@@ -627,7 +544,6 @@ const SurahDetail = () => {
 
   const loadWordByWord = async (ayahNumber: number) => {
     if (wordData[ayahNumber]) return;
-    
     try {
       const words = await fetchWordByWord(parseInt(surahNumber!), ayahNumber);
       setWordData(prev => ({ ...prev, [ayahNumber]: words }));
@@ -639,13 +555,11 @@ const SurahDetail = () => {
   const loadTafsir = async (ayahNumber: number) => {
     if (tafsirData[ayahNumber]) return;
 
-    // Update last visible ayah
     setLastVisibleAyah(ayahNumber);
 
-    // Track click interaction
     if (user && surahNumber) {
       try {
-        const { error } = await supabase
+        await supabase
           .from('ayah_interactions')
           .upsert({
             user_id: user.id,
@@ -657,10 +571,6 @@ const SurahDetail = () => {
             onConflict: 'user_id,surah_number,ayah_number,interaction_type',
             ignoreDuplicates: false,
           });
-        
-        if (error) {
-          console.error('Error saving interaction:', error);
-        }
       } catch (error) {
         console.error('Error saving interaction:', error);
       }
@@ -685,13 +595,11 @@ const SurahDetail = () => {
       return;
     }
 
-    // Update last visible ayah
     setLastVisibleAyah(ayahNumber);
 
-    // Track reciting interaction
     if (user && surahNumber) {
       try {
-        const { error } = await supabase
+        await supabase
           .from('ayah_interactions')
           .upsert({
             user_id: user.id,
@@ -703,10 +611,6 @@ const SurahDetail = () => {
             onConflict: 'user_id,surah_number,ayah_number,interaction_type',
             ignoreDuplicates: false,
           });
-        
-        if (error) {
-          console.error('Error saving interaction:', error);
-        }
       } catch (error) {
         console.error('Error saving interaction:', error);
       }
@@ -714,22 +618,16 @@ const SurahDetail = () => {
 
     const audioUrl = getAyahAudioUrl('ar.alafasy', parseInt(surahNumber!), ayahNumber);
     
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    if (audioRef.current) audioRef.current.pause();
     
     audioRef.current = new Audio(audioUrl);
     audioRef.current.play()
-      .catch(error => {
-        console.error('Error playing ayah audio:', error);
+      .catch(() => {
         toast.error('Failed to play audio');
       });
     setPlayingAyah(ayahNumber);
     
-    audioRef.current.onended = () => {
-      setPlayingAyah(null);
-    };
-    
+    audioRef.current.onended = () => setPlayingAyah(null);
     audioRef.current.onerror = () => {
       toast.error('Error loading audio');
       setPlayingAyah(null);
@@ -739,55 +637,37 @@ const SurahDetail = () => {
   const playSurah = () => {
     const currentSurahNumber = parseInt(surahNumber!);
     
-    // If this surah is already playing globally
     if (playingSurah === currentSurahNumber) {
-      if (isPlaying) {
-        pauseSurah();
-      } else {
-        resumeSurah();
-      }
+      if (isPlaying) pauseSurah();
+      else resumeSurah();
       return;
     }
 
-    // If another surah is playing, stop it first
     if (playingSurah && playingSurah !== currentSurahNumber) {
       stopSurah();
     }
 
     if (!surahData) return;
-    
-    // Start playing this surah through global context
     playGlobalSurah(currentSurahNumber, surahData.numberOfAyahs);
   };
 
   // Auto-scroll to playing ayah when locked
   useEffect(() => {
     if (!playingSurah || !isPlaying || playingSurah !== parseInt(surahNumber!)) return;
-    
     const isLocked = (window as any).quranLockState;
     if (!isLocked) return;
-
-    const scrollToCurrentAyah = () => {
-      const element = document.querySelector(`[data-ayah="${globalPlayingAyah}"]`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    };
-
-    scrollToCurrentAyah();
+    const element = document.querySelector(`[data-ayah="${globalPlayingAyah}"]`);
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [globalPlayingAyah, playingSurah, isPlaying, surahNumber]);
 
   const handleWordClick = async (ayahNumber: number, wordIndex: number) => {
     const key = `${ayahNumber}-${wordIndex}`;
     setOpenWordPopover(openWordPopover === key ? null : key);
-    
-    // Update last visible ayah to the one being clicked
     setLastVisibleAyah(ayahNumber);
 
-    // Track click interaction
     if (user && surahNumber) {
       try {
-        const { error } = await supabase
+        await supabase
           .from('ayah_interactions')
           .upsert({
             user_id: user.id,
@@ -799,10 +679,6 @@ const SurahDetail = () => {
             onConflict: 'user_id,surah_number,ayah_number,interaction_type',
             ignoreDuplicates: false,
           });
-        
-        if (error) {
-          console.error('Error saving interaction:', error);
-        }
       } catch (error) {
         console.error('Error saving interaction:', error);
       }
@@ -810,15 +686,10 @@ const SurahDetail = () => {
   };
 
   const playWordAudio = (word: WordData) => {
-    if (word.audio) {
-      const audio = new Audio(word.audio);
-      audio.play();
-    }
+    if (word.audio) new Audio(word.audio).play();
   };
 
-  if (loading) {
-    return <IslamicFactsLoader />;
-  }
+  if (loading) return <IslamicFactsLoader />;
 
   if (!surahData) {
     return (
@@ -862,40 +733,41 @@ const SurahDetail = () => {
             </p>
           </div>
 
-          <Button
-            onClick={playSurah}
-            className="rounded-full px-6 py-6 shadow-lg hover:shadow-xl smooth-transition"
-            size="lg"
-          >
-            {playingSurah === parseInt(surahNumber!) && isPlaying ? (
-              <Pause className="h-5 w-5 mr-2" />
-            ) : (
-              <Play className="h-5 w-5 mr-2" />
-            )}
-            <span className="font-semibold">
-              {playingSurah === parseInt(surahNumber!) && isPlaying
-                ? (settings.language === 'ar' ? 'إيقاف مؤقت' : 'Pause')
-                : (settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah')}
-            </span>
-          </Button>
-
-          <Button
-            onClick={toggleSurahBookmark}
-            variant="outline"
-            size="icon"
-            className="rounded-full w-12 h-12"
-            title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
-          >
-            <Bookmark className={`h-5 w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
-          </Button>
-
-          {/* Share Surah (new) */}
-          <div className="flex items-center gap-2">
+          {/* Right actions - prevent shrinking so sizes stay consistent */}
+          <div className="flex items-center gap-2 flex-none">
             <Button
-              onClick={() => shareOrCopy(surahUrl(), settings.language === 'ar' ? surahData.name : surahData.englishName)}
+              onClick={playSurah}
+              className="rounded-full px-6 py-6 shadow-lg hover:shadow-xl smooth-transition shrink-0"
+              size="lg"
+            >
+              {playingSurah === parseInt(surahNumber!) && isPlaying ? (
+                <Pause className="h-5 w-5 mr-2" />
+              ) : (
+                <Play className="h-5 w-5 mr-2" />
+              )}
+              <span className="font-semibold">
+                {playingSurah === parseInt(surahNumber!) && isPlaying
+                  ? (settings.language === 'ar' ? 'إيقاف مؤقت' : 'Pause')
+                  : (settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah')}
+              </span>
+            </Button>
+
+            <Button
+              onClick={toggleSurahBookmark}
               variant="outline"
               size="icon"
-              className="rounded-full w-12 h-12"
+              className="rounded-full w-12 h-12 shrink-0"
+              title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
+            >
+              <Bookmark className={`h-5 w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
+            </Button>
+
+            {/* Share Surah (only URL) */}
+            <Button
+              onClick={() => shareOrCopy(surahUrl())}
+              variant="outline"
+              size="icon"
+              className="rounded-full w-12 h-12 shrink-0"
               title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
             >
               <Share2 className="h-5 w-5" />
@@ -943,16 +815,11 @@ const SurahDetail = () => {
         {surahData.ayahs
           .filter((ayah: any, index: number) => {
             if (!searchTerm.trim()) return true;
-            
-            // Check if search term is a number (ayah number)
             const searchNumber = parseInt(searchTerm);
-            if (!isNaN(searchNumber)) {
-              return ayah.numberInSurah === searchNumber;
-            }
-            
-            // Normalize Arabic text for better matching
-            const normalizeArabic = (text: string) => {
-              return text
+            if (!isNaN(searchNumber)) return ayah.numberInSurah === searchNumber;
+
+            const normalizeArabic = (text: string) =>
+              text
                 .normalize('NFKC')
                 .replace(/[\u064B-\u065F\u0670]/g, '')
                 .replace(/[ًٌٍَُِّْٰ]/g, '')
@@ -960,12 +827,10 @@ const SurahDetail = () => {
                 .replace(/ة/g, 'ه')
                 .trim()
                 .toLowerCase();
-            };
             
             const search = normalizeArabic(searchTerm);
             const arabicText = normalizeArabic(ayah.text || '');
             const translationText = (translation?.ayahs[index]?.text || '').toLowerCase();
-            
             return arabicText.includes(search) || translationText.includes(search);
           })
           .map((ayah: any, index: number) => (
@@ -976,7 +841,7 @@ const SurahDetail = () => {
               playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
             }`}
           >
-            {/* Ayah Number & Play */}
+            {/* Ayah Number & Actions */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -990,9 +855,7 @@ const SurahDetail = () => {
                       setSearchTerm('');
                       setTimeout(() => {
                         const element = document.querySelector(`[data-ayah="${ayah.numberInSurah}"]`);
-                        if (element) {
-                          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
+                        if (element) element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                       }, 100);
                     }}
                     className="rounded-full gap-1.5"
@@ -1032,21 +895,11 @@ const SurahDetail = () => {
                   <Bookmark className={`h-4 w-4 ${bookmarkedAyahs.has(ayah.numberInSurah) ? 'fill-primary text-primary' : ''}`} />
                 </Button>
 
-                {/* Share Ayah (new) */}
+                {/* Share Ayah (only URL) */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() =>
-                    shareOrCopy(
-                      ayahUrl(ayah.numberInSurah),
-                      settings.language === 'ar'
-                        ? `${surahData.name} - آية ${ayah.numberInSurah}`
-                        : `${surahData.englishName} - Ayah ${ayah.numberInSurah}`,
-                      settings.language === 'ar'
-                        ? `مشاركة آية ${ayah.numberInSurah} من ${surahData.name}`
-                        : `Share Ayah ${ayah.numberInSurah} from ${surahData.englishName}`
-                    )
-                  }
+                  onClick={() => shareOrCopy(ayahUrl(ayah.numberInSurah))}
                   className="rounded-full"
                   title={settings.language === 'ar' ? 'مشاركة الآية' : 'Share ayah'}
                 >
@@ -1184,8 +1037,6 @@ const SurahDetail = () => {
           <Button
             onClick={async () => {
               const nextSurahNum = nextSurahData.number;
-              
-              // Check if there's progress on next surah
               if (user) {
                 const { data: progressData } = await supabase
                   .from('reading_progress')
@@ -1193,9 +1044,7 @@ const SurahDetail = () => {
                   .eq('user_id', user.id)
                   .eq('surah_number', nextSurahNum)
                   .maybeSingle();
-                
                 const progress = progressData?.ayah_number || 0;
-                
                 if (progress > 0) {
                   navigate(`/quran/${nextSurahNum}?ayah=${progress}`);
                 } else {
