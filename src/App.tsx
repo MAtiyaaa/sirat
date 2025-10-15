@@ -50,6 +50,7 @@ import JerusalemLiveView from "./pages/JerusalemLiveView";
 import JerusalemPrayer from "./pages/JerusalemPrayer";
 import JerusalemLandmarksMap from "./pages/JerusalemLandmarksMap";
 import MosqueLocator from "./pages/MosqueLocator";
+import IslamicEmpires from "./pages/IslamicEmpires";
 
 const queryClient = new QueryClient();
 
@@ -103,6 +104,7 @@ const App = () => (
                   <Route path="/jerusalem/prayer" element={<JerusalemPrayer />} />
                   <Route path="/jerusalem/landmarks-map" element={<JerusalemLandmarksMap />} />
                   <Route path="/mosquelocator" element={<MosqueLocator />} />
+                  <Route path="/empires" element={<IslamicEmpires />} />
 
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/settings" element={<Settings />} />
