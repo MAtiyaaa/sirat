@@ -40,7 +40,7 @@ type Angel = {
 };
 
 /* -------------------------------------------
-   Color tones (same vibe as Empires/Prophets)
+   Color tones (Empire vibe)
 --------------------------------------------*/
 const TONES = [
   { gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600 dark:text-emerald-400" },
@@ -56,7 +56,7 @@ const TONES = [
 const toneFor = (i: number) => TONES[i % TONES.length];
 
 /* -------------------------------------------
-   Angels data (kept your wording)
+   Angels data
 --------------------------------------------*/
 const ANGELS: Angel[] = [
   {
@@ -88,7 +88,7 @@ const ANGELS: Angel[] = [
     descAr: "موكل بإنزال المطر وإنبات النبات والرزق",
     descEn: "Responsible for bringing rain, plant growth, and provisions",
     detailsAr: "الملك الموكل بالقطر والنبات، يدبر أمور الرزق بإذن الله",
-    detailsEn: "The angel in charge of rain and plants, managing sustenance by Allah permission",
+    detailsEn: "The angel in charge of rain and plants, managing sustenance by Allah's permission",
     references: [
       {
         source: "Quran",
@@ -158,7 +158,7 @@ const ANGELS: Angel[] = [
     descAr: "الملك الموكل بالنار وعذابها",
     descEn: "The angel in charge of Hellfire and its punishment",
     detailsAr: "لا يضحك أبداً ولا يبتسم من شدة ما يرى من عذاب النار",
-    detailsEn: "Never laughs or smiles due to the severity of what he sees of the Fire punishment",
+    detailsEn: "Never laughs or smiles due to the severity of what he sees of the Fire's punishment",
     references: [
       {
         source: "Quran",
@@ -211,7 +211,7 @@ const ANGELS: Angel[] = [
     nameAr: "حملة العرش",
     nameEn: "Bearers of the Throne",
     roleAr: "حملة عرش الرحمن",
-    roleEn: "Carriers of Allahs Throne",
+    roleEn: "Carriers of Allah's Throne",
     descAr: "الموكلون بحمل عرش الله العظيم",
     descEn: "Responsible for carrying the Magnificent Throne of Allah",
     detailsAr: "هم الآن أربعة، ويوم القيامة يكونون ثمانية",
@@ -253,6 +253,7 @@ const Angels: React.FC = () => {
   const navigate = useNavigate();
   const { settings } = useSettings();
   const ar = settings.language === "ar";
+  const dir = ar ? "rtl" : "ltr";
 
   const [selected, setSelected] = React.useState<Angel | null>(null);
 
@@ -265,7 +266,7 @@ const Angels: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20" dir={dir}>
       {/* Header */}
       <div className="max-w-2xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -285,11 +286,13 @@ const Angels: React.FC = () => {
         </div>
 
         {!selected && (
-          <p className="text-muted-foreground px-1 mb-2">{content.description}</p>
+          <p className={`text-muted-foreground px-1 mb-2 ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal text-pretty hyphens-auto`}>
+            {content.description}
+          </p>
         )}
       </div>
 
-      {/* LIST VIEW (vertical cards with gradient hover) */}
+      {/* LIST VIEW */}
       {!selected && (
         <div className="max-w-2xl mx-auto px-6">
           <div className="grid gap-4">
@@ -298,9 +301,9 @@ const Angels: React.FC = () => {
               const tone = toneFor(idx);
               return (
                 <div key={angel.nameEn} onClick={() => setSelected(angel)} className="cursor-pointer group">
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden rounded-2xl">
                     <div
-                      className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
+                      className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
                     />
                     <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
                       <div className="flex items-center gap-4">
@@ -311,10 +314,10 @@ const Angels: React.FC = () => {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1">
+                          <h3 className={`font-semibold text-lg mb-1 ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal`}>
                             {ar ? angel.nameAr : angel.nameEn}
                           </h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
+                          <p className={`text-sm text-muted-foreground ${ar ? "text-right arabic-regal" : ""} line-clamp-2 break-words whitespace-normal text-pretty hyphens-auto`}>
                             {ar ? angel.descAr : angel.descEn}
                           </p>
                         </div>
@@ -336,16 +339,16 @@ const Angels: React.FC = () => {
         </div>
       )}
 
-      {/* DETAIL VIEW (page-like card; no routing) */}
+      {/* DETAIL VIEW */}
       {selected && (
         <div className="max-w-2xl mx-auto px-6">
-          {/* Accent background matched to position */}
-          <div className="relative overflow-hidden mb-6">
+          {/* Accent header */}
+          <div className="relative overflow-hidden rounded-3xl mb-6">
             {(() => {
               const idx = Math.max(0, ANGELS.findIndex((a) => a.nameEn === selected.nameEn));
               const tone = toneFor(idx);
               return (
-                <div className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-3xl blur-2xl opacity-70`} />
+                <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-3xl blur-2xl opacity-70`} />
               );
             })()}
             <Card className="relative neomorph smooth-transition backdrop-blur-xl p-6 rounded-3xl">
@@ -358,11 +361,11 @@ const Angels: React.FC = () => {
                     <div className={`w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center`}>
                       <Icon className={`h-7 w-7 ${tone.iconColor}`} />
                     </div>
-                    <div className="flex-1">
-                      <h2 className="text-2xl font-semibold mb-1">
+                    <div className="flex-1 min-w-0">
+                      <h2 className={`text-2xl font-semibold mb-1 ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal`}>
                         {ar ? selected.nameAr : selected.nameEn}
                       </h2>
-                      <p className="text-sm text-muted-foreground">
+                      <p className={`text-sm text-muted-foreground ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal`}>
                         {ar ? selected.roleAr : selected.roleEn}
                       </p>
                     </div>
@@ -375,18 +378,18 @@ const Angels: React.FC = () => {
           {/* Meta blocks */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
-              <div className="text-xs uppercase text-muted-foreground">
+              <div className={`text-xs uppercase text-muted-foreground ${ar ? "text-right" : ""}`}>
                 {ar ? "الدور" : "Role"}
               </div>
-              <div className="text-sm mt-1">
+              <div className={`text-sm mt-1 ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal`}>
                 {ar ? selected.roleAr : selected.roleEn}
               </div>
             </Card>
             <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
-              <div className="text-xs uppercase text-muted-foreground">
+              <div className={`text-xs uppercase text-muted-foreground ${ar ? "text-right" : ""}`}>
                 {ar ? "وصف مختصر" : "Summary"}
               </div>
-              <div className="text-sm mt-1">
+              <div className={`text-sm mt-1 ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal text-pretty hyphens-auto`}>
                 {ar ? selected.descAr : selected.descEn}
               </div>
             </Card>
@@ -394,19 +397,19 @@ const Angels: React.FC = () => {
 
           {/* Details */}
           <Card className="neomorph backdrop-blur-xl p-6 rounded-3xl mb-6">
-            <p className={`text-base leading-relaxed ${ar ? "text-right" : ""}`}>
+            <p className={`text-base leading-relaxed ${ar ? "text-right arabic-regal" : ""} break-words whitespace-normal text-pretty hyphens-auto`}>
               {ar ? selected.detailsAr : selected.detailsEn}
             </p>
           </Card>
 
           {/* References */}
           {selected.references?.length > 0 && (
-            <div className="grid gap-3">
+            <div className="grid gap-3 mb-8">
               {selected.references.map((ref, i) => (
                 <Button
                   key={i}
                   variant="outline"
-                  className="w-full neomorph hover:neomorph-pressed"
+                  className="w-full neomorph hover:neomorph-pressed justify-start h-auto py-3"
                   onClick={() => {
                     if (ref.source === "Quran") {
                       const surah = ref.ref.split(":")[0];
@@ -414,11 +417,11 @@ const Angels: React.FC = () => {
                     }
                   }}
                 >
-                  <div className="flex flex-col gap-1 w-full text-left">
-                    <div className="font-semibold text-sm">
+                  <div className={`flex flex-col gap-1 w-full ${ar ? "text-right" : "text-left"}`}>
+                    <div className="font-semibold text-sm text-primary break-words whitespace-normal">
                       {ref.source} {ref.ref}
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className={`text-xs text-muted-foreground ${ar ? "arabic-regal" : ""} break-words whitespace-normal text-pretty hyphens-auto`}>
                       {ar ? ref.textAr : ref.textEn}
                     </div>
                   </div>
