@@ -12,7 +12,6 @@ import {
   Bookmark,
   Share2,
   ArrowLeft,
-  Link as LinkIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -81,6 +80,9 @@ const Hadith = () => {
       back: 'رجوع',
       share: 'مشاركة',
       copied: 'تم نسخ الرابط',
+      bookmarkAdded: 'تم الحفظ',
+      bookmarkRemoved: 'تمت الإزالة',
+      signInFirst: 'يرجى تسجيل الدخول',
     },
     en: {
       title: 'Hadith Collection',
@@ -100,9 +102,14 @@ const Hadith = () => {
       back: 'Back',
       share: 'Share',
       copied: 'Link copied',
+      bookmarkAdded: 'Bookmark added',
+      bookmarkRemoved: 'Removed',
+      signInFirst: 'Please sign in to bookmark hadiths',
     },
   };
   const t = content[settings.language];
+  const langIsAr = settings.language === 'ar';
+  const dir = langIsAr ? 'rtl' : 'ltr';
 
   const books = [
     { value: 'sahih-bukhari', label: t.bukhari },
@@ -132,7 +139,7 @@ const Hadith = () => {
       if (pageNum === 1) setHadiths(list);
       else setHadiths((prev) => [...prev, ...list]);
 
-      // if opening via URL (?book=...&hadith=...), pick the one
+      // deep link handling
       const params = new URLSearchParams(location.search);
       const deepBook = mapBookParam(params.get('book'));
       const deepNum = params.get('hadith');
@@ -176,7 +183,7 @@ const Hadith = () => {
 
   const toggleBookmark = async (hadith: Hadith) => {
     if (!userId) {
-      toast.error(settings.language === 'ar' ? 'يرجى تسجيل الدخول' : 'Please sign in to bookmark hadiths');
+      toast.error(t.signInFirst);
       return;
     }
 
@@ -197,7 +204,7 @@ const Hadith = () => {
           n.delete(bookmarkKey);
           return n;
         });
-        toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
+        toast.success(t.bookmarkRemoved);
       }
     } else {
       const { error } = await supabase.from('hadith_bookmarks').insert({
@@ -214,8 +221,32 @@ const Hadith = () => {
 
       if (!error) {
         setBookmarkedHadiths((prev) => new Set(prev).add(bookmarkKey));
-        toast.success(settings.language === 'ar' ? 'تم الحفظ' : 'Bookmark added');
+        toast.success(t.bookmarkAdded);
       }
+    }
+  };
+
+  const shareHadith = async (hadith: Hadith) => {
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    params.set('book', selectedBook);
+    params.set('hadith', String(hadith.hadithNumber));
+    url.search = params.toString();
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${hadith.book?.bookName} #${hadith.hadithNumber}`,
+          text: hadith.hadithEnglish?.slice(0, 120) || 'Hadith',
+          url: url.toString(),
+        });
+      } else {
+        await navigator.clipboard.writeText(url.toString());
+        toast.success(t.copied);
+      }
+    } catch {
+      await navigator.clipboard.writeText(url.toString());
+      toast.success(t.copied);
     }
   };
 
@@ -281,33 +312,11 @@ const Hadith = () => {
 
   const shareDetail = async () => {
     if (!detailHadith) return;
-    const url = new URL(window.location.href);
-    const params = new URLSearchParams(url.search);
-    params.set('book', selectedBook);
-    params.set('hadith', String(detailHadith.hadithNumber));
-    url.search = params.toString();
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `${detailHadith.book?.bookName} #${detailHadith.hadithNumber}`,
-          text: detailHadith.hadithEnglish?.slice(0, 120) || 'Hadith',
-          url: url.toString(),
-        });
-      } else {
-        await navigator.clipboard.writeText(url.toString());
-        toast.success(t.copied);
-      }
-    } catch {
-      await navigator.clipboard.writeText(url.toString());
-      toast.success(t.copied);
-    }
+    await shareHadith(detailHadith);
   };
 
-  const langIsAr = settings.language === 'ar';
-
   return (
-    <div className="min-h-screen pb-24 relative">
+    <div className="min-h-screen pb-24 relative" dir={dir}>
       {/* Global Back Button (list: history back, detail: close detail) */}
       <Button
         variant="ghost"
@@ -321,7 +330,7 @@ const Hadith = () => {
       </Button>
 
       {!viewingDetail && (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6 px-4">
           {/* Header */}
           <div className="text-center space-y-4 py-6">
             <div className="flex flex-col items-center justify-center gap-3">
@@ -337,15 +346,15 @@ const Hadith = () => {
           {/* Search & Filter */}
           <Card className="glass-effect rounded-3xl p-6 space-y-4 border border-border/50 apple-shadow">
             <div className="flex gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <div className="relative flex-1 min-w-0">
+                <Search className={`${langIsAr ? 'right-4' : 'left-4'} absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
                 <Input
                   type="text"
                   placeholder={t.search}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-12 h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style"
+                  className={`${langIsAr ? 'pr-12' : 'pl-12'} h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style`}
                 />
               </div>
               <Button onClick={handleSearch} className="rounded-2xl h-14 px-6 ios-26-style">
@@ -355,7 +364,7 @@ const Hadith = () => {
 
             <Select value={selectedBook} onValueChange={setSelectedBook}>
               <SelectTrigger className="h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style">
-                <SelectValue />
+                <SelectValue placeholder={t.book} />
               </SelectTrigger>
               <SelectContent>
                 {books.map((book) => (
@@ -380,69 +389,80 @@ const Hadith = () => {
                   const isBookmarked = bookmarkedHadiths.has(bookmarkKey);
 
                   return (
-                    <button
-                      key={`${hadith.hadithNumber}-${index}`}
-                      onClick={() => openDetail(hadith)}
-                      className="w-full text-left"
-                    >
-                      <Card className="glass-effect rounded-3xl p-8 space-y-5 smooth-transition hover:scale-[1.01] border border-border/50 apple-shadow">
+                    <div key={`${hadith.hadithNumber}-${index}`} className="w-full">
+                      <Card
+                        className="glass-effect rounded-3xl p-8 space-y-5 smooth-transition hover:scale-[1.01] border border-border/50 apple-shadow"
+                      >
+                        {/* Header row with number, book, actions */}
                         <div className="flex items-center justify-between text-sm text-muted-foreground ios-26-style">
-                          <span className="font-medium">
-                            {t.hadithNumber}: {hadith.hadithNumber}
-                          </span>
-                          <div className="flex items-center gap-4">
-                            <span className="font-medium">{hadith.book?.bookName || ''}</span>
-                            <button
+                          <div className="min-w-0 break-words whitespace-normal text-pretty hyphens-auto">
+                            <span className="font-medium">
+                              {t.hadithNumber}: {hadith.hadithNumber}
+                            </span>
+                            {hadith.book?.bookName ? (
+                              <span className="ml-3 font-medium">{hadith.book.bookName}</span>
+                            ) : null}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {/* Bookmark */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleBookmark(hadith);
                               }}
-                              className="smooth-transition hover:scale-110 p-1"
+                              className="rounded-full"
                               aria-label="bookmark"
+                              title={isBookmarked ? t.bookmarkRemoved : t.bookmarkAdded}
                             >
                               <Bookmark
-                                className={`h-6 w-6 ${
-                                  isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'
-                                }`}
+                                className={`h-5 w-5 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
                               />
-                            </button>
+                            </Button>
+                            {/* Share */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await shareHadith(hadith);
+                              }}
+                              className="rounded-full"
+                              aria-label={t.share}
+                              title={t.share}
+                            >
+                              <Share2 className="h-5 w-5" />
+                            </Button>
                           </div>
                         </div>
 
+                        {/* Chapter pill */}
                         {hadith.chapter && (
-                          <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl ios-26-style">
+                          <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl ios-26-style break-words whitespace-normal text-pretty hyphens-auto">
                             {t.chapter}:{' '}
-                            {settings.language === 'ar' ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
+                            {langIsAr ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
                           </div>
                         )}
 
-                        <div className="space-y-5">
-                          {settings.language === 'ar' ? (
-                            <>
-                              <p className="text-xl leading-loose text-right font-arabic">{hadith.hadithArabic}</p>
-                              {settings.translationEnabled && (
-                                <p className="text-base leading-relaxed text-muted-foreground ios-26-style">
-                                  {hadith.hadithEnglish}
-                                </p>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              <p className="text-base leading-relaxed ios-26-style">{hadith.hadithEnglish}</p>
-                              {settings.translationEnabled && (
-                                <p className="text-xl font-arabic text-right leading-loose text-muted-foreground">
-                                  {hadith.hadithArabic}
-                                </p>
-                              )}
-                            </>
-                          )}
+                        {/* Texts (Arabic + English – always show both on cards as requested) */}
+                        <div
+                          className={`space-y-4 ${langIsAr ? 'text-right arabic-regal' : ''} break-words whitespace-normal text-pretty hyphens-auto`}
+                          onClick={() => openDetail(hadith)}
+                          role="button"
+                        >
+                          {/* Arabic */}
+                          <p className="text-xl leading-loose font-arabic">{hadith.hadithArabic}</p>
+                          {/* English */}
+                          <p className="text-base leading-relaxed text-muted-foreground ios-26-style">{hadith.hadithEnglish}</p>
                         </div>
 
-                        <div className="pt-3 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl ios-26-style">
+                        {/* Narrator pill */}
+                        <div className="pt-2 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl ios-26-style break-words whitespace-normal">
                           {t.narrator}: {hadith.englishNarrator}
                         </div>
                       </Card>
-                    </button>
+                    </div>
                   );
                 })}
 
@@ -471,25 +491,39 @@ const Hadith = () => {
         </div>
       )}
 
+      {/* DETAIL VIEW */}
       {viewingDetail && detailHadith && (
         <div className="max-w-3xl mx-auto px-4 pt-20 pb-24">
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight break-words whitespace-normal text-pretty">
                 {detailHadith.book?.bookName} — #{detailHadith.hadithNumber}
               </h2>
               {detailHadith.chapter && (
-                <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl inline-block">
+                <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl inline-block break-words whitespace-normal">
                   {t.chapter}:{' '}
-                  {settings.language === 'ar'
+                  {langIsAr
                     ? detailHadith.chapter.chapterArabic
                     : detailHadith.chapter.chapterEnglish}
                 </div>
               )}
             </div>
 
-            <Card className="glass-effect rounded-3xl p-8 space-y-5 border border-border/50 apple-shadow">
-              <div className="flex items-center justify-end gap-2">
+            <Card className="glass-effect rounded-3xl p-8 space-y-6 border border-border/50 apple-shadow">
+              {/* Action Row (Bookmark LEFT, Share RIGHT) */}
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleBookmark(detailHadith)}
+                  className="rounded-full"
+                  title={bookmarkedHadiths.has(`${detailHadith.book?.bookSlug}-${detailHadith.hadithNumber}`) ? t.bookmarkRemoved : t.bookmarkAdded}
+                  aria-label="bookmark"
+                >
+                  <Bookmark
+                    className={`h-4 w-4 ${bookmarkedHadiths.has(`${detailHadith.book?.bookSlug}-${detailHadith.hadithNumber}`) ? 'fill-primary text-primary' : ''}`}
+                  />
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -500,42 +534,30 @@ const Hadith = () => {
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    const url = new URL(window.location.href);
-                    await navigator.clipboard.writeText(url.toString());
-                    toast.success(t.copied);
-                  }}
-                  className="rounded-full"
-                  title={t.copied}
-                  aria-label={t.copied}
-                >
-                  <LinkIcon className="h-4 w-4" />
-                </Button>
               </div>
 
               <div className="space-y-6">
                 {langIsAr ? (
                   <>
-                    <p className="text-2xl leading-loose text-right font-arabic">{detailHadith.hadithArabic}</p>
-                    {settings.translationEnabled && (
-                      <p className="text-base leading-relaxed text-muted-foreground">{detailHadith.hadithEnglish}</p>
-                    )}
+                    <p className="text-2xl leading-loose text-right font-arabic break-words whitespace-normal text-pretty hyphens-auto">
+                      {detailHadith.hadithArabic}
+                    </p>
+                    <p className="text-base leading-relaxed text-muted-foreground break-words whitespace-normal text-pretty hyphens-auto">
+                      {detailHadith.hadithEnglish}
+                    </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-base leading-relaxed">{detailHadith.hadithEnglish}</p>
-                    {settings.translationEnabled && (
-                      <p className="text-2xl font-arabic text-right leading-loose text-muted-foreground">
-                        {detailHadith.hadithArabic}
-                      </p>
-                    )}
+                    <p className="text-base leading-relaxed break-words whitespace-normal text-pretty hyphens-auto">
+                      {detailHadith.hadithEnglish}
+                    </p>
+                    <p className="text-2xl font-arabic text-right leading-loose text-muted-foreground break-words whitespace-normal text-pretty hyphens-auto">
+                      {detailHadith.hadithArabic}
+                    </p>
                   </>
                 )}
 
-                <div className="pt-3 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl">
+                <div className="pt-3 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl break-words whitespace-normal">
                   {t.narrator}: {detailHadith.englishNarrator}
                 </div>
               </div>
