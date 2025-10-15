@@ -130,7 +130,7 @@ const RashidunCaliphs = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-            {ar ? "الخلفاء الراشدون" : "Rashidun Caliphs"}
+            {ar ? "الخلافة الراشدة" : "Rashidun Caliphate"}
           </h1>
         </div>
 
