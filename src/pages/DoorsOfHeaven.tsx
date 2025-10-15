@@ -36,7 +36,7 @@ type Door = {
 };
 
 /* -------------------------------------------
-   Color tones (same vibe as your other pages)
+   Color tones
 --------------------------------------------*/
 const TONES = [
   { gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600 dark:text-emerald-400" },
@@ -75,17 +75,14 @@ const DoorsOfHeaven: React.FC = () => {
   };
 
   /* -------------------------------------------
-     Data (your exact text preserved)
+     Data
   --------------------------------------------*/
   const DOORS: Door[] = [
     {
       icon: Hand,
       nameAr: "باب الصلاة",
       nameEn: "Door of Prayer (Bab as-Salah)",
-      whoEnters: {
-        ar: "المداومون على الصلوات الخمس في أوقاتها",
-        en: "Those who consistently performed the five daily prayers on time",
-      },
+      whoEnters: { ar: "المداومون على الصلوات الخمس في أوقاتها", en: "Those who consistently performed the five daily prayers on time" },
       description: {
         ar: "باب خاص بأهل الصلاة الذين حافظوا عليها في أوقاتها وأتموا أركانها وخشعوا فيها",
         en: "A special door for those who maintained their prayers on time, completed their pillars, and had humility in them",
@@ -303,7 +300,7 @@ const DoorsOfHeaven: React.FC = () => {
   const [selected, setSelected] = React.useState<Door | null>(null);
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 overflow-x-hidden">
       {/* Header */}
       <div className="max-w-2xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
@@ -342,21 +339,15 @@ const DoorsOfHeaven: React.FC = () => {
               return (
                 <div key={door.nameEn} onClick={() => setSelected(door)} className="cursor-pointer group">
                   <div className="relative overflow-hidden">
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
-                    />
+                    <div className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
                     <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
                       <div className="flex items-center gap-4">
-                        <div
-                          className={`flex-shrink-0 w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}
-                        >
+                        <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
                           <Icon className={`h-7 w-7 ${tone.iconColor}`} />
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1">
-                            {ar ? door.nameAr : door.nameEn}
-                          </h3>
+                          <h3 className="font-semibold text-lg mb-1">{ar ? door.nameAr : door.nameEn}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {ar ? door.description.ar : door.description.en}
                           </p>
@@ -419,9 +410,7 @@ const DoorsOfHeaven: React.FC = () => {
                       <Icon className={`h-7 w-7 ${tone.iconColor}`} />
                     </div>
                     <div className="flex-1">
-                      <h2 className="text-2xl font-semibold mb-1">
-                        {ar ? selected.nameAr : selected.nameEn}
-                      </h2>
+                      <h2 className="text-2xl font-semibold mb-1">{ar ? selected.nameAr : selected.nameEn}</h2>
                       <p className="text-sm text-muted-foreground">
                         <span className="font-medium">{content.whoEnters}:</span>{" "}
                         {ar ? selected.whoEnters.ar : selected.whoEnters.en}
@@ -457,7 +446,7 @@ const DoorsOfHeaven: React.FC = () => {
             </p>
           </Card>
 
-          {/* References */}
+          {/* References (wrapped) */}
           {selected.references?.length > 0 && (
             <div className="grid gap-3 mb-2">
               <h3 className="font-semibold text-primary">{content.references}</h3>
@@ -465,7 +454,8 @@ const DoorsOfHeaven: React.FC = () => {
                 <Button
                   key={i}
                   variant="outline"
-                  className="w-full neomorph hover:neomorph-pressed justify-start h-auto py-3"
+                  // allow wrapping inside the button
+                  className="w-full neomorph hover:neomorph-pressed justify-start h-auto py-3 whitespace-normal"
                   onClick={() => {
                     if (ref.source === "Quran") {
                       const surahNum = ref.reference.split(":")[0];
@@ -473,11 +463,11 @@ const DoorsOfHeaven: React.FC = () => {
                     }
                   }}
                 >
-                  <div className="flex flex-col gap-1 w-full text-left">
-                    <div className="font-semibold text-sm">
+                  <div className="flex flex-col gap-1 w-full text-left min-w-0">
+                    <div className="font-semibold text-sm break-words whitespace-normal hyphens-auto">
                       {ref.source} {ref.reference}
                     </div>
-                    <div className={`text-xs text-muted-foreground ${ar ? "text-right arabic-regal" : ""}`}>
+                    <div className={`text-xs text-muted-foreground break-words whitespace-normal hyphens-auto ${ar ? "text-right arabic-regal" : ""}`}>
                       {ar ? ref.text.ar : ref.text.en}
                     </div>
                   </div>
