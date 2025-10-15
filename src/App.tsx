@@ -63,7 +63,7 @@ import TimuridOverview from "./pages/TimuridOverview";
 import SafavidOverview from "./pages/SafavidOverview";
 import MughalOverview from "./pages/MughalOverview";
 import IslamicHistory from "./pages/IslamicHistory";
-import GoldenAgeofIslam from "./pages/GoldenAgeofIslam";
+import GoldenAgeOfIslam from "./pages/GoldenAgeOfIslam";
 
 const queryClient = new QueryClient();
 
@@ -130,7 +130,7 @@ const App = () => (
                   <Route path="/empires/safavid" element={<SafavidOverview />} />
                   <Route path="/empires/mughal" element={<MughalOverview />} />
                   <Route path="/islamichistory" element={<IslamicHistory />} />
-                  <Route path="/islamichistory/golden-age" element={<GoldenAgeofIslam />} />
+                  <Route path="/islamichistory/golden-age" element={<GoldenAgeOfIslam />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
