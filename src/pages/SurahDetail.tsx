@@ -70,21 +70,18 @@ const SurahDetail = () => {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // --- Share helpers (only URL, no title/text) ---
+  // --- Share helpers (URL-only, silent on failure) ---
   const shareOrCopy = async (url: string) => {
     try {
       if (navigator.share) {
         await navigator.share({ url });
         return;
       }
-      throw new Error('no web share'); // force to clipboard if not supported
+      // fallback: clipboard
+      await navigator.clipboard.writeText(url);
+      toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
     } catch {
-      try {
-        await navigator.clipboard.writeText(url);
-        toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied');
-      } catch {
-        toast.error(settings.language === 'ar' ? 'تعذر مشاركة الرابط' : 'Could not share link');
-      }
+      // silent fail — no popup/toast
     }
   };
   const surahUrl = () => `${window.location.origin}/quran/${surahNumber}`;
@@ -621,17 +618,11 @@ const SurahDetail = () => {
     if (audioRef.current) audioRef.current.pause();
     
     audioRef.current = new Audio(audioUrl);
-    audioRef.current.play()
-      .catch(() => {
-        toast.error('Failed to play audio');
-      });
+    audioRef.current.play().catch(() => {});
     setPlayingAyah(ayahNumber);
     
     audioRef.current.onended = () => setPlayingAyah(null);
-    audioRef.current.onerror = () => {
-      toast.error('Error loading audio');
-      setPlayingAyah(null);
-    };
+    audioRef.current.onerror = () => setPlayingAyah(null);
   };
 
   const playSurah = () => {
@@ -700,7 +691,7 @@ const SurahDetail = () => {
   }
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6 relative overflow-x-hidden">
       {/* Back to Quran List Button */}
       <Button
         variant="ghost"
@@ -713,10 +704,10 @@ const SurahDetail = () => {
       </Button>
 
       {/* Header */}
-      <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${
+      <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl overflow-hidden">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className={`text-4xl md:text-5xl font-bold tracking-tight truncate ${
               settings.fontType === 'normal' ? '' : 
               settings.fontType === 'amiri' ? 'amiri-font' :
               settings.fontType === 'scheherazade' ? 'scheherazade-font' :
@@ -733,8 +724,8 @@ const SurahDetail = () => {
             </p>
           </div>
 
-          {/* Right actions - prevent shrinking so sizes stay consistent */}
-          <div className="flex items-center gap-2 flex-none">
+          {/* Right actions — never overflow, wrap if needed */}
+          <div className="flex items-center gap-2 ml-auto max-w-full">
             <Button
               onClick={playSurah}
               className="rounded-full px-6 py-6 shadow-lg hover:shadow-xl smooth-transition shrink-0"
