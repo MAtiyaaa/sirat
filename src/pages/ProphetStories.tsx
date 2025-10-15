@@ -1,6 +1,6 @@
-import React from 'react';
-import { useSettings } from '@/contexts/SettingsContext';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useSettings } from "@/contexts/SettingsContext";
+import { useNavigate } from "react-router-dom";
 import {
   Book,
   Heart,
@@ -21,9 +21,13 @@ import {
   Moon,
   ArrowLeft,
   Leaf,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
+/* -------------------------------------------------------------
+   Types
+--------------------------------------------------------------*/
 interface Story {
   id: number;
   icon: any;
@@ -41,11 +45,28 @@ interface Story {
   ageAtDeathEn: string;
 }
 
-const ProphetStories = () => {
-  const { settings } = useSettings();
-  const [selectedStory, setSelectedStory] = React.useState<Story | null>(null);
-  const navigate = useNavigate();
-  const ar = settings.language === 'ar';
+/* -------------------------------------------------------------
+   Color/Style presets (like the Empires example)
+--------------------------------------------------------------*/
+type Tone = {
+  gradient: string;
+  iconBg: string;
+  iconColor: string;
+};
+
+const TONES: Tone[] = [
+  { gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600 dark:text-emerald-400" },
+  { gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20", iconBg: "bg-amber-500/10", iconColor: "text-amber-600 dark:text-amber-400" },
+  { gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20", iconBg: "bg-purple-500/10", iconColor: "text-purple-600 dark:text-purple-400" },
+  { gradient: "from-sky-500/20 via-cyan-400/20 to-blue-500/20", iconBg: "bg-sky-500/10", iconColor: "text-sky-600 dark:text-sky-400" },
+  { gradient: "from-lime-500/20 via-green-400/20 to-emerald-500/20", iconBg: "bg-lime-500/10", iconColor: "text-lime-600 dark:text-lime-400" },
+  { gradient: "from-fuchsia-500/20 via-rose-400/20 to-pink-500/20", iconBg: "bg-fuchsia-500/10", iconColor: "text-fuchsia-600 dark:text-fuchsia-400" },
+  { gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20", iconBg: "bg-blue-500/10", iconColor: "text-blue-600 dark:text-blue-400" },
+  { gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20", iconBg: "bg-red-500/10", iconColor: "text-red-600 dark:text-red-400" },
+  { gradient: "from-yellow-500/20 via-amber-400/20 to-orange-500/20", iconBg: "bg-yellow-500/10", iconColor: "text-yellow-600 dark:text-yellow-400" },
+];
+
+const toneFor = (i: number) => TONES[i % TONES.length];
 
   const stories: Story[] = [
     {
@@ -519,118 +540,166 @@ const ProphetStories = () => {
     },
   ];
 
-  if (selectedStory) {
-    return (
-      <div className="max-w-3xl mx-auto space-y-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSelectedStory(null)}
-          className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
-          aria-label={ar ? 'رجوع' : 'Back'}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+const ProphetStories: React.FC = () => {
+  const { settings } = useSettings();
+  const isArabic = settings.language === "ar";
+  const navigate = useNavigate();
 
-        <div className="text-center space-y-4 pt-8">
-          {React.createElement(selectedStory.icon, {
-            className: 'h-16 w-16 mx-auto text-primary mb-4',
-          })}
-          <h1 className="text-4xl md:text-5xl font-bold">
-            {ar ? selectedStory.nameAr : selectedStory.nameEn}
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            {ar ? selectedStory.descriptionAr : selectedStory.descriptionEn}
-          </p>
-        </div>
+  const [selected, setSelected] = React.useState<Story | null>(null);
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="glass-effect rounded-2xl p-4 border border-border/30 backdrop-blur-xl">
-            <div className="text-xs uppercase text-muted-foreground">
-              {ar ? 'الميلاد' : 'Birth'}
-            </div>
-            <div className="text-sm mt-1">
-              {ar ? selectedStory.birthAr : selectedStory.birthEn}
-            </div>
-          </div>
-          <div className="glass-effect rounded-2xl p-4 border border-border/30 backdrop-blur-xl">
-            <div className="text-xs uppercase text-muted-foreground">
-              {ar ? 'الوفاة' : 'Death'}
-            </div>
-            <div className="text-sm mt-1">
-              {ar ? selectedStory.deathAr : selectedStory.deathEn}
-            </div>
-          </div>
-          <div className="glass-effect rounded-2xl p-4 border border-border/30 backdrop-blur-xl">
-            <div className="text-xs uppercase text-muted-foreground">
-              {ar ? 'العمر عند الوفاة' : 'Age at Death'}
-            </div>
-            <div className="text-sm mt-1">
-              {ar ? selectedStory.ageAtDeathAr : selectedStory.ageAtDeathEn}
-            </div>
-          </div>
-        </div>
+  const headerTitle = isArabic ? "قصص الأنبياء" : "Prophet Stories";
+  const backLabel = isArabic ? "رجوع" : "Back";
 
-        <div className="glass-effect rounded-3xl p-8 border border-border/30 backdrop-blur-xl">
-          <p className={`text-lg leading-relaxed ${ar ? 'text-right' : ''}`}>
-            {ar ? selectedStory.storyAr : selectedStory.storyEn}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // Keep original order, but you could sort alphabetically if desired.
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10"
-        aria-label={ar ? 'رجوع' : 'Back'}
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-
-      <div className="text-center space-y-4 pt-8">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-            {ar ? 'قصص الأنبياء' : 'Prophet Stories'}
-          </span>
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
-          {ar
-            ? 'تعلم من قصص الرسل والأنبياء عليهم السلام'
-            : 'Learn from the stories of the Prophets and Messengers'}
-        </p>
+    <div className="min-h-screen pb-20">
+      {/* Header (same look as your Empires example) */}
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (selected) setSelected(null);
+              else navigate(-1);
+            }}
+            aria-label={backLabel}
+            className="shrink-0 neomorph hover:neomorph-pressed"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-3xl font-bold">{headerTitle}</h1>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {stories.map((story) => {
-          const Icon = story.icon;
-          return (
-            <button
-              key={story.id}
-              onClick={() => setSelectedStory(story)}
-              className="glass-effect rounded-3xl p-6 border border-border/30 hover:border-primary/40 backdrop-blur-xl smooth-transition group text-left"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 smooth-transition">
-                  <Icon className="h-7 w-7 text-white" />
+      {/* LIST VIEW */}
+      {!selected && (
+        <div className="max-w-2xl mx-auto px-6">
+          <div className="grid gap-4">
+            {STORIES.map((story, idx) => {
+              const Icon = story.icon;
+              const tone = toneFor(idx);
+              return (
+                <div key={story.id} onClick={() => setSelected(story)} className="cursor-pointer group">
+                  <div className="relative overflow-hidden">
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
+                    />
+                    <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`flex-shrink-0 w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}
+                        >
+                          <Icon className={`h-7 w-7 ${tone.iconColor}`} />
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-lg mb-1">
+                            {isArabic ? story.nameAr : story.nameEn}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {isArabic ? story.descriptionAr : story.descriptionEn}
+                          </p>
+                        </div>
+
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <svg
+                              className="w-4 h-4 text-primary"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-primary smooth-transition">
-                    {ar ? story.nameAr : story.nameEn}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {ar ? story.descriptionAr : story.descriptionEn}
-                  </p>
-                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* DETAIL VIEW (page-like, no routing) */}
+      {selected && (
+        <div className="max-w-2xl mx-auto px-6">
+          {/* Accent background matching tone */}
+          <div className={`relative overflow-hidden mb-6`}>
+            {/* choose a stable tone based on index in STORIES */}
+            {(() => {
+              const idx = Math.max(0, STORIES.findIndex((s) => s.id === selected.id));
+              const tone = toneFor(idx);
+              return (
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-3xl blur-2xl opacity-70`}
+                />
+              );
+            })()}
+            <Card className="relative neomorph smooth-transition backdrop-blur-xl p-6 rounded-3xl">
+              {(() => {
+                const idx = Math.max(0, STORIES.findIndex((s) => s.id === selected.id));
+                const tone = toneFor(idx);
+                const Icon = selected.icon;
+                return (
+                  <div className="flex items-start gap-4">
+                    <div className={`w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center`}>
+                      <Icon className={`h-7 w-7 ${tone.iconColor}`} />
+                    </div>
+                    <div className="flex-1">
+                      <h2 className="text-2xl font-semibold mb-1">
+                        {isArabic ? selected.nameAr : selected.nameEn}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {isArabic ? selected.descriptionAr : selected.descriptionEn}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </Card>
+          </div>
+
+          {/* Meta cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
+              <div className="text-xs uppercase text-muted-foreground">
+                {isArabic ? "الميلاد" : "Birth"}
               </div>
-            </button>
-          );
-        })}
-      </div>
+              <div className="text-sm mt-1">
+                {isArabic ? selected.birthAr : selected.birthEn}
+              </div>
+            </Card>
+            <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
+              <div className="text-xs uppercase text-muted-foreground">
+                {isArabic ? "الوفاة" : "Death"}
+              </div>
+              <div className="text-sm mt-1">
+                {isArabic ? selected.deathAr : selected.deathEn}
+              </div>
+            </Card>
+            <Card className="neomorph backdrop-blur-xl p-4 rounded-2xl">
+              <div className="text-xs uppercase text-muted-foreground">
+                {isArabic ? "العمر عند الوفاة" : "Age at Death"}
+              </div>
+              <div className="text-sm mt-1">
+                {isArabic ? selected.ageAtDeathAr : selected.ageAtDeathEn}
+              </div>
+            </Card>
+          </div>
+
+          {/* Story block */}
+          <Card className="neomorph backdrop-blur-xl p-6 rounded-3xl">
+            <p className={`text-base leading-relaxed ${isArabic ? "text-right" : ""}`}>
+              {isArabic ? selected.storyAr : selected.storyEn}
+            </p>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
