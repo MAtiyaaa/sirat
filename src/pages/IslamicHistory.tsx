@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Crown, Star } from "lucide-react";
+import { ArrowLeft, Crown, Star, Users, BookOpen, Landmark, Scroll } from "lucide-react";
 
 type TItem = {
   icon: any;
@@ -24,6 +24,17 @@ const IslamicHistory = () => {
 
   const cards: TItem[] = [
     {
+      icon: Users,
+      titleAr: "الخلفاء الراشدون",
+      titleEn: "Rashidun Caliphate",
+      descAr: "أبو بكر وعمر وعثمان وعلي - عهد العدل والفتوحات",
+      descEn: "Abu Bakr, Umar, Uthman & Ali - Era of justice and conquests",
+      link: "/empires/rashidun",
+      gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20",
+      iconBg: "bg-emerald-500/10",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+    },
+    {
       icon: Crown,
       titleAr: "الإمبراطوريات الإسلامية",
       titleEn: "Islamic Empires",
@@ -44,6 +55,39 @@ const IslamicHistory = () => {
       gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20",
       iconBg: "bg-amber-500/10",
       iconColor: "text-amber-600 dark:text-amber-400",
+    },
+    {
+      icon: BookOpen,
+      titleAr: "قصص الأنبياء",
+      titleEn: "Prophet Stories",
+      descAr: "رحلة مع أنبياء الله من آدم إلى محمد ﷺ",
+      descEn: "Journey with Allah's prophets from Adam to Muhammad ﷺ",
+      link: "/prophet-stories",
+      gradient: "from-sky-500/20 via-cyan-400/20 to-blue-500/20",
+      iconBg: "bg-sky-500/10",
+      iconColor: "text-sky-600 dark:text-sky-400",
+    },
+    {
+      icon: Landmark,
+      titleAr: "المدن المقدسة",
+      titleEn: "Holy Cities",
+      descAr: "مكة والمدينة والقدس - تاريخها وأهميتها",
+      descEn: "Makkah, Madinah & Jerusalem - History and significance",
+      link: "/holy-cities",
+      gradient: "from-lime-500/20 via-green-400/20 to-emerald-500/20",
+      iconBg: "bg-lime-500/10",
+      iconColor: "text-lime-600 dark:text-lime-400",
+    },
+    {
+      icon: Scroll,
+      titleAr: "أسماء الله الحسنى",
+      titleEn: "Names of Allah",
+      descAr: "التعرف على الأسماء الحسنى ومعانيها",
+      descEn: "Learn the Beautiful Names and their meanings",
+      link: "/names-of-allah",
+      gradient: "from-fuchsia-500/20 via-rose-400/20 to-pink-500/20",
+      iconBg: "bg-fuchsia-500/10",
+      iconColor: "text-fuchsia-600 dark:text-fuchsia-400",
     },
   ];
 

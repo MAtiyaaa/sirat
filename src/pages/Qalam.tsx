@@ -18,7 +18,7 @@ interface Message {
 }
 
 interface NavCardData {
-  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih';
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih' | 'islamic-history' | 'rashidun' | 'empires' | 'golden-age' | 'holy-cities' | 'names-allah';
   data?: {
     surahNumber?: number;
     ayahNumber?: number;
@@ -31,7 +31,7 @@ interface NavCardData {
 
 const parseNavigationCards = (text: string): { text: string; cards: NavCardData[] } => {
   const cards: NavCardData[] = [];
-  const cardRegex = /\[NAV:(surah|ayah|prayer|stories|account|settings|bookmarks|history|hadith|duas|tasbih)\|?([^\]]*)\]/g;
+  const cardRegex = /\[NAV:(surah|ayah|prayer|stories|account|settings|bookmarks|history|hadith|duas|tasbih|islamic-history|rashidun|empires|golden-age|holy-cities|names-allah)\|?([^\]]*)\]/g;
   
   const cleanText = text.replace(cardRegex, (match, type, dataStr) => {
     const cardData: NavCardData = { type };

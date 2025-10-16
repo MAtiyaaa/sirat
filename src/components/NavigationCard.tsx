@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Book, Clock, Sparkles, User, Settings, BookMarked, History, Repeat } from 'lucide-react';
+import { Book, Clock, Sparkles, User, Settings, BookMarked, History, Repeat, Crown, Star, Landmark, Scroll } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
 interface NavigationCardProps {
-  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih' | 'stories-and-names';
+  type: 'surah' | 'ayah' | 'prayer' | 'stories' | 'account' | 'settings' | 'bookmarks' | 'history' | 'hadith' | 'duas' | 'tasbih' | 'stories-and-names' | 'islamic-history' | 'rashidun' | 'empires' | 'golden-age' | 'holy-cities' | 'names-allah';
   data?: {
     surahNumber?: number;
     ayahNumber?: number;
@@ -142,6 +142,66 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
           gradient: 'from-cyan-500/20 via-sky-400/20 to-blue-500/20',
           iconBg: 'bg-cyan-500/10',
           iconColor: 'text-cyan-600 dark:text-cyan-400',
+        };
+      case 'islamic-history':
+        return {
+          icon: Book,
+          title: 'Islamic History',
+          description: 'Explore Islamic history & civilizations',
+          link: '/islamichistory',
+          gradient: 'from-amber-500/20 via-orange-400/20 to-yellow-500/20',
+          iconBg: 'bg-amber-500/10',
+          iconColor: 'text-amber-600 dark:text-amber-400',
+        };
+      case 'rashidun':
+        return {
+          icon: Crown,
+          title: 'Rashidun Caliphs',
+          description: 'The rightly guided caliphs',
+          link: '/empires/rashidun',
+          gradient: 'from-emerald-500/20 via-teal-400/20 to-cyan-500/20',
+          iconBg: 'bg-emerald-500/10',
+          iconColor: 'text-emerald-600 dark:text-emerald-400',
+        };
+      case 'empires':
+        return {
+          icon: Crown,
+          title: 'Islamic Empires',
+          description: 'Major Islamic empires through history',
+          link: '/empires',
+          gradient: 'from-purple-500/20 via-pink-400/20 to-rose-500/20',
+          iconBg: 'bg-purple-500/10',
+          iconColor: 'text-purple-600 dark:text-purple-400',
+        };
+      case 'golden-age':
+        return {
+          icon: Star,
+          title: 'Golden Age of Islam',
+          description: 'Sciences, arts & civilizational achievements',
+          link: '/islamichistory/golden-age',
+          gradient: 'from-amber-500/20 via-orange-400/20 to-yellow-500/20',
+          iconBg: 'bg-amber-500/10',
+          iconColor: 'text-amber-600 dark:text-amber-400',
+        };
+      case 'holy-cities':
+        return {
+          icon: Landmark,
+          title: 'Holy Cities',
+          description: 'Makkah, Madinah & Jerusalem',
+          link: '/holy-cities',
+          gradient: 'from-lime-500/20 via-green-400/20 to-emerald-500/20',
+          iconBg: 'bg-lime-500/10',
+          iconColor: 'text-lime-600 dark:text-lime-400',
+        };
+      case 'names-allah':
+        return {
+          icon: Scroll,
+          title: 'Names of Allah',
+          description: 'The 99 Beautiful Names',
+          link: '/names-of-allah',
+          gradient: 'from-fuchsia-500/20 via-rose-400/20 to-pink-500/20',
+          iconBg: 'bg-fuchsia-500/10',
+          iconColor: 'text-fuchsia-600 dark:text-fuchsia-400',
         };
       default:
         return null;
