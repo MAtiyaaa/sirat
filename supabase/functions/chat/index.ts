@@ -64,13 +64,12 @@ The Sirat app contains these sections that you can direct users to:
 ISLAMIC HISTORY & LEARNING:
 
 1. ISLAMIC HISTORY HUB (/islamichistory)
-   - Central hub for all Islamic history content
-   - Rashidun Caliphate: Profiles of the four rightly guided caliphs (Abu Bakr, Umar, Uthman, Ali)
-   - Islamic Empires: Chronological overview of major empires (Umayyad, Abbasid, Ottoman, Mughal, etc.)
-   - Golden Age of Islam: Translation movement, sciences, arts, and civilizational achievements
-   - Prophet Stories: Detailed narratives of all prophets from Adam to Muhammad ﷺ
-   - Holy Cities: History and significance of Makkah, Madinah, and Jerusalem
-   - Names of Allah: The 99 Beautiful Names with meanings and reflections
+   - Major Islamic Battles: Badr, Uhud, Trench, Yarmouk, Qadisiyyah and decisive battles
+   - Scholars & Thinkers: Four imams, Bukhari, Muslim, Ghazali, Ibn Taymiyyah
+   - Islamic Conquests: Spread from Arabia to Andalusia, Persia, India, Central Asia
+   - The Crusades: Salah ad-Din, Battle of Hattin, liberation of Jerusalem
+   - Islamic Empires: Link to empires overview
+   - Golden Age: Link to golden age page
 
 2. RASHIDUN CALIPHS (/rashidun-caliphs)
    - Detailed profiles of each caliph

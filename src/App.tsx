@@ -64,6 +64,10 @@ import SafavidOverview from "./pages/SafavidOverview";
 import MughalOverview from "./pages/MughalOverview";
 import IslamicHistory from "./pages/IslamicHistory";
 import GoldenAgeOfIslam from "./pages/GoldenAgeOfIslam";
+import IslamicBattles from "./pages/IslamicBattles";
+import IslamicScholars from "./pages/IslamicScholars";
+import IslamicConquests from "./pages/IslamicConquests";
+import IslamicCrusades from "./pages/IslamicCrusades";
 
 const queryClient = new QueryClient();
 
@@ -131,6 +135,10 @@ const App = () => (
                   <Route path="/empires/mughal" element={<MughalOverview />} />
                   <Route path="/islamichistory" element={<IslamicHistory />} />
                   <Route path="/islamichistory/golden-age" element={<GoldenAgeOfIslam />} />
+                  <Route path="/islamichistory/battles" element={<IslamicBattles />} />
+                  <Route path="/islamichistory/scholars" element={<IslamicScholars />} />
+                  <Route path="/islamichistory/conquests" element={<IslamicConquests />} />
+                  <Route path="/islamichistory/crusades" element={<IslamicCrusades />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/account" element={<Account />} />
