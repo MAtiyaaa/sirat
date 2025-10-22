@@ -284,66 +284,53 @@ const Hadith = () => {
   };
 
   return (
-    <div className="min-h-screen pb-24 relative" dir={dir}>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
-        aria-label={t.back}
-        title={t.back}
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+    <div className="min-h-screen pb-20" dir={dir}>
+      <div className="max-w-2xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={t.back}
+          >
+            <ArrowLeft className={`h-5 w-5 ${langIsAr ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">
+            {t.title}
+          </h1>
+        </div>
 
-      <div className="max-w-2xl mx-auto space-y-6 px-4">
-          {/* Header */}
-          <div className="text-center space-y-4 py-6">
-            <div className="flex flex-col items-center justify-center gap-3">
-              <BookOpen className="h-12 w-12 text-primary" />
-              <h1 className="text-4xl md:text-5xl font-bold ios-26-style tracking-tight">
-                <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-                  {t.title}
-                </span>
-              </h1>
-            </div>
-          </div>
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className={`absolute ${langIsAr ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder={t.search}
+            className={`w-full ${langIsAr ? 'pr-10' : 'pl-10'} h-12 glass-effect border-border/50 rounded-xl px-4 outline-none focus:ring-2 focus:ring-primary`}
+          />
+        </div>
 
-          {/* Search & Filter */}
-          <Card className="glass-effect rounded-3xl p-6 space-y-4 border border-border/50 apple-shadow">
-            <div className="flex gap-3">
-              <div className="relative flex-1 min-w-0">
-                <Search className={`${langIsAr ? 'right-4' : 'left-4'} absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
-                <Input
-                  type="text"
-                  placeholder={t.search}
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className={`${langIsAr ? 'pr-12' : 'pl-12'} h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style`}
-                />
-              </div>
-              <Button onClick={handleSearch} className="rounded-2xl h-14 px-6 ios-26-style">
-                <Search className="h-5 w-5" />
-              </Button>
-            </div>
+        {/* Book Filter */}
+        <Select value={selectedBook} onValueChange={setSelectedBook}>
+          <SelectTrigger className="w-full glass-effect border-border/50">
+            <SelectValue placeholder={t.book} />
+          </SelectTrigger>
+          <SelectContent>
+            {books.map((book) => (
+              <SelectItem key={book.value} value={book.value}>
+                {book.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-            <Select value={selectedBook} onValueChange={setSelectedBook}>
-              <SelectTrigger className="h-14 rounded-2xl border-border/50 bg-background/50 text-base ios-26-style">
-                <SelectValue placeholder={t.book} />
-              </SelectTrigger>
-              <SelectContent>
-                {books.map((book) => (
-                  <SelectItem key={book.value} value={book.value} className="text-base">
-                    {book.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Card>
-
-          {/* Hadiths List */}
-          <div className="space-y-4">
+        {/* Hadiths List */}
+        <div className="space-y-4">
             {loading && page === 1 ? (
               <div className="flex justify-center items-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
