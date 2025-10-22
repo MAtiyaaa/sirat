@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bookmark, BookOpen, Trash2, Loader2, ArrowLeft, BookMarked } from 'lucide-react';
+import { Bookmark, BookOpen, Trash2, Loader2, ArrowLeft, BookMarked, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchSurahs, Surah } from '@/lib/quran-api';
 
@@ -131,6 +131,17 @@ const Bookmarks = () => {
   const ayahBookmarks = bookmarks.filter(b => b.bookmark_type === 'ayah');
   const surahBookmarks = bookmarks.filter(b => b.bookmark_type === 'surah');
 
+  const getCardGradient = (index: number) => {
+    const gradients = [
+      { gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20", iconBg: "bg-purple-500/10", iconColor: "text-purple-600 dark:text-purple-400" },
+      { gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20", iconBg: "bg-blue-500/10", iconColor: "text-blue-600 dark:text-blue-400" },
+      { gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600 dark:text-emerald-400" },
+      { gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20", iconBg: "bg-amber-500/10", iconColor: "text-amber-600 dark:text-amber-400" },
+      { gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20", iconBg: "bg-red-500/10", iconColor: "text-red-600 dark:text-red-400" },
+    ];
+    return gradients[index % gradients.length];
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -141,297 +152,383 @@ const Bookmarks = () => {
 
   if (!user) {
     return (
-      <div className="text-center py-12">
-        <Bookmark className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-muted-foreground mb-4">
-          {settings.language === 'ar' 
-            ? 'يجب تسجيل الدخول لعرض الإشارات المرجعية'
-            : 'Please sign in to view bookmarks'}
-        </p>
-        <Button onClick={() => navigate('/auth')}>
-          {settings.language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-        </Button>
+      <div className="min-h-screen pb-20">
+        <div className="max-w-2xl mx-auto p-6">
+          <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Bookmark className="h-10 w-10 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">
+              {settings.language === 'ar' ? 'يجب تسجيل الدخول' : 'Sign In Required'}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {settings.language === 'ar' 
+                ? 'يجب تسجيل الدخول لعرض الإشارات المرجعية'
+                : 'Please sign in to view bookmarks'}
+            </p>
+            <Button onClick={() => navigate('/auth')} size="lg">
+              {settings.language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const isRTL = settings.language === 'ar';
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 glass-effect hover:glass-effect-hover w-10 h-10"
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-
-      <div className="text-center space-y-4 pt-8">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+    <div className="min-h-screen pb-20">
+      <div className="max-w-2xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={settings.language === 'ar' ? 'رجوع' : 'Back'}
+          >
+            <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">
             {settings.language === 'ar' ? 'المحفوظات' : 'Bookmarks'}
-          </span>
-        </h1>
-        <p className="text-base md:text-lg text-muted-foreground">
-          {settings.language === 'ar' 
-            ? 'الآيات والسور والأحاديث والأدعية المحفوظة'
-            : 'Your saved ayahs, surahs, hadiths, and duas'}
-        </p>
-      </div>
+          </h1>
+        </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="ayahs" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 glass-effect">
-          <TabsTrigger value="ayahs">
-            {settings.language === 'ar' ? `آيات (${ayahBookmarks.length})` : `Ayahs (${ayahBookmarks.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="surahs">
-            {settings.language === 'ar' ? `سور (${surahBookmarks.length})` : `Surahs (${surahBookmarks.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="hadiths">
-            {settings.language === 'ar' ? `أحاديث (${hadithBookmarks.length})` : `Hadiths (${hadithBookmarks.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="duas">
-            {settings.language === 'ar' ? `أدعية (${duaBookmarks.length})` : `Duas (${duaBookmarks.length})`}
-          </TabsTrigger>
-        </TabsList>
+        {/* Tabs */}
+        <Tabs defaultValue="ayahs" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 glass-effect">
+            <TabsTrigger value="ayahs" className="text-xs sm:text-sm">
+              {settings.language === 'ar' ? `آيات (${ayahBookmarks.length})` : `Ayahs (${ayahBookmarks.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="surahs" className="text-xs sm:text-sm">
+              {settings.language === 'ar' ? `سور (${surahBookmarks.length})` : `Surahs (${surahBookmarks.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="hadiths" className="text-xs sm:text-sm">
+              {settings.language === 'ar' ? `أحاديث (${hadithBookmarks.length})` : `Hadiths (${hadithBookmarks.length})`}
+            </TabsTrigger>
+            <TabsTrigger value="duas" className="text-xs sm:text-sm">
+              {settings.language === 'ar' ? `أدعية (${duaBookmarks.length})` : `Duas (${duaBookmarks.length})`}
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="ayahs" className="space-y-4 mt-6">
-          {ayahBookmarks.length === 0 ? (
-            <div className="text-center py-12 glass-effect rounded-3xl">
-              <BookMarked className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">
-                {settings.language === 'ar' 
-                  ? 'لا توجد آيات محفوظة'
-                  : 'No bookmarked ayahs yet'}
-              </p>
-            </div>
-          ) : (
-            ayahBookmarks.map(bookmark => (
-              <div
-                key={bookmark.id}
-                onClick={() => navigate(`/quran/${bookmark.surah_number}`)}
-                className="glass-effect rounded-3xl p-6 border border-border/30 hover:border-primary/40 backdrop-blur-xl smooth-transition cursor-pointer group"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg group-hover:scale-110 smooth-transition">
-                        <BookOpen className="h-6 w-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">{getSurahName(bookmark.surah_number)}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {settings.language === 'ar' 
-                            ? `الآية ${bookmark.ayah_number}`
-                            : `Ayah ${bookmark.ayah_number}`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeBookmark(bookmark.id);
-                    }}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </Button>
+          {/* Ayahs Tab */}
+          <TabsContent value="ayahs" className="space-y-4 mt-6">
+            {ayahBookmarks.length === 0 ? (
+              <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <BookMarked className="h-10 w-10 text-primary" />
                 </div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {settings.language === 'ar' ? 'لا توجد آيات محفوظة' : 'No Bookmarked Ayahs'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {settings.language === 'ar' 
+                    ? 'احفظ آياتك المفضلة لتجدها هنا'
+                    : 'Save your favorite ayahs to find them here'}
+                </p>
               </div>
-            ))
-          )}
-        </TabsContent>
+            ) : (
+              <div className="grid gap-4">
+                {ayahBookmarks.map((bookmark, index) => {
+                  const style = getCardGradient(index);
+                  return (
+                    <div key={bookmark.id} className="cursor-pointer group">
+                      <div className="relative overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                        
+                        <Card 
+                          className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
+                          onClick={() => navigate(`/quran/${bookmark.surah_number}?ayah=${bookmark.ayah_number}`)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
+                              <BookOpen className={`h-7 w-7 ${style.iconColor}`} />
+                            </div>
 
-        <TabsContent value="surahs" className="space-y-4 mt-6">
-          {surahBookmarks.length === 0 ? (
-            <div className="text-center py-12 glass-effect rounded-3xl">
-              <BookMarked className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">
-                {settings.language === 'ar' 
-                  ? 'لا توجد سور محفوظة'
-                  : 'No bookmarked surahs yet'}
-              </p>
-            </div>
-          ) : (
-            surahBookmarks.map(bookmark => {
-              const surah = surahs.find(s => s.number === bookmark.surah_number);
-              return (
-                <div
-                  key={bookmark.id}
-                  onClick={() => navigate(`/quran/${bookmark.surah_number}`)}
-                  className="glass-effect rounded-3xl p-6 border border-border/30 hover:border-primary/40 backdrop-blur-xl smooth-transition cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg group-hover:scale-110 smooth-transition">
-                        <span className="text-white font-bold text-xl">{bookmark.surah_number}</span>
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-xl mb-1">{getSurahName(bookmark.surah_number)}</h3>
-                        {surah && (
-                          <p className="text-sm text-muted-foreground">
-                            {surah.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'}
-                          </p>
-                        )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg mb-1 truncate">
+                                {getSurahName(bookmark.surah_number)}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {settings.language === 'ar' 
+                                  ? `الآية ${bookmark.ayah_number}`
+                                  : `Ayah ${bookmark.ayah_number}`}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeBookmark(bookmark.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeBookmark(bookmark.id);
-                      }}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </TabsContent>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
 
-        <TabsContent value="hadiths" className="space-y-4 mt-6">
-          {hadithBookmarks.length === 0 ? (
-            <div className="text-center py-12 glass-effect rounded-3xl">
-              <BookMarked className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">
-                {settings.language === 'ar' 
-                  ? 'لا توجد أحاديث محفوظة'
-                  : 'No bookmarked hadiths yet'}
-              </p>
-            </div>
-          ) : (
-            hadithBookmarks.map(bookmark => (
-              <Card
-                key={bookmark.id}
-                className="glass-effect p-6 border border-border/50 hover:border-primary/50 smooth-transition"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BookOpen className="h-4 w-4 text-primary" />
-                        <h3 className="font-semibold">{bookmark.book_name}</h3>
+          {/* Surahs Tab */}
+          <TabsContent value="surahs" className="space-y-4 mt-6">
+            {surahBookmarks.length === 0 ? (
+              <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <BookMarked className="h-10 w-10 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {settings.language === 'ar' ? 'لا توجد سور محفوظة' : 'No Bookmarked Surahs'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {settings.language === 'ar' 
+                    ? 'احفظ السور المفضلة لديك لتجدها هنا'
+                    : 'Save your favorite surahs to find them here'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {surahBookmarks.map((bookmark, index) => {
+                  const style = getCardGradient(index);
+                  const surah = surahs.find(s => s.number === bookmark.surah_number);
+                  return (
+                    <div key={bookmark.id} className="cursor-pointer group">
+                      <div className="relative overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                        
+                        <Card 
+                          className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
+                          onClick={() => navigate(`/quran/${bookmark.surah_number}`)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
+                              <span className={`font-bold text-xl ${style.iconColor}`}>{bookmark.surah_number}</span>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg mb-1 truncate">
+                                {getSurahName(bookmark.surah_number)}
+                              </h3>
+                              {surah && (
+                                <p className="text-sm text-muted-foreground">
+                                  {surah.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeBookmark(bookmark.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {settings.language === 'ar' 
-                          ? `حديث رقم ${bookmark.hadith_number}`
-                          : `Hadith ${bookmark.hadith_number}`}
-                      </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeBookmark(bookmark.id, 'hadith')}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {settings.language === 'ar' ? (
-                      <>
-                        <p className="text-base font-arabic text-right" dir="rtl">
-                          {bookmark.hadith_arabic}
-                        </p>
-                        {settings.translationEnabled && (
-                          <p className="text-sm text-muted-foreground">
-                            {bookmark.hadith_english}
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-base">
-                          {bookmark.hadith_english}
-                        </p>
-                        {settings.translationEnabled && (
-                          <p className="text-sm font-arabic text-right text-muted-foreground" dir="rtl">
-                            {bookmark.hadith_arabic}
-                          </p>
-                        )}
-                      </>
-                    )}
-                    <p className="text-xs text-muted-foreground pt-2">
-                      {settings.language === 'ar' ? 'الراوي: ' : 'Narrator: '}{bookmark.narrator}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            ))
-          )}
-        </TabsContent>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
 
-        <TabsContent value="duas" className="space-y-4 mt-6">
-          {duaBookmarks.length === 0 ? (
-            <div className="text-center py-12 glass-effect rounded-3xl">
-              <BookMarked className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">
-                {settings.language === 'ar' 
-                  ? 'لا توجد أدعية محفوظة'
-                  : 'No bookmarked duas yet'}
-              </p>
-            </div>
-          ) : (
-            duaBookmarks.map(bookmark => (
-              <Card
-                key={bookmark.id}
-                className="glass-effect p-6 border border-border/50 hover:border-primary/50 smooth-transition"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <h3 className="font-bold text-lg">{bookmark.dua_title}</h3>
-                      {bookmark.category && (
-                        <span className="inline-block px-3 py-1 rounded-full text-xs bg-primary/10 text-primary">
-                          {bookmark.category}
-                        </span>
-                      )}
+          {/* Hadiths Tab */}
+          <TabsContent value="hadiths" className="space-y-4 mt-6">
+            {hadithBookmarks.length === 0 ? (
+              <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <BookMarked className="h-10 w-10 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">
+                  {settings.language === 'ar' ? 'لا توجد أحاديث محفوظة' : 'No Bookmarked Hadiths'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {settings.language === 'ar' 
+                    ? 'احفظ الأحاديث المفضلة لتجدها هنا'
+                    : 'Save your favorite hadiths to find them here'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {hadithBookmarks.map((bookmark, index) => {
+                  const style = getCardGradient(index);
+                  return (
+                    <div key={bookmark.id} className="group">
+                      <div className="relative overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                        
+                        <Card className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-4 flex-1">
+                                <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center`}>
+                                  <BookOpen className={`h-7 w-7 ${style.iconColor}`} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold text-lg mb-1">{bookmark.book_name}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {settings.language === 'ar' 
+                                      ? `حديث رقم ${bookmark.hadith_number}`
+                                      : `Hadith ${bookmark.hadith_number}`}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => removeBookmark(bookmark.id, 'hadith')}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            
+                            <div className="space-y-3 pl-[72px]">
+                              {settings.language === 'ar' ? (
+                                <>
+                                  <p className="text-base font-arabic text-right leading-relaxed" dir="rtl">
+                                    {bookmark.hadith_arabic}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {bookmark.hadith_english}
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-base leading-relaxed">
+                                    {bookmark.hadith_english}
+                                  </p>
+                                  <p className="text-sm font-arabic text-right text-muted-foreground" dir="rtl">
+                                    {bookmark.hadith_arabic}
+                                  </p>
+                                </>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                {settings.language === 'ar' ? 'الراوي: ' : 'Narrator: '}{bookmark.narrator}
+                              </p>
+                            </div>
+                          </div>
+                        </Card>
+                      </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeBookmark(bookmark.id, 'dua')}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
 
-                  {bookmark.dua_arabic && (
-                    <p 
-                      className={`text-2xl leading-loose text-right ${settings.fontType === 'quran' ? 'quran-font' : ''}`}
-                      dir="rtl"
-                    >
-                      {bookmark.dua_arabic}
-                    </p>
-                  )}
-
-                  {bookmark.dua_transliteration && (
-                    <p className="text-sm text-muted-foreground italic">
-                      {bookmark.dua_transliteration}
-                    </p>
-                  )}
-
-                  {bookmark.dua_english && (
-                    <p className="text-base">
-                      {bookmark.dua_english}
-                    </p>
-                  )}
+          {/* Duas Tab */}
+          <TabsContent value="duas" className="space-y-4 mt-6">
+            {duaBookmarks.length === 0 ? (
+              <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
+                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                  <BookMarked className="h-10 w-10 text-primary" />
                 </div>
-              </Card>
-            ))
-          )}
-        </TabsContent>
-      </Tabs>
+                <h3 className="text-xl font-semibold mb-2">
+                  {settings.language === 'ar' ? 'لا توجد أدعية محفوظة' : 'No Bookmarked Duas'}
+                </h3>
+                <p className="text-muted-foreground">
+                  {settings.language === 'ar' 
+                    ? 'احفظ الأدعية المفضلة لتجدها هنا'
+                    : 'Save your favorite duas to find them here'}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {duaBookmarks.map((bookmark, index) => {
+                  const style = getCardGradient(index);
+                  return (
+                    <div key={bookmark.id} className="group">
+                      <div className="relative overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                        
+                        <Card className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6">
+                          <div className="space-y-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-4 flex-1">
+                                <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center`}>
+                                  <Heart className={`h-7 w-7 ${style.iconColor}`} />
+                                </div>
+                                <div className="flex-1 min-w-0 space-y-2">
+                                  <h3 className="font-semibold text-lg">{bookmark.dua_title}</h3>
+                                  {bookmark.category && (
+                                    <span className="inline-block px-3 py-1 rounded-full text-xs bg-primary/10 text-primary">
+                                      {bookmark.category}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => removeBookmark(bookmark.id, 'dua')}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+
+                            <div className="space-y-3 pl-[72px]">
+                              {bookmark.dua_arabic && (
+                                <p 
+                                  className={`text-2xl leading-loose text-right ${settings.fontType === 'quran' ? 'quran-font' : 'font-arabic'}`}
+                                  dir="rtl"
+                                >
+                                  {bookmark.dua_arabic}
+                                </p>
+                              )}
+
+                              {bookmark.dua_transliteration && (
+                                <p className="text-sm text-muted-foreground italic">
+                                  {bookmark.dua_transliteration}
+                                </p>
+                              )}
+
+                              {bookmark.dua_english && (
+                                <p className="text-base">
+                                  {bookmark.dua_english}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </Card>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
