@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2, ArrowRight } from 'lucide-react';
+import { Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2, ArrowRight, BookOpen } from 'lucide-react';
 import { fetchSurahs, Surah, getFirstAyahOfPage } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -420,7 +420,20 @@ const Quran = () => {
                     )}
                   </Button>
                 )}
-                <ArrowRight className="h-8 w-8 text-primary" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (displayProgress > 0) {
+                      navigate(`/quran/${displaySurah.number}?ayah=${displayProgress}`);
+                    } else {
+                      navigate(`/quran/${displaySurah.number}`);
+                    }
+                  }}
+                >
+                  <BookOpen className="h-8 w-8 text-primary" />
+                </Button>
               </div>
             </div>
           </div>
