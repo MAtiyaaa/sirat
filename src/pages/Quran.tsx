@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2 } from 'lucide-react';
+import { Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2 } from 'lucide-react';
 import { fetchSurahs, Surah, getFirstAyahOfPage } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -253,6 +253,53 @@ const Quran = () => {
     }
   };
 
+  const toggleSurahBookmark = async (surahNumber: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      return;
+    }
+
+    try {
+      const isBookmarked = bookmarkedSurahs.has(surahNumber);
+      
+      if (isBookmarked) {
+        await supabase
+          .from('bookmarks')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('surah_number', surahNumber)
+          .eq('bookmark_type', 'surah');
+        
+        setBookmarkedSurahs(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(surahNumber);
+          return newSet;
+        });
+        toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
+      } else {
+        await supabase
+          .from('bookmarks')
+          .insert({
+            user_id: user.id,
+            surah_number: surahNumber,
+            bookmark_type: 'surah'
+          });
+        
+        setBookmarkedSurahs(prev => new Set([...prev, surahNumber]));
+        toast.success(settings.language === 'ar' ? 'تمت الإضافة' : 'Added');
+      }
+      
+      // Reload bookmarks to ensure sync
+      await loadBookmarks();
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      toast.error(settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
   if (loading) {
     return <IslamicFactsLoader />;
   }
@@ -310,7 +357,7 @@ const Quran = () => {
                     : `Surah ${surahs.find(s => s.number === pageSuggestion.surahNumber)?.englishName || pageSuggestion.surahNumber} - Ayah ${pageSuggestion.ayahNumber}`}
                 </p>
               </div>
-              <Book className="h-8 w-8 text-primary" />
+              <Search className="h-8 w-8 text-primary" />
             </div>
           </div>
         </div>
@@ -373,7 +420,7 @@ const Quran = () => {
                     )}
                   </Button>
                 )}
-                <Book className="h-8 w-8 text-primary" />
+                <Bookmark className="h-8 w-8 text-primary" />
               </div>
             </div>
           </div>
@@ -455,10 +502,15 @@ const Quran = () => {
                             )}
                           </Button>
                         )}
-                        {bookmarkedSurahs.has(surah.number) && (
-                          <Bookmark className="h-5 w-5 text-primary fill-primary" />
-                        )}
-                        <Book className="h-5 w-5 text-muted-foreground" />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => toggleSurahBookmark(surah.number, e)}
+                          title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
+                        >
+                          <Bookmark className={`h-5 w-5 ${bookmarkedSurahs.has(surah.number) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                        </Button>
                       </div>
                     </div>
                     
