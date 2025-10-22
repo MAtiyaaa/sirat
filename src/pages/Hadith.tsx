@@ -57,10 +57,6 @@ const Hadith = () => {
   const [bookmarkedHadiths, setBookmarkedHadiths] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
 
-  // detail state (same-page full view)
-  const [viewingDetail, setViewingDetail] = useState(false);
-  const [detailHadith, setDetailHadith] = useState<Hadith | null>(null);
-
   const content = {
     ar: {
       title: 'الأحاديث النبوية',
@@ -138,18 +134,6 @@ const Hadith = () => {
       const list: Hadith[] = data.hadiths?.data || [];
       if (pageNum === 1) setHadiths(list);
       else setHadiths((prev) => [...prev, ...list]);
-
-      // deep link handling
-      const params = new URLSearchParams(location.search);
-      const deepBook = mapBookParam(params.get('book'));
-      const deepNum = params.get('hadith');
-      if (deepBook && deepNum && deepBook === bookName) {
-        const found = list.find((h) => String(h.hadithNumber) === String(deepNum));
-        if (found) {
-          setDetailHadith(found);
-          setViewingDetail(true);
-        }
-      }
     } catch (e) {
       console.error(e);
       toast.error('Failed to load hadiths. Please try again.');
@@ -288,40 +272,23 @@ const Hadith = () => {
     fetchHadiths(selectedBook, next, searchTerm);
   };
 
-  // open/close detail
-  const openDetail = (h: Hadith) => {
-    setDetailHadith(h);
-    setViewingDetail(true);
-
-    const params = new URLSearchParams(location.search);
-    params.set('book', selectedBook);
-    params.set('hadith', String(h.hadithNumber));
-    const next = `${location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, '', next);
-  };
-
-  const closeDetail = () => {
-    setViewingDetail(false);
-    setDetailHadith(null);
-
-    const params = new URLSearchParams(location.search);
-    params.delete('hadith');
-    const next = params.toString() ? `${location.pathname}?${params.toString()}` : location.pathname;
-    window.history.replaceState(null, '', next);
-  };
-
-  const shareDetail = async () => {
-    if (!detailHadith) return;
-    await shareHadith(detailHadith);
+  const getCardGradient = (index: number) => {
+    const gradients = [
+      { gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20", iconBg: "bg-purple-500/10", iconColor: "text-purple-600 dark:text-purple-400" },
+      { gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20", iconBg: "bg-blue-500/10", iconColor: "text-blue-600 dark:text-blue-400" },
+      { gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600 dark:text-emerald-400" },
+      { gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20", iconBg: "bg-amber-500/10", iconColor: "text-amber-600 dark:text-amber-400" },
+      { gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20", iconBg: "bg-red-500/10", iconColor: "text-red-600 dark:text-red-400" },
+    ];
+    return gradients[index % gradients.length];
   };
 
   return (
     <div className="min-h-screen pb-24 relative" dir={dir}>
-      {/* Global Back Button (list: history back, detail: close detail) */}
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => (viewingDetail ? closeDetail() : navigate(-1))}
+        onClick={() => navigate(-1)}
         className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
         aria-label={t.back}
         title={t.back}
@@ -329,8 +296,7 @@ const Hadith = () => {
         <ArrowLeft className="h-5 w-5" />
       </Button>
 
-      {!viewingDetail && (
-        <div className="max-w-4xl mx-auto space-y-6 px-4">
+      <div className="max-w-2xl mx-auto space-y-6 px-4">
           {/* Header */}
           <div className="text-center space-y-4 py-6">
             <div className="flex flex-col items-center justify-center gap-3">
@@ -389,80 +355,72 @@ const Hadith = () => {
                   const isBookmarked = bookmarkedHadiths.has(bookmarkKey);
 
                   return (
-                    <div key={`${hadith.hadithNumber}-${index}`} className="w-full">
+                  <div key={`${hadith.hadithNumber}-${index}`} className="group">
+                    <div className="relative overflow-hidden">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${getCardGradient(index).gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                      
                       <Card
-                        className="glass-effect rounded-3xl p-8 space-y-5 smooth-transition hover:scale-[1.01] border border-border/50 apple-shadow"
+                        className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
                       >
-                        {/* Header row with number, book, actions */}
-                        <div className="flex items-center justify-between text-sm text-muted-foreground ios-26-style">
-                          <div className="min-w-0 break-words whitespace-normal text-pretty hyphens-auto">
-                            <span className="font-medium">
-                              {t.hadithNumber}: {hadith.hadithNumber}
-                            </span>
-                            {hadith.book?.bookName ? (
-                              <span className="ml-3 font-medium">{hadith.book.bookName}</span>
-                            ) : null}
+                        <div className="space-y-4">
+                          {/* Header */}
+                          <div className="flex items-center justify-between text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="h-4 w-4 text-primary" />
+                              <span className="font-medium">
+                                {t.hadithNumber}: {hadith.hadithNumber}
+                              </span>
+                              {hadith.book?.bookName && (
+                                <span className="font-medium">• {hadith.book.bookName}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => toggleBookmark(hadith)}
+                                title={isBookmarked ? t.bookmarkRemoved : t.bookmarkAdded}
+                              >
+                                <Bookmark
+                                  className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : ''}`}
+                                />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => shareHadith(hadith)}
+                                title={t.share}
+                              >
+                                <Share2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            {/* Bookmark */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleBookmark(hadith);
-                              }}
-                              className="rounded-full"
-                              aria-label="bookmark"
-                              title={isBookmarked ? t.bookmarkRemoved : t.bookmarkAdded}
-                            >
-                              <Bookmark
-                                className={`h-5 w-5 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
-                              />
-                            </Button>
-                            {/* Share */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await shareHadith(hadith);
-                              }}
-                              className="rounded-full"
-                              aria-label={t.share}
-                              title={t.share}
-                            >
-                              <Share2 className="h-5 w-5" />
-                            </Button>
+
+                          {/* Chapter */}
+                          {hadith.chapter && (
+                            <div className="text-sm text-muted-foreground font-medium px-3 py-2 bg-muted/30 rounded-lg">
+                              {t.chapter}: {langIsAr ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
+                            </div>
+                          )}
+
+                          {/* Content */}
+                          <div className="space-y-3">
+                            <div className="text-right">
+                              <p className="text-xl leading-loose font-arabic">{hadith.hadithArabic}</p>
+                            </div>
+                            <p className="text-sm leading-relaxed">{hadith.hadithEnglish}</p>
                           </div>
-                        </div>
 
-                        {/* Chapter pill */}
-                        {hadith.chapter && (
-                          <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl ios-26-style break-words whitespace-normal text-pretty hyphens-auto">
-                            {t.chapter}:{' '}
-                            {langIsAr ? hadith.chapter.chapterArabic : hadith.chapter.chapterEnglish}
+                          {/* Narrator */}
+                          <div className="text-sm text-muted-foreground font-medium px-3 py-2 bg-muted/20 rounded-lg">
+                            {t.narrator}: {hadith.englishNarrator}
                           </div>
-                        )}
-
-                        {/* Texts (Arabic + English – always show both on cards as requested) */}
-                        <div
-                          className={`space-y-4 ${langIsAr ? 'text-right arabic-regal' : ''} break-words whitespace-normal text-pretty hyphens-auto`}
-                          onClick={() => openDetail(hadith)}
-                          role="button"
-                        >
-                          {/* Arabic */}
-                          <p className="text-xl leading-loose font-arabic">{hadith.hadithArabic}</p>
-                          {/* English */}
-                          <p className="text-base leading-relaxed text-muted-foreground ios-26-style">{hadith.hadithEnglish}</p>
-                        </div>
-
-                        {/* Narrator pill */}
-                        <div className="pt-2 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl ios-26-style break-words whitespace-normal">
-                          {t.narrator}: {hadith.englishNarrator}
                         </div>
                       </Card>
                     </div>
+                  </div>
                   );
                 })}
 
@@ -489,82 +447,6 @@ const Hadith = () => {
             )}
           </div>
         </div>
-      )}
-
-      {/* DETAIL VIEW */}
-      {viewingDetail && detailHadith && (
-        <div className="max-w-3xl mx-auto px-4 pt-20 pb-24">
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight break-words whitespace-normal text-pretty">
-                {detailHadith.book?.bookName} — #{detailHadith.hadithNumber}
-              </h2>
-              {detailHadith.chapter && (
-                <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl inline-block break-words whitespace-normal">
-                  {t.chapter}:{' '}
-                  {langIsAr
-                    ? detailHadith.chapter.chapterArabic
-                    : detailHadith.chapter.chapterEnglish}
-                </div>
-              )}
-            </div>
-
-            <Card className="glass-effect rounded-3xl p-8 space-y-6 border border-border/50 apple-shadow">
-              {/* Action Row (Bookmark LEFT, Share RIGHT) */}
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => toggleBookmark(detailHadith)}
-                  className="rounded-full"
-                  title={bookmarkedHadiths.has(`${detailHadith.book?.bookSlug}-${detailHadith.hadithNumber}`) ? t.bookmarkRemoved : t.bookmarkAdded}
-                  aria-label="bookmark"
-                >
-                  <Bookmark
-                    className={`h-4 w-4 ${bookmarkedHadiths.has(`${detailHadith.book?.bookSlug}-${detailHadith.hadithNumber}`) ? 'fill-primary text-primary' : ''}`}
-                  />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={shareDetail}
-                  className="rounded-full"
-                  title={t.share}
-                  aria-label={t.share}
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="space-y-6">
-                {langIsAr ? (
-                  <>
-                    <p className="text-2xl leading-loose text-right font-arabic break-words whitespace-normal text-pretty hyphens-auto">
-                      {detailHadith.hadithArabic}
-                    </p>
-                    <p className="text-base leading-relaxed text-muted-foreground break-words whitespace-normal text-pretty hyphens-auto">
-                      {detailHadith.hadithEnglish}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-base leading-relaxed break-words whitespace-normal text-pretty hyphens-auto">
-                      {detailHadith.hadithEnglish}
-                    </p>
-                    <p className="text-2xl font-arabic text-right leading-loose text-muted-foreground break-words whitespace-normal text-pretty hyphens-auto">
-                      {detailHadith.hadithArabic}
-                    </p>
-                  </>
-                )}
-
-                <div className="pt-3 text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl break-words whitespace-normal">
-                  {t.narrator}: {detailHadith.englishNarrator}
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
