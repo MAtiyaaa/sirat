@@ -1073,57 +1073,75 @@ const SurahDetail = () => {
               dir="rtl"
             >
               {wordData[ayah.numberInSurah] ? (
-                <div className="flex flex-wrap gap-2 justify-end text-right" dir="rtl">
-                  {wordData[ayah.numberInSurah].map((word, wordIndex) => {
-                    const popoverKey = `${ayah.numberInSurah}-${wordIndex}`;
-                    return (
-                      <Popover 
-                        key={wordIndex}
-                        open={openWordPopover === popoverKey}
-                        onOpenChange={(open) => {
-                          if (!open) setOpenWordPopover(null);
-                        }}
-                      >
-                        <PopoverTrigger asChild>
-                          <button
-                            onClick={() => handleWordClick(ayah.numberInSurah, wordIndex)}
-                            className="cursor-pointer hover:text-primary smooth-transition inline-block bg-transparent border-0 p-0 m-0 font-inherit"
-                            style={{ font: 'inherit' }}
-                          >
-                            {word.text}
-                          </button>
-                        </PopoverTrigger>
-                        <PopoverContent 
-                          className="w-[280px] p-4 glass-effect backdrop-blur-xl border-border/50"
-                          side="top"
-                          align="center"
-                          sideOffset={8}
+                settings.wordByWordDisplay ? (
+                  // Inline word-by-word display
+                  <div className="flex flex-wrap gap-4 justify-end text-right" dir="rtl">
+                    {wordData[ayah.numberInSurah].map((word, wordIndex) => (
+                      <div key={wordIndex} className="inline-flex flex-col items-center gap-1">
+                        <span className="text-2xl">{word.text}</span>
+                        <span className="text-xs text-muted-foreground italic font-normal" dir="ltr">
+                          {word.transliteration}
+                        </span>
+                        <span className="text-xs text-muted-foreground font-normal" dir="ltr">
+                          {word.translation}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  // Popover word-by-word display
+                  <div className="flex flex-wrap gap-2 justify-end text-right" dir="rtl">
+                    {wordData[ayah.numberInSurah].map((word, wordIndex) => {
+                      const popoverKey = `${ayah.numberInSurah}-${wordIndex}`;
+                      return (
+                        <Popover 
+                          key={wordIndex}
+                          open={openWordPopover === popoverKey}
+                          onOpenChange={(open) => {
+                            if (!open) setOpenWordPopover(null);
+                          }}
                         >
-                          <div className="space-y-3 text-left" dir="ltr">
-                            <div>
-                              <p className="font-semibold text-foreground text-base mb-1">{word.translation}</p>
-                              <p className="text-muted-foreground italic text-sm">{word.transliteration}</p>
+                          <PopoverTrigger asChild>
+                            <button
+                              onClick={() => handleWordClick(ayah.numberInSurah, wordIndex)}
+                              className="cursor-pointer hover:text-primary smooth-transition inline-block bg-transparent border-0 p-0 m-0 font-inherit"
+                              style={{ font: 'inherit' }}
+                            >
+                              {word.text}
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent 
+                            className="w-[280px] p-4 glass-effect backdrop-blur-xl border-border/50"
+                            side="top"
+                            align="center"
+                            sideOffset={8}
+                          >
+                            <div className="space-y-3 text-left" dir="ltr">
+                              <div>
+                                <p className="font-semibold text-foreground text-base mb-1">{word.translation}</p>
+                                <p className="text-muted-foreground italic text-sm">{word.transliteration}</p>
+                              </div>
+                              {word.audio && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    playWordAudio(word);
+                                  }}
+                                  className="w-full"
+                                >
+                                  <Volume2 className="h-3 w-3 mr-2" />
+                                  {settings.language === 'ar' ? 'تشغيل' : 'Play'}
+                                </Button>
+                              )}
                             </div>
-                            {word.audio && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  playWordAudio(word);
-                                }}
-                                className="w-full"
-                              >
-                                <Volume2 className="h-3 w-3 mr-2" />
-                                {settings.language === 'ar' ? 'تشغيل' : 'Play'}
-                              </Button>
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    );
-                  })}
-                </div>
+                          </PopoverContent>
+                        </Popover>
+                      );
+                    })}
+                  </div>
+                )
               ) : (
                 <span>{ayah.text}</span>
               )}

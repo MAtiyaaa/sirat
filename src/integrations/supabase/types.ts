@@ -300,6 +300,7 @@ export type Database = {
           translation_source: string | null
           updated_at: string | null
           user_id: string
+          word_by_word_display: boolean | null
         }
         Insert: {
           created_at?: string | null
@@ -317,6 +318,7 @@ export type Database = {
           translation_source?: string | null
           updated_at?: string | null
           user_id: string
+          word_by_word_display?: boolean | null
         }
         Update: {
           created_at?: string | null
@@ -334,6 +336,7 @@ export type Database = {
           translation_source?: string | null
           updated_at?: string | null
           user_id?: string
+          word_by_word_display?: boolean | null
         }
         Relationships: []
       }

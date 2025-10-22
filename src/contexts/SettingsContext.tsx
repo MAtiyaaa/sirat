@@ -18,6 +18,7 @@ interface Settings {
   tafsirSource: string;
   prayerTimeRegion: string | null;
   readingTrackingMode: ReadingTrackingMode;
+  wordByWordDisplay: boolean;
 }
 
 interface SettingsContextType {
@@ -36,6 +37,7 @@ const defaultSettings: Settings = {
   tafsirSource: 'en-tafisr-ibn-kathir',
   prayerTimeRegion: null,
   readingTrackingMode: 'auto',
+  wordByWordDisplay: false,
 };
 
 // Load settings from localStorage immediately (synchronously) for instant availability
@@ -139,6 +141,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
               prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
               readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
+              wordByWordDisplay: data.word_by_word_display ?? defaultSettings.wordByWordDisplay,
             };
             console.log('[Settings] Setting state to DB settings:', dbSettings);
             setSettings(dbSettings);
@@ -247,6 +250,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         tafsir_source: settings.tafsirSource,
         prayer_time_region: settings.prayerTimeRegion,
         reading_tracking_mode: settings.readingTrackingMode,
+        word_by_word_display: settings.wordByWordDisplay,
       };
       
       console.log('[Settings] Upserting data:', settingsData);

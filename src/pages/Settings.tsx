@@ -149,6 +149,8 @@ const Settings = () => {
       translationOptions: {
         transliteration: 'النقل الحرفي',
       },
+      wordByWord: 'النطق والترجمة تحت الكلمة',
+      wordByWordDesc: 'عرض النطق والترجمة تحت كل كلمة',
       mode: 'الوضع',
       color: 'اللون',
       modes: {
@@ -217,6 +219,8 @@ const Settings = () => {
       translationOptions: {
         transliteration: 'Transliteration',
       },
+      wordByWord: 'Word Transliteration & Translation',
+      wordByWordDesc: 'Show transliteration and translation under each word',
       mode: 'Mode',
       color: 'Color',
       modes: {
@@ -457,6 +461,14 @@ const Settings = () => {
                 <SelectItem value="click">{t.trackingModes.click}</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="h-px bg-border" />
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <Label className="font-medium">{t.wordByWord}</Label>
+              <p className="text-xs text-muted-foreground mt-1">{t.wordByWordDesc}</p>
+            </div>
+            <Switch checked={settings.wordByWordDisplay} onCheckedChange={(checked) => updateSettings({ wordByWordDisplay: checked })} />
           </div>
         </div>
       </div>
