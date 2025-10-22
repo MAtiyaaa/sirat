@@ -155,9 +155,9 @@ const ChatHistory = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="max-w-2xl mx-auto p-6 space-y-6">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Button
             variant="ghost"
             size="icon"
@@ -167,7 +167,7 @@ const ChatHistory = () => {
           >
             <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
           </Button>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             {settings.language === 'ar' ? 'سجل المحادثات' : 'Chat History'}
           </h1>
         </div>
@@ -214,21 +214,21 @@ const ChatHistory = () => {
                   <div className="relative overflow-hidden">
                     <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
                     
-                    <Card 
-                      className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
+                     <Card 
+                      className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-4 sm:p-6"
                       onClick={() => openInQalam(conv.id)}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
-                          <MessageSquare className={`h-7 w-7 ${style.iconColor}`} />
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${style.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
+                          <MessageSquare className={`h-6 w-6 sm:h-7 sm:w-7 ${style.iconColor}`} />
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1 truncate">
+                          <h3 className="font-semibold text-base sm:text-lg mb-1 truncate">
                             {conv.title}
                           </h3>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-3.5 w-3.5" />
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             <span>{formatDate(conv.updated_at)}</span>
                             {conv.message_count && (
                               <>
