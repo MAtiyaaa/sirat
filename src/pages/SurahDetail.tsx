@@ -25,7 +25,8 @@ import {
   Bookmark,
   Search,
   Eye,
-  Lock
+  Lock,
+  Share2
 } from 'lucide-react';
 import { IslamicFactsLoader } from '@/components/IslamicFactsLoader';
 import {
@@ -503,6 +504,43 @@ const SurahDetail = () => {
     }
   };
 
+  const handleShareSurah = async () => {
+    const url = `${window.location.origin}/quran/${surahNumber}`;
+    const title = `${surahData?.englishName} - ${settings.language === 'ar' ? 'القرآن الكريم' : 'The Holy Quran'}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const handleShareAyah = async (ayahNumber: number, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    const url = `${window.location.origin}/quran/${surahNumber}?ayah=${ayahNumber}`;
+    const title = `${surahData?.englishName} - Ayah ${ayahNumber}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   const handleAyahChat = async (ayah: any) => {
     // Update last visible ayah
     setLastVisibleAyah(ayah.numberInSurah);
@@ -866,6 +904,16 @@ const SurahDetail = () => {
           >
             <Bookmark className={`h-5 w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
           </Button>
+          
+          <Button
+            onClick={handleShareSurah}
+            variant="outline"
+            size="icon"
+            className="rounded-full w-12 h-12"
+            title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
@@ -995,6 +1043,15 @@ const SurahDetail = () => {
                   title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark ayah'}
                 >
                   <Bookmark className={`h-4 w-4 ${bookmarkedAyahs.has(ayah.numberInSurah) ? 'fill-primary text-primary' : ''}`} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleShareAyah(ayah.numberInSurah, e)}
+                  className="rounded-full"
+                  title={settings.language === 'ar' ? 'مشاركة الآية' : 'Share ayah'}
+                >
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

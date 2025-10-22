@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw } from 'lucide-react';
+import { Book, Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2 } from 'lucide-react';
 import { fetchSurahs, Surah, getFirstAyahOfPage } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -234,6 +234,25 @@ const Quran = () => {
     }
   };
 
+  const handleShareSurah = async (surahNumber: number, surahName: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const url = `${window.location.origin}/quran/${surahNumber}`;
+    const title = `${surahName} - ${settings.language === 'ar' ? 'القرآن الكريم' : 'The Holy Quran'}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   if (loading) {
     return <IslamicFactsLoader />;
   }
@@ -398,6 +417,15 @@ const Quran = () => {
                         {settings.language === 'ar' ? surah.name : surah.englishName}
                       </h3>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => handleShareSurah(surah.number, surah.englishName, e)}
+                          title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
+                        >
+                          <Share2 className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                        </Button>
                         {surahProgressPercent > 0 && (
                           <Button
                             variant="ghost"
