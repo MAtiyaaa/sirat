@@ -537,143 +537,120 @@ const Wudu = () => {
   const currentSteps = steps[settings.language];
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        {/* Prayer Times Section */}
-        <Collapsible open={isPrayerTimesOpen} onOpenChange={setIsPrayerTimesOpen}>
-          <div className="relative overflow-hidden rounded-3xl border border-border/30 group">
-            {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background opacity-50 group-hover:opacity-70 smooth-transition" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-            
-            <div className="relative glass-effect p-6 sm:p-8">
-              <CollapsibleTrigger asChild>
-                <button className="w-full">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-105 smooth-transition">
-                        <HandHeart className="h-7 w-7 text-primary" />
+    <div className="space-y-8">
+      {/* Prayer Times Section */}
+      <Collapsible open={isPrayerTimesOpen} onOpenChange={setIsPrayerTimesOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <HandHeart className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === "ar" ? "أوقات الصلاة" : "Prayer Times"}
+                    </h2>
+                    {location && (
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span>{location}</span>
                       </div>
-                      <div className="text-left">
-                        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-                          {settings.language === "ar" ? "أوقات الصلاة" : "Prayer Times"}
-                        </h2>
-                        {location && (
-                          <div className="flex items-center gap-2 mt-1.5 text-sm text-muted-foreground">
-                            <MapPin className="h-3.5 w-3.5" />
-                            <span>{location}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {loading ? (
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                    ) : nextPrayer ? (
-                      <div className="flex items-center gap-4">
-                        <div className="text-right hidden sm:block">
-                          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                            {settings.language === "ar" ? "القادمة" : "Next"}
-                          </div>
-                          <div className="text-xl font-bold text-primary">{nextPrayer.name}</div>
-                          <div className="text-lg font-semibold">{nextPrayer.time}</div>
-                        </div>
-                        <ChevronDown
-                          className={`h-5 w-5 text-muted-foreground smooth-transition ${isPrayerTimesOpen ? "rotate-180" : ""}`}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </button>
-              </CollapsibleTrigger>
-
-              <CollapsibleContent className="mt-8">
-                {prayerTimes && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-                    {Object.entries(prayerTimes).map(([prayer, time]) => {
-                      const rakaas = prayerRakaas[prayer as keyof PrayerTimes];
-                      return (
-                        <Card
-                          key={prayer}
-                          className="relative overflow-hidden group/card border-border/30 hover:border-primary/50 smooth-transition"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover/card:opacity-100 smooth-transition" />
-                          <div className="relative p-4 sm:p-5 text-center">
-                            <div className="text-sm font-semibold text-muted-foreground mb-2">
-                              {prayerNames[prayer as keyof PrayerTimes]}
-                            </div>
-                            <div className="text-xl sm:text-2xl font-bold text-primary mb-3">{time}</div>
-                            <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t border-border/30">
-                              <div className="flex items-center justify-center gap-2">
-                                <span className="font-medium">{settings.language === "ar" ? "فرض" : "Fard"}:</span>
-                                <span className="text-foreground font-semibold">{rakaas.fard}</span>
-                              </div>
-                              {rakaas.sunnah > 0 && (
-                                <div className="flex items-center justify-center gap-2">
-                                  <span className="font-medium">{settings.language === "ar" ? "سنة" : "Sunnah"}:</span>
-                                  <span className="text-foreground font-semibold">{rakaas.sunnah}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </CollapsibleContent>
-            </div>
-          </div>
-        </Collapsible>
-
-        {/* Next Prayer Countdown */}
-        {nextPrayer && isPrayerTimesOpen && (
-          <div className="relative overflow-hidden rounded-2xl border border-primary/30">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent" />
-            <div className="relative glass-effect p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <Clock className="h-7 w-7 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                      {settings.language === "ar" ? "الوقت المتبقي حتى" : "Time till"}
-                    </p>
-                    <p className="text-2xl font-bold text-primary">{nextPrayer.name}</p>
+                    )}
                   </div>
                 </div>
-                <div className="text-4xl font-bold text-primary tabular-nums">{nextPrayer.timeLeft}</div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Qibla Finder */}
-        <Collapsible open={isQiblaOpen} onOpenChange={setIsQiblaOpen}>
-          <div className="relative overflow-hidden rounded-3xl border border-border/30 group">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-primary/5 to-background opacity-50 group-hover:opacity-70 smooth-transition" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-            
-            <div className="relative glass-effect p-6 sm:p-8">
-              <CollapsibleTrigger asChild>
-                <button className="w-full">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center group-hover:scale-105 smooth-transition">
-                        <MapPin className="h-7 w-7 text-green-600 dark:text-green-400" />
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                ) : nextPrayer ? (
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="text-sm text-muted-foreground">
+                        {settings.language === "ar" ? "القادمة" : "Next"}
                       </div>
-                      <div className="text-left">
-                        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
-                          {settings.language === "ar" ? "اتجاه القبلة" : "Qibla Direction"}
-                        </h2>
-                        {qiblaDirection !== null && (
-                          <p className="text-sm text-muted-foreground mt-1.5">
-                            {qiblaDirection}° {settings.language === "ar" ? "من الشمال" : "from North"}
-                          </p>
+                      <div className="text-xl font-bold text-primary">{nextPrayer.name}</div>
+                      <div className="text-lg font-semibold">{nextPrayer.time}</div>
+                    </div>
+                    <ChevronDown
+                      className={`h-5 w-5 text-muted-foreground transition-transform ${isPrayerTimesOpen ? "rotate-180" : ""}`}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            {prayerTimes && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {Object.entries(prayerTimes).map(([prayer, time]) => {
+                  const rakaas = prayerRakaas[prayer as keyof PrayerTimes];
+                  return (
+                    <Card
+                      key={prayer}
+                      className="p-4 text-center glass-effect border-border/50 hover:border-primary/50 smooth-transition"
+                    >
+                      <div className="text-sm font-semibold text-muted-foreground mb-1">
+                        {prayerNames[prayer as keyof PrayerTimes]}
+                      </div>
+                      <div className="text-lg font-bold text-primary mb-2">{time}</div>
+                      <div className="text-xs text-muted-foreground space-y-0.5">
+                        <div>
+                          {settings.language === "ar" ? "فرض" : "Fard"}: {rakaas.fard}
+                        </div>
+                        {rakaas.sunnah > 0 && (
+                          <div>
+                            {settings.language === "ar" ? "سنة" : "Sunnah"}: {rakaas.sunnah}
+                          </div>
                         )}
                       </div>
-                    </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+
+      {/* Next Prayer Countdown */}
+      {nextPrayer && isPrayerTimesOpen && (
+        <div className="glass-effect rounded-2xl p-5 border border-primary/20 bg-primary/5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {settings.language === "ar" ? "الوقت المتبقي حتى" : "Time till"}
+                </p>
+                <p className="text-xl font-bold text-primary">{nextPrayer.name}</p>
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-primary">{nextPrayer.timeLeft}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Qibla Finder */}
+      <Collapsible open={isQiblaOpen} onOpenChange={setIsQiblaOpen}>
+        <div className="glass-effect rounded-3xl p-6 border border-border/50 overflow-hidden">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  <div className="text-left">
+                    <h2 className="text-2xl font-bold">
+                      {settings.language === "ar" ? "اتجاه القبلة" : "Qibla Direction"}
+                    </h2>
+                    {qiblaDirection !== null && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {qiblaDirection}° {settings.language === "ar" ? "من الشمال" : "from North"}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <div className="flex items-center gap-4">
                   {qiblaDirection !== null && (
@@ -957,8 +934,7 @@ const Wudu = () => {
             )}
           </CollapsibleContent>
         </div>
-      </div>
-    </Collapsible>
+      </Collapsible>
 
       {/* Hijri Calendar Dropdown */}
       <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
@@ -1216,7 +1192,6 @@ const Wudu = () => {
           </div>
         </div>
       </Link>
-      </div>
     </div>
   );
 };
