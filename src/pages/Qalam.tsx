@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown } from 'lucide-react';
+import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavigationCard from '@/components/NavigationCard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -64,6 +64,7 @@ const parseNavigationCards = (text: string): { text: string; cards: NavCardData[
 
 const Qalam = () => {
   const { settings } = useSettings();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -84,15 +85,16 @@ const Qalam = () => {
     setShowScrollButton(!isNearBottom && messages.length > 0);
   };
 
-  // Save current state to sessionStorage
+  // Save current state to sessionStorage including input
   useEffect(() => {
-    if (messages.length > 0 || conversationId) {
+    if (messages.length > 0 || conversationId || input) {
       sessionStorage.setItem('qalam_state', JSON.stringify({
         messages,
-        conversationId
+        conversationId,
+        input
       }));
     }
-  }, [messages, conversationId]);
+  }, [messages, conversationId, input]);
 
   // Load user and conversation
   useEffect(() => {
@@ -117,10 +119,11 @@ const Qalam = () => {
       const savedState = sessionStorage.getItem('qalam_state');
       if (savedState) {
         try {
-          const { messages: savedMessages, conversationId: savedConvId } = JSON.parse(savedState);
+          const { messages: savedMessages, conversationId: savedConvId, input: savedInput } = JSON.parse(savedState);
           if (savedMessages && savedMessages.length > 0) {
             setMessages(savedMessages);
             setConversationId(savedConvId);
+            if (savedInput) setInput(savedInput);
             return; // Use saved state, don't load from DB
           }
         } catch (e) {
@@ -167,15 +170,35 @@ const Qalam = () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.user) return;
 
-        // Save current conversation if it has messages
+        // Save current conversation state before switching
         if (messages.length > 0 && conversationId) {
-          sessionStorage.setItem('qalam_previous', JSON.stringify({
+          sessionStorage.setItem(`qalam_conv_${conversationId}`, JSON.stringify({
             messages,
-            conversationId
+            input
           }));
         }
 
-        // Load the selected conversation
+        // Check if we have saved state for this conversation
+        const savedConvState = sessionStorage.getItem(`qalam_conv_${state.conversationId}`);
+        if (savedConvState) {
+          try {
+            const { messages: savedMessages, input: savedInput } = JSON.parse(savedConvState);
+            setMessages(savedMessages);
+            setConversationId(state.conversationId);
+            if (savedInput) setInput(savedInput);
+            sessionStorage.setItem('qalam_state', JSON.stringify({
+              messages: savedMessages,
+              conversationId: state.conversationId,
+              input: savedInput || ''
+            }));
+            window.history.replaceState({}, document.title);
+            return;
+          } catch (e) {
+            console.error('Error loading saved conversation state:', e);
+          }
+        }
+
+        // Load the selected conversation from DB
         const { data: msgs } = await supabase
           .from('ai_messages')
           .select('*')
@@ -185,9 +208,11 @@ const Qalam = () => {
         if (msgs) {
           setMessages(msgs.map(m => ({ id: m.id, role: m.role as 'user' | 'assistant', content: m.content })));
           setConversationId(state.conversationId);
+          setInput('');
           sessionStorage.setItem('qalam_state', JSON.stringify({
             messages: msgs.map(m => ({ id: m.id, role: m.role, content: m.content })),
-            conversationId: state.conversationId
+            conversationId: state.conversationId,
+            input: ''
           }));
         }
         
@@ -205,9 +230,22 @@ const Qalam = () => {
       return;
     }
     
+    // Save current conversation state before switching
+    if (conversationId && (messages.length > 0 || input)) {
+      sessionStorage.setItem(`qalam_conv_${conversationId}`, JSON.stringify({
+        messages,
+        input
+      }));
+    }
+    
     setMessages([]);
     setConversationId(null);
-    sessionStorage.removeItem('qalam_state');
+    setInput('');
+    sessionStorage.setItem('qalam_state', JSON.stringify({
+      messages: [],
+      conversationId: null,
+      input: ''
+    }));
     toast.success(settings.language === 'ar' ? 'محادثة جديدة' : 'New chat started');
   };
 
@@ -381,13 +419,23 @@ const Qalam = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] relative overflow-hidden">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate(-1)}
+        className={`absolute top-2 ${settings.language === 'ar' ? 'right-2' : 'left-2'} md:top-4 md:${settings.language === 'ar' ? 'right-4' : 'left-4'} rounded-full w-10 h-10 z-50 glass-effect`}
+      >
+        <ArrowLeft className={`h-5 w-5 ${settings.language === 'ar' ? 'rotate-180' : ''}`} />
+      </Button>
+
       {user && (
         <>
           <Link to="/chat-history">
             <Button
               size="icon"
               variant="ghost"
-              className="absolute top-2 left-2 md:top-4 md:left-4 rounded-full w-8 h-8 md:w-9 md:h-9 z-20"
+              className={`absolute top-2 ${settings.language === 'ar' ? 'left-14' : 'right-14'} md:top-4 md:${settings.language === 'ar' ? 'left-16' : 'right-16'} rounded-full w-8 h-8 md:w-9 md:h-9 z-20 glass-effect`}
             >
               <History className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Button>
@@ -397,26 +445,28 @@ const Qalam = () => {
             onClick={createNewChat}
             size="icon"
             variant="outline"
-            className="absolute top-2 right-2 md:top-4 md:right-4 rounded-full w-8 h-8 md:w-10 md:h-10 z-20"
+            className={`absolute top-2 ${settings.language === 'ar' ? 'left-2' : 'right-2'} md:top-4 md:${settings.language === 'ar' ? 'left-4' : 'right-4'} rounded-full w-8 h-8 md:w-10 md:h-10 z-20 glass-effect`}
           >
             <Plus className="h-4 w-4 md:h-5 md:w-5" />
           </Button>
         </>
       )}
       
-      <div className="text-center py-3 md:py-4 pt-12 md:pt-4">
+      <div className="text-center py-3 md:py-4 pt-16 md:pt-20">
         <div className="flex items-center justify-center gap-3 mb-2">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-effect">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-effect border border-border/30">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-sm font-semibold">
               {settings.language === 'ar' ? 'قلم - المساعد الذكي' : 'Qalam - AI Assistant'}
             </span>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground px-4">
           {settings.language === 'ar' 
-            ? 'اسأل أي سؤال إسلامي'
-            : 'Ask any Islamic question'}
+            ? 'اسأل أي سؤال عن الإسلام، القرآن، الحديث، أو التاريخ الإسلامي'
+            : 'Ask anything about Islam, Quran, Hadith, or Islamic history'}
         </p>
       </div>
 
@@ -427,15 +477,39 @@ const Qalam = () => {
         className="flex-1 overflow-y-auto space-y-4 mb-4"
       >
         {messages.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="h-10 w-10 text-primary" />
+          <div className="text-center py-12 px-4">
+            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-primary/10 flex items-center justify-center mx-auto mb-6 animate-pulse">
+              <Sparkles className="h-12 w-12 text-primary" />
             </div>
-            <p className="text-muted-foreground">
+            <h3 className="text-xl font-semibold mb-2">
               {settings.language === 'ar'
-                ? 'ابدأ محادثة مع قلم'
-                : 'Start a conversation with Qalam'}
+                ? 'مرحباً بك في قلم'
+                : 'Welcome to Qalam'}
+            </h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              {settings.language === 'ar'
+                ? 'اطرح أي سؤال عن الإسلام وسأساعدك بإجابات مفصلة ومصادر موثوقة'
+                : 'Ask me anything about Islam and I\'ll help with detailed answers and trusted sources'}
             </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
+              {[
+                { q: settings.language === 'ar' ? 'ما هي أركان الإسلام؟' : 'What are the pillars of Islam?', icon: '🕌' },
+                { q: settings.language === 'ar' ? 'اشرح لي سورة الفاتحة' : 'Explain Surah Al-Fatiha', icon: '📖' },
+                { q: settings.language === 'ar' ? 'من هم الخلفاء الراشدون؟' : 'Who were the Rashidun Caliphs?', icon: '👥' },
+                { q: settings.language === 'ar' ? 'ما هي أوقات الصلاة؟' : 'What are the prayer times?', icon: '⏰' },
+              ].map((example, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setInput(example.q)}
+                  className="glass-effect rounded-2xl p-4 text-left hover:border-primary/30 border border-border/30 smooth-transition group"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl group-hover:scale-110 smooth-transition">{example.icon}</span>
+                    <span className="text-sm">{example.q}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <>
@@ -549,22 +623,22 @@ const Qalam = () => {
       )}
 
       {/* Input */}
-      <div className="glass-effect rounded-2xl p-3 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm">
+      <div className="glass-effect rounded-2xl p-3 md:p-4 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && !isLoading && handleSend()}
-          placeholder={settings.language === 'ar' ? 'اكتب سؤالك...' : 'Type your question...'}
-          className="border-0 bg-transparent focus-visible:ring-0"
+          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !isLoading && handleSend()}
+          placeholder={settings.language === 'ar' ? 'اكتب سؤالك هنا...' : 'Type your question here...'}
+          className="border-0 bg-transparent focus-visible:ring-0 text-base"
           disabled={isLoading}
         />
         <Button
           onClick={handleSend}
           size="icon"
-          className="rounded-xl"
-          disabled={isLoading}
+          className="rounded-xl h-10 w-10 md:h-12 md:w-12"
+          disabled={isLoading || !input.trim()}
         >
-          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
+          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="h-5 w-5" />}
         </Button>
       </div>
     </div>
