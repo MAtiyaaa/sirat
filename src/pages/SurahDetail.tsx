@@ -859,28 +859,52 @@ const SurahDetail = () => {
 
       {/* Header */}
       <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <div className="flex-1">
-            <h1 className={`text-4xl md:text-5xl font-bold tracking-tight ${
-              settings.fontType === 'normal' ? '' : 
-              settings.fontType === 'amiri' ? 'amiri-font' :
-              settings.fontType === 'scheherazade' ? 'scheherazade-font' :
-              settings.fontType === 'lateef' ? 'lateef-font' :
-              settings.fontType === 'noto-naskh' ? 'noto-naskh-font' :
-              'quran-font'
-            }`}>
-              <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-                {settings.language === 'ar' ? surahData.name : surahData.englishName}
-              </span>
-            </h1>
-            <p className="text-base text-muted-foreground mt-2">
-              {surahData.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'} • {surahData.revelationType}
-            </p>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className={`text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight ${
+                settings.fontType === 'normal' ? '' : 
+                settings.fontType === 'amiri' ? 'amiri-font' :
+                settings.fontType === 'scheherazade' ? 'scheherazade-font' :
+                settings.fontType === 'lateef' ? 'lateef-font' :
+                settings.fontType === 'noto-naskh' ? 'noto-naskh-font' :
+                'quran-font'
+              }`}>
+                <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
+                  {settings.language === 'ar' ? surahData.name : surahData.englishName}
+                </span>
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-2">
+                {surahData.numberOfAyahs} {settings.language === 'ar' ? 'آية' : 'verses'} • {surahData.revelationType}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={toggleSurahBookmark}
+                variant="outline"
+                size="icon"
+                className="rounded-full w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
+                title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
+              >
+                <Bookmark className={`h-4 w-4 md:h-5 md:w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
+              </Button>
+              
+              <Button
+                onClick={handleShareSurah}
+                variant="outline"
+                size="icon"
+                className="rounded-full w-10 h-10 md:w-12 md:h-12 flex-shrink-0"
+                title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
+              >
+                <Share2 className="h-4 w-4 md:h-5 md:w-5" />
+              </Button>
+            </div>
           </div>
 
           <Button
             onClick={playSurah}
-            className="rounded-full px-6 py-6 shadow-lg hover:shadow-xl smooth-transition"
+            className="rounded-full w-full shadow-lg hover:shadow-xl smooth-transition"
             size="lg"
           >
             {playingSurah === parseInt(surahNumber!) && isPlaying ? (
@@ -893,26 +917,6 @@ const SurahDetail = () => {
                 ? (settings.language === 'ar' ? 'إيقاف مؤقت' : 'Pause')
                 : (settings.language === 'ar' ? 'تشغيل السورة' : 'Play Surah')}
             </span>
-          </Button>
-
-          <Button
-            onClick={toggleSurahBookmark}
-            variant="outline"
-            size="icon"
-            className="rounded-full w-12 h-12"
-            title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
-          >
-            <Bookmark className={`h-5 w-5 ${isSurahBookmarked ? 'fill-primary text-primary' : ''}`} />
-          </Button>
-          
-          <Button
-            onClick={handleShareSurah}
-            variant="outline"
-            size="icon"
-            className="rounded-full w-12 h-12"
-            title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
-          >
-            <Share2 className="h-5 w-5" />
           </Button>
         </div>
       </div>
