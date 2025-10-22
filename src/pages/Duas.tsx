@@ -1563,200 +1563,159 @@ const Duas: React.FC = () => {
   }
 
   /* ===================== LIST VIEW ===================== */
+  const getCardGradient = (index: number) => {
+    const gradients = [
+      { gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20", iconBg: "bg-purple-500/10", iconColor: "text-purple-600 dark:text-purple-400" },
+      { gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20", iconBg: "bg-blue-500/10", iconColor: "text-blue-600 dark:text-blue-400" },
+      { gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-600 dark:text-emerald-400" },
+      { gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20", iconBg: "bg-amber-500/10", iconColor: "text-amber-600 dark:text-amber-400" },
+      { gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20", iconBg: "bg-red-500/10", iconColor: "text-red-600 dark:text-red-400" },
+    ];
+    return gradients[index % gradients.length];
+  };
+
   return (
-    <div
-      className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-visible"
-      dir={langIsAr ? "rtl" : "ltr"}
-    >
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-        <div className="absolute left-1/2 -translate-x-1/2 top-[-7rem] h-72 w-72 rounded-full bg-primary/20 blur-3xl opacity-50" />
-        <div className="absolute right-1/2 translate-x-1/2 bottom-[-7rem] h-80 w-80 rounded-full bg-secondary/20 blur-3xl opacity-40" />
-      </div>
-
-      {/* Back */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
-        aria-label={t("Back", "رجوع")}
-        title={t("Back", "رجوع")}
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-
-      {/* Hero */}
-      <header className="pt-16 md:pt-20 text-center px-4">
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-          <span className="bg-gradient-to-br from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent">
-            {langIsAr ? "مكتبة الأدعية والأذكار" : "Dua & Athkar Library"}
-          </span>
-        </h1>
-        <p className="mt-3 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-          {langIsAr
-            ? "أدعية يومية صحيحة مصمّمة بعناية. تصفّح وابحث واحفظ وشارك."
-            : "Authentic daily supplications, beautifully organized. Browse, search, bookmark, and share."}
-        </p>
-      </header>
-
-      {/* Controls (NOT sticky → avoids inner scrollbar) */}
-      <section className="mt-8 md:mt-10 px-4">
-        <div className="rounded-2xl border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50 p-3 md:p-4 shadow-sm">
-          <div className="grid gap-3 md:grid-cols-[1fr_300px_auto] items-center">
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t("Search duas in Arabic or English…", "ابحث عن دعاء بالعربية أو الإنجليزية…")}
-                className="w-full rounded-xl border bg-background px-11 py-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Search className={`${langIsAr ? "right-3" : "left-3"} absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground`} />
-            </div>
-
-            {/* Category */}
-            <div className="flex items-center gap-2">
-              <Select value={category} onValueChange={(val) => setCategory(val as CategoryKey)}>
-                <SelectTrigger className="w-full rounded-xl h-11 border bg-background">
-                  <SelectValue placeholder={t("Select category", "اختر التصنيف")} />
-                </SelectTrigger>
-                {/* dropdown can scroll independently when OPEN, but it's portal-based; no extra page scrollbar */}
-                <SelectContent>
-                  {categoriesInUse.map((key) => {
-                    const meta = CAT_META[key];
-                    const Icon = meta?.icon || FALLBACK_ICON;
-                    return (
-                      <SelectItem key={key} value={key} className="flex items-center">
-                        <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4" />
-                          <span>{t(meta.labelEn, meta.labelAr)}</span>
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Reset */}
-            <div className="flex md:justify-end">
-              <Button variant="outline" onClick={resetFilters} className="rounded-xl h-11">
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                {t("Reset", "إعادة الضبط")}
-              </Button>
-            </div>
-          </div>
-
-          <div className="mt-3 text-xs md:text-sm text-muted-foreground">
-            {`${t("Showing", "المعروض")} ${filtered.length} ${t("duas", "دعاء")}`}
-          </div>
+    <div className="min-h-screen pb-20">
+      <div className="max-w-2xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={t("Back", "رجوع")}
+          >
+            <ArrowLeft className={`h-5 w-5 ${langIsAr ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">
+            {langIsAr ? "الأدعية والأذكار" : "Duas & Athkar"}
+          </h1>
         </div>
-      </section>
 
-      {/* Grid */}
-      <main className="px-4 mt-6 pb-24">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className={`absolute ${langIsAr ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("Search duas...", "ابحث في الأدعية...")}
+            className={`w-full ${langIsAr ? 'pr-10' : 'pl-10'} h-12 glass-effect border-border/50 rounded-xl px-4 outline-none focus:ring-2 focus:ring-primary`}
+          />
+        </div>
+
+        {/* Category Filter */}
+        <Select value={category} onValueChange={(val) => setCategory(val as CategoryKey)}>
+          <SelectTrigger className="w-full glass-effect border-border/50">
+            <SelectValue placeholder={t("All Categories", "جميع التصنيفات")} />
+          </SelectTrigger>
+          <SelectContent>
+            {categoriesInUse.map((key) => {
+              const meta = CAT_META[key];
+              const Icon = meta?.icon || FALLBACK_ICON;
+              return (
+                <SelectItem key={key} value={key}>
+                  <div className="flex items-center gap-2">
+                    <Icon className="h-4 w-4" />
+                    <span>{t(meta.labelEn, meta.labelAr)}</span>
+                  </div>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
+
+        {/* Results Count */}
+        <p className="text-sm text-muted-foreground">
+          {`${t("Showing", "المعروض")} ${filtered.length} ${t("duas", "دعاء")}`}
+        </p>
+
+        {/* Duas Grid */}
         {filtered.length === 0 ? (
-          <div className="rounded-2xl border p-8 text-center text-muted-foreground bg-background/50 backdrop-blur">
-            {t("No results. Try a different search or category.", "لا توجد نتائج. جرّب بحثًا أو تصنيفًا مختلفًا.")}
+          <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
+            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+              <Heart className="h-10 w-10 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">
+              {t("No Results", "لا توجد نتائج")}
+            </h3>
+            <p className="text-muted-foreground">
+              {t("Try a different search or category", "جرّب بحثًا أو تصنيفًا مختلفًا")}
+            </p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {filtered.map((dua) => {
+          <div className="grid gap-4">
+            {filtered.map((dua, index) => {
+              const style = getCardGradient(index);
               const IconComp = dua.icon || FALLBACK_ICON;
               const saved = bookmarkedDuas.has(dua.titleEn);
               return (
-                <article
-                  key={dua.id}
-                  onClick={() => openDetail(dua)}
-                  className="group relative overflow-hidden rounded-3xl border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 shadow-sm transition hover:shadow-md cursor-pointer"
-                >
-                  {/* Header row */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow shrink-0">
-                        <IconComp className="h-6 w-6 text-primary-foreground" />
+                <div key={dua.id} className="cursor-pointer group">
+                  <div className="relative overflow-hidden">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                    
+                    <Card 
+                      className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
+                      onClick={() => openDetail(dua)}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
+                            <IconComp className={`h-7 w-7 ${style.iconColor}`} />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg mb-1">
+                              {langIsAr ? dua.titleAr : dua.titleEn}
+                            </h3>
+                            {dua.reference && (
+                              <p className="text-sm text-muted-foreground">
+                                {t("Ref:", "المصدر:")} {dua.reference}
+                              </p>
+                            )}
+                            {dua.repeat && (
+                              <span className="inline-block mt-2 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
+                                ×{dua.repeat} {t("times", "مرات")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                            onClick={() => toggleBookmark(dua)}
+                            title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+                          >
+                            <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                            onClick={() => shareDua(dua)}
+                            title={t("Share", "مشاركة")}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
                       </div>
-                      <div className="leading-tight min-w-0">
-                        <h3 className="text-base md:text-lg font-semibold break-words">
-                          {langIsAr ? dua.titleAr : dua.titleEn}
-                        </h3>
-                        {dua.reference && (
-                          <p className="text-xs text-muted-foreground mt-0.5 break-words">
-                            {t("Ref:", "المصدر:")} {dua.reference}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Actions (stop bubbling) */}
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={() => toggleBookmark(dua)}
-                        title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-                        aria-label={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-                      >
-                        <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={() => shareDua(dua)}
-                        title={t("Share", "مشاركة")}
-                        aria-label={t("Share", "مشاركة")}
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    </Card>
                   </div>
-
-                  {/* Arabic */}
-                  <div className="mt-4">
-                    <p className={`text-xl leading-relaxed ${settings.fontType === "quran" ? "font-quran" : ""}`} dir="rtl">
-                      {dua.arabic}
-                    </p>
-                  </div>
-
-                  {/* Transliteration / Translation */}
-                  {showTranslit && dua.transliteration && (
-                    <p className="mt-3 text-sm text-muted-foreground italic" dir="ltr">
-                      {dua.transliteration}
-                    </p>
-                  )}
-                  {showTranslation && (
-                    <p className={`mt-3 text-sm text-muted-foreground ${langIsAr ? "text-right" : ""}`}>
-                      {dua.translation}
-                    </p>
-                  )}
-
-                  {/* Meta chips */}
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {dua.repeat && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-1">
-                        ×{dua.repeat} {t("times", "مرات")}
-                      </span>
-                    )}
-                    {dua.categories.slice(0, 3).map((c) => {
-                      if (c === "all" || !(c in CAT_META)) return null;
-                      return (
-                        <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-2 py-1">
-                          {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
-                        </span>
-                      );
-                    })}
-                  </div>
-                </article>
+                </div>
               );
             })}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };
