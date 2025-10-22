@@ -1310,6 +1310,7 @@ const Duas: React.FC = () => {
 
   const [category, setCategory] = useState<CategoryKey>("all");
   const [query, setQuery] = useState("");
+  const [selectedDua, setSelectedDua] = useState<Dua | null>(null);
 
   const langIsAr = settings.language === "ar";
   const showTranslit = settings.translationEnabled && settings.translationSource === "transliteration";
@@ -1396,6 +1397,15 @@ const Duas: React.FC = () => {
     }
   };
 
+  /* ---------- Deep link open ---------- */
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const duaId = params.get("dua");
+    if (!duaId) return;
+    const d = ALL_DUAS.find((x) => x.id === duaId);
+    if (d) setSelectedDua(d);
+  }, [location.search]);
+
   /* ---------- Categories / filter ---------- */
   const categoriesInUse: CategoryKey[] = useMemo(() => {
     const base: CategoryKey[] = ["all"];
@@ -1423,6 +1433,117 @@ const Duas: React.FC = () => {
       return fields.includes(q);
     });
   }, [category, query]);
+
+  const openDetail = (dua: Dua) => {
+    setSelectedDua(dua);
+    const params = new URLSearchParams(location.search);
+    params.set("dua", dua.id);
+    window.history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+  };
+
+  const closeDetail = () => {
+    setSelectedDua(null);
+    const params = new URLSearchParams(location.search);
+    params.delete("dua");
+    const next = params.toString() ? `${location.pathname}?${params.toString()}` : location.pathname;
+    window.history.replaceState(null, "", next);
+  };
+
+  /* ===================== DETAIL VIEW ===================== */
+  if (selectedDua) {
+    const Icon = selectedDua.icon || FALLBACK_ICON;
+    const saved = bookmarkedDuas.has(selectedDua.titleEn);
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="max-w-2xl mx-auto p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={closeDetail}
+              className="shrink-0"
+              aria-label={t("Back", "رجوع")}
+            >
+              <ArrowLeft className={`h-5 w-5 ${langIsAr ? 'rotate-180' : ''}`} />
+            </Button>
+            <h1 className="text-3xl font-bold">
+              {langIsAr ? selectedDua.titleAr : selectedDua.titleEn}
+            </h1>
+          </div>
+
+          {/* Content Card */}
+          <Card className="glass-effect rounded-3xl p-8 border border-border/50 backdrop-blur-xl">
+            {/* Action Row */}
+            <div className="flex items-center justify-between mb-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleBookmark(selectedDua)}
+                className="rounded-full"
+                title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+              >
+                <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => shareDua(selectedDua)}
+                className="rounded-full"
+                title={t("Share", "مشاركة")}
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-6">
+              <div className="text-right">
+                <p className={`text-3xl leading-loose ${settings.fontType === "quran" ? "font-quran" : ""}`} dir="rtl">
+                  {selectedDua.arabic}
+                </p>
+                {selectedDua.repeat && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    (×{selectedDua.repeat})
+                  </p>
+                )}
+              </div>
+
+              {showTranslit && selectedDua.transliteration && (
+                <p className="text-sm text-muted-foreground italic" dir="ltr">
+                  {selectedDua.transliteration}
+                </p>
+              )}
+
+              {showTranslation && (
+                <p className={`text-base ${langIsAr ? "text-right" : ""}`}>
+                  {selectedDua.translation}
+                </p>
+              )}
+
+              {selectedDua.reference && (
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold">{t("Reference:", "المصدر:")}</span> {selectedDua.reference}
+                </p>
+              )}
+
+              {/* Categories */}
+              <div className="flex flex-wrap gap-2 pt-4">
+                {selectedDua.categories.slice(0, 3).map((c) => {
+                  if (c === "all" || !(c in CAT_META)) return null;
+                  return (
+                    <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-3 py-1">
+                      {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   /* ===================== LIST VIEW ===================== */
   const getCardGradient = (index: number) => {
@@ -1517,9 +1638,10 @@ const Duas: React.FC = () => {
                   <div className="relative overflow-hidden">
                     <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
                     
-                    <Card 
-                      className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
-                    >
+                      <Card 
+                        className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6 cursor-pointer"
+                        onClick={() => openDetail(dua)}
+                      >
                       <div className="space-y-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-center gap-3">

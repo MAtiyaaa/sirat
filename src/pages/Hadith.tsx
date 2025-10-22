@@ -56,6 +56,8 @@ const Hadith = () => {
   const [page, setPage] = useState(1);
   const [bookmarkedHadiths, setBookmarkedHadiths] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
+  const [viewingDetail, setViewingDetail] = useState(false);
+  const [detailHadith, setDetailHadith] = useState<Hadith | null>(null);
 
   const content = {
     ar: {
@@ -134,6 +136,18 @@ const Hadith = () => {
       const list: Hadith[] = data.hadiths?.data || [];
       if (pageNum === 1) setHadiths(list);
       else setHadiths((prev) => [...prev, ...list]);
+
+      // deep link handling
+      const params = new URLSearchParams(location.search);
+      const deepBook = mapBookParam(params.get('book'));
+      const deepNum = params.get('hadith');
+      if (deepBook && deepNum && deepBook === bookName) {
+        const found = list.find((h) => String(h.hadithNumber) === String(deepNum));
+        if (found) {
+          setDetailHadith(found);
+          setViewingDetail(true);
+        }
+      }
     } catch (e) {
       console.error(e);
       toast.error('Failed to load hadiths. Please try again.');
@@ -272,6 +286,24 @@ const Hadith = () => {
     fetchHadiths(selectedBook, next, searchTerm);
   };
 
+  const openDetail = (h: Hadith) => {
+    setDetailHadith(h);
+    setViewingDetail(true);
+    const params = new URLSearchParams(location.search);
+    params.set('book', selectedBook);
+    params.set('hadith', String(h.hadithNumber));
+    window.history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
+  };
+
+  const closeDetail = () => {
+    setViewingDetail(false);
+    setDetailHadith(null);
+    const params = new URLSearchParams(location.search);
+    params.delete('hadith');
+    const next = params.toString() ? `${location.pathname}?${params.toString()}` : location.pathname;
+    window.history.replaceState(null, '', next);
+  };
+
   const getCardGradient = (index: number) => {
     const gradients = [
       { gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20", iconBg: "bg-purple-500/10", iconColor: "text-purple-600 dark:text-purple-400" },
@@ -286,21 +318,21 @@ const Hadith = () => {
   return (
     <div className="min-h-screen pb-20" dir={dir}>
       <div className="max-w-2xl mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="shrink-0"
-            aria-label={t.back}
-          >
-            <ArrowLeft className={`h-5 w-5 ${langIsAr ? 'rotate-180' : ''}`} />
-          </Button>
-          <h1 className="text-3xl font-bold">
-            {t.title}
-          </h1>
-        </div>
+        {!viewingDetail && (
+          <>
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="shrink-0"
+                aria-label={t.back}
+              >
+                <ArrowLeft className={`h-5 w-5 ${langIsAr ? 'rotate-180' : ''}`} />
+              </Button>
+              <h1 className="text-3xl font-bold">{t.title}</h1>
+            </div>
 
         {/* Search Bar */}
         <div className="relative">
@@ -347,7 +379,8 @@ const Hadith = () => {
                       <div className={`absolute inset-0 bg-gradient-to-br ${getCardGradient(index).gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`} />
                       
                       <Card
-                        className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
+                        className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6 cursor-pointer"
+                        onClick={() => openDetail(hadith)}
                       >
                         <div className="space-y-4">
                           {/* Header */}
@@ -433,6 +466,75 @@ const Hadith = () => {
               </>
             )}
           </div>
+        </>
+        )}
+
+        {/* DETAIL VIEW */}
+        {viewingDetail && detailHadith && (
+          <>
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={closeDetail}
+                className="shrink-0"
+                aria-label={t.back}
+              >
+                <ArrowLeft className={`h-5 w-5 ${langIsAr ? 'rotate-180' : ''}`} />
+              </Button>
+              <h1 className="text-3xl font-bold">
+                {detailHadith.book?.bookName} #{detailHadith.hadithNumber}
+              </h1>
+            </div>
+
+            <Card className="glass-effect rounded-3xl p-8 border border-border/50 backdrop-blur-xl space-y-6">
+              {/* Action Row */}
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleBookmark(detailHadith)}
+                  className="rounded-full"
+                  title={bookmarkedHadiths.has(`${detailHadith.book?.bookSlug}-${detailHadith.hadithNumber}`) ? t.bookmarkRemoved : t.bookmarkAdded}
+                >
+                  <Bookmark
+                    className={`h-4 w-4 ${bookmarkedHadiths.has(`${detailHadith.book?.bookSlug}-${detailHadith.hadithNumber}`) ? 'fill-primary text-primary' : ''}`}
+                  />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => shareHadith(detailHadith)}
+                  className="rounded-full"
+                  title={t.share}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Chapter */}
+              {detailHadith.chapter && (
+                <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/30 rounded-xl">
+                  {t.chapter}: {langIsAr ? detailHadith.chapter.chapterArabic : detailHadith.chapter.chapterEnglish}
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="space-y-4">
+                <div className="text-right">
+                  <p className="text-2xl leading-loose font-arabic">{detailHadith.hadithArabic}</p>
+                </div>
+                <p className="text-base leading-relaxed">{detailHadith.hadithEnglish}</p>
+              </div>
+
+              {/* Narrator */}
+              <div className="text-sm text-muted-foreground font-medium px-4 py-2 bg-muted/20 rounded-xl">
+                {t.narrator}: {detailHadith.englishNarrator}
+              </div>
+            </Card>
+          </>
+        )}
         </div>
     </div>
   );
