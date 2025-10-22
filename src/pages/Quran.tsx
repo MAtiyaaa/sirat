@@ -463,32 +463,12 @@ const Quran = () => {
                       <h3 className={`text-xl font-semibold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
                         {settings.language === 'ar' ? surah.name : surah.englishName}
                       </h3>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={(e) => handleShareSurah(surah.number, surah.englishName, e)}
-                          title={settings.language === 'ar' ? 'مشاركة السورة' : 'Share surah'}
-                        >
-                          <Share2 className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                        </Button>
-                        {surahProgressPercent > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={(e) => handleResetClick(surah.number, e)}
-                            title={settings.language === 'ar' ? 'إعادة تعيين التقدم' : 'Reset progress'}
-                          >
-                            <RotateCcw className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                          </Button>
-                        )}
+                      <div className="flex items-center gap-1">
                         {playingSurah === surah.number && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 flex-shrink-0"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -496,20 +476,31 @@ const Quran = () => {
                             }}
                           >
                             {isPlaying ? (
-                              <Pause className="h-5 w-5 text-primary" />
+                              <Pause className="h-4 w-4 text-primary" />
                             ) : (
-                              <Play className="h-5 w-5 text-primary" />
+                              <Play className="h-4 w-4 text-primary" />
                             )}
+                          </Button>
+                        )}
+                        {surahProgressPercent > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 flex-shrink-0"
+                            onClick={(e) => handleResetClick(surah.number, e)}
+                            title={settings.language === 'ar' ? 'إعادة تعيين التقدم' : 'Reset progress'}
+                          >
+                            <RotateCcw className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
                           </Button>
                         )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 flex-shrink-0"
                           onClick={(e) => toggleSurahBookmark(surah.number, e)}
                           title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
                         >
-                          <Bookmark className={`h-5 w-5 ${bookmarkedSurahs.has(surah.number) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                          <Bookmark className={`h-4 w-4 ${bookmarkedSurahs.has(surah.number) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                         </Button>
                       </div>
                     </div>
