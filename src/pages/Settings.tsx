@@ -148,14 +148,19 @@ const Settings = () => {
       translationOptions: {
         transliteration: 'النقل الحرفي',
       },
-      themes: {
+      mode: 'الوضع',
+      color: 'اللون',
+      modes: {
         light: 'فاتح',
         dark: 'داكن',
+        system: 'حسب النظام',
+      },
+      colors: {
+        blue: 'أزرق',
+        green: 'أخضر',
         gold: 'ذهبي',
         pink: 'وردي',
-        green: 'أخضر',
-        neumorphic: 'نيومورفيك',
-        system: 'حسب النظام',
+        red: 'أحمر',
       },
       fonts: {
         quran: 'خط المصحف',
@@ -210,14 +215,19 @@ const Settings = () => {
       translationOptions: {
         transliteration: 'Transliteration',
       },
-      themes: {
+      mode: 'Mode',
+      color: 'Color',
+      modes: {
         light: 'Light',
         dark: 'Dark',
+        system: 'System',
+      },
+      colors: {
+        blue: 'Blue',
+        green: 'Green',
         gold: 'Gold',
         pink: 'Pink',
-        green: 'Green',
-        neumorphic: 'Neumorphic',
-        system: 'System',
+        red: 'Red',
       },
       fonts: {
         quran: 'Uthmanic',
@@ -348,19 +358,31 @@ const Settings = () => {
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.theme}</Label>
-            <Select value={settings.theme} onValueChange={(value: any) => updateSettings({ theme: value })}>
+            <Label className="font-medium">{t.mode}</Label>
+            <Select value={settings.themeMode} onValueChange={(value: any) => updateSettings({ themeMode: value })}>
               <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="system">{t.themes.system}</SelectItem>
-                <SelectItem value="light">{t.themes.light}</SelectItem>
-                <SelectItem value="dark">{t.themes.dark}</SelectItem>
-                <SelectItem value="gold">{t.themes.gold}</SelectItem>
-                <SelectItem value="pink">{t.themes.pink}</SelectItem>
-                <SelectItem value="green">{t.themes.green}</SelectItem>
-                <SelectItem value="neumorphic">{t.themes.neumorphic}</SelectItem>
+                <SelectItem value="system">{t.modes.system}</SelectItem>
+                <SelectItem value="light">{t.modes.light}</SelectItem>
+                <SelectItem value="dark">{t.modes.dark}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="h-px bg-border" />
+          <div className="flex items-center justify-between">
+            <Label className="font-medium">{t.color}</Label>
+            <Select value={settings.themeColor} onValueChange={(value: any) => updateSettings({ themeColor: value })}>
+              <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="blue">{t.colors.blue}</SelectItem>
+                <SelectItem value="green">{t.colors.green}</SelectItem>
+                <SelectItem value="gold">{t.colors.gold}</SelectItem>
+                <SelectItem value="pink">{t.colors.pink}</SelectItem>
+                <SelectItem value="red">{t.colors.red}</SelectItem>
               </SelectContent>
             </Select>
           </div>

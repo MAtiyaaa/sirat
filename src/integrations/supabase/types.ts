@@ -294,7 +294,8 @@ export type Database = {
           tafsir_enabled: boolean | null
           tafsir_source: string | null
           tajweed_enabled: boolean | null
-          theme: string | null
+          theme_color: string | null
+          theme_mode: string | null
           translation_enabled: boolean | null
           translation_source: string | null
           updated_at: string | null
@@ -310,7 +311,8 @@ export type Database = {
           tafsir_enabled?: boolean | null
           tafsir_source?: string | null
           tajweed_enabled?: boolean | null
-          theme?: string | null
+          theme_color?: string | null
+          theme_mode?: string | null
           translation_enabled?: boolean | null
           translation_source?: string | null
           updated_at?: string | null
@@ -326,7 +328,8 @@ export type Database = {
           tafsir_enabled?: boolean | null
           tafsir_source?: string | null
           tajweed_enabled?: boolean | null
-          theme?: string | null
+          theme_color?: string | null
+          theme_mode?: string | null
           translation_enabled?: boolean | null
           translation_source?: string | null
           updated_at?: string | null

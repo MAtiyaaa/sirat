@@ -20,13 +20,62 @@ serve(async (req) => {
       });
     }
     
-    const { messages } = JSON.parse(body);
+    const { messages, userId, userEmail, userName } = JSON.parse(body);
     
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Load user context
+    let userContext = "";
+    if (userId) {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Get user's reading progress
+      const { data: progress } = await supabase
+        .from("reading_progress")
+        .select("*")
+        .eq("user_id", userId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      // Get last viewed surah
+      const { data: lastViewed } = await supabase
+        .from("last_viewed_surah")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      // Get bookmarks count
+      const { count: bookmarksCount } = await supabase
+        .from("bookmarks")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
+
+      // Get completed surahs  
+      const { data: completedSurahs } = await supabase
+        .from("reading_progress")
+        .select("surah_number")
+        .eq("user_id", userId)
+        .order("surah_number");
+
+      userContext = `
+User Information:
+- Name: ${userName || "Unknown"}
+- Email: ${userEmail || "Unknown"}
+${progress ? `- Currently reading: Surah ${progress.surah_number}, Ayah ${progress.ayah_number}` : ""}
+${lastViewed ? `- Last viewed: Surah ${lastViewed.surah_number}` : ""}
+${bookmarksCount ? `- Total bookmarks: ${bookmarksCount}` : ""}
+${completedSurahs && completedSurahs.length > 0 ? `- Completed surahs: ${completedSurahs.map((s: any) => s.surah_number).join(", ")}` : ""}
+
+Remember this information when answering the user's questions.`;
     }
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -47,6 +96,8 @@ serve(async (req) => {
           { 
             role: 'system', 
             content: `You are Qalam, an Islamic AI assistant integrated into the Sirat app - a comprehensive Islamic learning platform.
+
+${userContext}
 
 CORE IDENTITY AND PURPOSE:
 - You provide answers about Islam, Quran, Hadith, Islamic history, jurisprudence (fiqh), and Islamic practices

@@ -134,6 +134,8 @@ const Account = () => {
       changeName: 'تغيير الاسم',
       changeEmail: 'تغيير البريد الإلكتروني',
       changePassword: 'تغيير كلمة المرور',
+      clearQalamHistory: 'مسح محادثات قلم',
+      clearQalamHistoryWarning: 'سيؤدي هذا إلى حذف جميع محادثاتك مع قلم.',
       clearReadingData: 'مسح بيانات القراءة',
       clearAllData: 'مسح جميع البيانات',
       deleteAccount: 'حذف الحساب',
@@ -178,6 +180,8 @@ const Account = () => {
       changeName: 'Change Name',
       changeEmail: 'Change Email',
       changePassword: 'Change Password',
+      clearQalamHistory: 'Clear Qalam History',
+      clearQalamHistoryWarning: 'This will delete all your conversations with Qalam.',
       clearReadingData: 'Clear Reading Data',
       clearAllData: 'Clear All Data',
       deleteAccount: 'Delete Account',
@@ -364,6 +368,36 @@ const Account = () => {
       setConfirmPassword('');
     } catch (error) {
       console.error('Password update error:', error);
+      toast({
+        title: t.error,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearQalamHistory = async () => {
+    if (!user) return;
+
+    setIsLoading(true);
+    try {
+      const { data: conversations } = await supabase
+        .from('ai_conversations')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (conversations && conversations.length > 0) {
+        const conversationIds = conversations.map(c => c.id);
+        await supabase.from('ai_messages').delete().in('conversation_id', conversationIds);
+        await supabase.from('ai_conversations').delete().in('id', conversationIds);
+      }
+
+      toast({
+        title: t.dataCleared,
+      });
+    } catch (error) {
+      console.error('Clear Qalam history error:', error);
       toast({
         title: t.error,
         variant: 'destructive',
@@ -767,6 +801,30 @@ const Account = () => {
               <AlertDialogFooter>
                 <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleClearReadingData} disabled={isLoading}>
+                  {t.confirm}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          {/* Clear Qalam History */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-purple-500/30 smooth-transition flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Trash2 className="h-5 w-5 text-purple-500" />
+                  <span className="font-medium">{t.clearQalamHistory}</span>
+                </div>
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t.clearQalamHistory}</AlertDialogTitle>
+                <AlertDialogDescription>{t.clearQalamHistoryWarning}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearQalamHistory} disabled={isLoading}>
                   {t.confirm}
                 </AlertDialogAction>
               </AlertDialogFooter>

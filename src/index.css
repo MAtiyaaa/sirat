@@ -8,7 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light Theme */
+    /* Base Light Theme with Blue */
     --background: 0 0% 100%;
     --foreground: 240 10% 15%;
     
@@ -44,24 +44,17 @@ All colors MUST be HSL.
     --glass-border: 0 0% 100% / 0.18;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    /* Dark Theme */
+    /* Dark Theme with Blue */
     --background: 240 10% 8%;
     --foreground: 0 0% 98%;
     
@@ -102,146 +95,56 @@ All colors MUST be HSL.
     --sidebar-ring: 221 83% 53%;
   }
   
-  .gold {
-    /* Gold Theme */
-    --background: 45 30% 95%;
-    --foreground: 40 50% 15%;
-    
-    --card: 45 40% 98%;
-    --card-foreground: 40 50% 15%;
-    
-    --popover: 45 40% 98%;
-    --popover-foreground: 40 50% 15%;
-    
-    --primary: 43 74% 49%;
-    --primary-foreground: 40 50% 15%;
-    
-    --secondary: 45 30% 90%;
-    --secondary-foreground: 40 50% 15%;
-    
-    --muted: 45 30% 90%;
-    --muted-foreground: 40 30% 40%;
-    
-    --accent: 43 74% 49%;
-    --accent-foreground: 40 50% 15%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 45 30% 85%;
-    --input: 45 30% 85%;
-    --ring: 43 74% 49%;
-    
-    --glass-bg: 45 40% 98% / 0.7;
-    --glass-border: 43 74% 49% / 0.18;
-  }
-  
-  .pink {
-    /* Pink Theme */
-    --background: 330 40% 96%;
-    --foreground: 340 50% 20%;
-    
-    --card: 330 50% 98%;
-    --card-foreground: 340 50% 20%;
-    
-    --popover: 330 50% 98%;
-    --popover-foreground: 340 50% 20%;
-    
-    --primary: 340 82% 67%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 330 40% 92%;
-    --secondary-foreground: 340 50% 20%;
-    
-    --muted: 330 40% 92%;
-    --muted-foreground: 340 30% 45%;
-    
-    --accent: 340 82% 67%;
-    --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 330 40% 88%;
-    --input: 330 40% 88%;
-    --ring: 340 82% 67%;
-    
-    --glass-bg: 330 50% 98% / 0.7;
-    --glass-border: 340 82% 67% / 0.18;
-  }
-  
-  .green {
-    /* Quranic Green Theme */
-    --background: 140 25% 96%;
-    --foreground: 145 40% 15%;
-    
-    --card: 140 30% 98%;
-    --card-foreground: 145 40% 15%;
-    
-    --popover: 140 30% 98%;
-    --popover-foreground: 145 40% 15%;
-    
+  /* Green Color Theme */
+  .light.green, .green {
     --primary: 145 63% 42%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 140 25% 92%;
-    --secondary-foreground: 145 40% 15%;
-    
-    --muted: 140 25% 92%;
-    --muted-foreground: 145 20% 45%;
-    
     --accent: 145 63% 42%;
-    --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 140 25% 88%;
-    --input: 140 25% 88%;
     --ring: 145 63% 42%;
-    
-    --glass-bg: 140 30% 98% / 0.7;
-    --glass-border: 145 63% 42% / 0.18;
   }
   
-  .neumorphic {
-    /* Neumorphic Theme - Monochromatic with soft shadows */
-    --background: 0 0% 88%;
-    --foreground: 0 0% 25%;
-    
-    --card: 0 0% 88%;
-    --card-foreground: 0 0% 25%;
-    
-    --popover: 0 0% 88%;
-    --popover-foreground: 0 0% 25%;
-    
-    --primary: 0 0% 50%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 0 0% 82%;
-    --secondary-foreground: 0 0% 25%;
-    
-    --muted: 0 0% 82%;
-    --muted-foreground: 0 0% 45%;
-    
-    --accent: 0 0% 70%;
-    --accent-foreground: 0 0% 25%;
-    
-    --destructive: 0 60% 55%;
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 0 0% 50%;
-    
-    --glass-bg: 0 0% 88%;
-    --glass-border: 0 0% 88%;
-    
-    /* Neumorphic shadows */
-    --neomorph-shadow-light: -8px -8px 16px hsl(0 0% 100% / 0.7);
-    --neomorph-shadow-dark: 8px 8px 16px hsl(0 0% 0% / 0.15);
-    --neomorph-inset-light: inset -4px -4px 8px hsl(0 0% 100% / 0.7);
-    --neomorph-inset-dark: inset 4px 4px 8px hsl(0 0% 0% / 0.15);
+  .dark.green {
+    --primary: 145 63% 49%;
+    --accent: 145 63% 49%;
+    --ring: 145 63% 49%;
+  }
+  
+  /* Gold Color Theme */
+  .light.gold, .gold {
+    --primary: 43 74% 49%;
+    --accent: 43 74% 49%;
+    --ring: 43 74% 49%;
+  }
+  
+  .dark.gold {
+    --primary: 43 74% 55%;
+    --accent: 43 74% 55%;
+    --ring: 43 74% 55%;
+  }
+  
+  /* Pink Color Theme */
+  .light.pink, .pink {
+    --primary: 340 82% 67%;
+    --accent: 340 82% 67%;
+    --ring: 340 82% 67%;
+  }
+  
+  .dark.pink {
+    --primary: 340 82% 67%;
+    --accent: 340 82% 67%;
+    --ring: 340 82% 67%;
+  }
+  
+  /* Red Color Theme */
+  .light.red, .red {
+    --primary: 0 72% 51%;
+    --accent: 0 72% 51%;
+    --ring: 0 72% 51%;
+  }
+  
+  .dark.red {
+    --primary: 0 72% 58%;
+    --accent: 0 72% 58%;
+    --ring: 0 72% 58%;
   }
 }
 
@@ -303,40 +206,6 @@ All colors MUST be HSL.
   .apple-shadow {
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1),
                 0 2px 8px -2px rgba(0, 0, 0, 0.05);
-  }
-  
-  /* Neumorphic effects */
-  .neomorph {
-    box-shadow: var(--neomorph-shadow-light), var(--neomorph-shadow-dark);
-    border: none;
-  }
-  
-  .neomorph-inset {
-    box-shadow: var(--neomorph-inset-light), var(--neomorph-inset-dark);
-    border: none;
-  }
-  
-  .neomorph-pressed {
-    box-shadow: var(--neomorph-inset-light), var(--neomorph-inset-dark);
-    transform: scale(0.98);
-  }
-  
-  .neumorphic .glass-effect {
-    background: hsl(var(--background));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  
-  .neumorphic button,
-  .neumorphic .neomorph-interactive {
-    box-shadow: var(--neomorph-shadow-light), var(--neomorph-shadow-dark);
-    border: none;
-  }
-  
-  .neumorphic button:active,
-  .neumorphic .neomorph-interactive:active {
-    box-shadow: var(--neomorph-inset-light), var(--neomorph-inset-dark);
-    transform: scale(0.98);
   }
 
   @keyframes fade-in {

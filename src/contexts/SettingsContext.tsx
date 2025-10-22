@@ -2,13 +2,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
-export type Theme = 'light' | 'dark' | 'gold' | 'pink' | 'green' | 'neumorphic' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeColor = 'blue' | 'green' | 'gold' | 'pink' | 'red';
 export type FontType = 'quran' | 'amiri' | 'scheherazade' | 'lateef' | 'noto-naskh' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
 
 interface Settings {
   language: Language;
-  theme: Theme;
+  themeMode: ThemeMode;
+  themeColor: ThemeColor;
   translationEnabled: boolean;
   translationSource: string;
   fontType: FontType;
@@ -25,7 +27,8 @@ interface SettingsContextType {
 
 const defaultSettings: Settings = {
   language: 'en',
-  theme: 'system', // System is default
+  themeMode: 'system',
+  themeColor: 'blue',
   translationEnabled: true,
   translationSource: 'en.sahih',
   fontType: 'quran',
@@ -50,15 +53,16 @@ const loadInitialSettings = (): Settings => {
 };
 
 // Apply theme immediately on load
-const applyTheme = (theme: Theme) => {
-  document.documentElement.classList.remove('light', 'dark', 'gold', 'pink', 'green', 'neumorphic');
+const applyTheme = (mode: ThemeMode, color: ThemeColor) => {
+  document.documentElement.classList.remove('light', 'dark', 'blue', 'green', 'gold', 'pink', 'red');
   
-  if (theme === 'system') {
+  let actualMode = mode;
+  if (mode === 'system') {
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.classList.add(prefersDark ? 'dark' : 'light');
-  } else {
-    document.documentElement.classList.add(theme);
+    actualMode = prefersDark ? 'dark' : 'light';
   }
+  
+  document.documentElement.classList.add(actualMode, color);
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -73,7 +77,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Apply theme immediately on mount
   React.useEffect(() => {
-    applyTheme(initialSettings.theme);
+    applyTheme(initialSettings.themeMode, initialSettings.themeColor);
     document.documentElement.dir = initialSettings.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = initialSettings.language;
   }, []);
@@ -126,7 +130,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             console.log('[Settings] Loaded from database:', data);
             const dbSettings: Settings = {
               language: (data.language as Language) || defaultSettings.language,
-              theme: (data.theme as Theme) || defaultSettings.theme,
+              themeMode: (data.theme_mode as ThemeMode) || defaultSettings.themeMode,
+              themeColor: (data.theme_color as ThemeColor) || defaultSettings.themeColor,
               translationEnabled: data.translation_enabled ?? defaultSettings.translationEnabled,
               translationSource: data.translation_source || defaultSettings.translationSource,
               fontType: (data.font_type as FontType) || defaultSettings.fontType,
@@ -185,24 +190,23 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     // Apply theme whenever settings change
-    applyTheme(settings.theme);
+    applyTheme(settings.themeMode, settings.themeColor);
     
     // Apply direction
     document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = settings.language;
 
     // Listen for system theme changes when in system mode
-    if (settings.theme === 'system') {
+    if (settings.themeMode === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      const handleChange = (e: MediaQueryListEvent) => {
-        document.documentElement.classList.remove('light', 'dark', 'gold', 'pink', 'green', 'neumorphic');
-        document.documentElement.classList.add(e.matches ? 'dark' : 'light');
+      const handleChange = () => {
+        applyTheme('system', settings.themeColor);
       };
       
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
-  }, [settings.theme, settings.language]);
+  }, [settings.themeMode, settings.themeColor, settings.language]);
 
   useEffect(() => {
     // Don't save settings until they've been loaded initially
@@ -234,7 +238,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const settingsData = {
         user_id: userId,
         language: settings.language,
-        theme: settings.theme,
+        theme_mode: settings.themeMode,
+        theme_color: settings.themeColor,
         translation_enabled: settings.translationEnabled,
         translation_source: settings.translationSource,
         font_type: settings.fontType,

@@ -69,6 +69,7 @@ const Qalam = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -98,6 +99,19 @@ const Qalam = () => {
     const loadData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      
+      // Load profile
+      if (session?.user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (profileData) {
+          setProfile(profileData);
+        }
+      }
       
       // Try to restore from sessionStorage first
       const savedState = sessionStorage.getItem('qalam_state');
@@ -275,7 +289,12 @@ const Qalam = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage],
+          userId: user.id,
+          userEmail: user.email,
+          userName: profile?.full_name || user.email,
+        }),
       });
 
       if (!response.ok || !response.body) {
