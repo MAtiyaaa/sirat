@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown, ArrowLeft } from 'lucide-react';
+import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown, ArrowLeft, Lock, LockOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
@@ -72,6 +72,7 @@ const Qalam = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isPrivateMode, setIsPrivateMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -241,6 +242,7 @@ const Qalam = () => {
     setMessages([]);
     setConversationId(null);
     setInput('');
+    setIsPrivateMode(false);
     sessionStorage.setItem('qalam_state', JSON.stringify({
       messages: [],
       conversationId: null,
@@ -286,9 +288,9 @@ const Qalam = () => {
     setIsLoading(true);
 
     try {
-      // Create conversation if needed
+      // Create conversation if needed (skip in private mode)
       let convId = conversationId;
-      if (!convId) {
+      if (!convId && !isPrivateMode) {
         const { data: newConv } = await supabase
           .from('ai_conversations')
           .insert({ user_id: user.id, title: input.slice(0, 50) })
@@ -301,8 +303,8 @@ const Qalam = () => {
         }
       }
       
-      // Save user message
-      if (convId) {
+      // Save user message (skip in private mode)
+      if (convId && !isPrivateMode) {
         const { data: savedMsg } = await supabase
           .from('ai_messages')
           .insert({ 
@@ -329,9 +331,9 @@ const Qalam = () => {
         },
         body: JSON.stringify({ 
           messages: [...messages, userMessage],
-          userId: user.id,
-          userEmail: user.email,
-          userName: profile?.full_name || user.email,
+          userId: isPrivateMode ? null : user.id,
+          userEmail: isPrivateMode ? null : user.email,
+          userName: isPrivateMode ? null : (profile?.full_name || user.email),
         }),
       });
 
@@ -390,8 +392,8 @@ const Qalam = () => {
         }
       }
       
-      // Save assistant message
-      if (convId && assistantMessage) {
+      // Save assistant message (skip in private mode)
+      if (convId && assistantMessage && !isPrivateMode) {
         const { data: savedMsg } = await supabase
           .from('ai_messages')
           .insert({ 
@@ -406,6 +408,35 @@ const Qalam = () => {
           setMessages(prev => prev.map((m, i) => 
             i === prev.length - 1 ? { ...m, id: savedMsg.id } : m
           ));
+        }
+
+        // Auto-generate title for first exchange
+        if (messages.length === 1) {
+          try {
+            const titleResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-title`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ 
+                userMessage: messages[0].content,
+                assistantMessage: assistantMessage
+              }),
+            });
+
+            if (titleResponse.ok) {
+              const { title } = await titleResponse.json();
+              if (title) {
+                await supabase
+                  .from('ai_conversations')
+                  .update({ title })
+                  .eq('id', convId);
+              }
+            }
+          } catch (error) {
+            console.error('Failed to generate title:', error);
+          }
         }
       }
     } catch (error) {
@@ -452,21 +483,21 @@ const Qalam = () => {
         </>
       )}
       
-      <div className="text-center py-3 md:py-4 pt-16 md:pt-20">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full glass-effect border border-border/30">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-white" />
+      <div className="text-center py-2 pt-12 md:pt-14">
+        <div className="flex items-center justify-center gap-3 mb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-effect border border-border/30">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+              <Sparkles className="h-3 w-3 text-white" />
             </div>
-            <span className="text-sm font-semibold">
-              {settings.language === 'ar' ? 'قلم - المساعد الذكي' : 'Qalam - AI Assistant'}
+            <span className="text-xs font-semibold">
+              {settings.language === 'ar' ? 'قلم' : 'Qalam'}
             </span>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground px-4">
+        <p className="text-xs text-muted-foreground px-4">
           {settings.language === 'ar' 
-            ? 'اسأل أي سؤال عن الإسلام، القرآن، الحديث، أو التاريخ الإسلامي'
-            : 'Ask anything about Islam, Quran, Hadith, or Islamic history'}
+            ? 'اسأل عن الإسلام والقرآن والحديث'
+            : 'Ask about Islam, Quran, and Hadith'}
         </p>
       </div>
 
@@ -623,23 +654,48 @@ const Qalam = () => {
       )}
 
       {/* Input */}
-      <div className="glass-effect rounded-2xl p-3 md:p-4 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !isLoading && handleSend()}
-          placeholder={settings.language === 'ar' ? 'اكتب سؤالك هنا...' : 'Type your question here...'}
-          className="border-0 bg-transparent focus-visible:ring-0 text-base"
-          disabled={isLoading}
-        />
-        <Button
-          onClick={handleSend}
-          size="icon"
-          className="rounded-xl h-10 w-10 md:h-12 md:w-12"
-          disabled={isLoading || !input.trim()}
-        >
-          {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="h-5 w-5" />}
-        </Button>
+      <div className="space-y-2">
+        {user && !conversationId && messages.length === 0 && (
+          <div className="flex justify-center">
+            <button
+              onClick={() => setIsPrivateMode(!isPrivateMode)}
+              className={`glass-effect rounded-full px-4 py-2 flex items-center gap-2 text-xs smooth-transition border ${
+                isPrivateMode 
+                  ? 'border-primary bg-primary/10 text-primary' 
+                  : 'border-border/30 text-muted-foreground hover:border-border'
+              }`}
+            >
+              {isPrivateMode ? <Lock className="h-3 w-3" /> : <LockOpen className="h-3 w-3" />}
+              <span>
+                {settings.language === 'ar' 
+                  ? (isPrivateMode ? 'وضع خاص' : 'وضع عادي')
+                  : (isPrivateMode ? 'Private Mode' : 'Normal Mode')}
+              </span>
+            </button>
+          </div>
+        )}
+        <div className="glass-effect rounded-2xl p-3 md:p-4 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !isLoading && handleSend()}
+            placeholder={
+              isPrivateMode 
+                ? (settings.language === 'ar' ? 'محادثة خاصة - لن يتم الحفظ...' : 'Private chat - not saved...')
+                : (settings.language === 'ar' ? 'اكتب سؤالك هنا...' : 'Type your question here...')
+            }
+            className="border-0 bg-transparent focus-visible:ring-0 text-base"
+            disabled={isLoading}
+          />
+          <Button
+            onClick={handleSend}
+            size="icon"
+            className="rounded-xl h-10 w-10 md:h-12 md:w-12"
+            disabled={isLoading || !input.trim()}
+          >
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
     </div>
   );

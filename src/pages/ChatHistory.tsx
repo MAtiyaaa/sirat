@@ -236,7 +236,7 @@ const ChatHistory = () => {
                     <button
                       key={conv.id}
                       onClick={() => setSelectedConversation(conv.id)}
-                      className={`w-full text-left glass-effect rounded-2xl p-4 smooth-transition border group hover:scale-[1.02] ${
+                      className={`w-full text-left glass-effect rounded-2xl p-4 smooth-transition border group hover:scale-[1.02] overflow-hidden ${
                         selectedConversation === conv.id
                           ? 'border-primary bg-primary/5 shadow-lg'
                           : 'border-border/30 hover:border-border'
@@ -252,7 +252,7 @@ const ChatHistory = () => {
                             <span>{formatDate(conv.updated_at)}</span>
                           </div>
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           <Button
                             variant="ghost"
                             size="icon"
@@ -324,9 +324,9 @@ const ChatHistory = () => {
                               <p className="text-muted-foreground">{msg.ayah_context}</p>
                             </div>
                           )}
-                          <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                           <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div
-                              className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                              className={`max-w-[85%] rounded-2xl px-4 py-3 break-words overflow-hidden ${
                                 msg.role === 'user'
                                   ? 'bg-primary text-primary-foreground shadow-lg'
                                   : 'glass-effect border border-border/30'
@@ -348,10 +348,10 @@ const ChatHistory = () => {
                                     h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3 first:mt-0">{children}</h2>,
                                     h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-2 first:mt-0">{children}</h3>,
                                     blockquote: ({ children }) => <blockquote className="border-l-4 border-primary pl-4 italic my-2">{children}</blockquote>,
-                                    a: ({ children, href }) => <a href={href} className="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">{children}</a>,
+                                    a: ({ children, href }) => <a href={href} className="text-primary underline hover:text-primary/80 break-all" target="_blank" rel="noopener noreferrer">{children}</a>,
                                   }}
                                 >
-                                  {msg.content}
+                                  {msg.content.replace(/\[NAV:[^\]]+\]/g, '')}
                                 </ReactMarkdown>
                               ) : (
                                 <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
