@@ -21,7 +21,8 @@ import {
   Calendar,
   Activity,
   BookOpen,
-  Flame
+  Flame,
+  ArrowLeft
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -598,8 +599,22 @@ const Account = () => {
       : '—');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/10">
-      <div className="container max-w-2xl mx-auto px-4 py-12 space-y-8">
+    <div className="min-h-screen pb-20">
+      <div className="container max-w-2xl mx-auto px-4 py-6 space-y-8">
+        
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={settings.language === 'ar' ? 'رجوع' : 'Back'}
+          >
+            <ArrowLeft className={`h-5 w-5 ${settings.language === 'ar' ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
+        </div>
         
         {/* Profile Header - Centered */}
         <div className="text-center space-y-6 animate-fade-in">

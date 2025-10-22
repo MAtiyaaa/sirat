@@ -121,9 +121,10 @@ const Settings = () => {
     );
   };
 
-  const content = {
+    const content = {
     ar: {
       title: 'الإعدادات',
+      back: 'رجوع',
       account: 'الحساب',
       myAccount: 'حسابي',
       appearance: 'المظهر',
@@ -191,6 +192,7 @@ const Settings = () => {
     },
     en: {
       title: 'Settings',
+      back: 'Back',
       account: 'Account',
       myAccount: 'My Account',
       appearance: 'Appearance',
@@ -263,36 +265,21 @@ const Settings = () => {
   const isRTL = lang === 'ar';
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className="max-w-2xl mx-auto space-y-6 pb-12">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(-1)}
-        className={`fixed top-6 ${isRTL ? 'right-6' : 'left-6'} z-50 rounded-full w-10 h-10`}
-      >
-        <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
-      </Button>
-
-      {/* Header with Avatar */}
-      <div className="text-center space-y-4 pt-8 animate-fade-in">
-        <div className="relative inline-block">
-          <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-xl">
-            <SettingsIcon className="h-10 w-10 text-white" />
-          </div>
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen pb-20">
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={t.back}
+          >
+            <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
         </div>
-        <div>
-          <h1 className="text-4xl font-bold mb-2">
-            <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/70 bg-clip-text text-transparent">
-              {t.title}
-            </span>
-          </h1>
-          {user && profile && (
-            <Link to="/account" className="text-sm text-muted-foreground hover:text-primary smooth-transition">
-              {profile.full_name || user.email}
-            </Link>
-          )}
-        </div>
-      </div>
 
       {/* Account */}
       <div className="space-y-3">
@@ -525,6 +512,7 @@ const Settings = () => {
           </AlertDialog>
         </div>
       )}
+      </div>
     </div>
   );
 };
