@@ -32,6 +32,7 @@ import Zakat from "./pages/Zakat";
 import NotFound from "./pages/NotFound";
 import HolyCities from "./pages/HolyCities";
 import Makkah from "./pages/Makkah";
+import { ScrollToTop } from "./components/ScrollToTop";
 import MakkahKaabaSignificance from "./pages/MakkahKaabaSignificance";
 import MakkahKaabaHistory from "./pages/MakkahKaabaHistory";
 import MakkahLiveView from "./pages/MakkahLiveView";
@@ -80,6 +81,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <Layout>
                 <Routes>
                   <Route path="/" element={<Home />} />
