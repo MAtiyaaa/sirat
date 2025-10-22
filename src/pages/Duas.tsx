@@ -1310,7 +1310,6 @@ const Duas: React.FC = () => {
 
   const [category, setCategory] = useState<CategoryKey>("all");
   const [query, setQuery] = useState("");
-  const [selectedDua, setSelectedDua] = useState<Dua | null>(null);
 
   const langIsAr = settings.language === "ar";
   const showTranslit = settings.translationEnabled && settings.translationSource === "transliteration";
@@ -1397,15 +1396,6 @@ const Duas: React.FC = () => {
     }
   };
 
-  /* ---------- Deep link open ---------- */
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const duaId = params.get("dua");
-    if (!duaId) return;
-    const d = ALL_DUAS.find((x) => x.id === duaId);
-    if (d) setSelectedDua(d);
-  }, [location.search]);
-
   /* ---------- Categories / filter ---------- */
   const categoriesInUse: CategoryKey[] = useMemo(() => {
     const base: CategoryKey[] = ["all"];
@@ -1433,134 +1423,6 @@ const Duas: React.FC = () => {
       return fields.includes(q);
     });
   }, [category, query]);
-
-  const openDetail = (dua: Dua) => {
-    setSelectedDua(dua);
-    const params = new URLSearchParams(location.search);
-    params.set("dua", dua.id);
-    window.history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
-  };
-
-  const closeDetail = () => {
-    setSelectedDua(null);
-    const params = new URLSearchParams(location.search);
-    params.delete("dua");
-    const next = params.toString() ? `${location.pathname}?${params.toString()}` : location.pathname;
-    window.history.replaceState(null, "", next);
-  };
-
-  const resetFilters = () => {
-    setCategory("all");
-    setQuery("");
-  };
-
-  /* ===================== DETAIL VIEW ===================== */
-  if (selectedDua) {
-    const Icon = selectedDua.icon || FALLBACK_ICON;
-    const saved = bookmarkedDuas.has(selectedDua.titleEn);
-    return (
-      <div
-        className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-visible"
-        dir={langIsAr ? "rtl" : "ltr"}
-      >
-        {/* Back */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={closeDetail}
-          className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
-          aria-label={t("Back", "رجوع")}
-          title={t("Back", "رجوع")}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-
-        {/* Soft background */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-          <div className="absolute left-1/2 -translate-x-1/2 top-[-6rem] h-72 w-72 rounded-full bg-primary/20 blur-3xl opacity-40" />
-        </div>
-
-        {/* Header */}
-        <div className="max-w-3xl mx-auto pt-20 px-4 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl mx-auto bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow">
-            <Icon className="h-8 w-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold">
-            {langIsAr ? selectedDua.titleAr : selectedDua.titleEn}
-          </h1>
-          {selectedDua.reference && (
-            <p className="text-sm text-muted-foreground">
-              {t("Ref:", "المصدر:")} {selectedDua.reference}
-            </p>
-          )}
-        </div>
-
-        {/* Card */}
-        <div className="max-w-3xl mx-auto px-4 mt-6 space-y-6 pb-24">
-          <Card className="glass-effect rounded-3xl p-6 border border-border/30 backdrop-blur-xl">
-            {/* ACTION ROW — Bookmark LEFT, Share RIGHT */}
-            <div className="flex items-center justify-between mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => toggleBookmark(selectedDua)}
-                className="rounded-full"
-                title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-                aria-label={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-              >
-                <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => shareDua(selectedDua)}
-                className="rounded-full"
-                title={t("Share", "مشاركة")}
-                aria-label={t("Share", "مشاركة")}
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Arabic */}
-            <p className={`text-2xl leading-relaxed ${settings.fontType === "quran" ? "font-quran" : ""}`} dir="rtl">
-              {selectedDua.arabic}
-            </p>
-
-            {/* Transliteration / Translation */}
-            {showTranslit && selectedDua.transliteration && (
-              <p className="mt-4 text-sm text-muted-foreground italic" dir="ltr">
-                {selectedDua.transliteration}
-              </p>
-            )}
-            {showTranslation && (
-              <p className={`mt-4 text-sm text-muted-foreground ${langIsAr ? "text-right" : ""}`}>
-                {selectedDua.translation}
-              </p>
-            )}
-
-            {/* Meta chips */}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              {selectedDua.repeat && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-xs px-2 py-1">
-                  ×{selectedDua.repeat} {t("times", "مرات")}
-                </span>
-              )}
-              {selectedDua.categories.slice(0, 3).map((c) => {
-                if (c === "all" || !(c in CAT_META)) return null;
-                return (
-                  <span key={c} className="inline-flex items-center rounded-full bg-muted text-xs px-2 py-1">
-                    {t(CAT_META[c].labelEn, CAT_META[c].labelAr)}
-                  </span>
-                );
-              })}
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   /* ===================== LIST VIEW ===================== */
   const getCardGradient = (index: number) => {
@@ -1657,55 +1519,63 @@ const Duas: React.FC = () => {
                     
                     <Card 
                       className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6"
-                      onClick={() => openDetail(dua)}
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <div className={`flex-shrink-0 w-14 h-14 rounded-xl ${style.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}>
-                            <IconComp className={`h-7 w-7 ${style.iconColor}`} />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg mb-1">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${style.iconBg} flex items-center justify-center`}>
+                              <IconComp className={`h-6 w-6 ${style.iconColor}`} />
+                            </div>
+                            <h3 className="font-semibold text-lg">
                               {langIsAr ? dua.titleAr : dua.titleEn}
                             </h3>
-                            {dua.reference && (
-                              <p className="text-sm text-muted-foreground">
-                                {t("Ref:", "المصدر:")} {dua.reference}
-                              </p>
-                            )}
-                            {dua.repeat && (
-                              <span className="inline-block mt-2 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs">
-                                ×{dua.repeat} {t("times", "مرات")}
-                              </span>
-                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => toggleBookmark(dua)}
+                              title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
+                            >
+                              <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => shareDua(dua)}
+                              title={t("Share", "مشاركة")}
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                            onClick={() => toggleBookmark(dua)}
-                            title={saved ? t("Remove bookmark", "إزالة الإشارة") : t("Bookmark", "حفظ")}
-                          >
-                            <Bookmark className={`h-4 w-4 ${saved ? "fill-primary text-primary" : ""}`} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                            onClick={() => shareDua(dua)}
-                            title={t("Share", "مشاركة")}
-                          >
-                            <Share2 className="h-4 w-4" />
-                          </Button>
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                        
+                        <div className="space-y-3">
+                          <div className="text-right">
+                            <p className="text-2xl leading-loose font-arabic">{dua.arabic}</p>
+                            {dua.repeat && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                (×{dua.repeat})
+                              </p>
+                            )}
                           </div>
+                          
+                          {dua.transliteration && (
+                            <p className="text-sm text-muted-foreground italic">
+                              {dua.transliteration}
+                            </p>
+                          )}
+                          
+                          <p className="text-sm">{dua.translation}</p>
+                          
+                          {dua.reference && (
+                            <p className="text-xs text-muted-foreground">
+                              <span className="font-semibold">{t("Reference:", "المصدر:")}</span> {dua.reference}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </Card>
