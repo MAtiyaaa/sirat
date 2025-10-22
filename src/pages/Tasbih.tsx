@@ -183,45 +183,26 @@ const Tasbih: React.FC = () => {
 
   return (
     <div
-      className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-visible pb-20"
+      className="min-h-screen pb-20"
       dir={lang === "ar" ? "rtl" : "ltr"}
     >
-      {/* Soft BG */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
-        <div className="absolute left-1/2 -translate-x-1/2 top-[-7rem] h-72 w-72 rounded-full bg-primary/20 blur-3xl opacity-50" />
-        <div className="absolute right-1/2 translate-x-1/2 bottom-[-7rem] h-80 w-80 rounded-full bg-secondary/20 blur-3xl opacity-40" />
-      </div>
-
-      {/* Back */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate(-1)}
-        className="fixed top-6 left-6 z-50 rounded-full w-10 h-10 bg-background/70 backdrop-blur border"
-        aria-label={t.back}
-        title={t.back}
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-
-      {/* Header */}
-      <header className="pt-16 md:pt-20 text-center px-4 space-y-3">
-        <div className="flex items-center justify-center gap-3">
-          <Sparkles className="h-10 w-10 text-primary" />
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            <span className="bg-gradient-to-br from-foreground via-foreground/90 to-foreground/60 bg-clip-text text-transparent">
-              {t.title}
-            </span>
-          </h1>
+      <div className="max-w-2xl mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={t.back}
+          >
+            <ArrowLeft className={`h-5 w-5 ${lang === 'ar' ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
         </div>
-        <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-          {t.subtitle}
-        </p>
-      </header>
 
       {/* Controls: Dhikr + Target */}
-      <section className="mt-8 px-4">
+      <section className="space-y-4">
         <div className="rounded-2xl border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/50 p-4 shadow-sm">
           <div className="grid gap-3 md:grid-cols-[1fr_320px]">
             {/* Dhikr select */}
@@ -317,7 +298,7 @@ const Tasbih: React.FC = () => {
       </section>
 
       {/* Main counter card (tap anywhere to +1) */}
-      <section className="mt-6 px-4">
+      <section className="space-y-4">
         <div
           className="group relative overflow-hidden rounded-3xl border bg-card/60 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 md:p-8 shadow-sm cursor-pointer select-none"
           onClick={increment}
@@ -396,7 +377,7 @@ const Tasbih: React.FC = () => {
       </section>
 
       {/* Controls */}
-      <section className="mt-4 px-4 space-y-4">
+      <section className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <Button
             onClick={decrement}
@@ -495,6 +476,7 @@ const Tasbih: React.FC = () => {
           </p>
         </div>
       </section>
+      </div>
     </div>
   );
 };

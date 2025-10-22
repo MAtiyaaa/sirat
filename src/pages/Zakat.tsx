@@ -265,25 +265,20 @@ const Zakat = () => {
   const currencySymbol = CURRENCIES.find(c => c.code === currency)?.symbol || '$';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/10">
+    <div className="min-h-screen pb-20">
       <div className="container max-w-4xl mx-auto px-4 py-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          {settings.language === 'ar' ? 'رجوع' : 'Back'}
-        </Button>
-
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 bg-primary/10 rounded-full">
-              <Calculator className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">{t.title}</h1>
-          <p className="text-muted-foreground">{t.subtitle}</p>
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0"
+            aria-label={settings.language === 'ar' ? 'رجوع' : 'Back'}
+          >
+            <ArrowLeft className={`h-5 w-5 ${settings.language === 'ar' ? 'rotate-180' : ''}`} />
+          </Button>
+          <h1 className="text-3xl font-bold">{t.title}</h1>
         </div>
 
         <Card className="mb-6">
