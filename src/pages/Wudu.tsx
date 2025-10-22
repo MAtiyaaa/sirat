@@ -957,7 +957,8 @@ const Wudu = () => {
             )}
           </CollapsibleContent>
         </div>
-      </Collapsible>
+      </div>
+    </Collapsible>
 
       {/* Hijri Calendar Dropdown */}
       <Collapsible open={isHijriOpen} onOpenChange={setIsHijriOpen}>
@@ -1215,6 +1216,7 @@ const Wudu = () => {
           </div>
         </div>
       </Link>
+      </div>
     </div>
   );
 };
