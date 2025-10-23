@@ -398,7 +398,7 @@ const MosqueLocator = () => {
   };
 
   return (
-    <div className="min-h-screen pb-28">
+    <div className="min-h-screen pb-28 bg-gradient-to-b from-background via-background to-primary/5">
       {/* Keep other menus/sheets above Leaflet; add pin hover polish */}
       <style>{`
         .leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 1 !important; }
@@ -406,62 +406,101 @@ const MosqueLocator = () => {
         .pin-icon:hover { transform: translateY(-2px) scale(1.04); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
       `}</style>
 
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="shrink-0 neomorph hover:neomorph-pressed"
-            aria-label={back}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        <div>
-            <h1 className="text-3xl font-bold">{ui.title}</h1>
-            <p className="text-muted-foreground">{ui.subtitle}</p>
-          </div>
+      <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+        {/* Header with enhanced design */}
+        <div className="relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-emerald-500/10 to-primary/10 rounded-2xl blur-2xl opacity-50 group-hover:opacity-70 smooth-transition" />
+          <Card className="relative glass-effect border-primary/20 p-4 sm:p-6">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="shrink-0 h-10 w-10 rounded-xl hover:bg-primary/10 hover:scale-105 smooth-transition"
+                aria-label={back}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-lg">
+                    <MapIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary via-emerald-600 to-primary bg-clip-text text-transparent">
+                    {ui.title}
+                  </h1>
+                </div>
+                <p className="text-sm text-muted-foreground ml-[52px]">{ui.subtitle}</p>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* Controls */}
+        {/* Controls with better design */}
         <div className="flex flex-wrap items-center gap-3">
           <Button
             onClick={getLocation}
-            className="neomorph hover:neomorph-pressed gap-2"
+            disabled={loading}
+            className="h-12 px-6 bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg hover:shadow-xl smooth-transition gap-2 text-white font-medium"
             variant="default"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LocateFixed className="h-4 w-4" />
+            )}
             {loading ? (ar ? "جاري التحميل..." : "Loading...") : ui.locate}
           </Button>
+          {error && (
+            <div className="flex-1 min-w-[200px] px-4 py-2 rounded-xl bg-destructive/10 text-destructive text-sm border border-destructive/20">
+              {error}
+            </div>
+          )}
         </div>
 
-        {/* Map */}
-        <Card className="relative neomorph h-[460px] overflow-hidden z-0">
-          <div className="absolute inset-0">
-            <div ref={mapDivRef} className="w-full h-full" />
-            {!leafletJsReady || !leafletCssReady ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>{ar ? "جاري تحميل الخريطة..." : "Loading map..."}</span>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </Card>
-
-        {/* Results */}
+        {/* Map with enhanced styling */}
         <div className="relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-teal-400/10 to-cyan-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
-          <Card className="relative neomorph hover:neomorph-inset smooth-transition p-0">
-            <div className="px-4 py-3 border-b flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapIcon className="h-4 w-4 text-primary" />
-                <h2 className="font-semibold">{ui.listTitle}</h2>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {ar ? "تتحدّث القائمة مع تحريك/تكبير الخريطة" : "Updates as you move/zoom the map"}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-emerald-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 smooth-transition" />
+          <Card className="relative glass-effect border-primary/30 h-[400px] sm:h-[500px] overflow-hidden shadow-2xl">
+            <div className="absolute inset-0">
+              <div ref={mapDivRef} className="w-full h-full rounded-2xl" />
+              {!leafletJsReady || !leafletCssReady ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/95 backdrop-blur-sm">
+                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center animate-pulse">
+                    <MapIcon className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {ar ? "جاري تحميل الخريطة..." : "Loading map..."}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </Card>
+        </div>
+
+        {/* Results with enhanced design */}
+        <div className="relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-emerald-500/20 to-cyan-500/20 rounded-3xl blur-2xl opacity-40 group-hover:opacity-60 smooth-transition" />
+          <Card className="relative glass-effect border-primary/30 shadow-xl p-0">
+            <div className="px-4 sm:px-6 py-4 border-b border-primary/20 bg-gradient-to-r from-primary/5 to-emerald-500/5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-lg">
+                    <MapIcon className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-lg">{ui.listTitle}</h2>
+                    <p className="text-xs text-muted-foreground">
+                      {mosques.length} {ar ? "مسجد قريب" : "nearby"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground px-3 py-1.5 rounded-full bg-muted/50 border border-primary/20">
+                  {ar ? "تتحدّث القائمة مع تحريك/تكبير الخريطة" : "Updates as you move/zoom"}
+                </div>
               </div>
             </div>
 
@@ -469,36 +508,39 @@ const MosqueLocator = () => {
             {isMobile ? (
               <div className="p-4 grid gap-3">
                 {mosques.length === 0 ? (
-                  <p className="text-muted-foreground">{error ? error : ui.noResults}</p>
+                  <div className="py-12 text-center">
+                    <div className="inline-flex h-16 w-16 rounded-2xl bg-muted items-center justify-center mb-4">
+                      <MapIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground">{error ? error : ui.noResults}</p>
+                  </div>
                 ) : (
                   sorted.map((m) => (
                     <div key={m.id} className="relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-emerald-400/10 to-cyan-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
-                      <Card className="relative neomorph hover:neomorph-inset smooth-transition p-4">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-emerald-400/20 to-cyan-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+                      <Card className="relative glass-effect border-primary/20 hover:border-primary/40 shadow-lg hover:shadow-xl smooth-transition p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                            <MapPin className="h-5 w-5 text-primary" />
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-emerald-500/20 flex items-center justify-center border border-primary/30 shadow-md">
+                            <MapPin className="h-6 w-6 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2">
-                              <h3 className="font-semibold truncate">{m.name}</h3>
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <h3 className="font-bold text-base truncate">{m.name}</h3>
+                              <span className="text-xs px-2.5 py-1 rounded-full bg-gradient-to-r from-primary/20 to-emerald-500/20 text-primary font-semibold whitespace-nowrap border border-primary/30">
                                 {formatDistance(m.dist)}
                               </span>
                             </div>
                             {m.addr && (
-                              <p className="text-sm text-muted-foreground truncate">{m.addr}</p>
+                              <p className="text-sm text-muted-foreground truncate mb-3">{m.addr}</p>
                             )}
-                            <div className="mt-3 flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                className="neomorph hover:neomorph-pressed gap-2"
-                                onClick={() => setSelected(m)}
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                                {ui.options}
-                              </Button>
-                            </div>
+                            <Button
+                              size="sm"
+                              className="w-full h-9 bg-gradient-to-r from-primary/10 to-emerald-500/10 hover:from-primary/20 hover:to-emerald-500/20 border border-primary/30 gap-2 smooth-transition font-medium"
+                              onClick={() => setSelected(m)}
+                            >
+                              <Navigation className="h-4 w-4" />
+                              {ui.options}
+                            </Button>
                           </div>
                         </div>
                       </Card>
@@ -509,58 +551,63 @@ const MosqueLocator = () => {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-muted-foreground">
-                    <tr className="border-b">
-                      <th className="text-left px-4 py-2 w-[42px]">#</th>
-                      <th className="text-left px-4 py-2 cursor-pointer select-none" onClick={() => onSort("name")}>
-                        <div className="inline-flex items-center gap-1">
-                          {ui.nameCol} <ArrowUpDown className="h-3.5 w-3.5" />
+                  <thead className="bg-gradient-to-r from-primary/5 to-emerald-500/5">
+                    <tr className="border-b border-primary/20">
+                      <th className="text-left px-6 py-3 w-[50px] font-bold text-muted-foreground">#</th>
+                      <th className="text-left px-6 py-3 cursor-pointer select-none hover:text-primary smooth-transition font-bold" onClick={() => onSort("name")}>
+                        <div className="inline-flex items-center gap-2">
+                          {ui.nameCol} <ArrowUpDown className="h-4 w-4" />
                         </div>
                       </th>
                       <th
-                        className="text-left px-4 py-2 cursor-pointer select-none whitespace-nowrap"
+                        className="text-left px-6 py-3 cursor-pointer select-none whitespace-nowrap hover:text-primary smooth-transition font-bold"
                         onClick={() => onSort("dist")}
                       >
-                        <div className="inline-flex items-center gap-1">
-                          {ui.distCol} <ArrowUpDown className="h-3.5 w-3.5" />
+                        <div className="inline-flex items-center gap-2">
+                          {ui.distCol} <ArrowUpDown className="h-4 w-4" />
                         </div>
                       </th>
-                      <th className="text-left px-4 py-2">{ui.actionsCol}</th>
+                      <th className="text-left px-6 py-3 font-bold text-muted-foreground">{ui.actionsCol}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sorted.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-4 py-6 text-muted-foreground">
-                          {error ? error : ui.noResults}
+                        <td colSpan={4} className="px-6 py-12 text-center">
+                          <div className="inline-flex h-16 w-16 rounded-2xl bg-muted items-center justify-center mb-4">
+                            <MapIcon className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                          <p className="text-muted-foreground">{error ? error : ui.noResults}</p>
                         </td>
                       </tr>
                     ) : (
                       sorted.map((m, i) => (
-                        <tr key={m.id} className="border-b hover:bg-muted/40 smooth-transition">
-                          <td className="px-4 py-2">{i + 1}</td>
-                          <td className="px-4 py-2">
-                            <div className="font-medium">{m.name}</div>
+                        <tr key={m.id} className="border-b border-primary/10 hover:bg-gradient-to-r hover:from-primary/5 hover:to-emerald-500/5 smooth-transition group">
+                          <td className="px-6 py-4">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-sm group-hover:bg-primary/20 smooth-transition">
+                              {i + 1}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="font-bold text-base mb-0.5">{m.name}</div>
                             {m.addr && (
                               <div className="text-xs text-muted-foreground truncate max-w-[52ch]">{m.addr}</div>
                             )}
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-emerald-500/10 text-primary font-semibold border border-primary/30">
                               {formatDistance(m.dist)}
                             </span>
                           </td>
-                          <td className="px-4 py-2">
-                            <div className="flex items-center gap-2">
-                              <Button
-                                size="sm"
-                                className="neomorph hover:neomorph-pressed gap-2"
-                                onClick={() => setSelected(m)}
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                                {ui.options}
-                              </Button>
-                            </div>
+                          <td className="px-6 py-4">
+                            <Button
+                              size="sm"
+                              className="h-9 px-4 bg-gradient-to-r from-primary/10 to-emerald-500/10 hover:from-primary/20 hover:to-emerald-500/20 border border-primary/30 gap-2 smooth-transition font-medium"
+                              onClick={() => setSelected(m)}
+                            >
+                              <Navigation className="h-4 w-4" />
+                              {ui.options}
+                            </Button>
                           </td>
                         </tr>
                       ))
@@ -576,67 +623,69 @@ const MosqueLocator = () => {
       {/* App chooser / Share modal — huge z-index so it stays above the map */}
       {selected && (
         <div
-          className="fixed inset-0 z-[10000] bg-black/40 flex items-end md:items-center md:justify-center"
+          className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-end md:items-center md:justify-center animate-fade-in"
           onClick={() => setSelected(null)}
         >
           <div
-            className="w-full md:w-[520px] bg-background rounded-t-2xl md:rounded-2xl p-5 neomorph"
+            className="w-full md:w-[540px] bg-background/95 backdrop-blur-xl rounded-t-3xl md:rounded-3xl p-6 shadow-2xl border border-primary/30 animate-slide-in-right"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <MapPin className="h-5 w-5 text-primary" />
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-lg">
+                <MapPin className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold truncate">{selected.name}</h3>
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="font-bold text-lg truncate pr-2">{selected.name}</h3>
                   <button
-                    className="rounded-full p-1 hover:bg-muted smooth-transition"
+                    className="rounded-xl p-2 hover:bg-destructive/10 hover:text-destructive smooth-transition"
                     onClick={() => setSelected(null)}
                     aria-label={ui.close}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {formatDistance(selected.dist)} • {selected.lat.toFixed(5)},{selected.lon.toFixed(5)}
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="font-semibold text-primary">{formatDistance(selected.dist)}</span>
+                    <span>•</span>
+                    <span className="text-xs">{selected.lat.toFixed(4)}, {selected.lon.toFixed(4)}</span>
+                  </span>
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <Button
-                className="neomorph hover:neomorph-pressed gap-2"
-                onClick={() => openInApp(selected, "google")}
-              >
-                <Navigation className="h-4 w-4" />
-                {ui.google}
-              </Button>
-              <Button
-                variant="secondary"
-                className="neomorph hover:neomorph-pressed gap-2"
-                onClick={() => openInApp(selected, "apple")}
-              >
-                <Navigation className="h-4 w-4" />
-                {ui.apple}
-              </Button>
-              <Button
-                variant="secondary"
-                className="neomorph hover:neomorph-pressed gap-2"
-                onClick={() => openInApp(selected, "waze")}
-              >
-                <Navigation className="h-4 w-4" />
-                {ui.waze}
-              </Button>
-            </div>
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-3">
+                <Button
+                  className="h-14 flex-col gap-1 bg-gradient-to-br from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg hover:shadow-xl smooth-transition text-white font-medium"
+                  onClick={() => openInApp(selected, "google")}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="text-xs">{ui.google}</span>
+                </Button>
+                <Button
+                  className="h-14 flex-col gap-1 bg-gradient-to-br from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 shadow-lg hover:shadow-xl smooth-transition font-medium"
+                  onClick={() => openInApp(selected, "apple")}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="text-xs">{ui.apple}</span>
+                </Button>
+                <Button
+                  className="h-14 flex-col gap-1 bg-gradient-to-br from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 shadow-lg hover:shadow-xl smooth-transition font-medium"
+                  onClick={() => openInApp(selected, "waze")}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="text-xs">{ui.waze}</span>
+                </Button>
+              </div>
 
-            <div className="mt-3">
               <Button
-                variant="ghost"
-                className="w-full neomorph hover:neomorph-pressed gap-2"
+                variant="outline"
+                className="w-full h-12 border-primary/30 hover:bg-primary/5 gap-2 smooth-transition font-medium"
                 onClick={() => shareMosque(selected)}
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-5 w-5" />
                 {ui.share}
               </Button>
             </div>
