@@ -286,6 +286,9 @@ const Qalam = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    
+    // Auto scroll to bottom when sending a message
+    setTimeout(() => scrollToBottom(), 100);
 
     try {
       // Create conversation if needed (skip in private mode)
@@ -332,7 +335,10 @@ const Qalam = () => {
         body: JSON.stringify({ 
           messages: [...messages, userMessage],
           userId: isPrivateMode ? null : user.id,
-          userName: isPrivateMode ? null : (profile?.first_name || 'there'),
+          userFirstName: isPrivateMode ? null : (profile?.first_name || 'there'),
+          userFullName: isPrivateMode ? null : (profile?.first_name && profile?.last_name 
+            ? `${profile.first_name} ${profile.last_name}` 
+            : profile?.first_name || profile?.full_name || 'there'),
           isPrivateMode: isPrivateMode,
         }),
       });
@@ -674,7 +680,7 @@ const Qalam = () => {
             </button>
           </div>
         )}
-        <div className="glass-effect rounded-2xl p-3 md:p-4 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg">
+        <div className="glass-effect rounded-2xl p-2 md:p-3 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -684,16 +690,16 @@ const Qalam = () => {
                 ? (settings.language === 'ar' ? 'محادثة خاصة - لن يتم الحفظ...' : 'Private chat - not saved...')
                 : (settings.language === 'ar' ? 'اكتب سؤالك هنا...' : 'Type your question here...')
             }
-            className="border-0 bg-transparent focus-visible:ring-0 text-base"
+            className="border-0 bg-transparent focus-visible:ring-0 text-sm md:text-base"
             disabled={isLoading}
           />
           <Button
             onClick={handleSend}
             size="icon"
-            className="rounded-xl h-10 w-10 md:h-12 md:w-12"
+            className="rounded-xl h-8 w-8 md:h-9 md:w-9 shrink-0"
             disabled={isLoading || !input.trim()}
           >
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="h-5 w-5" />}
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
           </Button>
         </div>
       </div>
