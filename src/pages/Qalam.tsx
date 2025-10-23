@@ -333,6 +333,7 @@ const Qalam = () => {
           messages: [...messages, userMessage],
           userId: isPrivateMode ? null : user.id,
           userName: isPrivateMode ? null : (profile?.first_name || 'there'),
+          isPrivateMode: isPrivateMode,
         }),
       });
 

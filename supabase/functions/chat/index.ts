@@ -20,7 +20,7 @@ serve(async (req) => {
       });
     }
     
-    const { messages, userId, userName } = JSON.parse(body);
+    const { messages, userId, userName, isPrivateMode } = JSON.parse(body);
     
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
@@ -31,7 +31,15 @@ serve(async (req) => {
 
     // Load user context
     let userContext = "";
-    if (userId) {
+    
+    if (isPrivateMode) {
+      userContext = `
+PRIVATE MODE ACTIVE:
+This is a private conversation. The user has chosen not to save this chat history.
+- Do not reference any saved user data or reading progress
+- Treat this as an anonymous, ephemeral conversation
+- The user wants privacy, so be respectful of that choice`;
+    } else if (userId) {
       const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
