@@ -52,7 +52,8 @@ const Account = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -113,7 +114,8 @@ const Account = () => {
 
       if (data) {
         setProfile(data);
-        setFullName(data.full_name || '');
+        setFirstName(data.first_name || '');
+        setLastName(data.last_name || '');
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -141,7 +143,8 @@ const Account = () => {
       clearAllData: 'مسح جميع البيانات',
       deleteAccount: 'حذف الحساب',
       signOut: 'تسجيل الخروج',
-      fullName: 'الاسم الكامل',
+      firstName: 'الاسم الأول',
+      lastName: 'اسم العائلة',
       email: 'البريد الإلكتروني',
       currentPassword: 'كلمة المرور الحالية',
       newPassword: 'كلمة المرور الجديدة',
@@ -187,7 +190,8 @@ const Account = () => {
       clearAllData: 'Clear All Data',
       deleteAccount: 'Delete Account',
       signOut: 'Sign Out',
-      fullName: 'Full Name',
+      firstName: 'First Name',
+      lastName: 'Last Name',
       email: 'Email Address',
       currentPassword: 'Current Password',
       newPassword: 'New Password',
@@ -218,7 +222,8 @@ const Account = () => {
   const t = content[settings.language];
 
   const nameSchema = z.object({
-    fullName: z.string().trim().min(1, 'Name required').max(100, 'Name too long'),
+    firstName: z.string().trim().min(1, 'First name required').max(50, 'First name too long'),
+    lastName: z.string().trim().max(50, 'Last name too long'),
   });
 
   const emailSchema = z.object({
@@ -233,7 +238,10 @@ const Account = () => {
   const handleUpdateName = async () => {
     if (!user) return;
 
-    const validation = nameSchema.safeParse({ fullName: fullName.trim() });
+    const validation = nameSchema.safeParse({ 
+      firstName: firstName.trim(),
+      lastName: lastName.trim() 
+    });
     if (!validation.success) {
       toast({
         title: validation.error.errors[0].message,
@@ -244,6 +252,8 @@ const Account = () => {
 
     setIsLoading(true);
     try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+      
       // Check if profile exists
       const { data: existingProfile } = await supabase
         .from('profiles')
@@ -255,7 +265,11 @@ const Account = () => {
         // Update existing profile
         const { error } = await supabase
           .from('profiles')
-          .update({ full_name: fullName.trim() })
+          .update({ 
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            full_name: fullName
+          })
           .eq('user_id', user.id);
 
         if (error) throw error;
@@ -263,7 +277,12 @@ const Account = () => {
         // Create new profile
         const { error } = await supabase
           .from('profiles')
-          .insert({ user_id: user.id, full_name: fullName.trim() });
+          .insert({ 
+            user_id: user.id, 
+            first_name: firstName.trim(),
+            last_name: lastName.trim(),
+            full_name: fullName
+          });
 
         if (error) throw error;
       }
@@ -692,11 +711,19 @@ const Account = () => {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label>{t.fullName}</Label>
+                  <Label>{t.firstName}</Label>
                   <Input
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder={t.fullName}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder={t.firstName}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t.lastName}</Label>
+                  <Input
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder={t.lastName}
                   />
                 </div>
               </div>

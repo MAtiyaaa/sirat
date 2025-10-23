@@ -20,7 +20,7 @@ serve(async (req) => {
       });
     }
     
-    const { messages, userId, userEmail, userName } = JSON.parse(body);
+    const { messages, userId, userName } = JSON.parse(body);
     
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
@@ -68,14 +68,13 @@ serve(async (req) => {
 
       userContext = `
 User Information:
-- Name: ${userName || "Unknown"}
-- Email: ${userEmail || "Unknown"}
+- First Name: ${userName || "friend"}
 ${progress ? `- Currently reading: Surah ${progress.surah_number}, Ayah ${progress.ayah_number}` : ""}
 ${lastViewed ? `- Last viewed: Surah ${lastViewed.surah_number}` : ""}
 ${bookmarksCount ? `- Total bookmarks: ${bookmarksCount}` : ""}
 ${completedSurahs && completedSurahs.length > 0 ? `- Completed surahs: ${completedSurahs.map((s: any) => s.surah_number).join(", ")}` : ""}
 
-Remember this information when answering the user's questions.`;
+When addressing the user, call them by their first name (e.g., "Hi ${userName}"). Do not mention or reference their email address.`;
     }
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');

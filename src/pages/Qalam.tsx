@@ -332,8 +332,7 @@ const Qalam = () => {
         body: JSON.stringify({ 
           messages: [...messages, userMessage],
           userId: isPrivateMode ? null : user.id,
-          userEmail: isPrivateMode ? null : user.email,
-          userName: isPrivateMode ? null : (profile?.full_name || user.email),
+          userName: isPrivateMode ? null : (profile?.first_name || 'there'),
         }),
       });
 

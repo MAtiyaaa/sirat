@@ -18,7 +18,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -29,7 +30,8 @@ const Auth = () => {
   const authSchema = z.object({
     email: z.string().email('Invalid email address').max(255, 'Email too long'),
     password: z.string().min(6, 'Password must be at least 6 characters').max(100, 'Password too long'),
-    fullName: z.string().min(1, 'Name required').max(100, 'Name too long').optional(),
+    firstName: z.string().min(1, 'First name required').max(50, 'First name too long').optional(),
+    lastName: z.string().max(50, 'Last name too long').optional(),
   });
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -41,7 +43,8 @@ const Auth = () => {
       const validation = authSchema.safeParse({
         email: email.trim(),
         password,
-        fullName: isSignUp ? fullName.trim() : undefined,
+        firstName: isSignUp ? firstName.trim() : undefined,
+        lastName: isSignUp ? lastName.trim() : undefined,
       });
 
       if (!validation.success) {
@@ -58,7 +61,8 @@ const Auth = () => {
           options: {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
-              full_name: fullName,
+              first_name: firstName,
+              last_name: lastName,
             }
           }
         });
@@ -106,23 +110,41 @@ const Auth = () => {
         <div className="glass-effect rounded-2xl p-6 space-y-6">
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {isSignUp && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">
-                  {settings.language === 'ar' ? 'الاسم الكامل' : 'Full Name'}
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder={settings.language === 'ar' ? 'أدخل اسمك الكامل' : 'Enter your full name'}
-                    className="pl-10"
-                    required
-                  />
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">
+                    {settings.language === 'ar' ? 'الاسم الأول' : 'First Name'}
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder={settings.language === 'ar' ? 'أدخل اسمك الأول' : 'Enter your first name'}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
                 </div>
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">
+                    {settings.language === 'ar' ? 'اسم العائلة' : 'Last Name'}
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="lastName"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder={settings.language === 'ar' ? 'أدخل اسم العائلة' : 'Enter your last name'}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div className="space-y-2">
