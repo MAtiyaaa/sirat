@@ -15,7 +15,6 @@ import {
   X,
   ArrowUpDown,
   Map as MapIcon,
-  Sparkles,
 } from "lucide-react";
 
 // ---------- lightweight helpers ----------
@@ -69,25 +68,16 @@ function debounce<T extends (...args: any[]) => void>(fn: T, ms: number) {
   };
 }
 
-// Enhanced MapPin icon with glow effect
+// Lucide-style MapPin as an inline SVG icon for Leaflet
 function pinIcon(options?: { color?: string; fill?: string }) {
-  const color = options?.color ?? "#10b981";
-  const fill = options?.fill ?? "#10b981";
+  const color = options?.color ?? "#10b981"; // emerald stroke
+  const fill = options?.fill ?? "#10b981"; // emerald fill
 
   const svg = `
-    <svg viewBox="0 0 24 24" width="32" height="32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-      <ellipse cx="12" cy="22" rx="5.5" ry="2" fill="rgba(0,0,0,0.2)"></ellipse>
+    <svg viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="12" cy="22" rx="5.5" ry="2" fill="rgba(0,0,0,0.18)"></ellipse>
       <path d="M12 22c-4.2-4.3-6-7.5-6-10a6 6 0 1 1 12 0c0 2.5-1.8 5.7-6 10Z"
-            fill="${fill}" stroke="${color}" stroke-width="2" filter="url(#glow)" />
+            fill="${fill}" stroke="${color}" stroke-width="1.5" />
       <circle cx="12" cy="11" r="2.5" fill="white" stroke="${color}" stroke-width="1.5"/>
     </svg>
   `.trim();
@@ -96,9 +86,9 @@ function pinIcon(options?: { color?: string; fill?: string }) {
   return (window as any).L.divIcon({
     className: "pin-icon",
     html: svg,
-    iconSize: [32, 32],
-    iconAnchor: [16, 30],
-    popupAnchor: [0, -30],
+    iconSize: [28, 28],
+    iconAnchor: [14, 26], // tip sits near bottom
+    popupAnchor: [0, -26],
   });
 }
 
@@ -107,7 +97,7 @@ type Mosque = {
   name: string;
   lat: number;
   lon: number;
-  dist: number;
+  dist: number; // meters
   addr?: string;
 };
 
@@ -124,17 +114,20 @@ const MosqueLocator = () => {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Mosque | null>(null);
 
+  // sorting for desktop table
   const [sortKey, setSortKey] = useState<"name" | "dist">("dist");
   const [sortAsc, setSortAsc] = useState(true);
 
+  // Leaflet via CDN (no installs)
   const leafletCssReady = useCdnResource("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", "css");
   const leafletJsReady = useCdnResource("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js", "js");
 
   const mapRef = useRef<any>(null);
   const mapDivRef = useRef<HTMLDivElement | null>(null);
   const userMarkerRef = useRef<any>(null);
-  const mosqueLayersRef = useRef<any>(null);
+  const mosqueLayersRef = useRef<any>(null); // a layer group to manage pins
 
+  // responsive switch for list rendering
   const [isMobile, setIsMobile] = useState<boolean>(() => window.innerWidth < 640);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 640);
@@ -146,8 +139,8 @@ const MosqueLocator = () => {
     () => ({
       title: ar ? "خريطة مساجد قريبة" : "Nearby Mosques Map",
       subtitle: ar
-        ? "نحدّد موقعك تلقائيًا. كَبّر/صغِّر أو حرّك الخريطة لتحميل المزيد حسب عرض الخريطة."
-        : "We'll ask for your location automatically. Zoom or pan to load more based on the current view.",
+        ? "نحدّد موقعك تلقائيًا. كَبّر/صغِّر أو حرّك الخريطة لتحميل المزيد حسب عرض الخريطة."
+        : "We’ll ask for your location automatically. Zoom or pan to load more based on the current view.",
       locate: ar ? "إعادة تحديد الموقع" : "Refresh my location",
       locating: ar ? "جاري تحديد موقعك..." : "Locating you...",
       openMaps: ar ? "افتح في الخرائط" : "Open in Maps",
@@ -165,11 +158,11 @@ const MosqueLocator = () => {
       google: "Google Maps",
       apple: "Apple Maps",
       waze: "Waze",
-      updates: ar ? "تتحدّث القائمة مع تحريك/تكبير الخريطة" : "Live updates as you explore",
     }),
     [ar],
   );
 
+  // ask for location automatically on mount
   useEffect(() => {
     getLocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -201,6 +194,7 @@ const MosqueLocator = () => {
     );
   };
 
+  // Overpass query for current map bounds
   const fetchMosquesForBounds = useCallback(
     async (bounds: any) => {
       try {
@@ -265,6 +259,7 @@ const MosqueLocator = () => {
     [ar, loc],
   );
 
+  // init map & wire events
   useEffect(() => {
     if (!leafletCssReady || !leafletJsReady || !mapDivRef.current) return;
     // @ts-ignore
@@ -273,7 +268,7 @@ const MosqueLocator = () => {
 
     if (!mapRef.current) {
       mapRef.current = L.map(mapDivRef.current, {
-        center: loc ? [loc.lat, loc.lon] : [24.7136, 46.6753],
+        center: loc ? [loc.lat, loc.lon] : [24.7136, 46.6753], // fallback: Riyadh
         zoom: loc ? 14 : 5,
         zoomControl: false,
       });
@@ -289,9 +284,9 @@ const MosqueLocator = () => {
     if (loc) {
       const userIcon = L.divIcon({
         className: "user-marker",
-        html: `<div class="user-location-badge">${ar ? "أنت" : "You"}</div>`,
-        iconSize: [50, 28],
-        iconAnchor: [25, 14],
+        html: `<div class="rounded-full bg-primary/90 text-background text-[10px] px-2 py-1 shadow">${ar ? "أنت" : "You"}</div>`,
+        iconSize: [40, 20],
+        iconAnchor: [20, 10],
       });
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng([loc.lat, loc.lon]);
@@ -307,7 +302,7 @@ const MosqueLocator = () => {
     }, 400);
 
     mapRef.current.on("moveend zoomend", debouncedFetch);
-    debouncedFetch();
+    debouncedFetch(); // initial
 
     return () => {
       mapRef.current?.off("moveend", debouncedFetch);
@@ -315,6 +310,7 @@ const MosqueLocator = () => {
     };
   }, [leafletCssReady, leafletJsReady, loc, ar, fetchMosquesForBounds]);
 
+  // draw real pins (MapPin icon), names stay in the list only
   useEffect(() => {
     // @ts-ignore
     const L = (window as any).L as typeof import("leaflet");
@@ -334,6 +330,7 @@ const MosqueLocator = () => {
     });
   }, [mosques]);
 
+  // sorting/table helpers
   const onSort = (key: "name" | "dist") => {
     if (sortKey === key) setSortAsc((s) => !s);
     else {
@@ -357,6 +354,7 @@ const MosqueLocator = () => {
   const formatDistance = (m: number) =>
     m >= 1000 ? `${(m / 1000).toFixed(1)} ${ui.km}` : `${Math.round(m)} ${ui.meters}`;
 
+  // app chooser
   const openInApp = (m: Mosque, app: "google" | "apple" | "waze") => {
     let url = "";
     const label = encodeURIComponent(m.name);
@@ -391,311 +389,163 @@ const MosqueLocator = () => {
   };
 
   return (
-    <div className="min-h-screen pb-28 bg-gradient-to-br from-background via-background to-emerald-50/30 dark:to-emerald-950/10">
+    <div className="min-h-screen pb-28">
+      {/* Keep other menus/sheets above Leaflet; add pin hover polish */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-4px); }
-        }
-        @keyframes pulse-glow {
-          0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
-          50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -1000px 0; }
-          100% { background-position: 1000px 0; }
-        }
-        
         .leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 1 !important; }
-        
-        .pin-icon { 
-          transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-          will-change: transform;
-        }
-        .pin-icon:hover { 
-          transform: translateY(-4px) scale(1.1);
-          filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.4));
-        }
-        
-        .user-location-badge {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          color: white;
-          font-size: 11px;
-          font-weight: 600;
-          padding: 6px 12px;
-          border-radius: 20px;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-          animation: pulse-glow 2s ease-in-out infinite;
-          white-space: nowrap;
-        }
-        
-        .mosque-card-wrapper {
-          animation: fadeInUp 0.3s ease-out forwards;
-          opacity: 0;
-        }
-        .mosque-card-wrapper:nth-child(1) { animation-delay: 0.05s; }
-        .mosque-card-wrapper:nth-child(2) { animation-delay: 0.1s; }
-        .mosque-card-wrapper:nth-child(3) { animation-delay: 0.15s; }
-        .mosque-card-wrapper:nth-child(4) { animation-delay: 0.2s; }
-        .mosque-card-wrapper:nth-child(5) { animation-delay: 0.25s; }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .shimmer-effect {
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-          background-size: 1000px 100%;
-          animation: shimmer 2s infinite;
-        }
-        
-        .gradient-border {
-          position: relative;
-          border-radius: 1rem;
-          padding: 2px;
-          background: linear-gradient(135deg, #10b981, #06b6d4, #8b5cf6);
-          background-size: 200% 200%;
-          animation: gradientShift 3s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        
-        .map-container {
-          position: relative;
-          overflow: hidden;
-          border-radius: 1.5rem;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-        }
-        
-        .map-container::before {
-          content: '';
-          position: absolute;
-          top: -2px;
-          left: -2px;
-          right: -2px;
-          bottom: -2px;
-          background: linear-gradient(135deg, #10b981, #06b6d4);
-          border-radius: 1.5rem;
-          z-index: -1;
-          opacity: 0.5;
-          filter: blur(10px);
-        }
-        
-        .stats-badge {
-          backdrop-filter: blur(12px);
-          background: rgba(255, 255, 255, 0.9);
-          border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-        
-        .dark .stats-badge {
-          background: rgba(0, 0, 0, 0.6);
-        }
+        .pin-icon { transition: transform 120ms ease, filter 120ms ease; will-change: transform; }
+        .pin-icon:hover { transform: translateY(-2px) scale(1.04); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)); }
       `}</style>
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="shrink-0 neomorph hover:neomorph-pressed transition-all duration-200"
+            className="shrink-0 neomorph hover:neomorph-pressed"
             aria-label={back}
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                {ui.title}
-              </h1>
-              <Sparkles className="h-5 w-5 text-emerald-500 animate-pulse" />
-            </div>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">{ui.subtitle}</p>
+          <div>
+            <h1 className="text-3xl font-bold">{ui.title}</h1>
+            <p className="text-muted-foreground">{ui.subtitle}</p>
           </div>
         </div>
 
-        {/* Controls with enhanced styling */}
+        {/* Controls */}
         <div className="flex flex-wrap items-center gap-3">
-          <Button
-            onClick={getLocation}
-            className="neomorph hover:neomorph-pressed gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-lg transition-all duration-300"
-            disabled={loading}
-          >
+          <Button onClick={getLocation} className="neomorph hover:neomorph-pressed gap-2" variant="default">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
             {loading ? (ar ? "جاري التحميل..." : "Loading...") : ui.locate}
           </Button>
-
-          {mosques.length > 0 && (
-            <div className="stats-badge px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-emerald-600" />
-              <span>
-                {mosques.length} {ar ? "مسجد" : "mosques"}
-              </span>
-            </div>
-          )}
         </div>
 
-        {/* Map with enhanced container */}
-        <div className="map-container relative h-[400px] sm:h-[500px] lg:h-[600px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none z-10 rounded-3xl" />
-          <div ref={mapDivRef} className="w-full h-full rounded-3xl" />
-          {(!leafletJsReady || !leafletCssReady) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-3xl">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-                <span className="text-sm font-medium">{ar ? "جاري تحميل الخريطة..." : "Loading map..."}</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Results with stunning design */}
-        <div className="relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 rounded-2xl opacity-20 blur-xl" />
-          <Card className="relative neomorph overflow-hidden backdrop-blur-sm bg-background/95">
-            {/* Header */}
-            <div className="px-4 sm:px-6 py-4 border-b bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
-                    <MapIcon className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-lg">{ui.listTitle}</h2>
-                    <p className="text-xs text-muted-foreground">{ui.updates}</p>
-                  </div>
+        {/* Map */}
+        <Card className="relative neomorph h-[460px] overflow-hidden z-0">
+          <div className="absolute inset-0">
+            <div ref={mapDivRef} className="w-full h-full" />
+            {!leafletJsReady || !leafletCssReady ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{ar ? "جاري تحميل الخريطة..." : "Loading map..."}</span>
                 </div>
-                {loading && <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />}
+              </div>
+            ) : null}
+          </div>
+        </Card>
+
+        {/* Results */}
+        <div className="relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-teal-400/10 to-cyan-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+          <Card className="relative neomorph hover:neomorph-inset smooth-transition p-0">
+            <div className="px-4 py-3 border-b flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapIcon className="h-4 w-4 text-primary" />
+                <h2 className="font-semibold">{ui.listTitle}</h2>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {ar ? "تتحدّث القائمة مع تحريك/تكبير الخريطة" : "Updates as you move/zoom the map"}
               </div>
             </div>
 
-            {/* Content */}
+            {/* Mobile: cards | Desktop: table */}
             {isMobile ? (
-              <div className="p-4 space-y-3">
+              <div className="p-4 grid gap-3">
                 {mosques.length === 0 ? (
-                  <div className="text-center py-12">
-                    <MapPin className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-                    <p className="text-muted-foreground">{error || ui.noResults}</p>
-                  </div>
+                  <p className="text-muted-foreground">{error ? error : ui.noResults}</p>
                 ) : (
-                  sorted.map((m, idx) => (
-                    <div key={m.id} className="mosque-card-wrapper" style={{ animationDelay: `${idx * 0.05}s` }}>
-                      <div className="relative group">
-                        <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl opacity-0 group-hover:opacity-100 blur transition duration-300" />
-                        <Card className="relative neomorph hover:neomorph-inset p-4 transition-all duration-300">
-                          <div className="flex gap-3">
-                            <div className="w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
-                              <MapPin className="h-6 w-6 text-white" />
+                  sorted.map((m) => (
+                    <div key={m.id} className="relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-emerald-400/10 to-cyan-500/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition" />
+                      <Card className="relative neomorph hover:neomorph-inset smooth-transition p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                            <MapPin className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <h3 className="font-semibold truncate">{m.name}</h3>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary whitespace-nowrap">
+                                {formatDistance(m.dist)}
+                              </span>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-1">
-                                <h3 className="font-semibold text-base leading-tight">{m.name}</h3>
-                                <span className="shrink-0 text-xs px-2.5 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium shadow">
-                                  {formatDistance(m.dist)}
-                                </span>
-                              </div>
-                              {m.addr && <p className="text-sm text-muted-foreground line-clamp-1 mb-3">{m.addr}</p>}
+                            {m.addr && <p className="text-sm text-muted-foreground truncate">{m.addr}</p>}
+                            <div className="mt-3 flex items-center gap-2">
                               <Button
                                 size="sm"
-                                className="w-full neomorph hover:neomorph-pressed gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow transition-all duration-200"
+                                className="neomorph hover:neomorph-pressed gap-2"
                                 onClick={() => setSelected(m)}
                               >
-                                <Navigation className="h-4 w-4" />
+                                <ExternalLink className="h-4 w-4" />
                                 {ui.options}
                               </Button>
                             </div>
                           </div>
-                        </Card>
-                      </div>
+                        </div>
+                      </Card>
                     </div>
                   ))
                 )}
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/50 border-b">
-                    <tr>
-                      <th className="text-left px-6 py-4 text-sm font-semibold w-16">#</th>
-                      <th
-                        className="text-left px-6 py-4 text-sm font-semibold cursor-pointer select-none hover:bg-muted/70 transition-colors"
-                        onClick={() => onSort("name")}
-                      >
-                        <div className="inline-flex items-center gap-2">
-                          {ui.nameCol}
-                          <ArrowUpDown className="h-4 w-4 opacity-50" />
+                <table className="w-full text-sm">
+                  <thead className="text-muted-foreground">
+                    <tr className="border-b">
+                      <th className="text-left px-4 py-2 w-[42px]">#</th>
+                      <th className="text-left px-4 py-2 cursor-pointer select-none" onClick={() => onSort("name")}>
+                        <div className="inline-flex items-center gap-1">
+                          {ui.nameCol} <ArrowUpDown className="h-3.5 w-3.5" />
                         </div>
                       </th>
                       <th
-                        className="text-left px-6 py-4 text-sm font-semibold cursor-pointer select-none hover:bg-muted/70 transition-colors whitespace-nowrap"
+                        className="text-left px-4 py-2 cursor-pointer select-none whitespace-nowrap"
                         onClick={() => onSort("dist")}
                       >
-                        <div className="inline-flex items-center gap-2">
-                          {ui.distCol}
-                          <ArrowUpDown className="h-4 w-4 opacity-50" />
+                        <div className="inline-flex items-center gap-1">
+                          {ui.distCol} <ArrowUpDown className="h-3.5 w-3.5" />
                         </div>
                       </th>
-                      <th className="text-left px-6 py-4 text-sm font-semibold">{ui.actionsCol}</th>
+                      <th className="text-left px-4 py-2">{ui.actionsCol}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sorted.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-16 text-center">
-                          <MapPin className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-                          <p className="text-muted-foreground">{error || ui.noResults}</p>
+                        <td colSpan={4} className="px-4 py-6 text-muted-foreground">
+                          {error ? error : ui.noResults}
                         </td>
                       </tr>
                     ) : (
                       sorted.map((m, i) => (
-                        <tr
-                          key={m.id}
-                          className="border-b hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-teal-50/50 dark:hover:from-emerald-950/20 dark:hover:to-teal-950/20 transition-all duration-200 group"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                              {i + 1}
-                            </div>
+                        <tr key={m.id} className="border-b hover:bg-muted/40 smooth-transition">
+                          <td className="px-4 py-2">{i + 1}</td>
+                          <td className="px-4 py-2">
+                            <div className="font-medium">{m.name}</div>
+                            {m.addr && (
+                              <div className="text-xs text-muted-foreground truncate max-w-[52ch]">{m.addr}</div>
+                            )}
                           </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                                <MapPin className="h-5 w-5 text-white" />
-                              </div>
-                              <div>
-                                <div className="font-semibold text-base mb-0.5">{m.name}</div>
-                                {m.addr && (
-                                  <div className="text-xs text-muted-foreground line-clamp-1 max-w-md">{m.addr}</div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium shadow">
-                              <MapPin className="h-3.5 w-3.5" />
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                               {formatDistance(m.dist)}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <Button
-                              size="sm"
-                              className="neomorph hover:neomorph-pressed gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow transition-all duration-200"
-                              onClick={() => setSelected(m)}
-                            >
-                              <Navigation className="h-4 w-4" />
-                              {ui.options}
-                            </Button>
+                          <td className="px-4 py-2">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                className="neomorph hover:neomorph-pressed gap-2"
+                                onClick={() => setSelected(m)}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                {ui.options}
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))
@@ -708,91 +558,69 @@ const MosqueLocator = () => {
         </div>
       </div>
 
-      {/* Enhanced Modal */}
+      {/* App chooser / Share modal — huge z-index so it stays above the map */}
       {selected && (
         <div
-          className="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-end sm:items-center sm:justify-center animate-in fade-in duration-200"
+          className="fixed inset-0 z-[10000] bg-black/40 flex items-end md:items-center md:justify-center"
           onClick={() => setSelected(null)}
         >
           <div
-            className="w-full sm:max-w-lg bg-background rounded-t-3xl sm:rounded-3xl shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0 duration-300"
+            className="w-full md:w-[520px] bg-background rounded-t-2xl md:rounded-2xl p-5 neomorph"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Gradient border effect */}
-            <div className="relative p-6 sm:p-8">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-t-3xl" />
-
-              {/* Header */}
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
-                  <MapPin className="h-7 w-7 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-xl leading-tight">{selected.name}</h3>
-                    <button
-                      className="shrink-0 rounded-full p-2 hover:bg-muted transition-colors"
-                      onClick={() => setSelected(null)}
-                      aria-label={ui.close}
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 mt-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium shadow">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {formatDistance(selected.dist)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {selected.lat.toFixed(5)}, {selected.lon.toFixed(5)}
-                    </span>
-                  </div>
-                  {selected.addr && <p className="text-sm text-muted-foreground mt-2">{selected.addr}</p>}
-                </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <MapPin className="h-5 w-5 text-primary" />
               </div>
-
-              {/* Navigation Apps */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  {ui.chooseApp}
-                </h4>
-                <div className="grid grid-cols-3 gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold truncate">{selected.name}</h3>
                   <button
-                    className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    onClick={() => openInApp(selected, "google")}
+                    className="rounded-full p-1 hover:bg-muted smooth-transition"
+                    onClick={() => setSelected(null)}
+                    aria-label={ui.close}
                   >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Navigation className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-xs font-semibold text-white text-center">Google</div>
-                  </button>
-                  <button
-                    className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-700 to-gray-800 p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    onClick={() => openInApp(selected, "apple")}
-                  >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Navigation className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-xs font-semibold text-white text-center">Apple</div>
-                  </button>
-                  <button
-                    className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    onClick={() => openInApp(selected, "waze")}
-                  >
-                    <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <Navigation className="h-6 w-6 text-white mx-auto mb-2" />
-                    <div className="text-xs font-semibold text-white text-center">Waze</div>
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
-
-                {/* Share Button */}
-                <Button
-                  variant="outline"
-                  className="w-full neomorph hover:neomorph-pressed gap-2 h-12 text-base transition-all duration-200"
-                  onClick={() => shareMosque(selected)}
-                >
-                  <Share2 className="h-5 w-5" />
-                  {ui.share}
-                </Button>
+                <p className="text-sm text-muted-foreground">
+                  {formatDistance(selected.dist)} • {selected.lat.toFixed(5)},{selected.lon.toFixed(5)}
+                </p>
               </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              <Button className="neomorph hover:neomorph-pressed gap-2" onClick={() => openInApp(selected, "google")}>
+                <Navigation className="h-4 w-4" />
+                {ui.google}
+              </Button>
+              <Button
+                variant="secondary"
+                className="neomorph hover:neomorph-pressed gap-2"
+                onClick={() => openInApp(selected, "apple")}
+              >
+                <Navigation className="h-4 w-4" />
+                {ui.apple}
+              </Button>
+              <Button
+                variant="secondary"
+                className="neomorph hover:neomorph-pressed gap-2"
+                onClick={() => openInApp(selected, "waze")}
+              >
+                <Navigation className="h-4 w-4" />
+                {ui.waze}
+              </Button>
+            </div>
+
+            <div className="mt-3">
+              <Button
+                variant="ghost"
+                className="w-full neomorph hover:neomorph-pressed gap-2"
+                onClick={() => shareMosque(selected)}
+              >
+                <Share2 className="h-4 w-4" />
+                {ui.share}
+              </Button>
             </div>
           </div>
         </div>
