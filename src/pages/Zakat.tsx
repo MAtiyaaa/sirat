@@ -7,20 +7,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Calculator } from 'lucide-react';
+import { ArrowLeft, Calculator, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { DirhamIcon } from '@/components/DirhamIcon';
 
 const CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
-  { code: 'GBP', symbol: '£', name: 'British Pound' },
-  { code: 'SAR', symbol: 'ر.س', name: 'Saudi Riyal' },
-  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
-  { code: 'EGP', symbol: 'ج.م', name: 'Egyptian Pound' },
-  { code: 'TRY', symbol: '₺', name: 'Turkish Lira' },
-  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
-  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee' },
-  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit' },
+  { code: 'USD', symbol: '$', name: 'US Dollar', icon: null },
+  { code: 'EUR', symbol: '€', name: 'Euro', icon: null },
+  { code: 'GBP', symbol: '£', name: 'British Pound', icon: null },
+  { code: 'SAR', symbol: 'ر.س', name: 'Saudi Riyal', icon: null },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', icon: 'dirham' },
+  { code: 'EGP', symbol: 'ج.م', name: 'Egyptian Pound', icon: null },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira', icon: null },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee', icon: null },
+  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee', icon: null },
+  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit', icon: null },
 ];
 
 const Zakat = () => {
@@ -28,6 +29,7 @@ const Zakat = () => {
   const { settings } = useSettings();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [fetchingPrices, setFetchingPrices] = useState(false);
   
   // Form state
   const [currency, setCurrency] = useState('USD');
@@ -137,7 +139,52 @@ const Zakat = () => {
     
     const detectedCurrency = currencyMap[userLocale] || 'USD';
     setCurrency(detectedCurrency);
+
+    // Auto-fetch prices for AED on initial load
+    if (detectedCurrency === 'AED') {
+      fetchRealTimePrices('AED');
+    }
   }, []);
+
+  const fetchRealTimePrices = async (currencyCode: string) => {
+    setFetchingPrices(true);
+    try {
+      // Using Metals.dev API - free tier allows fetching metal prices
+      const response = await fetch(`https://api.metals.dev/v1/latest?api_key=GOLDAPI-1DEMOAPIKEY&currency=${currencyCode}&unit=gram`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch prices');
+      }
+
+      const data = await response.json();
+      
+      if (data.metals?.gold) {
+        setGoldPricePerGram(data.metals.gold.toFixed(2));
+      }
+      
+      if (data.metals?.silver) {
+        setSilverPricePerGram(data.metals.silver.toFixed(2));
+      }
+
+      toast({
+        title: settings.language === 'ar' ? 'تم تحديث الأسعار' : 'Prices updated',
+        description: settings.language === 'ar' 
+          ? 'تم جلب أسعار الذهب والفضة الحالية' 
+          : 'Current gold and silver prices fetched',
+      });
+    } catch (error) {
+      console.error('Error fetching prices:', error);
+      toast({
+        title: settings.language === 'ar' ? 'فشل في جلب الأسعار' : 'Failed to fetch prices',
+        description: settings.language === 'ar'
+          ? 'يرجى إدخال الأسعار يدوياً'
+          : 'Please enter prices manually',
+        variant: 'destructive',
+      });
+    } finally {
+      setFetchingPrices(false);
+    }
+  };
 
   const loadZakatData = async (userId: string) => {
     try {
@@ -262,7 +309,9 @@ const Zakat = () => {
   };
 
   const results = calculateZakat();
-  const currencySymbol = CURRENCIES.find(c => c.code === currency)?.symbol || '$';
+  const selectedCurrency = CURRENCIES.find(c => c.code === currency);
+  const currencySymbol = selectedCurrency?.symbol || '$';
+  const showDirhamIcon = selectedCurrency?.icon === 'dirham';
 
   return (
     <div className="min-h-screen pb-20">
@@ -289,14 +338,26 @@ const Zakat = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="currency">{t.currency}</Label>
-                <Select value={currency} onValueChange={setCurrency}>
+                <Select value={currency} onValueChange={(val) => {
+                  setCurrency(val);
+                  if (val === 'AED') {
+                    fetchRealTimePrices(val);
+                  }
+                }}>
                   <SelectTrigger id="currency">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {CURRENCIES.map((curr) => (
                       <SelectItem key={curr.code} value={curr.code}>
-                        {curr.symbol} {curr.name}
+                        <div className="flex items-center gap-2">
+                          {curr.icon === 'dirham' ? (
+                            <DirhamIcon size={16} />
+                          ) : (
+                            <span>{curr.symbol}</span>
+                          )}
+                          <span>{curr.name}</span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -317,29 +378,52 @@ const Zakat = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="goldPrice">{t.goldPrice}</Label>
-                <Input
-                  id="goldPrice"
-                  type="number"
-                  step="0.01"
-                  value={goldPricePerGram}
-                  onChange={(e) => setGoldPricePerGram(e.target.value)}
-                  placeholder="0.00"
-                />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {currency === 'AED' && (settings.language === 'ar' 
+                    ? 'أسعار الذهب والفضة في الإمارات' 
+                    : 'UAE Gold & Silver Prices')}
+                </p>
+                {currency === 'AED' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fetchRealTimePrices('AED')}
+                    disabled={fetchingPrices}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${fetchingPrices ? 'animate-spin' : ''}`} />
+                    <span className="ml-2">
+                      {settings.language === 'ar' ? 'تحديث الأسعار' : 'Update Prices'}
+                    </span>
+                  </Button>
+                )}
               </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="goldPrice">{t.goldPrice}</Label>
+                  <Input
+                    id="goldPrice"
+                    type="number"
+                    step="0.01"
+                    value={goldPricePerGram}
+                    onChange={(e) => setGoldPricePerGram(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="silverPrice">{t.silverPrice}</Label>
-                <Input
-                  id="silverPrice"
-                  type="number"
-                  step="0.01"
-                  value={silverPricePerGram}
-                  onChange={(e) => setSilverPricePerGram(e.target.value)}
-                  placeholder="0.00"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="silverPrice">{t.silverPrice}</Label>
+                  <Input
+                    id="silverPrice"
+                    type="number"
+                    step="0.01"
+                    value={silverPricePerGram}
+                    onChange={(e) => setSilverPricePerGram(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
@@ -458,20 +542,38 @@ const Zakat = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
                 <p className="text-muted-foreground">{t.totalAssets}</p>
-                <p className="text-2xl font-bold">{currencySymbol}{results.totalAssets.toFixed(2)}</p>
+                <p className="text-2xl font-bold flex items-center gap-2">
+                  {showDirhamIcon && <DirhamIcon size={24} />}
+                  {!showDirhamIcon && currencySymbol}
+                  {results.totalAssets.toFixed(2)}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground">{t.totalLiabilities}</p>
-                <p className="text-2xl font-bold">{currencySymbol}{results.totalLiabilities.toFixed(2)}</p>
+                <p className="text-2xl font-bold flex items-center gap-2">
+                  {showDirhamIcon && <DirhamIcon size={24} />}
+                  {!showDirhamIcon && currencySymbol}
+                  {results.totalLiabilities.toFixed(2)}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground">{t.netAssets}</p>
-                <p className="text-2xl font-bold">{currencySymbol}{results.netAssets.toFixed(2)}</p>
+                <p className="text-2xl font-bold flex items-center gap-2">
+                  {showDirhamIcon && <DirhamIcon size={24} />}
+                  {!showDirhamIcon && currencySymbol}
+                  {results.netAssets.toFixed(2)}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground">{t.nisabThreshold}</p>
-                <p className="text-2xl font-bold">
-                  {isNaN(results.nisabValue) ? '—' : `${currencySymbol}${results.nisabValue.toFixed(2)}`}
+                <p className="text-2xl font-bold flex items-center gap-2">
+                  {isNaN(results.nisabValue) ? '—' : (
+                    <>
+                      {showDirhamIcon && <DirhamIcon size={24} />}
+                      {!showDirhamIcon && currencySymbol}
+                      {results.nisabValue.toFixed(2)}
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -488,7 +590,11 @@ const Zakat = () => {
                 {results.qualifies && (
                   <div>
                     <p className="text-muted-foreground text-sm mb-1">{t.zakatDue}</p>
-                    <p className="text-3xl font-bold">{currencySymbol}{results.zakatDue.toFixed(2)}</p>
+                    <p className="text-3xl font-bold flex items-center justify-center gap-2">
+                      {showDirhamIcon && <DirhamIcon size={32} />}
+                      {!showDirhamIcon && currencySymbol}
+                      {results.zakatDue.toFixed(2)}
+                    </p>
                   </div>
                 )}
               </div>
