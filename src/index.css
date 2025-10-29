@@ -6,6 +6,17 @@
 All colors MUST be HSL.
 */
 
+/* UAE Dirham Symbol Font */
+@font-face {
+  font-family: 'UAESymbol';
+  src: url('/fonts/dirham.woff2') format('woff2'),
+       url('/fonts/dirham.woff') format('woff'),
+       url('/fonts/dirham.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     /* Base Light Theme with Blue */

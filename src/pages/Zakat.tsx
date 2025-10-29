@@ -137,34 +137,47 @@ const Zakat = () => {
       'ms-MY': 'MYR',
     };
     
-    const detectedCurrency = currencyMap[userLocale] || 'USD';
+    const detectedCurrency = currencyMap[userLocale] || 'AED';
     setCurrency(detectedCurrency);
 
     // Auto-fetch prices for AED on initial load
-    if (detectedCurrency === 'AED') {
-      fetchRealTimePrices('AED');
-    }
+    fetchRealTimePrices(detectedCurrency);
   }, []);
 
   const fetchRealTimePrices = async (currencyCode: string) => {
     setFetchingPrices(true);
     try {
-      // Using Metals.dev API - free tier allows fetching metal prices
-      const response = await fetch(`https://api.metals.dev/v1/latest?api_key=GOLDAPI-1DEMOAPIKEY&currency=${currencyCode}&unit=gram`);
+      // Fetch gold price per gram
+      const goldResponse = await fetch(`https://api.gold-api.com/price/XAU`);
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch prices');
+      if (!goldResponse.ok) {
+        throw new Error('Failed to fetch gold price');
       }
 
-      const data = await response.json();
+      const goldData = await goldResponse.json();
       
-      if (data.metals?.gold) {
-        setGoldPricePerGram(data.metals.gold.toFixed(2));
-      }
+      // Gold API returns price per troy ounce in USD
+      // 1 troy ounce = 31.1035 grams
+      const goldPricePerGramUSD = goldData.price / 31.1035;
       
-      if (data.metals?.silver) {
-        setSilverPricePerGram(data.metals.silver.toFixed(2));
+      // Fetch silver price
+      const silverResponse = await fetch(`https://api.gold-api.com/price/XAG`);
+      const silverData = await silverResponse.json();
+      const silverPricePerGramUSD = silverData.price / 31.1035;
+
+      // Convert to target currency if not USD
+      let conversionRate = 1;
+      if (currencyCode !== 'USD') {
+        const ratesResponse = await fetch(`https://api.exchangerate-api.com/v4/latest/USD`);
+        const ratesData = await ratesResponse.json();
+        conversionRate = ratesData.rates[currencyCode] || 1;
       }
+
+      const goldPrice = goldPricePerGramUSD * conversionRate;
+      const silverPrice = silverPricePerGramUSD * conversionRate;
+
+      setGoldPricePerGram(goldPrice.toFixed(2));
+      setSilverPricePerGram(silverPrice.toFixed(2));
 
       toast({
         title: settings.language === 'ar' ? 'تم تحديث الأسعار' : 'Prices updated',
@@ -378,26 +391,22 @@ const Zakat = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
+              <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {currency === 'AED' && (settings.language === 'ar' 
-                    ? 'أسعار الذهب والفضة في الإمارات' 
-                    : 'UAE Gold & Silver Prices')}
+                  {settings.language === 'ar' 
+                    ? 'أسعار الذهب والفضة الحالية' 
+                    : 'Current Gold & Silver Prices'}
                 </p>
-                {currency === 'AED' && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fetchRealTimePrices('AED')}
-                    disabled={fetchingPrices}
-                  >
-                    <RefreshCw className={`h-4 w-4 ${fetchingPrices ? 'animate-spin' : ''}`} />
-                    <span className="ml-2">
-                      {settings.language === 'ar' ? 'تحديث الأسعار' : 'Update Prices'}
-                    </span>
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchRealTimePrices(currency)}
+                  disabled={fetchingPrices}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${fetchingPrices ? 'animate-spin' : ''}`} />
+                  {settings.language === 'ar' ? 'تحديث الأسعار' : 'Update Prices'}
+                </Button>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
