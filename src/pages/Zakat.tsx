@@ -11,9 +11,7 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { DirhamIcon } from "@/components/DirhamIcon";
 
-type User = {
-  id: string;
-} | null;
+type User = { id: string } | null;
 
 const CURRENCIES = [
   { code: "AED", symbol: "د.إ", name: "UAE Dirham", icon: "dirham" as const },
@@ -26,6 +24,7 @@ const CURRENCIES = [
   { code: "IRR", symbol: "﷼", name: "Iranian Rial", icon: null },
   { code: "JOD", symbol: "د.ا", name: "Jordanian Dinar", icon: null },
   { code: "KWD", symbol: "د.ك", name: "Kuwaiti Dinar", icon: null },
+  { code: "LBP", symbol: "ل.ل", name: "Lebanese Pound", icon: null }, // ← added
   { code: "MYR", symbol: "RM", name: "Malaysian Ringgit", icon: null },
   { code: "OMR", symbol: "ر.ع", name: "Omani Rial", icon: null },
   { code: "PKR", symbol: "₨", name: "Pakistani Rupee", icon: null },
@@ -35,20 +34,6 @@ const CURRENCIES = [
   { code: "USD", symbol: "$", name: "US Dollar", icon: null },
   { code: "YER", symbol: "﷼", name: "Yemeni Rial", icon: null },
 ] as const;
-
-const currencyFromLocale = (locale: string | undefined) => {
-  const map: Record<string, string> = {
-    "ar-SA": "SAR",
-    "ar-AE": "AED",
-    "ar-EG": "EGP",
-    "tr-TR": "TRY",
-    "en-GB": "GBP",
-    "en-IN": "INR",
-    "ur-PK": "PKR",
-    "ms-MY": "MYR",
-  };
-  return (locale && map[locale]) || "AED";
-};
 
 const content = {
   ar: {
@@ -81,7 +66,6 @@ const content = {
       "الزكاة واجبة على كل مسلم بالغ عاقل يملك نصاباً من المال الذي مر عليه حول كامل. النصاب هو 85 جرام من الذهب أو 595 جرام من الفضة. مقدار الزكاة هو 2.5% من صافي الأصول الزكوية.",
     privacyNote: "جميع البيانات خاصة بك ولن يتم مشاركتها.",
     signInRequired: "يرجى تسجيل الدخول لحفظ بياناتك",
-    enterPriceNote: "أدخل سعر الجرام للذهب/الفضة لحساب حد النصاب بدقة.",
     updatePrices: "تحديث الأسعار",
     priceHeader: "أسعار الذهب والفضة الحالية",
     pricesUpdated: "تم جلب أسعار الذهب والفضة الحالية",
@@ -119,7 +103,6 @@ const content = {
       "Zakat is obligatory for every adult Muslim who possesses the nisab (minimum threshold) for one lunar year. The nisab is equivalent to 85 grams of gold or 595 grams of silver. The Zakat rate is 2.5% of net zakatable assets.",
     privacyNote: "All your data is private and will not be shared.",
     signInRequired: "Please sign in to save your data",
-    enterPriceNote: "Enter price/gram for gold/silver to compute nisab accurately.",
     updatePrices: "Update Prices",
     priceHeader: "Current Gold & Silver Prices",
     pricesUpdated: "Current gold and silver prices fetched",
@@ -134,13 +117,13 @@ const Zakat = () => {
   const { settings } = useSettings();
   const t = content[(settings.language as "ar" | "en") || "en"];
 
-  // ---- core state
+  // core state
   const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(false);
   const [fetchingPrices, setFetchingPrices] = useState(false);
 
   // form state
-  const [currency, setCurrency] = useState<string>("AED"); // hard default = AED
+  const [currency, setCurrency] = useState<string>("AED"); // HARD DEFAULT = AED
   const [nisabBasis, setNisabBasis] = useState<"gold" | "silver">("gold");
   const [goldPricePerGram, setGoldPricePerGram] = useState<string>("");
   const [silverPricePerGram, setSilverPricePerGram] = useState<string>("");
@@ -153,7 +136,7 @@ const Zakat = () => {
   const [investments, setInvestments] = useState<string>("");
   const [liabilities, setLiabilities] = useState<string>("");
 
-  // ---- price fetcher
+  // price fetcher (USD base → convert to selected currency)
   const fetchRealTimePrices = async (currencyCode: string) => {
     setFetchingPrices(true);
     try {
@@ -165,7 +148,7 @@ const Zakat = () => {
       if (!silverResponse.ok) throw new Error("Failed to fetch silver price");
       const silverData = await silverResponse.json();
 
-      // gold-api returns per troy ounce (USD). Convert to per gram.
+      // per troy ounce (USD) → per gram
       const ozToGram = 31.1035;
       const goldPerGramUSD = (goldData?.price ?? 0) / ozToGram;
       const silverPerGramUSD = (silverData?.price ?? 0) / ozToGram;
@@ -181,26 +164,18 @@ const Zakat = () => {
       setGoldPricePerGram((goldPerGramUSD * conversionRate).toFixed(2));
       setSilverPricePerGram((silverPerGramUSD * conversionRate).toFixed(2));
 
-      toast({
-        title: t.pricesUpdated,
-        description: "",
-      });
+      toast({ title: t.pricesUpdated });
     } catch (err) {
       console.error("Error fetching prices:", err);
-      toast({
-        title: t.pricesFailed,
-        description: t.enterManually,
-        variant: "destructive",
-      });
+      toast({ title: t.pricesFailed, description: t.enterManually, variant: "destructive" });
     } finally {
       setFetchingPrices(false);
     }
   };
 
-  // ---- startup: decide currency once (saved > locale > AED), load saved data, then fetch prices
+  // startup: get user & saved data; ONLY override AED if saved currency exists, then fetch prices for final currency
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       try {
         const { data: authData } = await supabase.auth.getUser();
@@ -209,9 +184,7 @@ const Zakat = () => {
         const authedUser = authData?.user ?? null;
         setUser(authedUser);
 
-        // baseline choice
-        let nextCurrency = currencyFromLocale(typeof navigator !== "undefined" ? navigator.language : undefined);
-
+        let nextCurrency = "AED"; // stay AED unless DB has a value
         if (authedUser) {
           const { data, error } = await supabase
             .from("user_zakat_data")
@@ -222,10 +195,7 @@ const Zakat = () => {
           if (error) throw error;
 
           if (data) {
-            // only apply saved currency if present
-            if (data.currency) nextCurrency = data.currency;
-
-            // load the rest
+            if (data.currency) nextCurrency = data.currency; // no 'USD' fallback
             if (data.nisab_basis) setNisabBasis(data.nisab_basis as "gold" | "silver");
             if (typeof data.gold_price_per_gram === "number") setGoldPricePerGram(String(data.gold_price_per_gram));
             if (typeof data.silver_price_per_gram === "number")
@@ -242,28 +212,26 @@ const Zakat = () => {
         }
 
         setCurrency(nextCurrency);
-        // if saved prices existed we don't *have* to fetch, but fetching ensures freshness
         fetchRealTimePrices(nextCurrency);
       } catch (e) {
         console.error("Init error:", e);
-        // still make sure we have prices for AED default at least
+        // fall back to AED prices if something failed
+        setCurrency("AED");
         fetchRealTimePrices("AED");
       }
     })();
-
     return () => {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ---- save
+  // save
   const saveZakatData = async () => {
     if (!user) {
       toast({ title: t.signInRequired, variant: "destructive" });
       return;
     }
-
     setLoading(true);
     try {
       const { error } = await supabase.from("user_zakat_data").upsert({
@@ -281,9 +249,7 @@ const Zakat = () => {
         investments: parseFloat(investments) || 0,
         liabilities: parseFloat(liabilities) || 0,
       });
-
       if (error) throw error;
-
       toast({ title: settings.language === "ar" ? "تم حفظ البيانات بنجاح" : "Data saved successfully" });
     } catch (err) {
       console.error("Error saving zakat data:", err);
@@ -296,7 +262,7 @@ const Zakat = () => {
     }
   };
 
-  // ---- calculations (memoized so we don’t recompute every render)
+  // calculations
   const results = useMemo(() => {
     const goldPrice = parseFloat(goldPricePerGram) || 0;
     const silverPrice = parseFloat(silverPricePerGram) || 0;
@@ -316,23 +282,20 @@ const Zakat = () => {
     const totalLiabilities = parseFloat(liabilities) || 0;
     const netAssets = totalAssets - totalLiabilities;
 
-    const priceMissing = nisabBasis === "gold" ? goldPrice <= 0 : silverPrice <= 0;
+    const priceMissing =
+      nisabBasis === "gold" ? (parseFloat(goldPricePerGram) || 0) <= 0 : (parseFloat(silverPricePerGram) || 0) <= 0;
 
-    const nisabValue = priceMissing ? NaN : nisabBasis === "gold" ? 85 * goldPrice : 595 * silverPrice;
+    const nisabValue = priceMissing
+      ? NaN
+      : nisabBasis === "gold"
+        ? 85 * (parseFloat(goldPricePerGram) || 0)
+        : 595 * (parseFloat(silverPricePerGram) || 0);
 
     const qualifies = !isNaN(nisabValue) && netAssets >= nisabValue;
     const zakatBase = Math.max(0, netAssets);
     const zakatDue = qualifies ? zakatBase * 0.025 : 0;
 
-    return {
-      totalAssets,
-      totalLiabilities,
-      netAssets,
-      nisabValue,
-      qualifies,
-      zakatDue,
-      priceMissing,
-    };
+    return { totalAssets, totalLiabilities, netAssets, nisabValue, qualifies, zakatDue, priceMissing };
   }, [
     goldPricePerGram,
     silverPricePerGram,
@@ -348,7 +311,7 @@ const Zakat = () => {
   ]);
 
   const selectedCurrency = CURRENCIES.find((c) => c.code === currency);
-  const currencySymbol = selectedCurrency?.symbol || "$";
+  const currencySymbol = selectedCurrency?.symbol || "د.إ";
   const showDirhamIcon = selectedCurrency?.icon === "dirham";
 
   return (
@@ -380,7 +343,7 @@ const Zakat = () => {
                   value={currency}
                   onValueChange={(val) => {
                     setCurrency(val);
-                    // fetch prices for any selection (not only AED)
+                    // fetch fresh prices for the new currency
                     fetchRealTimePrices(val);
                   }}
                 >
@@ -414,7 +377,7 @@ const Zakat = () => {
               </div>
             </div>
 
-            {/* Prices */}
+            {/* Prices + refresh */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">{t.priceHeader}</p>
@@ -562,76 +525,15 @@ const Zakat = () => {
             <CardTitle>{t.results}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
-                <p className="text-muted-foreground">{t.totalAssets}</p>
-                <p className="text-2xl font-bold flex items-center gap-2">
-                  {showDirhamIcon && <DirhamIcon size={24} />}
-                  {!showDirhamIcon && currencySymbol}
-                  {results.totalAssets.toFixed(2)}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground">{t.totalLiabilities}</p>
-                <p className="text-2xl font-bold flex items-center gap-2">
-                  {showDirhamIcon && <DirhamIcon size={24} />}
-                  {!showDirhamIcon && currencySymbol}
-                  {results.totalLiabilities.toFixed(2)}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground">{t.netAssets}</p>
-                <p className="text-2xl font-bold flex items-center gap-2">
-                  {showDirhamIcon && <DirhamIcon size={24} />}
-                  {!showDirhamIcon && currencySymbol}
-                  {results.netAssets.toFixed(2)}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground">{t.nisabThreshold}</p>
-                <p className="text-2xl font-bold flex items-center gap-2">
-                  {isNaN(results.nisabValue) ? (
-                    "—"
-                  ) : (
-                    <>
-                      {showDirhamIcon && <DirhamIcon size={24} />}
-                      {!showDirhamIcon && currencySymbol}
-                      {results.nisabValue.toFixed(2)}
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {results.priceMissing ? (
-              <div className="p-4 rounded-lg text-center bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-                {t.enterPriceNote}
-              </div>
-            ) : (
-              <div
-                className={`p-4 rounded-lg text-center ${results.qualifies ? "bg-primary/10 text-primary" : "bg-muted"}`}
-              >
-                <p className="font-semibold text-lg mb-2">{results.qualifies ? t.qualifies : t.notQualifies}</p>
-                {results.qualifies && (
-                  <div>
-                    <p className="text-muted-foreground text-sm mb-1">{t.zakatDue}</p>
-                    <p className="text-3xl font-bold flex items-center justify-center gap-2">
-                      {showDirhamIcon && <DirhamIcon size={32} />}
-                      {!showDirhamIcon && currencySymbol}
-                      {results.zakatDue.toFixed(2)}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">{t.explanation}</div>
+            <ResultsBlock results={results} currencySymbol={currencySymbol} showDirhamIcon={showDirhamIcon} t={t} />
 
             <div className="flex justify-end">
               <Button onClick={saveZakatData} disabled={loading}>
                 {settings.language === "ar" ? "حفظ البيانات" : "Save Data"}
               </Button>
             </div>
+
+            <div className="text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">{t.explanation}</div>
           </CardContent>
         </Card>
 
@@ -642,5 +544,90 @@ const Zakat = () => {
     </div>
   );
 };
+
+function ResultsBlock({
+  results,
+  currencySymbol,
+  showDirhamIcon,
+  t,
+}: {
+  results: {
+    totalAssets: number;
+    totalLiabilities: number;
+    netAssets: number;
+    nisabValue: number;
+    qualifies: boolean;
+    zakatDue: number;
+    priceMissing: boolean;
+  };
+  currencySymbol: string;
+  showDirhamIcon: boolean | undefined;
+  t: any;
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="space-y-1">
+          <p className="text-muted-foreground">{t.totalAssets}</p>
+          <p className="text-2xl font-bold flex items-center gap-2">
+            {showDirhamIcon && <DirhamIcon size={24} />}
+            {!showDirhamIcon && currencySymbol}
+            {results.totalAssets.toFixed(2)}
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-muted-foreground">{t.totalLiabilities}</p>
+          <p className="text-2xl font-bold flex items-center gap-2">
+            {showDirhamIcon && <DirhamIcon size={24} />}
+            {!showDirhamIcon && currencySymbol}
+            {results.totalLiabilities.toFixed(2)}
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-muted-foreground">{t.netAssets}</p>
+          <p className="text-2xl font-bold flex items-center gap-2">
+            {showDirhamIcon && <DirhamIcon size={24} />}
+            {!showDirhamIcon && currencySymbol}
+            {results.netAssets.toFixed(2)}
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-muted-foreground">{t.nisabThreshold}</p>
+          <p className="text-2xl font-bold flex items-center gap-2">
+            {isNaN(results.nisabValue) ? (
+              "—"
+            ) : (
+              <>
+                {showDirhamIcon && <DirhamIcon size={24} />}
+                {!showDirhamIcon && currencySymbol}
+                {results.nisabValue.toFixed(2)}
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
+      {results.priceMissing ? (
+        <div className="p-4 rounded-lg text-center bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
+          {t.enterManually}
+        </div>
+      ) : (
+        <div className={`p-4 rounded-lg text-center ${results.qualifies ? "bg-primary/10 text-primary" : "bg-muted"}`}>
+          <p className="font-semibold text-lg mb-2">{results.qualifies ? t.qualifies : t.notQualifies}</p>
+          {results.qualifies && (
+            <div>
+              <p className="text-muted-foreground text-sm mb-1">{t.zakatDue}</p>
+              <p className="text-3xl font-bold flex items-center justify-center gap-2">
+                {showDirhamIcon && <DirhamIcon size={32} />}
+                {!showDirhamIcon && currencySymbol}
+                {results.zakatDue.toFixed(2)}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
 
 export default Zakat;
