@@ -12,16 +12,24 @@ import { toast } from '@/hooks/use-toast';
 import { DirhamIcon } from '@/components/DirhamIcon';
 
 const CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar', icon: null },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', icon: 'dirham' },
+  { code: 'BHD', symbol: 'د.ب', name: 'Bahraini Dinar', icon: null },
+  { code: 'EGP', symbol: 'ج.م', name: 'Egyptian Pound', icon: null },
   { code: 'EUR', symbol: '€', name: 'Euro', icon: null },
   { code: 'GBP', symbol: '£', name: 'British Pound', icon: null },
-  { code: 'SAR', symbol: 'ر.س', name: 'Saudi Riyal', icon: null },
-  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', icon: 'dirham' },
-  { code: 'EGP', symbol: 'ج.م', name: 'Egyptian Pound', icon: null },
-  { code: 'TRY', symbol: '₺', name: 'Turkish Lira', icon: null },
+  { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', icon: null },
   { code: 'INR', symbol: '₹', name: 'Indian Rupee', icon: null },
-  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee', icon: null },
+  { code: 'IRR', symbol: '﷼', name: 'Iranian Rial', icon: null },
+  { code: 'JOD', symbol: 'د.ا', name: 'Jordanian Dinar', icon: null },
+  { code: 'KWD', symbol: 'د.ك', name: 'Kuwaiti Dinar', icon: null },
   { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit', icon: null },
+  { code: 'OMR', symbol: 'ر.ع', name: 'Omani Rial', icon: null },
+  { code: 'PKR', symbol: '₨', name: 'Pakistani Rupee', icon: null },
+  { code: 'QAR', symbol: 'ر.ق', name: 'Qatari Riyal', icon: null },
+  { code: 'SAR', symbol: 'ر.س', name: 'Saudi Riyal', icon: null },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira', icon: null },
+  { code: 'USD', symbol: '$', name: 'US Dollar', icon: null },
+  { code: 'YER', symbol: '﷼', name: 'Yemeni Rial', icon: null },
 ];
 
 const Zakat = () => {
@@ -140,7 +148,7 @@ const Zakat = () => {
     const detectedCurrency = currencyMap[userLocale] || 'AED';
     setCurrency(detectedCurrency);
 
-    // Auto-fetch prices for AED on initial load
+    // Auto-fetch prices on initial load
     fetchRealTimePrices(detectedCurrency);
   }, []);
 
