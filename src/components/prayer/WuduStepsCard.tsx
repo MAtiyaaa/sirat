@@ -1,35 +1,39 @@
 import React, { useState } from 'react';
-import { HandHeart, ChevronDown, Sparkles, Check } from 'lucide-react';
+import { HandHeart, ChevronDown, Sparkles, Check, Heart, BookOpen, Droplets, Smile, Dumbbell, Brain, Ear, Footprints } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import type { LucideIcon } from 'lucide-react';
 
 const WuduStepsCard = () => {
   const { settings } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
-  const steps = {
+  const steps: {
+    ar: { title: string; count: number | null; description: string; icon: LucideIcon }[];
+    en: { title: string; count: number | null; description: string; icon: LucideIcon }[];
+  } = {
     ar: [
-      { title: 'النية', count: null, description: 'انوِ في قلبك الوضوء لله تعالى', emoji: '🤲' },
-      { title: 'التسمية', count: null, description: 'قل: بسم الله الرحمن الرحيم', emoji: '📿' },
-      { title: 'اليدين', count: 3, description: 'ابدأ باليد اليمنى ثم اليسرى، اغسل إلى الرسغين', emoji: '🙌' },
-      { title: 'الفم والأنف', count: 3, description: 'تمضمض بيدك اليمنى، استنشق بيدك اليمنى واستنثر بيدك اليسرى', emoji: '💧' },
-      { title: 'الوجه', count: 3, description: 'من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن', emoji: '😊' },
-      { title: 'الذراعين', count: 3, description: 'ابدأ باليد اليمنى إلى المرفق، ثم اليسرى إلى المرفق', emoji: '💪' },
-      { title: 'الرأس', count: 1, description: 'امسح من الأمام إلى الخلف ثم من الخلف إلى الأمام', emoji: '🧠' },
-      { title: 'الأذنين', count: 1, description: 'امسح داخل الأذنين بالسبابة، وخلفهما بالإبهام', emoji: '👂' },
-      { title: 'القدمين', count: 3, description: 'ابدأ بالقدم اليمنى إلى الكعبين، ثم اليسرى إلى الكعبين', emoji: '🦶' },
+      { title: 'النية', count: null, description: 'انوِ في قلبك الوضوء لله تعالى', icon: Heart },
+      { title: 'التسمية', count: null, description: 'قل: بسم الله الرحمن الرحيم', icon: BookOpen },
+      { title: 'اليدين', count: 3, description: 'ابدأ باليد اليمنى ثم اليسرى، اغسل إلى الرسغين', icon: HandHeart },
+      { title: 'الفم والأنف', count: 3, description: 'تمضمض بيدك اليمنى، استنشق بيدك اليمنى واستنثر بيدك اليسرى', icon: Droplets },
+      { title: 'الوجه', count: 3, description: 'من منابت الشعر إلى الذقن، ومن الأذن إلى الأذن', icon: Smile },
+      { title: 'الذراعين', count: 3, description: 'ابدأ باليد اليمنى إلى المرفق، ثم اليسرى إلى المرفق', icon: Dumbbell },
+      { title: 'الرأس', count: 1, description: 'امسح من الأمام إلى الخلف ثم من الخلف إلى الأمام', icon: Brain },
+      { title: 'الأذنين', count: 1, description: 'امسح داخل الأذنين بالسبابة، وخلفهما بالإبهام', icon: Ear },
+      { title: 'القدمين', count: 3, description: 'ابدأ بالقدم اليمنى إلى الكعبين، ثم اليسرى إلى الكعبين', icon: Footprints },
     ],
     en: [
-      { title: 'Intention', count: null, description: 'Intend in your heart to perform wudu for the sake of Allah', emoji: '🤲' },
-      { title: 'Bismillah', count: null, description: 'Say: In the name of Allah, the Most Gracious, the Most Merciful', emoji: '📿' },
-      { title: 'Hands', count: 3, description: 'Start with right hand, then left hand, wash up to wrists', emoji: '🙌' },
-      { title: 'Mouth & Nose', count: 3, description: 'Rinse mouth with right hand, sniff water with right hand, blow out with left', emoji: '💧' },
-      { title: 'Face', count: 3, description: 'From hairline to chin, from ear to ear', emoji: '😊' },
-      { title: 'Arms', count: 3, description: 'Start with right arm to elbow, then left arm to elbow', emoji: '💪' },
-      { title: 'Head', count: 1, description: 'Wipe from front to back, then back to front', emoji: '🧠' },
-      { title: 'Ears', count: 1, description: 'Wipe inside ears with index fingers, behind with thumbs', emoji: '👂' },
-      { title: 'Feet', count: 3, description: 'Start with right foot to ankles, then left foot to ankles', emoji: '🦶' },
+      { title: 'Intention', count: null, description: 'Intend in your heart to perform wudu for the sake of Allah', icon: Heart },
+      { title: 'Bismillah', count: null, description: 'Say: In the name of Allah, the Most Gracious, the Most Merciful', icon: BookOpen },
+      { title: 'Hands', count: 3, description: 'Start with right hand, then left hand, wash up to wrists', icon: HandHeart },
+      { title: 'Mouth & Nose', count: 3, description: 'Rinse mouth with right hand, sniff water with right hand, blow out with left', icon: Droplets },
+      { title: 'Face', count: 3, description: 'From hairline to chin, from ear to ear', icon: Smile },
+      { title: 'Arms', count: 3, description: 'Start with right arm to elbow, then left arm to elbow', icon: Dumbbell },
+      { title: 'Head', count: 1, description: 'Wipe from front to back, then back to front', icon: Brain },
+      { title: 'Ears', count: 1, description: 'Wipe inside ears with index fingers, behind with thumbs', icon: Ear },
+      { title: 'Feet', count: 3, description: 'Start with right foot to ankles, then left foot to ankles', icon: Footprints },
     ],
   };
 
@@ -106,6 +110,7 @@ const WuduStepsCard = () => {
             <div className="space-y-3">
               {currentSteps.map((step, index) => {
                 const isCompleted = completedSteps.includes(index);
+                const StepIcon = step.icon;
                 
                 return (
                   <button
@@ -139,7 +144,9 @@ const WuduStepsCard = () => {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xl">{step.emoji}</span>
+                            <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                              <StepIcon className="h-4 w-4 text-primary" />
+                            </div>
                             <h3 className={`text-lg font-bold ${isCompleted ? 'line-through' : ''}`}>
                               {step.title}
                             </h3>
