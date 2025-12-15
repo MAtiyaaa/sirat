@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -11,10 +11,16 @@ import {
   Sparkles,
   Building2,
   TreePalm,
-  FileText
+  FileText,
+  Navigation,
+  ChevronDown,
+  ChevronRight,
+  Star,
+  X,
+  Layers
 } from 'lucide-react';
 import { fetchSurahs, Surah, getFirstAyahOfPage, clearSurahsCache } from '@/lib/quran-api';
-import { getPageRangeDisplay, getJuzDisplay, toArabicNumerals } from '@/lib/surah-pages';
+import { getPageRangeDisplay, getJuzDisplay, toArabicNumerals, SURAH_JUZ } from '@/lib/surah-pages';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
@@ -33,6 +39,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+type FilterType = 'all' | 'meccan' | 'medinan' | 'bookmarked' | 'inprogress';
+
+const POPULAR_SURAHS = [
+  { number: 1, nameAr: 'الفاتحة', nameEn: 'Al-Fatiha' },
+  { number: 36, nameAr: 'يس', nameEn: 'Ya-Sin' },
+  { number: 55, nameAr: 'الرحمن', nameEn: 'Ar-Rahman' },
+  { number: 67, nameAr: 'الملك', nameEn: 'Al-Mulk' },
+  { number: 18, nameAr: 'الكهف', nameEn: 'Al-Kahf' },
+  { number: 56, nameAr: 'الواقعة', nameEn: 'Al-Waqia' },
+  { number: 112, nameAr: 'الإخلاص', nameEn: 'Al-Ikhlas' },
+  { number: 2, nameAr: 'البقرة', nameEn: 'Al-Baqara' },
+];
 
 const Quran = () => {
   const { settings } = useSettings();
@@ -50,8 +76,22 @@ const Quran = () => {
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [surahToReset, setSurahToReset] = useState<number | null>(null);
   const [pageSuggestion, setPageSuggestion] = useState<{pageNumber: number, surahNumber: number, ayahNumber: number} | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+  const [quickNavOpen, setQuickNavOpen] = useState(false);
+  const [pageInput, setPageInput] = useState('');
+  const [juzInput, setJuzInput] = useState('');
+  const [groupByJuz, setGroupByJuz] = useState(false);
+  const [expandedJuz, setExpandedJuz] = useState<Set<number>>(new Set());
 
   const isArabic = settings.language === 'ar';
+
+  const filterTabs: { key: FilterType; labelAr: string; labelEn: string }[] = [
+    { key: 'all', labelAr: 'الكل', labelEn: 'All' },
+    { key: 'meccan', labelAr: 'مكية', labelEn: 'Meccan' },
+    { key: 'medinan', labelAr: 'مدنية', labelEn: 'Medinan' },
+    { key: 'bookmarked', labelAr: 'المحفوظة', labelEn: 'Bookmarked' },
+    { key: 'inprogress', labelAr: 'قيد القراءة', labelEn: 'In Progress' },
+  ];
 
   useEffect(() => {
     loadSurahs();
@@ -63,6 +103,24 @@ const Quran = () => {
 
   useEffect(() => {
     const handleSearch = async () => {
+      let baseFiltered = surahs;
+
+      // Apply active filter first
+      switch (activeFilter) {
+        case 'meccan':
+          baseFiltered = surahs.filter(s => s.revelationType === 'Meccan');
+          break;
+        case 'medinan':
+          baseFiltered = surahs.filter(s => s.revelationType === 'Medinan');
+          break;
+        case 'bookmarked':
+          baseFiltered = surahs.filter(s => bookmarkedSurahs.has(s.number));
+          break;
+        case 'inprogress':
+          baseFiltered = surahs.filter(s => progress[s.number] && progress[s.number] > 0 && progress[s.number] < s.numberOfAyahs);
+          break;
+      }
+
       if (searchTerm.trim()) {
         const pageNumber = parseInt(searchTerm);
         if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= 604) {
@@ -94,7 +152,7 @@ const Quran = () => {
         
         const normalizedSearch = normalizeArabic(searchTerm.toLowerCase());
         
-        const filtered = surahs.filter(s => {
+        const filtered = baseFiltered.filter(s => {
           const englishName = s.englishName.toLowerCase();
           const arabicName = normalizeArabic(s.name.toLowerCase());
           const translation = s.englishNameTranslation.toLowerCase();
@@ -108,13 +166,27 @@ const Quran = () => {
         
         setFilteredSurahs(filtered);
       } else {
-        setFilteredSurahs(surahs);
+        setFilteredSurahs(baseFiltered);
         setPageSuggestion(null);
       }
     };
 
     handleSearch();
-  }, [searchTerm, surahs]);
+  }, [searchTerm, surahs, activeFilter, bookmarkedSurahs, progress]);
+
+  // Group surahs by Juz
+  const surahsByJuz = useMemo(() => {
+    const grouped: Record<number, Surah[]> = {};
+    for (let i = 1; i <= 30; i++) {
+      grouped[i] = [];
+    }
+    filteredSurahs.forEach(surah => {
+      const juz = SURAH_JUZ[surah.number] || 1;
+      if (!grouped[juz]) grouped[juz] = [];
+      grouped[juz].push(surah);
+    });
+    return grouped;
+  }, [filteredSurahs]);
 
   const loadSurahs = async (clearCache = false) => {
     setLoading(true);
@@ -306,6 +378,189 @@ const Quran = () => {
     }
   };
 
+  const handleQuickNavPage = async () => {
+    const page = parseInt(pageInput);
+    if (isNaN(page) || page < 1 || page > 604) {
+      toast.error(isArabic ? 'رقم الصفحة غير صالح' : 'Invalid page number');
+      return;
+    }
+    try {
+      const firstAyah = await getFirstAyahOfPage(page);
+      if (firstAyah) {
+        navigate(`/quran/${firstAyah.surahNumber}?ayah=${firstAyah.ayahNumber}`);
+        setQuickNavOpen(false);
+        setPageInput('');
+      }
+    } catch (error) {
+      toast.error(isArabic ? 'حدث خطأ' : 'An error occurred');
+    }
+  };
+
+  const handleQuickNavJuz = () => {
+    const juzNum = parseInt(juzInput);
+    if (isNaN(juzNum) || juzNum < 1 || juzNum > 30) {
+      toast.error(isArabic ? 'رقم الجزء غير صالح' : 'Invalid juz number');
+      return;
+    }
+    // Find first surah of the juz
+    const firstSurahOfJuz = Object.entries(SURAH_JUZ).find(([_, juz]) => juz === juzNum);
+    if (firstSurahOfJuz) {
+      navigate(`/quran/${firstSurahOfJuz[0]}`);
+      setQuickNavOpen(false);
+      setJuzInput('');
+    }
+  };
+
+  const toggleJuzExpanded = (juz: number) => {
+    setExpandedJuz(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(juz)) {
+        newSet.delete(juz);
+      } else {
+        newSet.add(juz);
+      }
+      return newSet;
+    });
+  };
+
+  const renderSurahCard = (surah: Surah, index: number) => {
+    const surahProgress = progress[surah.number] || 0;
+    const surahProgressPercent = (surahProgress / surah.numberOfAyahs) * 100;
+    const isBookmarked = bookmarkedSurahs.has(surah.number);
+    const isMeccan = surah.revelationType === 'Meccan';
+
+    return (
+      <Link
+        key={surah.number}
+        to={`/quran/${surah.number}`}
+        className="block animate-fade-in"
+        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+      >
+        <div className={`glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border ${isBookmarked ? 'border-primary/40 bg-primary/5' : 'border-border/30'} hover:border-primary/30 backdrop-blur-xl`}>
+          <div className="flex items-start gap-4">
+            {/* Surah Number Badge */}
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
+              <span className="text-primary font-bold">
+                {isArabic ? toArabicNumerals(surah.number) : surah.number}
+              </span>
+            </div>
+
+            {/* Surah Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div>
+                  <h3 className={`text-lg font-semibold leading-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+                    {isArabic ? surah.name : surah.englishName}
+                  </h3>
+                  {!isArabic && (
+                    <p className="text-sm text-muted-foreground mt-0.5">{surah.name}</p>
+                  )}
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex items-center gap-0.5 flex-shrink-0">
+                  {playingSurah === surah.number && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        isPlaying ? pauseSurah() : resumeSurah();
+                      }}
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Play className="h-4 w-4 text-primary" />
+                      )}
+                    </Button>
+                  )}
+                  {surahProgressPercent > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => handleResetClick(surah.number, e)}
+                    >
+                      <RotateCcw className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => toggleSurahBookmark(surah.number, e)}
+                  >
+                    <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Translation - Only for English */}
+              {!isArabic && (
+                <p className="text-xs text-muted-foreground mb-2">{surah.englishNameTranslation}</p>
+              )}
+              
+              {/* Meta Info */}
+              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                {/* Verse Count */}
+                <span className="flex items-center gap-1">
+                  {isArabic 
+                    ? `${toArabicNumerals(surah.numberOfAyahs)} آية`
+                    : `${surah.numberOfAyahs} verses`}
+                </span>
+                
+                <span className="text-border">•</span>
+                
+                {/* Revelation Type with Icon */}
+                <span className="flex items-center gap-1">
+                  {isMeccan ? (
+                    <Building2 className="h-3 w-3" />
+                  ) : (
+                    <TreePalm className="h-3 w-3" />
+                  )}
+                  {isArabic 
+                    ? (isMeccan ? 'مكية' : 'مدنية')
+                    : surah.revelationType}
+                </span>
+                
+                <span className="text-border">•</span>
+                
+                {/* Page Range */}
+                <span>{getPageRangeDisplay(surah.number, settings.language)}</span>
+                
+                <span className="text-border">•</span>
+                
+                {/* Juz */}
+                <span className="flex items-center gap-1">
+                  <Layers className="h-3 w-3" />
+                  {getJuzDisplay(surah.number, settings.language)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          {surahProgressPercent > 0 && (
+            <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">
+                  {isArabic 
+                    ? `الآية ${toArabicNumerals(surahProgress)} من ${toArabicNumerals(surah.numberOfAyahs)}`
+                    : `Ayah ${surahProgress} of ${surah.numberOfAyahs}`}
+                </span>
+                <span className="text-primary font-semibold">{surahProgressPercent.toFixed(0)}%</span>
+              </div>
+              <Progress value={surahProgressPercent} className="h-1.5" />
+            </div>
+          )}
+        </div>
+      </Link>
+    );
+  };
+
   if (loading) {
     return <IslamicFactsLoader />;
   }
@@ -355,7 +610,7 @@ const Quran = () => {
       </div>
 
       {/* Search Bar */}
-      <div className="px-4 mb-6">
+      <div className="px-4 mb-4">
         <div className="relative max-w-2xl mx-auto">
           <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'}`} />
           <Input
@@ -365,6 +620,36 @@ const Quran = () => {
             className={`h-14 rounded-2xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
             dir={isArabic ? 'rtl' : 'ltr'}
           />
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="px-4 mb-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 max-w-2xl mx-auto scrollbar-hide">
+          {filterTabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveFilter(tab.key)}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap smooth-transition ${
+                activeFilter === tab.key
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'glass-effect border border-border/30 hover:border-primary/30 text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {isArabic ? tab.labelAr : tab.labelEn}
+            </button>
+          ))}
+          <button
+            onClick={() => setGroupByJuz(!groupByJuz)}
+            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap smooth-transition flex items-center gap-2 ${
+              groupByJuz
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'glass-effect border border-border/30 hover:border-primary/30 text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <Layers className="h-4 w-4" />
+            {isArabic ? 'تجميع حسب الجزء' : 'Group by Juz'}
+          </button>
         </div>
       </div>
 
@@ -506,136 +791,144 @@ const Quran = () => {
 
       {/* Surah List */}
       <div className="space-y-3 px-4 max-w-2xl mx-auto">
-        {filteredSurahs.map((surah, index) => {
-          const surahProgress = progress[surah.number] || 0;
-          const surahProgressPercent = (surahProgress / surah.numberOfAyahs) * 100;
-          const isBookmarked = bookmarkedSurahs.has(surah.number);
-          const isMeccan = surah.revelationType === 'Meccan';
-
-          return (
-            <Link
-              key={surah.number}
-              to={`/quran/${surah.number}`}
-              className="block animate-fade-in"
-              style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
-            >
-              <div className={`glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border ${isBookmarked ? 'border-primary/40 bg-primary/5' : 'border-border/30'} hover:border-primary/30 backdrop-blur-xl`}>
-                <div className="flex items-start gap-4">
-                  {/* Surah Number Badge */}
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
-                    <span className="text-primary font-bold">
-                      {isArabic ? toArabicNumerals(surah.number) : surah.number}
-                    </span>
-                  </div>
-
-                  {/* Surah Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <div>
-                        <h3 className={`text-lg font-semibold leading-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
-                          {isArabic ? surah.name : surah.englishName}
+        {groupByJuz ? (
+          // Grouped by Juz
+          Object.entries(surahsByJuz)
+            .filter(([_, surahs]) => surahs.length > 0)
+            .map(([juz, juzSurahs]) => (
+              <Collapsible
+                key={juz}
+                open={expandedJuz.has(parseInt(juz))}
+                onOpenChange={() => toggleJuzExpanded(parseInt(juz))}
+              >
+                <CollapsibleTrigger asChild>
+                  <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                        <Layers className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="text-left">
+                        <h3 className="font-semibold">
+                          {isArabic ? `الجزء ${toArabicNumerals(parseInt(juz))}` : `Juz ${juz}`}
                         </h3>
-                        {!isArabic && (
-                          <p className="text-sm text-muted-foreground mt-0.5">{surah.name}</p>
-                        )}
-                      </div>
-                      
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-0.5 flex-shrink-0">
-                        {playingSurah === surah.number && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              isPlaying ? pauseSurah() : resumeSurah();
-                            }}
-                          >
-                            {isPlaying ? (
-                              <Pause className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Play className="h-4 w-4 text-primary" />
-                            )}
-                          </Button>
-                        )}
-                        {surahProgressPercent > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={(e) => handleResetClick(surah.number, e)}
-                          >
-                            <RotateCcw className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={(e) => toggleSurahBookmark(surah.number, e)}
-                        >
-                          <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
-                        </Button>
+                        <p className="text-xs text-muted-foreground">
+                          {isArabic ? `${toArabicNumerals(juzSurahs.length)} سورة` : `${juzSurahs.length} surahs`}
+                        </p>
                       </div>
                     </div>
-                    
-                    {/* Translation - Only for English */}
-                    {!isArabic && (
-                      <p className="text-xs text-muted-foreground mb-2">{surah.englishNameTranslation}</p>
+                    {expandedJuz.has(parseInt(juz)) ? (
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     )}
-                    
-                    {/* Meta Info */}
-                    <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                      {/* Verse Count */}
-                      <span className="flex items-center gap-1">
-                        {isArabic 
-                          ? `${toArabicNumerals(surah.numberOfAyahs)} آية`
-                          : `${surah.numberOfAyahs} verses`}
-                      </span>
-                      
-                      <span className="text-border">•</span>
-                      
-                      {/* Revelation Type with Icon */}
-                      <span className="flex items-center gap-1">
-                        {isMeccan ? (
-                          <Building2 className="h-3 w-3" />
-                        ) : (
-                          <TreePalm className="h-3 w-3" />
-                        )}
-                        {isArabic 
-                          ? (isMeccan ? 'مكية' : 'مدنية')
-                          : surah.revelationType}
-                      </span>
-                      
-                      <span className="text-border">•</span>
-                      
-                      {/* Page Range */}
-                      <span>{getPageRangeDisplay(surah.number, settings.language)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Progress Bar */}
-                {surahProgressPercent > 0 && (
-                  <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground font-medium">
-                        {isArabic 
-                          ? `الآية ${toArabicNumerals(surahProgress)} من ${toArabicNumerals(surah.numberOfAyahs)}`
-                          : `Ayah ${surahProgress} of ${surah.numberOfAyahs}`}
-                      </span>
-                      <span className="text-primary font-semibold">{surahProgressPercent.toFixed(0)}%</span>
-                    </div>
-                    <Progress value={surahProgressPercent} className="h-1.5" />
-                  </div>
-                )}
-              </div>
-            </Link>
-          );
-        })}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-3 space-y-3">
+                  {juzSurahs.map((surah, index) => renderSurahCard(surah, index))}
+                </CollapsibleContent>
+              </Collapsible>
+            ))
+        ) : (
+          // Flat list
+          filteredSurahs.map((surah, index) => renderSurahCard(surah, index))
+        )}
       </div>
+
+      {/* Floating Quick Navigate Button */}
+      <button
+        onClick={() => setQuickNavOpen(true)}
+        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-xl flex items-center justify-center hover:scale-110 smooth-transition z-50"
+      >
+        <Navigation className="h-6 w-6" />
+      </button>
+
+      {/* Quick Navigate Dialog */}
+      <Dialog open={quickNavOpen} onOpenChange={setQuickNavOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {isArabic ? 'التنقل السريع' : 'Quick Navigate'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 mt-4">
+            {/* Go to Page */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-muted-foreground">
+                {isArabic ? 'اذهب إلى الصفحة' : 'Go to Page'}
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={604}
+                  value={pageInput}
+                  onChange={(e) => setPageInput(e.target.value)}
+                  placeholder={isArabic ? '١-٦٠٤' : '1-604'}
+                  className="flex-1"
+                  dir={isArabic ? 'rtl' : 'ltr'}
+                />
+                <Button onClick={handleQuickNavPage} disabled={!pageInput}>
+                  <BookOpen className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Go to Juz */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-muted-foreground">
+                {isArabic ? 'اذهب إلى الجزء' : 'Go to Juz'}
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min={1}
+                  max={30}
+                  value={juzInput}
+                  onChange={(e) => setJuzInput(e.target.value)}
+                  placeholder={isArabic ? '١-٣٠' : '1-30'}
+                  className="flex-1"
+                  dir={isArabic ? 'rtl' : 'ltr'}
+                />
+                <Button onClick={handleQuickNavJuz} disabled={!juzInput}>
+                  <Layers className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Popular Surahs */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium text-muted-foreground">
+                {isArabic ? 'السور الشائعة' : 'Popular Surahs'}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {POPULAR_SURAHS.map(surah => (
+                  <button
+                    key={surah.number}
+                    onClick={() => {
+                      navigate(`/quran/${surah.number}`);
+                      setQuickNavOpen(false);
+                    }}
+                    className="flex items-center gap-2 p-3 rounded-xl glass-effect border border-border/30 hover:border-primary/30 smooth-transition text-left"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Star className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {isArabic ? surah.nameAr : surah.nameEn}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {isArabic ? toArabicNumerals(surah.number) : surah.number}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Reset Dialog */}
       <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>

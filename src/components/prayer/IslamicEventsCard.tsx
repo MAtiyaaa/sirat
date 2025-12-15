@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Moon, ChevronDown, Loader2, Star } from 'lucide-react';
+import { Moon, ChevronDown, Loader2, Star, PartyPopper, Gift } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -91,12 +91,12 @@ const IslamicEventsCard = ({ suhurTime, iftarTime, prayerTimeRegion }: IslamicEv
     }
   };
 
-  const getEventEmoji = (name: string) => {
+  const getEventIcon = (name: string) => {
     switch (name) {
-      case 'Ramadan': return '🌙';
-      case 'Eid al-Fitr': return '🎉';
-      case 'Eid al-Adha': return '🐑';
-      default: return '⭐';
+      case 'Ramadan': return Moon;
+      case 'Eid al-Fitr': return PartyPopper;
+      case 'Eid al-Adha': return Gift;
+      default: return Star;
     }
   };
 
@@ -148,17 +148,20 @@ const IslamicEventsCard = ({ suhurTime, iftarTime, prayerTimeRegion }: IslamicEv
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {!loading && nextEvent && (
-                    <div className="text-right">
-                      <div className="flex items-center gap-2 justify-end">
-                        <span className="text-xl">{getEventEmoji(nextEvent.name)}</span>
-                        <span className="text-lg font-bold text-primary">{nextEvent.countdown}</span>
+                  {!loading && nextEvent && (() => {
+                    const NextEventIcon = getEventIcon(nextEvent.name);
+                    return (
+                      <div className="text-right">
+                        <div className="flex items-center gap-2 justify-end">
+                          <NextEventIcon className="h-5 w-5 text-primary" />
+                          <span className="text-lg font-bold text-primary">{nextEvent.countdown}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {getLocalizedName(nextEvent.name)}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {getLocalizedName(nextEvent.name)}
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })()}
                   <ChevronDown className={`h-5 w-5 text-muted-foreground smooth-transition ${isOpen ? 'rotate-180' : ''}`} />
                 </div>
               </div>
@@ -179,15 +182,22 @@ const IslamicEventsCard = ({ suhurTime, iftarTime, prayerTimeRegion }: IslamicEv
                     className={`relative overflow-hidden rounded-2xl smooth-transition hover:scale-[1.02]`}
                   >
                     <div className={`absolute inset-0 bg-gradient-to-r ${getEventGradient(event.name)}`} />
-                    <div className="relative glass-effect border border-primary/20 p-5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <span className="text-3xl">{getEventEmoji(event.name)}</span>
-                          <div>
-                            <h3 className="text-lg font-bold">{getLocalizedName(event.name)}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {event.date.toLocaleDateString(settings.language === 'ar' ? 'ar-SA' : 'en-US', {
-                                weekday: 'long',
+                      <div className="relative glass-effect border border-primary/20 p-5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            {(() => {
+                              const EventIcon = getEventIcon(event.name);
+                              return (
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                                  <EventIcon className="h-6 w-6 text-primary" />
+                                </div>
+                              );
+                            })()}
+                            <div>
+                              <h3 className="text-lg font-bold">{getLocalizedName(event.name)}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                {event.date.toLocaleDateString(settings.language === 'ar' ? 'ar-SA' : 'en-US', {
+                                  weekday: 'long',
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
