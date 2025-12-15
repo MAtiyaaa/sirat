@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Moon, Loader2 } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Moon, Loader2, MoonStar } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -99,16 +99,17 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
     return months[monthNumber - 1];
   };
 
-  // Moon phase calculation (simplified)
-  const getMoonPhase = (day: number): string => {
-    if (day <= 3) return '🌑';
-    if (day <= 7) return '🌒';
-    if (day <= 11) return '🌓';
-    if (day <= 14) return '🌔';
-    if (day <= 17) return '🌕';
-    if (day <= 21) return '🌖';
-    if (day <= 25) return '🌗';
-    return '🌘';
+  // Moon phase calculation (simplified) - returns opacity for moon icon
+  const getMoonPhaseOpacity = (day: number): number => {
+    // Full moon around day 14-15, new moon at day 1 and 29/30
+    if (day <= 3 || day >= 28) return 0.2;  // New moon
+    if (day <= 7) return 0.4;  // Waxing crescent
+    if (day <= 11) return 0.6;  // First quarter
+    if (day <= 14) return 0.8;  // Waxing gibbous
+    if (day <= 17) return 1.0;  // Full moon
+    if (day <= 21) return 0.8;  // Waning gibbous
+    if (day <= 25) return 0.6;  // Last quarter
+    return 0.4;  // Waning crescent
   };
 
   return (
@@ -141,7 +142,10 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
                   {hijriDate && (
                     <div className="text-right">
                       <div className="flex items-center gap-2 justify-end">
-                        <span className="text-2xl">{getMoonPhase(parseInt(hijriDate.date))}</span>
+                        <MoonStar 
+                          className="h-5 w-5 text-primary" 
+                          style={{ opacity: getMoonPhaseOpacity(parseInt(hijriDate.date)) }}
+                        />
                         <span className="text-2xl font-bold text-primary">{hijriDate.date}</span>
                       </div>
                       <p className="text-sm text-muted-foreground">
