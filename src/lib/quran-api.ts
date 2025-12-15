@@ -28,18 +28,50 @@ export interface WordData {
   audio?: string;
 }
 
-// Fetch all surahs
-export async function fetchSurahs(): Promise<Surah[]> {
-  const response = await fetch(`${ALQURAN_BASE}/surah`);
-  const data = await response.json();
-  return data.data.map((s: any) => ({
-    number: s.number,
-    name: s.name,
-    englishName: s.englishName,
-    englishNameTranslation: s.englishNameTranslation,
-    numberOfAyahs: s.numberOfAyahs,
-    revelationType: s.revelationType,
-  }));
+// Fetch all surahs with retry logic
+export async function fetchSurahs(retries = 3): Promise<Surah[]> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      
+      const response = await fetch(`${ALQURAN_BASE}/surah`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.data || !Array.isArray(data.data)) {
+        throw new Error('Invalid response format');
+      }
+      
+      return data.data.map((s: any) => ({
+        number: s.number,
+        name: s.name,
+        englishName: s.englishName,
+        englishNameTranslation: s.englishNameTranslation,
+        numberOfAyahs: s.numberOfAyahs,
+        revelationType: s.revelationType,
+      }));
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`Attempt ${attempt} failed:`, error);
+      
+      if (attempt < retries) {
+        // Wait before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+  }
+  
+  throw lastError || new Error('Failed to fetch surahs after multiple attempts');
 }
 
 // Fetch surah with Arabic text
