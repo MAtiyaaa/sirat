@@ -96,15 +96,24 @@ export function clearSurahsCache(): void {
 export async function fetchSurahs(retries = 3): Promise<Surah[]> {
   let lastError: Error | null = null;
   
+  // First, try to get cached data - this ensures we have something to fall back on
+  const cachedSurahs = getCachedSurahs();
+  
   for (let attempt = 1; attempt <= retries; attempt++) {
+    let controller: AbortController | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+      controller = new AbortController();
+      timeoutId = setTimeout(() => {
+        if (controller) controller.abort();
+      }, 15000); // 15s timeout (increased from 10s)
       
       const response = await fetch(`${ALQURAN_BASE}/surah`, {
         signal: controller.signal
       });
-      clearTimeout(timeoutId);
+      
+      if (timeoutId) clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
@@ -130,8 +139,28 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
       
       return surahs;
     } catch (error) {
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      // Check if this is a Safari/iOS abort error or network cancellation
+      const isAbortError = 
+        error instanceof DOMException && error.name === 'AbortError' ||
+        errorMessage.includes('aborted') ||
+        errorMessage.includes('cancelled') ||
+        errorMessage.includes('Cancelled') ||
+        errorMessage.includes('The string did not match the expected pattern') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('network');
+      
+      // For abort errors, return cached data immediately if available
+      if (isAbortError && cachedSurahs) {
+        console.log('Network interrupted, using cached surahs');
+        return cachedSurahs;
+      }
+      
       lastError = error as Error;
-      console.error(`Attempt ${attempt} failed:`, error);
+      console.error(`Attempt ${attempt} failed:`, errorMessage);
       
       if (attempt < retries) {
         // Wait before retrying (exponential backoff)
@@ -141,7 +170,6 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
   }
   
   // If all retries failed, try to return cached data
-  const cachedSurahs = getCachedSurahs();
   if (cachedSurahs) {
     console.log('Using cached surahs due to network failure');
     return cachedSurahs;
