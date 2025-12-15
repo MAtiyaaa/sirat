@@ -114,9 +114,23 @@ const Quran = () => {
     try {
       const data = await fetchSurahs();
       setSurahs(data);
+      setFilteredSurahs(data);
     } catch (error) {
       console.error('Error loading surahs:', error);
-      toast.error('Failed to load surahs');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(
+        settings.language === 'ar' 
+          ? `فشل في تحميل السور. يرجى التحقق من اتصالك بالإنترنت وإعادة المحاولة.`
+          : `Failed to load surahs. Please check your internet connection and try again.`,
+        {
+          action: {
+            label: settings.language === 'ar' ? 'إعادة المحاولة' : 'Retry',
+            onClick: () => loadSurahs()
+          },
+          duration: 10000
+        }
+      );
+      console.error('Detailed error:', errorMessage);
     } finally {
       setLoading(false);
     }
