@@ -36,14 +36,36 @@ function getCachedSurahs(): Surah[] | null {
   try {
     const cached = localStorage.getItem(SURAHS_CACHE_KEY);
     if (cached) {
-      const { data, timestamp } = JSON.parse(cached);
+      const parsed = JSON.parse(cached);
+      // Validate cache structure
+      if (!parsed || typeof parsed !== 'object' || !parsed.data || !parsed.timestamp) {
+        console.warn('Invalid cache structure, clearing cache');
+        localStorage.removeItem(SURAHS_CACHE_KEY);
+        return null;
+      }
+      
+      const { data, timestamp } = parsed;
+      
+      // Validate data is an array with expected properties
+      if (!Array.isArray(data) || data.length === 0 || !data[0].number) {
+        console.warn('Invalid cached data format, clearing cache');
+        localStorage.removeItem(SURAHS_CACHE_KEY);
+        return null;
+      }
+      
       const expiryTime = CACHE_EXPIRY_HOURS * 60 * 60 * 1000;
       if (Date.now() - timestamp < expiryTime) {
         return data;
       }
     }
   } catch (error) {
-    console.error('Error reading cache:', error);
+    console.error('Error reading cache, clearing:', error);
+    // Clear corrupted cache
+    try {
+      localStorage.removeItem(SURAHS_CACHE_KEY);
+    } catch (e) {
+      // Ignore
+    }
   }
   return null;
 }
@@ -57,6 +79,16 @@ function cacheSurahs(surahs: Surah[]): void {
     }));
   } catch (error) {
     console.error('Error caching surahs:', error);
+  }
+}
+
+// Clear the surahs cache (useful for debugging)
+export function clearSurahsCache(): void {
+  try {
+    localStorage.removeItem(SURAHS_CACHE_KEY);
+    console.log('Surahs cache cleared');
+  } catch (error) {
+    console.error('Error clearing cache:', error);
   }
 }
 

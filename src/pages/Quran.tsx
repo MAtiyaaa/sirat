@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2, ArrowRight, BookOpen } from 'lucide-react';
-import { fetchSurahs, Surah, getFirstAyahOfPage } from '@/lib/quran-api';
+import { fetchSurahs, Surah, getFirstAyahOfPage, clearSurahsCache } from '@/lib/quran-api';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
@@ -109,28 +109,40 @@ const Quran = () => {
     handleSearch();
   }, [searchTerm, surahs, navigate]);
 
-  const loadSurahs = async () => {
+  const loadSurahs = async (clearCache = false) => {
     setLoading(true);
     try {
+      // Clear cache if requested (useful for fixing corrupted cache issues)
+      if (clearCache) {
+        clearSurahsCache();
+      }
+      
       const data = await fetchSurahs();
+      
+      // Validate data
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        throw new Error('No surahs data received');
+      }
+      
       setSurahs(data);
       setFilteredSurahs(data);
     } catch (error) {
       console.error('Error loading surahs:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Show error with retry options
       toast.error(
         settings.language === 'ar' 
-          ? `فشل في تحميل السور. يرجى التحقق من اتصالك بالإنترنت وإعادة المحاولة.`
-          : `Failed to load surahs. Please check your internet connection and try again.`,
+          ? `فشل في تحميل السور. ${errorMessage}`
+          : `Failed to load surahs. ${errorMessage}`,
         {
           action: {
             label: settings.language === 'ar' ? 'إعادة المحاولة' : 'Retry',
-            onClick: () => loadSurahs()
+            onClick: () => loadSurahs(true) // Clear cache on retry
           },
-          duration: 10000
+          duration: 15000
         }
       );
-      console.error('Detailed error:', errorMessage);
     } finally {
       setLoading(false);
     }
