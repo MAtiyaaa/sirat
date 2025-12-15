@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User, MessageSquare, RotateCcw, ArrowLeft, Settings as SettingsIcon, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -524,6 +525,14 @@ const Settings = () => {
           </AlertDialog>
         </div>
       )}
+
+      {/* Network Status */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">
+          {settings.language === 'ar' ? 'حالة الاتصال' : 'Network Status'}
+        </h2>
+        <NetworkStatusIndicator />
+      </div>
       </div>
     </div>
   );

@@ -28,7 +28,39 @@ export interface WordData {
   audio?: string;
 }
 
-// Fetch all surahs with retry logic
+const SURAHS_CACHE_KEY = 'quran_surahs_cache';
+const CACHE_EXPIRY_HOURS = 24;
+
+// Get cached surahs from localStorage
+function getCachedSurahs(): Surah[] | null {
+  try {
+    const cached = localStorage.getItem(SURAHS_CACHE_KEY);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      const expiryTime = CACHE_EXPIRY_HOURS * 60 * 60 * 1000;
+      if (Date.now() - timestamp < expiryTime) {
+        return data;
+      }
+    }
+  } catch (error) {
+    console.error('Error reading cache:', error);
+  }
+  return null;
+}
+
+// Save surahs to localStorage cache
+function cacheSurahs(surahs: Surah[]): void {
+  try {
+    localStorage.setItem(SURAHS_CACHE_KEY, JSON.stringify({
+      data: surahs,
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.error('Error caching surahs:', error);
+  }
+}
+
+// Fetch all surahs with retry logic and offline caching
 export async function fetchSurahs(retries = 3): Promise<Surah[]> {
   let lastError: Error | null = null;
   
@@ -52,7 +84,7 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
         throw new Error('Invalid response format');
       }
       
-      return data.data.map((s: any) => ({
+      const surahs = data.data.map((s: any) => ({
         number: s.number,
         name: s.name,
         englishName: s.englishName,
@@ -60,6 +92,11 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
         numberOfAyahs: s.numberOfAyahs,
         revelationType: s.revelationType,
       }));
+      
+      // Cache successful response
+      cacheSurahs(surahs);
+      
+      return surahs;
     } catch (error) {
       lastError = error as Error;
       console.error(`Attempt ${attempt} failed:`, error);
@@ -69,6 +106,13 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       }
     }
+  }
+  
+  // If all retries failed, try to return cached data
+  const cachedSurahs = getCachedSurahs();
+  if (cachedSurahs) {
+    console.log('Using cached surahs due to network failure');
+    return cachedSurahs;
   }
   
   throw lastError || new Error('Failed to fetch surahs after multiple attempts');
