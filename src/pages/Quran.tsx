@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bookmark, Volume2, Pause, Play, Search, RotateCcw, Share2, ArrowRight, BookOpen } from 'lucide-react';
+import { 
+  Bookmark, 
+  Pause, 
+  Play, 
+  Search, 
+  RotateCcw, 
+  BookOpen,
+  Sparkles,
+  Building2,
+  TreePalm,
+  FileText
+} from 'lucide-react';
 import { fetchSurahs, Surah, getFirstAyahOfPage, clearSurahsCache } from '@/lib/quran-api';
+import { getPageRangeDisplay, getJuzDisplay, toArabicNumerals } from '@/lib/surah-pages';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
@@ -20,14 +32,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 
 const Quran = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { playingSurah, isPlaying, playSurah, pauseSurah, resumeSurah, stopSurah } = useAudio();
+  const { playingSurah, isPlaying, pauseSurah, resumeSurah } = useAudio();
   const [surahs, setSurahs] = useState<Surah[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState<Record<number, number>>({});
@@ -40,23 +51,21 @@ const Quran = () => {
   const [surahToReset, setSurahToReset] = useState<number | null>(null);
   const [pageSuggestion, setPageSuggestion] = useState<{pageNumber: number, surahNumber: number, ayahNumber: number} | null>(null);
 
+  const isArabic = settings.language === 'ar';
+
   useEffect(() => {
     loadSurahs();
     loadProgress();
     loadBookmarks();
     loadLastViewed();
-    
-    // Clear saved position when viewing Quran home
     localStorage.removeItem('quran_last_position');
   }, []);
 
   useEffect(() => {
     const handleSearch = async () => {
       if (searchTerm.trim()) {
-        // Check if search is a page number (1-604)
         const pageNumber = parseInt(searchTerm);
         if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= 604) {
-          // Load page suggestion
           try {
             const firstAyah = await getFirstAyahOfPage(pageNumber);
             if (firstAyah) {
@@ -73,15 +82,13 @@ const Quran = () => {
           }
         }
         
-        // Clear page suggestion if not a page number
         setPageSuggestion(null);
         
-        // Normalize and remove diacritics for better Arabic matching
         const normalizeArabic = (text: string) => {
           return text
-            .normalize('NFKC') // Normalize Unicode
-            .replace(/[\u064B-\u065F\u0670]/g, '') // Remove diacritics
-            .replace(/[ًٌٍَُِّْٰ]/g, '') // Remove more diacritics
+            .normalize('NFKC')
+            .replace(/[\u064B-\u065F\u0670]/g, '')
+            .replace(/[ًٌٍَُِّْٰ]/g, '')
             .trim();
         };
         
@@ -107,19 +114,17 @@ const Quran = () => {
     };
 
     handleSearch();
-  }, [searchTerm, surahs, navigate]);
+  }, [searchTerm, surahs]);
 
   const loadSurahs = async (clearCache = false) => {
     setLoading(true);
     try {
-      // Clear cache if requested (useful for fixing corrupted cache issues)
       if (clearCache) {
         clearSurahsCache();
       }
       
       const data = await fetchSurahs();
       
-      // Validate data
       if (!data || !Array.isArray(data) || data.length === 0) {
         throw new Error('No surahs data received');
       }
@@ -130,15 +135,14 @@ const Quran = () => {
       console.error('Error loading surahs:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
-      // Show error with retry options
       toast.error(
-        settings.language === 'ar' 
+        isArabic 
           ? `فشل في تحميل السور. ${errorMessage}`
           : `Failed to load surahs. ${errorMessage}`,
         {
           action: {
-            label: settings.language === 'ar' ? 'إعادة المحاولة' : 'Retry',
-            onClick: () => loadSurahs(true) // Clear cache on retry
+            label: isArabic ? 'إعادة المحاولة' : 'Retry',
+            onClick: () => loadSurahs(true)
           },
           duration: 15000
         }
@@ -207,7 +211,7 @@ const Quran = () => {
     e.stopPropagation();
     
     if (!user) {
-      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      toast.error(isArabic ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
       return;
     }
 
@@ -219,7 +223,6 @@ const Quran = () => {
     if (!surahToReset || !user) return;
 
     try {
-      // Delete from database
       const { error: dbError } = await supabase
         .from('reading_progress')
         .delete()
@@ -228,14 +231,12 @@ const Quran = () => {
 
       if (dbError) throw dbError;
 
-      // Delete ayah interactions for this surah
       await supabase
         .from('ayah_interactions')
         .delete()
         .eq('user_id', user.id)
         .eq('surah_number', surahToReset);
 
-      // Clear localStorage for this surah
       const savedPosition = localStorage.getItem('quran_last_position');
       if (savedPosition) {
         try {
@@ -248,34 +249,14 @@ const Quran = () => {
         }
       }
 
-      // Reload progress from database to ensure sync
       await loadProgress();
 
-      toast.success(settings.language === 'ar' ? 'تم إعادة التعيين' : 'Progress reset');
+      toast.success(isArabic ? 'تم إعادة التعيين' : 'Progress reset');
       setResetDialogOpen(false);
       setSurahToReset(null);
     } catch (error) {
       console.error('Error resetting progress:', error);
-      toast.error(settings.language === 'ar' ? 'فشل إعادة التعيين' : 'Failed to reset progress');
-    }
-  };
-
-  const handleShareSurah = async (surahNumber: number, surahName: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const url = `${window.location.origin}/quran/${surahNumber}`;
-    const title = `${surahName} - ${settings.language === 'ar' ? 'القرآن الكريم' : 'The Holy Quran'}`;
-    
-    try {
-      if (navigator.share) {
-        await navigator.share({ title, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast.success(settings.language === 'ar' ? 'تم نسخ الرابط' : 'Link copied to clipboard');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
+      toast.error(isArabic ? 'فشل إعادة التعيين' : 'Failed to reset progress');
     }
   };
 
@@ -284,7 +265,7 @@ const Quran = () => {
     e.stopPropagation();
     
     if (!user) {
-      toast.error(settings.language === 'ar' ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
+      toast.error(isArabic ? 'يجب تسجيل الدخول أولاً' : 'Please sign in first');
       return;
     }
 
@@ -304,7 +285,7 @@ const Quran = () => {
           newSet.delete(surahNumber);
           return newSet;
         });
-        toast.success(settings.language === 'ar' ? 'تمت الإزالة' : 'Removed');
+        toast.success(isArabic ? 'تمت الإزالة' : 'Removed');
       } else {
         await supabase
           .from('bookmarks')
@@ -315,14 +296,13 @@ const Quran = () => {
           });
         
         setBookmarkedSurahs(prev => new Set([...prev, surahNumber]));
-        toast.success(settings.language === 'ar' ? 'تمت الإضافة' : 'Added');
+        toast.success(isArabic ? 'تمت الإضافة' : 'Added');
       }
       
-      // Reload bookmarks to ensure sync
       await loadBookmarks();
     } catch (error) {
       console.error('Error toggling bookmark:', error);
-      toast.error(settings.language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+      toast.error(isArabic ? 'حدث خطأ' : 'An error occurred');
     }
   };
 
@@ -331,70 +311,102 @@ const Quran = () => {
   }
 
   return (
-    <div className="space-y-6 pb-6">
-      <div className="text-center space-y-4 py-8 px-4">
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-          <span className="bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm">
-            {settings.language === 'ar' ? 'القرآن الكريم' : 'The Holy Quran'}
-          </span>
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto font-light">
-          {settings.language === 'ar' 
-            ? 'اختر سورة للقراءة'
-            : 'Select a surah to read'}
-        </p>
+    <div className="min-h-screen pb-8">
+      {/* Hero Section */}
+      <div className="relative pt-12 pb-8 px-4 animate-fade-in">
+        {/* Decorative Islamic Pattern Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <pattern id="islamic-pattern-quran" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+              <path d="M10 0 L20 10 L10 20 L0 10 Z M10 5 L15 10 L10 15 L5 10 Z" fill="currentColor"/>
+            </pattern>
+            <rect width="100" height="100" fill="url(#islamic-pattern-quran)" />
+          </svg>
+        </div>
+
+        {/* Gradient Orbs */}
+        <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+        <div className="absolute top-0 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+
+        <div className="relative text-center space-y-4 max-w-2xl mx-auto">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 backdrop-blur-sm">
+            <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+            <span className="text-xs font-semibold text-primary tracking-wider">
+              {isArabic ? '١١٤ سورة' : '114 Surahs'}
+            </span>
+          </div>
+
+          {/* Main Title */}
+          <div className="relative">
+            <h1 className="text-6xl md:text-7xl font-bold tracking-tight relative z-10">
+              <span className={`bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm ${isArabic ? 'arabic-regal' : ''}`} style={{ lineHeight: '1.2' }}>
+                {isArabic ? 'القرآن الكريم' : 'The Holy Quran'}
+              </span>
+            </h1>
+            <div className="absolute inset-0 blur-2xl opacity-20 bg-gradient-to-r from-primary/50 via-emerald-500/50 to-primary/50 -z-10" />
+          </div>
+
+          {/* Subtitle */}
+          <p className="text-base text-muted-foreground font-light tracking-wide">
+            {isArabic ? 'اختر سورة للقراءة والتدبر' : 'Select a surah to read and reflect'}
+          </p>
+        </div>
       </div>
 
       {/* Search Bar */}
-      <div className="px-4">
+      <div className="px-4 mb-6">
         <div className="relative max-w-2xl mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'}`} />
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={settings.language === 'ar' ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search for a surah or page number...'}
-            className="pl-12 h-16 rounded-3xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg"
+            placeholder={isArabic ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search surah name or page number (1-604)...'}
+            className={`h-14 rounded-2xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
+            dir={isArabic ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
-      {/* Page Suggestion */}
+      {/* Page Navigation Suggestion */}
       {pageSuggestion && (
-        <div className="px-4">
+        <div className="px-4 mb-6">
           <div 
             onClick={() => {
               navigate(`/quran/${pageSuggestion.surahNumber}?ayah=${pageSuggestion.ayahNumber}`);
               setSearchTerm('');
               setPageSuggestion(null);
             }}
-            className="glass-effect rounded-2xl p-6 cursor-pointer hover:scale-[1.02] smooth-transition border border-primary/30"
+            className="glass-effect rounded-2xl p-5 cursor-pointer hover:scale-[1.01] smooth-transition border border-primary/30 max-w-2xl mx-auto"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {settings.language === 'ar' ? `الصفحة ${pageSuggestion.pageNumber}` : `Page ${pageSuggestion.pageNumber}`}
-                </p>
-                <p className="text-lg font-semibold">
-                  {settings.language === 'ar' ? 'اذهب إلى هذه الصفحة' : 'Go to this page'}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {settings.language === 'ar' 
-                    ? `سورة ${surahs.find(s => s.number === pageSuggestion.surahNumber)?.name || pageSuggestion.surahNumber} - آية ${pageSuggestion.ayahNumber}`
-                    : `Surah ${surahs.find(s => s.number === pageSuggestion.surahNumber)?.englishName || pageSuggestion.surahNumber} - Ayah ${pageSuggestion.ayahNumber}`}
-                </p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-0.5">
+                    {isArabic ? `الصفحة ${toArabicNumerals(pageSuggestion.pageNumber)}` : `Page ${pageSuggestion.pageNumber}`}
+                  </p>
+                  <p className="font-semibold">
+                    {isArabic 
+                      ? surahs.find(s => s.number === pageSuggestion.surahNumber)?.name
+                      : surahs.find(s => s.number === pageSuggestion.surahNumber)?.englishName}
+                  </p>
+                </div>
               </div>
-              <Search className="h-8 w-8 text-primary" />
+              <BookOpen className="h-5 w-5 text-primary" />
             </div>
           </div>
         </div>
       )}
 
+      {/* Continue Reading Card */}
       {lastViewedSurah && surahs.length > 0 && (() => {
         const currentSurah = surahs.find(s => s.number === lastViewedSurah);
         const currentProgress = progress[lastViewedSurah] || 0;
         const isCompleted = currentSurah && currentProgress >= currentSurah.numberOfAyahs;
         
-        // If completed, show next surah
         const displaySurah = isCompleted && lastViewedSurah < 114 
           ? surahs.find(s => s.number === lastViewedSurah + 1)
           : currentSurah;
@@ -404,110 +416,137 @@ const Quran = () => {
         const displayProgress = progress[displaySurah.number] || 0;
         
         return (
-          <div 
-            className="glass-effect rounded-3xl p-6 md:p-8 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.02] smooth-transition mx-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1" onClick={() => {
+          <div className="px-4 mb-6">
+            <div 
+              className="glass-effect rounded-2xl p-5 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.01] smooth-transition max-w-2xl mx-auto"
+              onClick={() => {
                 if (displayProgress > 0) {
                   navigate(`/quran/${displaySurah.number}?ayah=${displayProgress}`);
                 } else {
                   navigate(`/quran/${displaySurah.number}`);
                 }
-              }}>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
-                </p>
-                <h3 className="text-2xl font-bold">
-                  {displaySurah[settings.language === 'ar' ? 'name' : 'englishName']}
-                </h3>
-                {displayProgress > 0 && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {settings.language === 'ar' 
-                      ? `الآية ${displayProgress}`
-                      : `Ayah ${displayProgress}`}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center gap-3">
-                {playingSurah === displaySurah.number && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      isPlaying ? pauseSurah() : resumeSurah();
-                    }}
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-6 w-6 text-primary" />
-                    ) : (
-                      <Play className="h-6 w-6 text-primary" />
+              }}
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                    <span className="text-primary-foreground font-bold">
+                      {isArabic ? toArabicNumerals(displaySurah.number) : displaySurah.number}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5 font-medium">
+                      {isArabic ? 'متابعة القراءة' : 'Continue Reading'}
+                    </p>
+                    <h3 className={`text-xl font-bold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+                      {isArabic ? displaySurah.name : displaySurah.englishName}
+                    </h3>
+                    {!isArabic && (
+                      <p className="text-sm text-muted-foreground">{displaySurah.name}</p>
                     )}
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (displayProgress > 0) {
-                      navigate(`/quran/${displaySurah.number}?ayah=${displayProgress}`);
-                    } else {
-                      navigate(`/quran/${displaySurah.number}`);
-                    }
-                  }}
-                >
-                  <BookOpen className="h-8 w-8 text-primary" />
-                </Button>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {playingSurah === displaySurah.number && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        isPlaying ? pauseSurah() : resumeSurah();
+                      }}
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Play className="h-5 w-5 text-primary" />
+                      )}
+                    </Button>
+                  )}
+                  <BookOpen className="h-6 w-6 text-primary" />
+                </div>
               </div>
+              {displayProgress > 0 && (
+                <div className="mt-4 pt-3 border-t border-border/30">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="text-muted-foreground">
+                      {isArabic 
+                        ? `الآية ${toArabicNumerals(displayProgress)} من ${toArabicNumerals(displaySurah.numberOfAyahs)}`
+                        : `Ayah ${displayProgress} of ${displaySurah.numberOfAyahs}`}
+                    </span>
+                    <span className="text-primary font-semibold">
+                      {((displayProgress / displaySurah.numberOfAyahs) * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  <Progress value={(displayProgress / displaySurah.numberOfAyahs) * 100} className="h-1.5" />
+                </div>
+              )}
             </div>
           </div>
         );
       })()}
 
+      {/* Overall Progress */}
       {overallProgress > 0 && (
-        <div className="glass-effect rounded-3xl p-8 space-y-5 border border-border/30 apple-shadow mx-4 backdrop-blur-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-bold">
-              {settings.language === 'ar' ? 'التقدم الإجمالي' : 'Overall Progress'}
-            </span>
-            <span className="text-3xl font-bold bg-gradient-to-br from-primary via-primary to-primary/70 bg-clip-text text-transparent drop-shadow-sm">
-              {overallProgress.toFixed(1)}%
-            </span>
+        <div className="px-4 mb-6">
+          <div className="glass-effect rounded-2xl p-5 border border-border/30 apple-shadow max-w-2xl mx-auto backdrop-blur-xl">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold">
+                {isArabic ? 'التقدم الإجمالي' : 'Overall Progress'}
+              </span>
+              <span className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
+                {overallProgress.toFixed(1)}%
+              </span>
+            </div>
+            <Progress value={overallProgress} className="h-2" />
           </div>
-          <Progress value={overallProgress} className="h-3" />
         </div>
       )}
 
-      <div className="space-y-3 px-4">
-        {filteredSurahs.map((surah) => {
+      {/* Surah List */}
+      <div className="space-y-3 px-4 max-w-2xl mx-auto">
+        {filteredSurahs.map((surah, index) => {
           const surahProgress = progress[surah.number] || 0;
           const surahProgressPercent = (surahProgress / surah.numberOfAyahs) * 100;
+          const isBookmarked = bookmarkedSurahs.has(surah.number);
+          const isMeccan = surah.revelationType === 'Meccan';
 
           return (
             <Link
               key={surah.number}
               to={`/quran/${surah.number}`}
-              className="block"
+              className="block animate-fade-in"
+              style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
             >
-              <div className="glass-effect rounded-3xl p-6 md:p-8 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-2xl border border-border/30 hover:border-primary/30 backdrop-blur-xl">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-lg">
-                    <span className="text-primary font-bold text-lg">{surah.number}</span>
+              <div className={`glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border ${isBookmarked ? 'border-primary/40 bg-primary/5' : 'border-border/30'} hover:border-primary/30 backdrop-blur-xl`}>
+                <div className="flex items-start gap-4">
+                  {/* Surah Number Badge */}
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
+                    <span className="text-primary font-bold">
+                      {isArabic ? toArabicNumerals(surah.number) : surah.number}
+                    </span>
                   </div>
 
+                  {/* Surah Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className={`text-xl font-semibold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
-                        {settings.language === 'ar' ? surah.name : surah.englishName}
-                      </h3>
-                      <div className="flex items-center gap-1">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div>
+                        <h3 className={`text-lg font-semibold leading-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+                          {isArabic ? surah.name : surah.englishName}
+                        </h3>
+                        {!isArabic && (
+                          <p className="text-sm text-muted-foreground mt-0.5">{surah.name}</p>
+                        )}
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
                         {playingSurah === surah.number && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 flex-shrink-0"
+                            className="h-8 w-8"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
@@ -525,9 +564,8 @@ const Quran = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 flex-shrink-0"
+                            className="h-8 w-8"
                             onClick={(e) => handleResetClick(surah.number, e)}
-                            title={settings.language === 'ar' ? 'إعادة تعيين التقدم' : 'Reset progress'}
                           >
                             <RotateCcw className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
                           </Button>
@@ -535,41 +573,57 @@ const Quran = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 flex-shrink-0"
+                          className="h-8 w-8"
                           onClick={(e) => toggleSurahBookmark(surah.number, e)}
-                          title={settings.language === 'ar' ? 'إضافة إشارة مرجعية' : 'Bookmark surah'}
                         >
-                          <Bookmark className={`h-4 w-4 ${bookmarkedSurahs.has(surah.number) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                          <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                         </Button>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {settings.language === 'ar' ? surah.englishName : surah.englishNameTranslation}
-                    </p>
+                    {/* Translation - Only for English */}
+                    {!isArabic && (
+                      <p className="text-xs text-muted-foreground mb-2">{surah.englishNameTranslation}</p>
+                    )}
                     
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>
-                        {settings.language === 'ar' 
-                          ? `${surah.numberOfAyahs} آية`
+                    {/* Meta Info */}
+                    <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                      {/* Verse Count */}
+                      <span className="flex items-center gap-1">
+                        {isArabic 
+                          ? `${toArabicNumerals(surah.numberOfAyahs)} آية`
                           : `${surah.numberOfAyahs} verses`}
                       </span>
-                      <span>•</span>
-                      <span>
-                        {settings.language === 'ar' 
-                          ? (surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية')
+                      
+                      <span className="text-border">•</span>
+                      
+                      {/* Revelation Type with Icon */}
+                      <span className="flex items-center gap-1">
+                        {isMeccan ? (
+                          <Building2 className="h-3 w-3" />
+                        ) : (
+                          <TreePalm className="h-3 w-3" />
+                        )}
+                        {isArabic 
+                          ? (isMeccan ? 'مكية' : 'مدنية')
                           : surah.revelationType}
                       </span>
+                      
+                      <span className="text-border">•</span>
+                      
+                      {/* Page Range */}
+                      <span>{getPageRangeDisplay(surah.number, settings.language)}</span>
                     </div>
                   </div>
                 </div>
 
+                {/* Progress Bar */}
                 {surahProgressPercent > 0 && (
-                  <div className="mt-4 pt-4 border-t border-border/30 space-y-2.5">
+                  <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground font-medium">
-                        {settings.language === 'ar' 
-                          ? `الآية ${surahProgress} من ${surah.numberOfAyahs}`
+                        {isArabic 
+                          ? `الآية ${toArabicNumerals(surahProgress)} من ${toArabicNumerals(surah.numberOfAyahs)}`
                           : `Ayah ${surahProgress} of ${surah.numberOfAyahs}`}
                       </span>
                       <span className="text-primary font-semibold">{surahProgressPercent.toFixed(0)}%</span>
@@ -583,24 +637,25 @@ const Quran = () => {
         })}
       </div>
 
+      {/* Reset Dialog */}
       <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {settings.language === 'ar' ? 'هل أنت متأكد؟' : 'Are you sure?'}
+              {isArabic ? 'هل أنت متأكد؟' : 'Are you sure?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {settings.language === 'ar'
+              {isArabic
                 ? 'سيتم حذف تقدمك في قراءة هذه السورة. لا يمكن التراجع عن هذا الإجراء.'
                 : 'This will delete your reading progress for this surah. This action cannot be undone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>
-              {settings.language === 'ar' ? 'إلغاء' : 'Cancel'}
+              {isArabic ? 'إلغاء' : 'Cancel'}
             </AlertDialogCancel>
             <AlertDialogAction onClick={confirmResetSurahProgress} className="bg-destructive hover:bg-destructive/90">
-              {settings.language === 'ar' ? 'إعادة التعيين' : 'Reset'}
+              {isArabic ? 'إعادة التعيين' : 'Reset'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
