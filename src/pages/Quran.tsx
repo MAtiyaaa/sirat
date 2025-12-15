@@ -629,7 +629,14 @@ const Quran = () => {
           {filterTabs.map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveFilter(tab.key)}
+              onClick={() => {
+                // Toggle off if clicking the same filter (except 'all')
+                if (activeFilter === tab.key && tab.key !== 'all') {
+                  setActiveFilter('all');
+                } else {
+                  setActiveFilter(tab.key);
+                }
+              }}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap smooth-transition ${
                 activeFilter === tab.key
                   ? 'bg-primary text-primary-foreground shadow-md'
@@ -837,9 +844,9 @@ const Quran = () => {
       {/* Floating Quick Navigate Button */}
       <button
         onClick={() => setQuickNavOpen(true)}
-        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-xl flex items-center justify-center hover:scale-110 smooth-transition z-50"
+        className="fixed bottom-24 right-4 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg flex items-center justify-center hover:scale-110 smooth-transition z-50"
       >
-        <Navigation className="h-6 w-6" />
+        <Navigation className="h-4 w-4" />
       </button>
 
       {/* Quick Navigate Dialog */}

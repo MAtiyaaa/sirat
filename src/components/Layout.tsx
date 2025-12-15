@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen } from 'lucide-react';
+import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, Eye, ChevronUp, X } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,8 +17,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { settings } = useSettings();
-  const { playingSurah, isPlaying, pauseSurah, resumeSurah } = useAudio();
+  const { playingSurah, playingAyah, isPlaying, pauseSurah, resumeSurah, stopSurah } = useAudio();
   const [isLocked, setIsLocked] = useState(false);
+  const [isPlayerMinimized, setIsPlayerMinimized] = useState(false);
   
   const appName = settings.language === 'ar' 
     ? <span className="arabic-regal text-3xl">صراط</span>
@@ -115,6 +116,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
+  const handleGoToAyah = () => {
+    if (playingSurah && playingAyah) {
+      navigate(`/quran/${playingSurah}?ayah=${playingAyah}`);
+    }
+  };
+
   const navItems = [
     { 
       path: '/quran', 
@@ -146,12 +153,33 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
 
+      {/* Minimized Player Button */}
+      {playingSurah && isPlayerMinimized && (
+        <button
+          onClick={() => setIsPlayerMinimized(false)}
+          className="fixed bottom-20 left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center z-50 animate-pulse"
+        >
+          <ChevronUp className="h-5 w-5" />
+        </button>
+      )}
+
       <nav className="fixed bottom-0 left-0 right-0 glass-effect border-t border-border z-50 backdrop-blur-xl">
         <div className="container mx-auto max-w-4xl">
           {/* Global Play Controls - Above Nav */}
-          {playingSurah && (
+          {playingSurah && !isPlayerMinimized && (
             <div className="border-b border-border/50 py-2 px-4">
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-2">
+                {/* Minimize button */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsPlayerMinimized(true)}
+                  className="rounded-full w-8 h-8"
+                  title={settings.language === 'ar' ? 'تصغير' : 'Minimize'}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+
                 {/* Lock button - only show on Quran page */}
                 {isInQuranPage && (
                   <Button
@@ -166,6 +194,17 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     {isLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
                   </Button>
                 )}
+
+                {/* Go to Ayah button */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleGoToAyah}
+                  className="rounded-full w-10 h-10"
+                  title={settings.language === 'ar' ? 'اذهب إلى الآية' : 'Go to Ayah'}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
                 
                 {/* Play/Pause - always show when playing */}
                 <Button
@@ -183,7 +222,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 </Button>
                 
                 <span className="text-xs text-muted-foreground">
-                  {settings.language === 'ar' ? `سورة ${playingSurah}` : `Surah ${playingSurah}`}
+                  {settings.language === 'ar' 
+                    ? `سورة ${playingSurah} - آية ${playingAyah || 1}` 
+                    : `Surah ${playingSurah} - Ayah ${playingAyah || 1}`}
                 </span>
               </div>
             </div>
