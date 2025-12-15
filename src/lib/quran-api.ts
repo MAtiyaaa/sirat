@@ -95,36 +95,61 @@ export function clearSurahsCache(): void {
 // Fetch all surahs with retry logic and offline caching
 export async function fetchSurahs(retries = 3): Promise<Surah[]> {
   let lastError: Error | null = null;
-  
+
   // First, try to get cached data - this ensures we have something to fall back on
   const cachedSurahs = getCachedSurahs();
-  
+
+  // Some mobile WebKit versions throw "The string did not match the expected pattern"
+  // when using fetch + AbortController signals. If we detect that, we disable the timeout path.
+  let disableAbortController = false;
+
+  const fetchFromQuranCom = async (): Promise<Surah[]> => {
+    const response = await fetch(`${QURAN_COM_BASE}/chapters?language=en`);
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+
+    const data = await response.json();
+    if (!data?.chapters || !Array.isArray(data.chapters)) {
+      throw new Error('Invalid response format');
+    }
+
+    return data.chapters.map((c: any) => ({
+      number: c.id,
+      name: c.name_arabic,
+      englishName: c.name_simple,
+      englishNameTranslation: c.translated_name?.name || '',
+      numberOfAyahs: c.verses_count,
+      revelationType: c.revelation_place === 'makkah' ? 'Meccan' : 'Medinan',
+    }));
+  };
+
   for (let attempt = 1; attempt <= retries; attempt++) {
     let controller: AbortController | null = null;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    
+
     try {
-      controller = new AbortController();
-      timeoutId = setTimeout(() => {
-        if (controller) controller.abort();
-      }, 15000); // 15s timeout (increased from 10s)
-      
-      const response = await fetch(`${ALQURAN_BASE}/surah`, {
-        signal: controller.signal
-      });
-      
+      const url = `${ALQURAN_BASE}/surah`;
+
+      let response: Response;
+      if (!disableAbortController && typeof AbortController !== 'undefined') {
+        controller = new AbortController();
+        timeoutId = setTimeout(() => controller?.abort(), 15000);
+        response = await fetch(url, { signal: controller.signal });
+      } else {
+        response = await fetch(url);
+      }
+
       if (timeoutId) clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (!data.data || !Array.isArray(data.data)) {
         throw new Error('Invalid response format');
       }
-      
+
       const surahs = data.data.map((s: any) => ({
         number: s.number,
         name: s.name,
@@ -133,49 +158,59 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
         numberOfAyahs: s.numberOfAyahs,
         revelationType: s.revelationType,
       }));
-      
+
       // Cache successful response
       cacheSurahs(surahs);
-      
+
       return surahs;
     } catch (error) {
       if (timeoutId) clearTimeout(timeoutId);
-      
+
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+      const isPatternMismatch = errorMessage.includes('The string did not match the expected pattern');
+      if (isPatternMismatch) disableAbortController = true;
+
       // Check if this is a Safari/iOS abort error or network cancellation
-      const isAbortError = 
-        error instanceof DOMException && error.name === 'AbortError' ||
+      const isAbortError =
+        (error instanceof DOMException && error.name === 'AbortError') ||
         errorMessage.includes('aborted') ||
         errorMessage.includes('cancelled') ||
         errorMessage.includes('Cancelled') ||
-        errorMessage.includes('The string did not match the expected pattern') ||
+        isPatternMismatch ||
         errorMessage.includes('NetworkError') ||
         errorMessage.includes('network');
-      
+
       // For abort errors, return cached data immediately if available
       if (isAbortError && cachedSurahs) {
         console.log('Network interrupted, using cached surahs');
         return cachedSurahs;
       }
-      
+
       lastError = error as Error;
       console.error(`Attempt ${attempt} failed:`, errorMessage);
-      
+
       if (attempt < retries) {
         // Wait before retrying (exponential backoff)
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
   }
-  
+
   // If all retries failed, try to return cached data
   if (cachedSurahs) {
     console.log('Using cached surahs due to network failure');
     return cachedSurahs;
   }
-  
-  throw lastError || new Error('Failed to fetch surahs after multiple attempts');
+
+  // Final fallback: use an alternative data source for surah metadata
+  try {
+    const fallbackSurahs = await fetchFromQuranCom();
+    cacheSurahs(fallbackSurahs);
+    return fallbackSurahs;
+  } catch (fallbackError) {
+    const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+    throw new Error(`${lastError?.message || 'Failed to fetch surahs'}; fallback failed: ${fallbackMessage}`);
+  }
 }
 
 // Fetch surah with Arabic text
