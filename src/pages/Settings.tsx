@@ -8,7 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User, MessageSquare, RotateCcw, ArrowLeft, Settings as SettingsIcon, Lock } from 'lucide-react';
+import { LogOut, User, MessageSquare, RotateCcw, ArrowLeft, Settings as SettingsIcon, Lock, Trash2 } from 'lucide-react';
+import { clearSurahsCache } from '@/lib/quran-api';
 import { toast } from 'sonner';
 import { NetworkStatusIndicator } from '@/components/NetworkStatusIndicator';
 import {
@@ -138,6 +139,9 @@ const Settings = () => {
       chatHistory: 'سجل المحادثات',
       resetProgress: 'إعادة تعيين التقدم',
       resetWarning: 'سيؤدي هذا إلى مسح سجل القراءة وتقدمك.',
+      clearCache: 'مسح ذاكرة التخزين المؤقت',
+      clearCacheDesc: 'امسح بيانات القرآن المخزنة إذا واجهت مشاكل في التحميل',
+      cacheCleared: 'تم مسح ذاكرة التخزين المؤقت',
       language: 'اللغة',
       theme: 'المظهر',
       fontType: 'نوع الخط',
@@ -208,6 +212,9 @@ const Settings = () => {
       chatHistory: 'Chat History',
       resetProgress: 'Reset Progress',
       resetWarning: 'This will clear your reading history and progress.',
+      clearCache: 'Clear Cache',
+      clearCacheDesc: 'Clear stored Quran data if you experience loading issues',
+      cacheCleared: 'Cache cleared successfully',
       language: 'Language',
       theme: 'Theme',
       fontType: 'Font Type',
@@ -470,6 +477,25 @@ const Settings = () => {
               <p className="text-xs text-muted-foreground mt-1">{t.wordByWordDesc}</p>
             </div>
             <Switch checked={settings.wordByWordDisplay} onCheckedChange={(checked) => updateSettings({ wordByWordDisplay: checked })} />
+          </div>
+          <div className="h-px bg-border" />
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <Label className="font-medium">{t.clearCache}</Label>
+              <p className="text-xs text-muted-foreground mt-1">{t.clearCacheDesc}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                clearSurahsCache();
+                toast.success(t.cacheCleared);
+              }}
+              className="gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              {t.clearCache}
+            </Button>
           </div>
         </div>
       </div>
