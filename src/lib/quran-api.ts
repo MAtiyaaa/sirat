@@ -214,17 +214,131 @@ export async function fetchSurahs(retries = 3): Promise<Surah[]> {
 }
 
 // Fetch surah with Arabic text
-export async function fetchSurahArabic(surahNumber: number) {
-  const response = await fetch(`${ALQURAN_BASE}/surah/${surahNumber}`);
-  const data = await response.json();
-  return data.data;
+export async function fetchSurahArabic(surahNumber: number, retries = 3): Promise<any> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(`${ALQURAN_BASE}/surah/${surahNumber}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.data) {
+        throw new Error('Invalid response format');
+      }
+      return data.data;
+    } catch (error) {
+      lastError = error as Error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`fetchSurahArabic attempt ${attempt} failed:`, errorMessage);
+
+      // Check for Safari/iOS pattern-mismatch or network errors
+      const isNetworkError =
+        errorMessage.includes('The string did not match the expected pattern') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('Failed to fetch');
+
+      if (isNetworkError || attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+  }
+
+  // Fallback to quran.com API
+  try {
+    const response = await fetch(`${QURAN_COM_BASE}/chapters/${surahNumber}?language=en`);
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+    const chapterData = await response.json();
+    
+    const versesResponse = await fetch(`${QURAN_COM_BASE}/quran/verses/uthmani?chapter_number=${surahNumber}`);
+    if (!versesResponse.ok) throw new Error(`HTTP error: ${versesResponse.status}`);
+    const versesData = await versesResponse.json();
+
+    const chapter = chapterData.chapter;
+    return {
+      number: chapter.id,
+      name: chapter.name_arabic,
+      englishName: chapter.name_simple,
+      englishNameTranslation: chapter.translated_name?.name || '',
+      numberOfAyahs: chapter.verses_count,
+      revelationType: chapter.revelation_place === 'makkah' ? 'Meccan' : 'Medinan',
+      ayahs: versesData.verses?.map((v: any) => ({
+        number: v.id,
+        text: v.text_uthmani,
+        numberInSurah: v.verse_key?.split(':')[1] ? parseInt(v.verse_key.split(':')[1]) : v.verse_number,
+        juz: v.juz_number,
+        page: v.page_number,
+      })) || [],
+    };
+  } catch (fallbackError) {
+    const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+    throw new Error(`${lastError?.message || 'Failed to fetch surah'}; fallback failed: ${fallbackMessage}`);
+  }
 }
 
 // Fetch surah translation
-export async function fetchSurahTranslation(surahNumber: number, edition: string = 'en.sahih') {
-  const response = await fetch(`${ALQURAN_BASE}/surah/${surahNumber}/${edition}`);
-  const data = await response.json();
-  return data.data;
+export async function fetchSurahTranslation(surahNumber: number, edition: string = 'en.sahih', retries = 3): Promise<any> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(`${ALQURAN_BASE}/surah/${surahNumber}/${edition}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      const data = await response.json();
+      if (!data.data) {
+        throw new Error('Invalid response format');
+      }
+      return data.data;
+    } catch (error) {
+      lastError = error as Error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`fetchSurahTranslation attempt ${attempt} failed:`, errorMessage);
+
+      // Check for Safari/iOS pattern-mismatch or network errors
+      const isNetworkError =
+        errorMessage.includes('The string did not match the expected pattern') ||
+        errorMessage.includes('NetworkError') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('Failed to fetch');
+
+      if (isNetworkError || attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
+    }
+  }
+
+  // Fallback to quran.com API for translations
+  try {
+    // Map alquran.cloud edition codes to quran.com translation IDs
+    const translationMap: Record<string, number> = {
+      'en.sahih': 20,
+      'en.asad': 17,
+      'en.pickthall': 19,
+      'en.yusufali': 22,
+      'en.transliteration': 57,
+    };
+    const translationId = translationMap[edition] || 20;
+
+    const response = await fetch(`${QURAN_COM_BASE}/quran/translations/${translationId}?chapter_number=${surahNumber}`);
+    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+    const data = await response.json();
+
+    return {
+      number: surahNumber,
+      ayahs: data.translations?.map((t: any, index: number) => ({
+        number: t.resource_id,
+        text: t.text?.replace(/<[^>]*>/g, '') || '', // Strip HTML tags
+        numberInSurah: index + 1,
+      })) || [],
+    };
+  } catch (fallbackError) {
+    const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+    throw new Error(`${lastError?.message || 'Failed to fetch translation'}; fallback failed: ${fallbackMessage}`);
+  }
 }
 
 // Fetch tafsir
