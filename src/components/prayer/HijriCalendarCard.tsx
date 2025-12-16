@@ -333,15 +333,21 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
                     {hijriCalendarDays.map((day, index) => {
                       // Format Gregorian date for display
                       const formatGregorianDate = (dateStr: string) => {
-                        if (!dateStr) return '';
-                        const [d, m, y] = dateStr.split('-');
+                        if (!dateStr) return null;
+                        const parts = dateStr.split('-');
+                        if (parts.length !== 3) return null;
+                        const [d, m, y] = parts;
+                        const dayNum = parseInt(d);
+                        const monthNum = parseInt(m);
+                        if (isNaN(dayNum) || isNaN(monthNum) || monthNum < 1 || monthNum > 12) return null;
                         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                         const monthsAr = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-                        const monthIndex = parseInt(m) - 1;
                         return settings.language === 'ar' 
-                          ? `${d} ${monthsAr[monthIndex]} ${y}`
-                          : `${months[monthIndex]} ${parseInt(d)}, ${y}`;
+                          ? `${dayNum} ${monthsAr[monthNum - 1]} ${y}`
+                          : `${months[monthNum - 1]} ${dayNum}, ${y}`;
                       };
+
+                      const gregorianFormatted = formatGregorianDate(day.gregorianDate);
 
                       return (
                         <div
@@ -359,20 +365,18 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
                             <Star className="h-2 w-2 text-amber-500 absolute top-1 right-1" />
                           )}
                           {/* Tooltip with Gregorian date and holiday name */}
-                          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none border border-border">
-                            {day.gregorianDate && (
-                              <div className="font-medium text-foreground">
-                                {formatGregorianDate(day.gregorianDate)}
+                          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-3 py-2 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none border border-border min-w-max">
+                            <div className="font-semibold text-foreground">
+                              {day.day} {getHijriMonthName(currentHijriMonth)} {currentHijriYear}
+                            </div>
+                            {gregorianFormatted && (
+                              <div className="text-muted-foreground mt-0.5">
+                                {gregorianFormatted}
                               </div>
                             )}
                             {day.isHoliday && (
-                              <div className="text-amber-500 mt-1">
+                              <div className="text-amber-500 font-medium mt-1 pt-1 border-t border-border/50">
                                 {settings.language === 'ar' ? day.holidayNameAr : day.holidayName}
-                              </div>
-                            )}
-                            {!day.gregorianDate && !day.isHoliday && (
-                              <div className="text-muted-foreground">
-                                {day.day} {getHijriMonthName(currentHijriMonth)}
                               </div>
                             )}
                           </div>
