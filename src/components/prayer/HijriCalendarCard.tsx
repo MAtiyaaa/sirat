@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Moon, Loader2, MoonStar } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Moon, Loader2, MoonStar, Star, PartyPopper } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
@@ -16,12 +16,39 @@ interface HijriCalendarDay {
   day: number;
   gregorianDate: string;
   isToday: boolean;
+  isHoliday: boolean;
+  holidayName?: string;
+  holidayNameAr?: string;
 }
 
 interface HijriCalendarCardProps {
   hijriDate: HijriDate | null;
   prayerTimeRegion?: string;
 }
+
+// Islamic holidays with their Hijri dates
+const ISLAMIC_HOLIDAYS: Record<string, { en: string; ar: string }> = {
+  '1-1': { en: 'Islamic New Year', ar: 'رأس السنة الهجرية' },
+  '1-10': { en: 'Ashura', ar: 'عاشوراء' },
+  '3-12': { en: 'Mawlid al-Nabi', ar: 'المولد النبوي' },
+  '7-27': { en: "Isra and Mi'raj", ar: 'الإسراء والمعراج' },
+  '8-15': { en: 'Shab-e-Barat', ar: 'ليلة النصف من شعبان' },
+  '9-1': { en: 'Ramadan Begins', ar: 'بداية رمضان' },
+  '9-21': { en: 'Laylat al-Qadr (approx)', ar: 'ليلة القدر' },
+  '9-23': { en: 'Laylat al-Qadr (approx)', ar: 'ليلة القدر' },
+  '9-25': { en: 'Laylat al-Qadr (approx)', ar: 'ليلة القدر' },
+  '9-27': { en: 'Laylat al-Qadr (approx)', ar: 'ليلة القدر' },
+  '9-29': { en: 'Laylat al-Qadr (approx)', ar: 'ليلة القدر' },
+  '10-1': { en: 'Eid al-Fitr', ar: 'عيد الفطر' },
+  '10-2': { en: 'Eid al-Fitr', ar: 'عيد الفطر' },
+  '10-3': { en: 'Eid al-Fitr', ar: 'عيد الفطر' },
+  '12-8': { en: 'Day of Tarwiyah', ar: 'يوم التروية' },
+  '12-9': { en: 'Day of Arafah', ar: 'يوم عرفة' },
+  '12-10': { en: 'Eid al-Adha', ar: 'عيد الأضحى' },
+  '12-11': { en: 'Eid al-Adha', ar: 'عيد الأضحى' },
+  '12-12': { en: 'Eid al-Adha', ar: 'عيد الأضحى' },
+  '12-13': { en: 'Eid al-Adha', ar: 'عيد الأضحى' },
+};
 
 const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardProps) => {
   const { settings } = useSettings();
@@ -30,6 +57,7 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
   const [currentHijriYear, setCurrentHijriYear] = useState<number>(1447);
   const [hijriCalendarDays, setHijriCalendarDays] = useState<HijriCalendarDay[]>([]);
   const [loading, setLoading] = useState(false);
+  const [firstDayOfWeek, setFirstDayOfWeek] = useState(0);
 
   useEffect(() => {
     if (hijriDate) {
@@ -42,16 +70,20 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
   const fetchHijriCalendar = async (month: number, year: number) => {
     setLoading(true);
     try {
-      let latitude, longitude;
+      let latitude = 25.2048, longitude = 55.2708; // Default to Dubai
 
       if (prayerTimeRegion) {
         [latitude, longitude] = prayerTimeRegion.split(',').map(Number);
-      } else {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject);
-        });
-        latitude = position.coords.latitude;
-        longitude = position.coords.longitude;
+      } else if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        } catch (e) {
+          console.log('Using default location for calendar');
+        }
       }
 
       const response = await fetch(
@@ -59,13 +91,32 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
       );
       const data = await response.json();
 
-      if (data.code === 200) {
-        const today = new Date().toISOString().split('T')[0];
-        const days: HijriCalendarDay[] = data.data.map((item: any) => ({
-          day: parseInt(item.date.hijri.day),
-          gregorianDate: item.date.gregorian.date,
-          isToday: item.date.gregorian.date === today,
-        }));
+      if (data.code === 200 && data.data.length > 0) {
+        const today = new Date();
+        const todayStr = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+
+        // Get the first day's weekday to properly align the calendar
+        const firstDayData = data.data[0];
+        const firstDayWeekday = firstDayData.date.gregorian.weekday.en;
+        const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const firstDayIndex = weekdays.indexOf(firstDayWeekday);
+        setFirstDayOfWeek(firstDayIndex);
+
+        const days: HijriCalendarDay[] = data.data.map((item: any) => {
+          const hijriDay = parseInt(item.date.hijri.day);
+          const hijriMonth = parseInt(item.date.hijri.month.number);
+          const holidayKey = `${hijriMonth}-${hijriDay}`;
+          const holiday = ISLAMIC_HOLIDAYS[holidayKey];
+
+          return {
+            day: hijriDay,
+            gregorianDate: item.date.gregorian.date,
+            isToday: item.date.gregorian.date === todayStr,
+            isHoliday: !!holiday,
+            holidayName: holiday?.en,
+            holidayNameAr: holiday?.ar,
+          };
+        });
         setHijriCalendarDays(days);
       }
     } catch (error) {
@@ -111,6 +162,9 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
     if (day <= 25) return 0.6;  // Last quarter
     return 0.4;  // Waning crescent
   };
+
+  // Get holidays for the current month to display below calendar
+  const monthHolidays = hijriCalendarDays.filter(day => day.isHoliday);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -209,18 +263,56 @@ const HijriCalendarCard = ({ hijriDate, prayerTimeRegion }: HijriCalendarCardPro
                   </div>
                 ) : (
                   <div className="grid grid-cols-7 gap-1">
+                    {/* Empty cells for alignment */}
+                    {Array.from({ length: firstDayOfWeek }).map((_, index) => (
+                      <div key={`empty-${index}`} className="aspect-square" />
+                    ))}
                     {hijriCalendarDays.map((day, index) => (
                       <div
                         key={index}
-                        className={`aspect-square flex items-center justify-center rounded-xl text-sm font-medium smooth-transition
+                        className={`aspect-square flex flex-col items-center justify-center rounded-xl text-sm font-medium smooth-transition relative group
                           ${day.isToday
                             ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg scale-110 ring-2 ring-primary/50'
-                            : 'bg-background/50 hover:bg-background/80 hover:scale-105'
+                            : day.isHoliday
+                              ? 'bg-amber-500/20 hover:bg-amber-500/30 ring-1 ring-amber-500/30'
+                              : 'bg-background/50 hover:bg-background/80 hover:scale-105'
                           }`}
+                        title={day.isHoliday ? (settings.language === 'ar' ? day.holidayNameAr : day.holidayName) : undefined}
                       >
                         {day.day}
+                        {day.isHoliday && !day.isToday && (
+                          <Star className="h-2 w-2 text-amber-500 absolute top-1 right-1" />
+                        )}
+                        {/* Tooltip on hover */}
+                        {day.isHoliday && (
+                          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                            {settings.language === 'ar' ? day.holidayNameAr : day.holidayName}
+                          </div>
+                        )}
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {/* Holidays in this month */}
+                {monthHolidays.length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                      <PartyPopper className="h-4 w-4" />
+                      {settings.language === 'ar' ? 'المناسبات هذا الشهر' : 'Events this month'}
+                    </h4>
+                    <div className="space-y-1">
+                      {[...new Map(monthHolidays.map(h => [h.holidayName, h])).values()].map((holiday, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-sm">
+                          <span className="text-foreground">
+                            {settings.language === 'ar' ? holiday.holidayNameAr : holiday.holidayName}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {holiday.day} {getHijriMonthName(currentHijriMonth)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
