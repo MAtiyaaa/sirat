@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Moon, Loader2, MoonStar, Star, PartyPopper } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Moon, Loader2, MoonStar, Star, PartyPopper, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface HijriDate {
   date: string;
@@ -51,10 +52,11 @@ const ISLAMIC_HOLIDAYS: Record<string, { en: string; ar: string }> = {
 
 const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: HijriCalendarCardProps) => {
   const { settings } = useSettings();
+  const [isOpen, setIsOpen] = useState(false);
   const [currentHijriMonth, setCurrentHijriMonth] = useState<number>(1);
   const [currentHijriYear, setCurrentHijriYear] = useState<number>(1446);
   const [hijriCalendarDays, setHijriCalendarDays] = useState<HijriCalendarDay[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState(0);
   const [todayHijri, setTodayHijri] = useState<HijriDate | null>(initialHijriDate);
 
@@ -95,12 +97,12 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
     fetchCurrentHijriDate();
   }, [initialHijriDate, settings.language]);
 
-  // Fetch calendar when month/year changes
+  // Fetch calendar when opened or month/year changes
   useEffect(() => {
-    if (currentHijriMonth && currentHijriYear) {
+    if (isOpen && currentHijriMonth && currentHijriYear) {
       fetchHijriCalendar(currentHijriMonth, currentHijriYear);
     }
-  }, [currentHijriMonth, currentHijriYear, prayerTimeRegion]);
+  }, [isOpen, currentHijriMonth, currentHijriYear, prayerTimeRegion]);
 
   const fetchHijriCalendar = async (month: number, year: number) => {
     setLoading(true);
@@ -157,12 +159,10 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
         });
         setHijriCalendarDays(days);
       } else {
-        // Fallback: generate basic calendar
         generateFallbackCalendar(month);
       }
     } catch (error) {
       console.error('Error fetching Hijri calendar:', error);
-      // Fallback: generate basic calendar
       generateFallbackCalendar(month);
     } finally {
       setLoading(false);
@@ -170,12 +170,10 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
   };
 
   const generateFallbackCalendar = (month: number) => {
-    // Hijri months alternate between 29 and 30 days
     const daysInMonth = month % 2 === 1 ? 30 : 29;
     const todayDay = todayHijri ? parseInt(todayHijri.date) : 0;
     const isCurrentMonth = todayHijri?.monthNumber === month;
     
-    // Approximate first day of week (this is a fallback, so not precise)
     setFirstDayOfWeek(0);
     
     const days: HijriCalendarDay[] = Array.from({ length: daysInMonth }, (_, i) => {
@@ -219,7 +217,6 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
     return months[monthNumber - 1];
   };
 
-  // Moon phase calculation (simplified) - returns opacity for moon icon
   const getMoonPhaseOpacity = (day: number): number => {
     if (day <= 3 || day >= 28) return 0.2;
     if (day <= 7) return 0.4;
@@ -231,155 +228,161 @@ const HijriCalendarCard = ({ hijriDate: initialHijriDate, prayerTimeRegion }: Hi
     return 0.4;
   };
 
-  // Get holidays for the current month to display below calendar
   const monthHolidays = hijriCalendarDays.filter(day => day.isHoliday);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-fuchsia-500/10" />
-      
-      <div className="relative glass-effect border border-border/50 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-violet-500" />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold">
-                {settings.language === 'ar' ? 'التقويم الهجري' : 'Hijri Calendar'}
-              </h2>
-              {todayHijri && (
-                <p className="text-sm text-muted-foreground">
-                  {todayHijri.weekday}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {todayHijri && (
-            <div className="text-right">
-              <div className="flex items-center gap-2 justify-end">
-                <MoonStar 
-                  className="h-5 w-5 text-primary" 
-                  style={{ opacity: getMoonPhaseOpacity(parseInt(todayHijri.date)) }}
-                />
-                <span className="text-2xl font-bold text-primary">{todayHijri.date}</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {todayHijri.month} {todayHijri.year}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Calendar Content */}
-        <div className="relative overflow-hidden rounded-2xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
-          <div className="relative glass-effect border border-primary/20 p-6">
-            {/* Month Navigation */}
-            <div className="flex items-center justify-between mb-6">
-              <button
-                onClick={() => navigateHijriMonth('prev')}
-                className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center smooth-transition hover:scale-110"
-              >
-                <ChevronLeft className="h-5 w-5 text-primary" />
-              </button>
-              
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Moon className="h-5 w-5 text-primary" />
-                  <span className="text-2xl font-bold">{getHijriMonthName(currentHijriMonth)}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {currentHijriYear} {todayHijri?.designation || 'AH'}
-                </p>
-              </div>
-              
-              <button
-                onClick={() => navigateHijriMonth('next')}
-                className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center smooth-transition hover:scale-110"
-              >
-                <ChevronRight className="h-5 w-5 text-primary" />
-              </button>
-            </div>
-
-            {/* Day labels */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {(settings.language === 'ar' 
-                ? ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت']
-                : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-              ).map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Calendar Grid */}
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-7 gap-1">
-                {/* Empty cells for alignment */}
-                {Array.from({ length: firstDayOfWeek }).map((_, index) => (
-                  <div key={`empty-${index}`} className="aspect-square" />
-                ))}
-                {hijriCalendarDays.map((day, index) => (
-                  <div
-                    key={index}
-                    className={`aspect-square flex flex-col items-center justify-center rounded-xl text-sm font-medium smooth-transition relative group cursor-default
-                      ${day.isToday
-                        ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg scale-110 ring-2 ring-primary/50 z-10'
-                        : day.isHoliday
-                          ? 'bg-amber-500/20 hover:bg-amber-500/30 ring-1 ring-amber-500/30'
-                          : 'bg-background/50 hover:bg-background/80 hover:scale-105'
-                      }`}
-                    title={day.isHoliday ? (settings.language === 'ar' ? day.holidayNameAr : day.holidayName) : undefined}
-                  >
-                    {day.day}
-                    {day.isHoliday && !day.isToday && (
-                      <Star className="h-2 w-2 text-amber-500 absolute top-1 right-1" />
-                    )}
-                    {/* Tooltip on hover */}
-                    {day.isHoliday && (
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
-                        {settings.language === 'ar' ? day.holidayNameAr : day.holidayName}
-                      </div>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="relative overflow-hidden rounded-3xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-purple-500/10 to-fuchsia-500/10" />
+        
+        <div className="relative glass-effect border border-border/50 p-6">
+          <CollapsibleTrigger asChild>
+            <button className="w-full">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
+                    <Calendar className="h-6 w-6 text-violet-500" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-xl font-bold">
+                      {settings.language === 'ar' ? 'التقويم الهجري' : 'Hijri Calendar'}
+                    </h2>
+                    {todayHijri && (
+                      <p className="text-sm text-muted-foreground">
+                        {todayHijri.weekday}
+                      </p>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
 
-            {/* Holidays in this month */}
-            {monthHolidays.length > 0 && !loading && (
-              <div className="mt-4 pt-4 border-t border-border/50">
-                <h4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
-                  <PartyPopper className="h-4 w-4" />
-                  {settings.language === 'ar' ? 'المناسبات هذا الشهر' : 'Events this month'}
-                </h4>
-                <div className="space-y-1">
-                  {[...new Map(monthHolidays.map(h => [h.holidayName, h])).values()].map((holiday, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-sm">
-                      <span className="text-foreground">
-                        {settings.language === 'ar' ? holiday.holidayNameAr : holiday.holidayName}
-                      </span>
-                      <span className="text-muted-foreground">
-                        {holiday.day} {getHijriMonthName(currentHijriMonth)}
-                      </span>
+                <div className="flex items-center gap-4">
+                  {todayHijri && (
+                    <div className="text-right">
+                      <div className="flex items-center gap-2 justify-end">
+                        <MoonStar 
+                          className="h-5 w-5 text-primary" 
+                          style={{ opacity: getMoonPhaseOpacity(parseInt(todayHijri.date)) }}
+                        />
+                        <span className="text-2xl font-bold text-primary">{todayHijri.date}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {todayHijri.month} {todayHijri.year}
+                      </p>
+                    </div>
+                  )}
+                  <ChevronDown className={`h-5 w-5 text-muted-foreground smooth-transition ${isOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </div>
+            </button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="mt-6">
+            <div className="relative overflow-hidden rounded-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5" />
+              <div className="relative glass-effect border border-primary/20 p-6">
+                {/* Month Navigation */}
+                <div className="flex items-center justify-between mb-6">
+                  <button
+                    onClick={() => navigateHijriMonth('prev')}
+                    className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center smooth-transition hover:scale-110"
+                  >
+                    <ChevronLeft className="h-5 w-5 text-primary" />
+                  </button>
+                  
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                      <Moon className="h-5 w-5 text-primary" />
+                      <span className="text-2xl font-bold">{getHijriMonthName(currentHijriMonth)}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {currentHijriYear} {todayHijri?.designation || 'AH'}
+                    </p>
+                  </div>
+                  
+                  <button
+                    onClick={() => navigateHijriMonth('next')}
+                    className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center smooth-transition hover:scale-110"
+                  >
+                    <ChevronRight className="h-5 w-5 text-primary" />
+                  </button>
+                </div>
+
+                {/* Day labels */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {(settings.language === 'ar' 
+                    ? ['أحد', 'اثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت']
+                    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                  ).map((day) => (
+                    <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+                      {day}
                     </div>
                   ))}
                 </div>
+
+                {/* Calendar Grid */}
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-7 gap-1">
+                    {/* Empty cells for alignment */}
+                    {Array.from({ length: firstDayOfWeek }).map((_, index) => (
+                      <div key={`empty-${index}`} className="aspect-square" />
+                    ))}
+                    {hijriCalendarDays.map((day, index) => (
+                      <div
+                        key={index}
+                        className={`aspect-square flex flex-col items-center justify-center rounded-xl text-sm font-medium smooth-transition relative group cursor-default
+                          ${day.isToday
+                            ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg scale-110 ring-2 ring-primary/50 z-10'
+                            : day.isHoliday
+                              ? 'bg-amber-500/20 hover:bg-amber-500/30 ring-1 ring-amber-500/30'
+                              : 'bg-background/50 hover:bg-background/80 hover:scale-105'
+                          }`}
+                        title={day.isHoliday ? (settings.language === 'ar' ? day.holidayNameAr : day.holidayName) : undefined}
+                      >
+                        {day.day}
+                        {day.isHoliday && !day.isToday && (
+                          <Star className="h-2 w-2 text-amber-500 absolute top-1 right-1" />
+                        )}
+                        {day.isHoliday && (
+                          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-xs px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20 pointer-events-none">
+                            {settings.language === 'ar' ? day.holidayNameAr : day.holidayName}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Holidays in this month */}
+                {monthHolidays.length > 0 && !loading && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                      <PartyPopper className="h-4 w-4" />
+                      {settings.language === 'ar' ? 'المناسبات هذا الشهر' : 'Events this month'}
+                    </h4>
+                    <div className="space-y-1">
+                      {[...new Map(monthHolidays.map(h => [h.holidayName, h])).values()].map((holiday, idx) => (
+                        <div key={idx} className="flex items-center justify-between text-sm">
+                          <span className="text-foreground">
+                            {settings.language === 'ar' ? holiday.holidayNameAr : holiday.holidayName}
+                          </span>
+                          <span className="text-muted-foreground">
+                            {holiday.day} {getHijriMonthName(currentHijriMonth)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          </CollapsibleContent>
         </div>
       </div>
-    </div>
+    </Collapsible>
   );
 };
 

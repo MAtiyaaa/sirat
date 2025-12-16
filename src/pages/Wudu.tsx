@@ -186,16 +186,16 @@ const Wudu = () => {
         ) : null}
       </div>
 
-      {/* Quick Access */}
-      <QuickAccessGrid />
-
       {/* Collapsible Sections */}
       <div className="space-y-4">
         <QiblaCard prayerTimeRegion={settings.prayerTimeRegion} />
         <HijriCalendarCard hijriDate={hijriDate} prayerTimeRegion={settings.prayerTimeRegion} />
-        <WuduStepsCard />
         <IslamicEventsCard suhurTime={suhurTime} iftarTime={iftarTime} prayerTimeRegion={settings.prayerTimeRegion} />
+        <WuduStepsCard />
       </div>
+
+      {/* Quick Access - Last */}
+      <QuickAccessGrid />
     </div>
   );
 };
