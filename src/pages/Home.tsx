@@ -13,15 +13,11 @@ import {
   MapPin,
   Settings as SettingsIcon,
   Moon,
+  History,
   Calculator
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
-import HomeHero from '@/components/home/HomeHero';
-import PrayerMiniWidget from '@/components/home/PrayerMiniWidget';
-import FeaturedCarousel from '@/components/home/FeaturedCarousel';
-import PersonalStats from '@/components/home/PersonalStats';
-import AchievementBadge from '@/components/home/AchievementBadge';
 
 // Get Surah of the Day based on current date
 const getSurahOfTheDay = () => {
@@ -122,6 +118,11 @@ const islamicQuotes = [
         reference: "Hud (11):61"
     },
     {
+        ar: "إِنَّ اللَّهَ يُحِبُّ الْمُتَوَكِّلِينَ",
+        en: "Indeed, Allah loves those who put their trust in Him",
+        reference: "Ali 'Imran (3):159"
+    },
+    {
         ar: "وَعَسَى أَن تَكْرَهُوا شَيْئًا وَهُوَ خَيْرٌ لَّكُمْ",
         en: "Perhaps you dislike a thing and it is good for you",
         reference: "Al-Baqarah (2):216"
@@ -208,37 +209,49 @@ const getQuoteOfTheDay = () => {
   return islamicQuotes[dayOfYear % islamicQuotes.length];
 };
 
-// Surah ayah counts for progress calculation
-const surahAyahCounts: Record<number, number> = {
-  1: 7, 2: 286, 3: 200, 4: 176, 5: 120, 6: 165, 7: 206, 8: 75, 9: 129, 10: 109,
-  11: 123, 12: 111, 13: 43, 14: 52, 15: 99, 16: 128, 17: 111, 18: 110, 19: 98, 20: 135,
-  21: 112, 22: 78, 23: 118, 24: 64, 25: 77, 26: 227, 27: 93, 28: 88, 29: 69, 30: 60,
-  31: 34, 32: 30, 33: 73, 34: 54, 35: 45, 36: 83, 37: 182, 38: 88, 39: 75, 40: 85,
-  41: 54, 42: 53, 43: 89, 44: 59, 45: 37, 46: 35, 47: 38, 48: 29, 49: 18, 50: 45,
-  51: 60, 52: 49, 53: 62, 54: 55, 55: 78, 56: 96, 57: 29, 58: 22, 59: 24, 60: 13,
-  61: 14, 62: 11, 63: 11, 64: 18, 65: 12, 66: 12, 67: 30, 68: 52, 69: 52, 70: 44,
-  71: 28, 72: 28, 73: 20, 74: 56, 75: 40, 76: 31, 77: 50, 78: 40, 79: 46, 80: 42,
-  81: 29, 82: 19, 83: 36, 84: 25, 85: 22, 86: 17, 87: 19, 88: 26, 89: 30, 90: 20,
-  91: 15, 92: 21, 93: 11, 94: 8, 95: 8, 96: 19, 97: 5, 98: 8, 99: 8, 100: 11,
-  101: 11, 102: 8, 103: 3, 104: 9, 105: 5, 106: 4, 107: 7, 108: 3, 109: 6, 110: 3,
-  111: 5, 112: 4, 113: 5, 114: 6
+// Map transliterated Surah names to Arabic for reference localization
+const surahNameMap: Record<string, string> = {
+  "Ash-Sharh": "الشرح",
+  "Hud": "هود",
+  "Al-Baqarah": "البقرة",
+  "At-Talaq": "الطلاق",
+  "Ali 'Imran": "آل عمران",
+  "Ta-Ha": "طه",
+  "Ar-Ra'd": "الرعد",
+  "Al-Hadid": "الحديد",
+  "Yusuf": "يوسف",
+  "An-Nur": "النور",
+  "Al-An'am": "الأنعام",
+  "Al-A'raf": "الأعراف",
+  "An-Nisa": "النساء",
+  "Adh-Dhariyat": "الذاريات",
+  "Al-Qasas": "القصص",
+  "Al-Hajj": "الحج",
 };
 
-const totalAyahs = Object.values(surahAyahCounts).reduce((a, b) => a + b, 0);
+// Convert Western numerals to Eastern Arabic numerals
+const toArabicNumerals = (input: string) => input.replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+
+// Format a reference like "Ash-Sharh (94):6" based on language
+const formatReference = (reference: string, language: 'ar' | 'en') => {
+  if (language === 'en') return reference;
+  const match = reference.match(/^\s*(.*?)\s*\((\d+)\):(\d+)\s*$/);
+  if (match) {
+    const [, name, surahNum, ayahNum] = match;
+    const arabicName = surahNameMap[name.trim()] || name.trim();
+    const surahNumAr = toArabicNumerals(surahNum);
+    const ayahNumAr = toArabicNumerals(ayahNum);
+    return `سورة ${arabicName} (${surahNumAr}):${ayahNumAr}`;
+  }
+  // Fallback: just localize any digits present
+  return toArabicNumerals(reference);
+};
 
 const Home = () => {
   const { settings } = useSettings();
   const [user, setUser] = React.useState<any>(null);
-  const [firstName, setFirstName] = useState<string | undefined>();
   const [surahOfDay, setSurahOfDay] = useState<any>(null);
   const [continueReading, setContinueReading] = useState<any>(null);
-  const [personalStats, setPersonalStats] = useState<{
-    surahsRead: number;
-    daysOpened: number;
-    bookmarksCount: number;
-    quranProgress: number;
-  } | null>(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const quoteOfDay = getQuoteOfTheDay();
 
   useEffect(() => {
@@ -266,25 +279,11 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadContinueReading = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        setStatsLoading(false);
-        return;
-      }
+      if (!session?.user) return;
 
-      // Load profile for first name
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-      
-      if (profile?.first_name) {
-        setFirstName(profile.first_name);
-      }
-
-      // Get last viewed surah for continue reading
+      // Get last viewed surah
       const { data: lastViewed } = await supabase
         .from('last_viewed_surah')
         .select('surah_number')
@@ -292,6 +291,7 @@ const Home = () => {
         .maybeSingle();
 
       if (lastViewed?.surah_number) {
+        // Get progress for that surah
         const { data: progress } = await supabase
           .from('reading_progress')
           .select('ayah_number')
@@ -299,6 +299,7 @@ const Home = () => {
           .eq('surah_number', lastViewed.surah_number)
           .maybeSingle();
 
+        // Fetch surah details
         try {
           const response = await fetch(`https://api.alquran.cloud/v1/surah/${lastViewed.surah_number}`);
           const data = await response.json();
@@ -307,6 +308,7 @@ const Home = () => {
               number: data.data.number,
               name: data.data.name,
               englishName: data.data.englishName,
+              englishNameTranslation: data.data.englishNameTranslation,
               numberOfAyahs: data.data.numberOfAyahs,
               ayahNumber: progress?.ayah_number || 1,
             });
@@ -315,45 +317,9 @@ const Home = () => {
           console.error('Error fetching continue reading:', error);
         }
       }
-
-      // Load personal stats
-      const { data: userStats } = await supabase
-        .from('user_stats')
-        .select('surahs_read, days_opened_this_year')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-
-      const { count: bookmarksCount } = await supabase
-        .from('bookmarks')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.user.id);
-
-      // Calculate Quran progress based on reading_progress
-      const { data: readingProgress } = await supabase
-        .from('reading_progress')
-        .select('surah_number, ayah_number')
-        .eq('user_id', session.user.id);
-
-      let totalAyahsRead = 0;
-      if (readingProgress) {
-        for (const rp of readingProgress) {
-          totalAyahsRead += rp.ayah_number;
-        }
-      }
-
-      const quranProgress = Math.round((totalAyahsRead / totalAyahs) * 100);
-
-      setPersonalStats({
-        surahsRead: userStats?.surahs_read || 0,
-        daysOpened: userStats?.days_opened_this_year || 0,
-        bookmarksCount: bookmarksCount || 0,
-        quranProgress: Math.min(quranProgress, 100),
-      });
-
-      setStatsLoading(false);
     };
 
-    loadUserData();
+    loadContinueReading();
   }, [user]);
 
   React.useEffect(() => {
@@ -445,71 +411,180 @@ const Home = () => {
 
   return (
     <div className="min-h-[calc(100vh-8rem)] pb-8">
-      <div className="w-full max-w-4xl mx-auto px-4 space-y-6">
+      <div className="w-full max-w-4xl mx-auto px-4 space-y-12">
         
-        {/* Hero Section */}
-        <HomeHero firstName={firstName} />
-
-        {/* Prayer Mini Widget */}
-        <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <PrayerMiniWidget />
-        </div>
-
-        {/* Achievement Badge */}
-        {user && personalStats && (
-          <AchievementBadge stats={personalStats} />
-        )}
-
-        {/* Featured Carousel */}
-        <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <FeaturedCarousel
-            surahOfDay={surahOfDay}
-            continueReading={continueReading}
-            quoteOfDay={quoteOfDay}
-          />
-        </div>
-
-        {/* Personal Stats (only for logged in users) */}
-        {user && (
-          <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-            <PersonalStats stats={personalStats} loading={statsLoading} />
+        {/* Hero Section - Phenomenal Islamic Design */}
+        <div className="relative pt-12 pb-8 animate-fade-in">
+          {/* Decorative Islamic Pattern Background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <pattern id="islamic-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                <path d="M10 0 L20 10 L10 20 L0 10 Z M10 5 L15 10 L10 15 L5 10 Z" fill="currentColor"/>
+              </pattern>
+              <rect width="100" height="100" fill="url(#islamic-pattern)" />
+            </svg>
           </div>
-        )}
 
-        {/* App Grid */}
-        <div className="pt-4">
-          <h2 className="text-sm font-semibold text-muted-foreground px-1 mb-3">
-            {settings.language === 'ar' ? 'استكشف' : 'Explore'}
-          </h2>
-          <div className="grid grid-cols-4 gap-5 animate-fade-in" style={{ animationDelay: '400ms' }}>
-            {appBoxes.map((app, index) => {
-              const Icon = app.icon;
-              return (
-                <Link
-                  key={app.link}
-                  to={app.link}
-                  className="flex flex-col items-center gap-2 group"
-                  style={{
-                    animationDelay: `${400 + index * 30}ms`,
-                  }}
-                >
-                  <div className={`w-14 h-14 rounded-[22%] bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 smooth-transition relative overflow-hidden group-active:scale-95`}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
-                    <div className="absolute inset-0 rounded-[22%] shadow-inner" />
-                    <Icon className="h-7 w-7 text-white relative z-10 drop-shadow-sm" strokeWidth={2.5} />
-                  </div>
-                  
-                  <span className="text-[11px] font-medium text-center leading-tight w-full truncate px-0.5">
-                    {app.title[settings.language]}
+          {/* Gradient Orbs */}
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
+          <div className="absolute top-0 right-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+
+          <div className="relative text-center space-y-4">
+            {/* Bismillah Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+              <span className="text-xs font-semibold text-primary tracking-wider">
+                {settings.language === 'ar' ? 'بسم الله الرحمن الرحيم' : 'بسم الله الرحمن الرحيم'}
+              </span>
+            </div>
+            
+            {/* Main Title - Stunning Typography */}
+            <div className="relative">
+              <h1 className="text-7xl md:text-8xl font-bold tracking-tight ios-26-style relative z-10">
+                {settings.language === 'ar' ? (
+                  <span className="bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent arabic-regal drop-shadow-sm" style={{ lineHeight: '1.1' }}>
+                    صراط
                   </span>
-                </Link>
-              );
-            })}
+                ) : (
+                  <span className="bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm" style={{ lineHeight: '1.1' }}>
+                    Sirat
+                  </span>
+                )}
+              </h1>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 blur-2xl opacity-20 bg-gradient-to-r from-primary/50 via-purple-500/50 to-primary/50 -z-10" />
+            </div>
+            
+            {/* Subtitle */}
+            <p className="text-base text-muted-foreground font-light tracking-wide">
+              {settings.language === 'ar' 
+                ? 'اقرأ. تدبّر. تذكّر.'
+                : 'Read. Reflect. Remember.'}
+            </p>
           </div>
         </div>
 
-        {/* Static Quran Stats - Compact */}
-        <div className="grid grid-cols-3 gap-2.5 pt-4 pb-4">
+        {/* Quick Access Cards - More Compact */}
+        {(surahOfDay || continueReading) && (
+          <div className="space-y-2.5 -mt-4">
+            {/* Surah of the Day */}
+            {surahOfDay && (
+              <Link 
+                to={`/quran/${surahOfDay.number}`}
+                className="block group animate-fade-in"
+              >
+                <div className="glass-effect rounded-3xl p-3.5 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                        <Sparkles className="h-5 w-5 text-primary-foreground" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                          {settings.language === 'ar' ? 'آية اليوم' : 'Daily Ayah'}
+                        </p>
+                        <h3 className="text-sm font-bold leading-tight">
+                          {settings.language === 'ar' ? surahOfDay.name : `${surahOfDay.englishName} (${surahOfDay.number}):1`}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="text-xl font-bold text-primary/40">
+                      {surahOfDay.number}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {/* Continue Reading */}
+            {continueReading && (
+              <Link 
+                to={`/quran/${continueReading.number}`}
+                className="block group animate-fade-in"
+              >
+                <div className="glass-effect rounded-3xl p-3.5 border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                        <Book className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                          {settings.language === 'ar' ? 'متابعة القراءة' : 'Continue Reading'}
+                        </p>
+                        <h3 className="text-sm font-bold leading-tight">
+                          {settings.language === 'ar' ? continueReading.name : continueReading.englishName}
+                        </h3>
+                      </div>
+                    </div>
+                    <div className="text-xl font-bold text-primary/40">
+                      {continueReading.number}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
+        )}
+
+        {/* Quote of the Day - Between Continue Reading and Apps */}
+        <div className="animate-fade-in">
+          <div className="relative overflow-hidden rounded-3xl border border-border/30 bg-gradient-to-br from-primary/5 via-background to-purple-500/5 p-6 backdrop-blur-xl">
+            {/* Decorative corner elements */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+            
+            <div className="relative space-y-3 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="h-px w-8 bg-gradient-to-r from-transparent to-primary/30" />
+                <Sparkles className="h-4 w-4 text-primary" />
+                <div className="h-px w-8 bg-gradient-to-l from-transparent to-primary/30" />
+              </div>
+              
+              <p className={`text-lg md:text-xl font-semibold leading-relaxed ${settings.language === 'ar' ? 'arabic-regal' : ''}`}>
+                {settings.language === 'ar' ? quoteOfDay.ar : quoteOfDay.en}
+              </p>
+              
+              <p className="text-xs text-muted-foreground font-medium tracking-wide">
+                {settings.language === 'ar' ? formatReference(quoteOfDay.reference, 'ar') : formatReference(quoteOfDay.reference, 'en')}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* App Grid - iOS 26 Style - Smaller & More Spacing */}
+        <div className="grid grid-cols-4 gap-6 pt-6 pb-4 animate-fade-in">
+          {appBoxes.map((app, index) => {
+            const Icon = app.icon;
+            return (
+              <Link
+                key={app.link}
+                to={app.link}
+                className="flex flex-col items-center gap-2 group"
+                style={{
+                  animationDelay: `${index * 30}ms`,
+                }}
+              >
+                {/* iOS-style app icon - Smaller */}
+                <div className={`w-14 h-14 rounded-[22%] bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 smooth-transition relative overflow-hidden group-active:scale-95`}>
+                  {/* Subtle overlay for depth */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+                  {/* Inner shadow for depth */}
+                  <div className="absolute inset-0 rounded-[22%] shadow-inner" />
+                  <Icon className="h-7 w-7 text-white relative z-10 drop-shadow-sm" strokeWidth={2.5} />
+                </div>
+                
+                {/* App label */}
+                <span className="text-[11px] font-medium text-center leading-tight w-full truncate px-0.5">
+                  {app.title[settings.language]}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Stats - Elegant & Compact */}
+        <div className="grid grid-cols-3 gap-2.5 pt-6">
           {[
             { value: '114', label: settings.language === 'ar' ? 'سورة' : 'Surahs' },
             { value: '6,236', label: settings.language === 'ar' ? 'آية' : 'Verses' },
