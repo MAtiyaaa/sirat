@@ -105,8 +105,8 @@ const Account = () => {
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
-  const [appleLinkLoading, setAppleLinkLoading] = useState(false);
+  const [linkInfoOpen, setLinkInfoOpen] = useState(false);
+  const [linkInfoProvider, setLinkInfoProvider] = useState<'google' | 'apple' | null>(null);
 
   const linkedProviders = getLinkedProviders(authUser);
   const hasGoogleLinked = linkedProviders.has('google');
@@ -244,6 +244,11 @@ const Account = () => {
       appleLinked: 'حساب Apple مرتبط',
       appleLinkSuccess: 'تم ربط حساب Apple بنجاح',
       appleLinkError: 'فشل في ربط حساب Apple',
+
+      linkDifferentEmailTitle: 'لا يمكن ربط بريد مختلف',
+      linkDifferentEmailBody:
+        'ربط Google/Apple يعمل فقط إذا كان بريد المزود مطابقًا لبريد حسابك الحالي. إذا كان البريد مختلفًا، فسيتم إنشاء حساب جديد. لذلك قمنا بإيقاف الربط هنا لتجنب تبديل الحساب.',
+      ok: 'حسنًا',
     },
     en: {
       title: 'My Account',
@@ -309,6 +314,11 @@ const Account = () => {
       appleLinked: 'Apple Account Linked',
       appleLinkSuccess: 'Apple account linked successfully',
       appleLinkError: 'Failed to link Apple account',
+
+      linkDifferentEmailTitle: "Can't link different email",
+      linkDifferentEmailBody:
+        'Google/Apple linking only works when the provider email matches your current account email. If it differs, a new account will be created. We block linking here to prevent an account switch.',
+      ok: 'OK',
     },
   };
 
@@ -491,43 +501,14 @@ const Account = () => {
   };
 
   const handleLinkGoogle = async () => {
-    setGoogleLinkLoading(true);
-    try {
-      // Use Lovable Cloud managed OAuth for linking
-      // When user is already signed in, the OAuth flow will link the identity
-      const { error } = await lovable.auth.signInWithOAuth('google', {
-        redirect_uri: `${window.location.origin}/account`,
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error('Google link error:', error);
-      toast({
-        title: t.googleLinkError,
-        description: error.message,
-        variant: 'destructive',
-      });
-      setGoogleLinkLoading(false);
-    }
+    // Prevent creating a new account/session switch when provider email differs.
+    setLinkInfoProvider('google');
+    setLinkInfoOpen(true);
   };
 
   const handleLinkApple = async () => {
-    setAppleLinkLoading(true);
-    try {
-      // Use Lovable Cloud managed OAuth for linking
-      // When user is already signed in, the OAuth flow will link the identity
-      const { error } = await lovable.auth.signInWithOAuth('apple', {
-        redirect_uri: `${window.location.origin}/account`,
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      console.error('Apple link error:', error);
-      toast({
-        title: t.appleLinkError,
-        description: error.message,
-        variant: 'destructive',
-      });
-      setAppleLinkLoading(false);
-    }
+    setLinkInfoProvider('apple');
+    setLinkInfoOpen(true);
   };
 
   const handleClearQalamHistory = async () => {
@@ -754,6 +735,33 @@ const Account = () => {
   return (
     <div className="min-h-screen pb-20">
       <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
+
+        <AlertDialog
+          open={linkInfoOpen}
+          onOpenChange={(open) => {
+            setLinkInfoOpen(open);
+            if (!open) setLinkInfoProvider(null);
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t.linkDifferentEmailTitle}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t.linkDifferentEmailBody}
+                {linkInfoProvider ? (
+                  <span className="block mt-2">
+                    {settings.language === 'ar'
+                      ? `المزود: ${linkInfoProvider === 'google' ? 'Google' : 'Apple'}`
+                      : `Provider: ${linkInfoProvider === 'google' ? 'Google' : 'Apple'}`}
+                  </span>
+                ) : null}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>{t.ok}</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         
         {/* Header */}
         <div className="flex items-center gap-4 animate-fade-in">
@@ -957,7 +965,7 @@ const Account = () => {
             {/* Google */}
             <button
               onClick={hasGoogleLinked ? undefined : handleLinkGoogle}
-              disabled={hasGoogleLinked || googleLinkLoading}
+              disabled={hasGoogleLinked}
               className={`w-full p-4 flex items-center justify-between ${
                 hasGoogleLinked 
                   ? 'cursor-default' 
@@ -974,9 +982,7 @@ const Account = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                {googleLinkLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                ) : hasGoogleLinked ? (
+                {hasGoogleLinked ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
                   <Link2 className="h-5 w-5 text-muted-foreground" />
@@ -987,7 +993,7 @@ const Account = () => {
             {/* Apple */}
             <button
               onClick={hasAppleLinked ? undefined : handleLinkApple}
-              disabled={hasAppleLinked || appleLinkLoading}
+              disabled={hasAppleLinked}
               className={`w-full p-4 flex items-center justify-between ${
                 hasAppleLinked 
                   ? 'cursor-default' 
@@ -1004,9 +1010,7 @@ const Account = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                {appleLinkLoading ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                ) : hasAppleLinked ? (
+                {hasAppleLinked ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
                   <Link2 className="h-5 w-5 text-muted-foreground" />
