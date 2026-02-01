@@ -6,6 +6,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 export type ThemeColor = 'blue' | 'green' | 'gold' | 'pink' | 'red';
 export type FontType = 'quran' | 'amiri' | 'scheherazade' | 'lateef' | 'noto-naskh' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
+export type WordByWordMode = 'off' | 'click' | 'under';
 
 interface Settings {
   language: Language;
@@ -18,7 +19,7 @@ interface Settings {
   tafsirSource: string;
   prayerTimeRegion: string | null;
   readingTrackingMode: ReadingTrackingMode;
-  wordByWordDisplay: boolean;
+  wordByWordMode: WordByWordMode;
 }
 
 interface SettingsContextType {
@@ -37,7 +38,7 @@ const defaultSettings: Settings = {
   tafsirSource: 'ar-tafsir-ibn-kathir',
   prayerTimeRegion: null,
   readingTrackingMode: 'auto',
-  wordByWordDisplay: false,
+  wordByWordMode: 'off',
 };
 
 // Load settings from localStorage immediately (synchronously) for instant availability
@@ -141,7 +142,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               tafsirSource: data.tafsir_source || defaultSettings.tafsirSource,
               prayerTimeRegion: data.prayer_time_region || defaultSettings.prayerTimeRegion,
               readingTrackingMode: (data.reading_tracking_mode as ReadingTrackingMode) || defaultSettings.readingTrackingMode,
-              wordByWordDisplay: data.word_by_word_display ?? defaultSettings.wordByWordDisplay,
+              // Handle migration from boolean to string
+              wordByWordMode: typeof data.word_by_word_display === 'boolean' 
+                ? (data.word_by_word_display ? 'under' : 'click') 
+                : (data.word_by_word_display as WordByWordMode) || defaultSettings.wordByWordMode,
             };
             console.log('[Settings] Setting state to DB settings:', dbSettings);
             setSettings(dbSettings);
@@ -250,8 +254,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         tafsir_source: settings.tafsirSource,
         prayer_time_region: settings.prayerTimeRegion,
         reading_tracking_mode: settings.readingTrackingMode,
-        word_by_word_display: settings.wordByWordDisplay,
-      };
+        word_by_word_display: settings.wordByWordMode as string,
+      } as any;
       
       console.log('[Settings] Upserting data:', settingsData);
       

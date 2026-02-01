@@ -1072,8 +1072,8 @@ const SurahDetail = () => {
               }`}
               dir="rtl"
             >
-              {wordData[ayah.numberInSurah] ? (
-                settings.wordByWordDisplay ? (
+              {wordData[ayah.numberInSurah] && settings.wordByWordMode !== 'off' ? (
+                settings.wordByWordMode === 'under' ? (
                   // Inline word-by-word display
                   <div className="flex flex-wrap gap-4 justify-end text-right" dir="rtl">
                     {wordData[ayah.numberInSurah].map((word, wordIndex) => (
@@ -1089,7 +1089,7 @@ const SurahDetail = () => {
                     ))}
                   </div>
                 ) : (
-                  // Popover word-by-word display
+                  // Popover word-by-word display (click mode)
                   <div className="flex flex-wrap gap-2 justify-end text-right" dir="rtl">
                     {wordData[ayah.numberInSurah].map((word, wordIndex) => {
                       const popoverKey = `${ayah.numberInSurah}-${wordIndex}`;

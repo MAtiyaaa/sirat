@@ -154,8 +154,12 @@ const Settings = () => {
       translationOptions: {
         transliteration: 'النقل الحرفي',
       },
-      wordByWord: 'النطق والترجمة تحت الكلمة',
-      wordByWordDesc: 'عرض النطق والترجمة تحت كل كلمة',
+      wordByWord: 'كلمة بكلمة',
+      wordByWordModes: {
+        off: 'إيقاف',
+        click: 'عند النقر',
+        under: 'تحت كل كلمة',
+      },
       mode: 'الوضع',
       color: 'اللون',
       modes: {
@@ -227,8 +231,12 @@ const Settings = () => {
       translationOptions: {
         transliteration: 'Transliteration',
       },
-      wordByWord: 'Word Transliteration & Translation',
-      wordByWordDesc: 'Show transliteration and translation under each word',
+      wordByWord: 'Word by Word',
+      wordByWordModes: {
+        off: 'Off',
+        click: 'On Click',
+        under: 'Under Each Word',
+      },
       mode: 'Mode',
       color: 'Color',
       modes: {
@@ -472,11 +480,17 @@ const Settings = () => {
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <Label className="font-medium">{t.wordByWord}</Label>
-              <p className="text-xs text-muted-foreground mt-1">{t.wordByWordDesc}</p>
-            </div>
-            <Switch checked={settings.wordByWordDisplay} onCheckedChange={(checked) => updateSettings({ wordByWordDisplay: checked })} />
+            <Label className="font-medium">{t.wordByWord}</Label>
+            <Select value={settings.wordByWordMode} onValueChange={(value: any) => updateSettings({ wordByWordMode: value })}>
+              <SelectTrigger className={isRTL ? 'w-44' : 'w-40'}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="off">{t.wordByWordModes.off}</SelectItem>
+                <SelectItem value="click">{t.wordByWordModes.click}</SelectItem>
+                <SelectItem value="under">{t.wordByWordModes.under}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="h-px bg-border" />
           <div className="flex items-center justify-between">
