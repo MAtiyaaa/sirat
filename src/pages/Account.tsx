@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable';
 import { useUserStats } from '@/hooks/useUserStats';
 import { getLinkedProviders, hasPasswordIdentity } from '@/lib/auth-identities';
 import { Button } from '@/components/ui/button';
@@ -492,15 +493,12 @@ const Account = () => {
   const handleLinkGoogle = async () => {
     setGoogleLinkLoading(true);
     try {
-      // IMPORTANT: when already signed in, we must LINK (not sign-in) to avoid creating a new user.
-      const { data, error } = await (supabase.auth as any).linkIdentity({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/account',
-        },
+      // Use Lovable Cloud managed OAuth for linking
+      // When user is already signed in, the OAuth flow will link the identity
+      const { error } = await lovable.auth.signInWithOAuth('google', {
+        redirect_uri: `${window.location.origin}/account`,
       });
       if (error) throw error;
-      if (data?.url) window.location.assign(data.url);
     } catch (error: any) {
       console.error('Google link error:', error);
       toast({
@@ -515,15 +513,12 @@ const Account = () => {
   const handleLinkApple = async () => {
     setAppleLinkLoading(true);
     try {
-      // IMPORTANT: when already signed in, we must LINK (not sign-in) to avoid creating a new user.
-      const { data, error } = await (supabase.auth as any).linkIdentity({
-        provider: 'apple',
-        options: {
-          redirectTo: window.location.origin + '/account',
-        },
+      // Use Lovable Cloud managed OAuth for linking
+      // When user is already signed in, the OAuth flow will link the identity
+      const { error } = await lovable.auth.signInWithOAuth('apple', {
+        redirect_uri: `${window.location.origin}/account`,
       });
       if (error) throw error;
-      if (data?.url) window.location.assign(data.url);
     } catch (error: any) {
       console.error('Apple link error:', error);
       toast({
