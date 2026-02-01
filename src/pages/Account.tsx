@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable';
 import { useUserStats } from '@/hooks/useUserStats';
+import { getLinkedProviders, hasPasswordIdentity } from '@/lib/auth-identities';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -93,9 +93,12 @@ const Account = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deleteAccountPassword, setDeleteAccountPassword] = useState('');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const { stats, loading: statsLoading } = useUserStats(user?.id);
+
+  const [authUser, setAuthUser] = useState(user);
 
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
@@ -104,28 +107,39 @@ const Account = () => {
   const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
   const [appleLinkLoading, setAppleLinkLoading] = useState(false);
 
-  // Check if user has Google/Apple identity linked
-  const hasGoogleLinked = user?.app_metadata?.providers?.includes('google') || 
-    user?.identities?.some((identity: any) => identity.provider === 'google');
-  const hasAppleLinked = user?.app_metadata?.providers?.includes('apple') || 
-    user?.identities?.some((identity: any) => identity.provider === 'apple');
+  const linkedProviders = getLinkedProviders(authUser);
+  const hasGoogleLinked = linkedProviders.has('google');
+  const hasAppleLinked = linkedProviders.has('apple');
+  const canUsePasswordDelete = hasPasswordIdentity(authUser);
 
   useEffect(() => {
     if (user) {
+      setAuthUser(user);
       loadProfile();
     }
   }, [user]);
+
+  const refreshAuthUser = async () => {
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) setAuthUser(data.user);
+    } catch {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     // Reload profile when returning to the page or when navigating
     const handleVisibilityChange = () => {
       if (!document.hidden && user) {
+        refreshAuthUser();
         loadProfile();
       }
     };
     
     const handleFocus = () => {
       if (user) {
+        refreshAuthUser();
         loadProfile();
       }
     };
@@ -478,13 +492,15 @@ const Account = () => {
   const handleLinkGoogle = async () => {
     setGoogleLinkLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + '/account',
+      // IMPORTANT: when already signed in, we must LINK (not sign-in) to avoid creating a new user.
+      const { data, error } = await (supabase.auth as any).linkIdentity({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/account',
+        },
       });
-
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
+      if (data?.url) window.location.assign(data.url);
     } catch (error: any) {
       console.error('Google link error:', error);
       toast({
@@ -499,13 +515,15 @@ const Account = () => {
   const handleLinkApple = async () => {
     setAppleLinkLoading(true);
     try {
-      const { error } = await lovable.auth.signInWithOAuth("apple", {
-        redirect_uri: window.location.origin + '/account',
+      // IMPORTANT: when already signed in, we must LINK (not sign-in) to avoid creating a new user.
+      const { data, error } = await (supabase.auth as any).linkIdentity({
+        provider: 'apple',
+        options: {
+          redirectTo: window.location.origin + '/account',
+        },
       });
-
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
+      if (data?.url) window.location.assign(data.url);
     } catch (error: any) {
       console.error('Apple link error:', error);
       toast({
@@ -616,9 +634,12 @@ const Account = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user || !deleteAccountPassword) {
+    if (!user) return;
+
+    const expects = settings.language === 'ar' ? 'حذف' : 'DELETE';
+    if (deleteConfirmText.trim().toUpperCase() !== expects) {
       toast({
-        title: t.passwordRequired,
+        title: settings.language === 'ar' ? 'اكتب كلمة التأكيد' : 'Type the confirmation word',
         variant: 'destructive',
       });
       return;
@@ -626,50 +647,46 @@ const Account = () => {
 
     setIsLoading(true);
     try {
-      // Verify password by attempting to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email!,
-        password: deleteAccountPassword,
+      // If user has an email/password identity, verify password; OAuth-only users can't.
+      if (canUsePasswordDelete) {
+        if (!deleteAccountPassword) {
+          toast({ title: t.passwordRequired, variant: 'destructive' });
+          return;
+        }
+
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user.email!,
+          password: deleteAccountPassword,
+        });
+
+        if (signInError) {
+          toast({
+            title: settings.language === 'ar' ? 'كلمة المرور غير صحيحة' : 'Incorrect password',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error('Missing session');
+
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({}),
       });
 
-      if (signInError) {
-        toast({
-          title: settings.language === 'ar' ? 'كلمة المرور غير صحيحة' : 'Incorrect password',
-          variant: 'destructive',
-        });
-        return;
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Delete failed');
       }
 
-      // Delete all user data first
-      const { data: conversations } = await supabase
-        .from('ai_conversations')
-        .select('id')
-        .eq('user_id', user.id);
-
-      if (conversations && conversations.length > 0) {
-        const conversationIds = conversations.map(c => c.id);
-        await supabase.from('ai_messages').delete().in('conversation_id', conversationIds);
-      }
-
-      await Promise.allSettled([
-        supabase.from('ai_conversations').delete().eq('user_id', user.id),
-        supabase.from('bookmarks').delete().eq('user_id', user.id),
-        supabase.from('hadith_bookmarks').delete().eq('user_id', user.id),
-        supabase.from('reading_progress').delete().eq('user_id', user.id),
-        supabase.from('last_viewed_surah').delete().eq('user_id', user.id),
-        supabase.from('ayah_interactions').delete().eq('user_id', user.id),
-        supabase.from('user_zakat_data').delete().eq('user_id', user.id),
-        supabase.from('user_stats').delete().eq('user_id', user.id),
-        supabase.from('profiles').delete().eq('user_id', user.id),
-        supabase.from('user_settings').delete().eq('user_id', user.id),
-      ]);
-
-      // Delete avatar from storage
-      if (profile?.avatar_url) {
-        await supabase.storage.from('avatars').remove([`${user.id}/avatar.png`, `${user.id}/avatar.jpg`, `${user.id}/avatar.jpeg`]);
-      }
-
-      // Sign out
+      // Session is now invalid; clear locally
       await supabase.auth.signOut();
       localStorage.clear();
 
@@ -687,6 +704,8 @@ const Account = () => {
     } finally {
       setIsLoading(false);
       setShowDeleteDialog(false);
+      setDeleteAccountPassword('');
+      setDeleteConfirmText('');
     }
   };
 
@@ -1108,14 +1127,27 @@ const Account = () => {
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>{t.enterPasswordToDelete}</Label>
+                    <Label>
+                      {settings.language === 'ar' ? 'اكتب كلمة التأكيد لإتمام الحذف' : 'Type the confirmation word to delete'}
+                    </Label>
                     <Input
-                      type="password"
-                      value={deleteAccountPassword}
-                      onChange={(e) => setDeleteAccountPassword(e.target.value)}
-                      placeholder={t.currentPassword}
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder={settings.language === 'ar' ? 'حذف' : 'DELETE'}
                     />
                   </div>
+
+                  {canUsePasswordDelete && (
+                    <div className="space-y-2">
+                      <Label>{t.enterPasswordToDelete}</Label>
+                      <Input
+                        type="password"
+                        value={deleteAccountPassword}
+                        onChange={(e) => setDeleteAccountPassword(e.target.value)}
+                        placeholder={t.currentPassword}
+                      />
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
