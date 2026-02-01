@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { 
   Book, 
   MessageSquare, 
@@ -463,6 +464,36 @@ const Home = () => {
             </p>
           </div>
         </div>
+
+        {/* Sign In Banner for Guests */}
+        {!user && (
+          <div className="animate-fade-in -mt-4">
+            <Link to="/auth">
+              <div className="glass-effect rounded-3xl p-4 border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 hover:border-primary/50 smooth-transition backdrop-blur-xl">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                      <User className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold leading-tight">
+                        {settings.language === 'ar' ? 'سجّل الدخول' : 'Sign In'}
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        {settings.language === 'ar' 
+                          ? 'احفظ تقدمك وإشاراتك المرجعية عبر جميع أجهزتك'
+                          : 'Sync your progress and bookmarks across devices'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button size="sm" className="shrink-0 rounded-xl">
+                    {settings.language === 'ar' ? 'ابدأ' : 'Get Started'}
+                  </Button>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
 
         {/* Quick Access Cards - More Compact */}
         {(surahOfDay || continueReading) && (

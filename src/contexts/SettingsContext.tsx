@@ -27,14 +27,14 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  language: 'en',
+  language: 'ar',
   themeMode: 'system',
   themeColor: 'blue',
   translationEnabled: true,
-  translationSource: 'en.sahih',
+  translationSource: 'ar.muyassar',
   fontType: 'quran',
   tafsirEnabled: true,
-  tafsirSource: 'en-tafisr-ibn-kathir',
+  tafsirSource: 'ar-tafsir-ibn-kathir',
   prayerTimeRegion: null,
   readingTrackingMode: 'auto',
   wordByWordDisplay: false,
