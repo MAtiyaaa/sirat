@@ -27,7 +27,9 @@ import {
   ArrowLeft,
   Link2,
   Check,
-  Loader2
+  Loader2,
+  Download,
+  Upload
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -105,8 +107,10 @@ const Account = () => {
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [linkInfoOpen, setLinkInfoOpen] = useState(false);
-  const [linkInfoProvider, setLinkInfoProvider] = useState<'google' | 'apple' | null>(null);
+  const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
+  const [appleLinkLoading, setAppleLinkLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
 
   const linkedProviders = getLinkedProviders(authUser);
   const hasGoogleLinked = linkedProviders.has('google');
@@ -245,10 +249,15 @@ const Account = () => {
       appleLinkSuccess: 'تم ربط حساب Apple بنجاح',
       appleLinkError: 'فشل في ربط حساب Apple',
 
-      linkDifferentEmailTitle: 'لا يمكن ربط بريد مختلف',
-      linkDifferentEmailBody:
-        'ربط Google/Apple يعمل فقط إذا كان بريد المزود مطابقًا لبريد حسابك الحالي. إذا كان البريد مختلفًا، فسيتم إنشاء حساب جديد. لذلك قمنا بإيقاف الربط هنا لتجنب تبديل الحساب.',
-      ok: 'حسنًا',
+      linkDifferentEmail: 'لا يمكن الربط لأن البريد الإلكتروني مختلف',
+      // Export/Import
+      exportData: 'تصدير البيانات',
+      importData: 'استيراد البيانات',
+      exportSuccess: 'تم تصدير البيانات بنجاح',
+      importSuccess: 'تم استيراد البيانات بنجاح',
+      importError: 'فشل استيراد البيانات',
+      invalidFile: 'ملف غير صالح',
+      selectFile: 'اختر ملف JSON',
     },
     en: {
       title: 'My Account',
@@ -315,10 +324,15 @@ const Account = () => {
       appleLinkSuccess: 'Apple account linked successfully',
       appleLinkError: 'Failed to link Apple account',
 
-      linkDifferentEmailTitle: "Can't link different email",
-      linkDifferentEmailBody:
-        'Google/Apple linking only works when the provider email matches your current account email. If it differs, a new account will be created. We block linking here to prevent an account switch.',
-      ok: 'OK',
+      linkDifferentEmail: "Can't link because the email is different",
+      // Export/Import
+      exportData: 'Export Data',
+      importData: 'Import Data',
+      exportSuccess: 'Data exported successfully',
+      importSuccess: 'Data imported successfully',
+      importError: 'Failed to import data',
+      invalidFile: 'Invalid file',
+      selectFile: 'Select JSON file',
     },
   };
 
@@ -501,14 +515,231 @@ const Account = () => {
   };
 
   const handleLinkGoogle = async () => {
-    // Prevent creating a new account/session switch when provider email differs.
-    setLinkInfoProvider('google');
-    setLinkInfoOpen(true);
+    if (!user) return;
+    setGoogleLinkLoading(true);
+    
+    // Store current user email to check after OAuth
+    const currentEmail = user.email;
+    sessionStorage.setItem('linkAttempt', JSON.stringify({ provider: 'google', email: currentEmail }));
+    
+    try {
+      await lovable.auth.signInWithOAuth('google');
+    } catch (error) {
+      console.error('Google link error:', error);
+      toast({ title: t.googleLinkError, variant: 'destructive' });
+      setGoogleLinkLoading(false);
+    }
   };
 
   const handleLinkApple = async () => {
-    setLinkInfoProvider('apple');
-    setLinkInfoOpen(true);
+    if (!user) return;
+    setAppleLinkLoading(true);
+    
+    const currentEmail = user.email;
+    sessionStorage.setItem('linkAttempt', JSON.stringify({ provider: 'apple', email: currentEmail }));
+    
+    try {
+      await lovable.auth.signInWithOAuth('apple');
+    } catch (error) {
+      console.error('Apple link error:', error);
+      toast({ title: t.appleLinkError, variant: 'destructive' });
+      setAppleLinkLoading(false);
+    }
+  };
+
+  // Check if link attempt resulted in different email after OAuth redirect
+  useEffect(() => {
+    const checkLinkAttempt = async () => {
+      const linkAttemptStr = sessionStorage.getItem('linkAttempt');
+      if (!linkAttemptStr || !user) return;
+      
+      sessionStorage.removeItem('linkAttempt');
+      
+      try {
+        const linkAttempt = JSON.parse(linkAttemptStr);
+        const originalEmail = linkAttempt.email;
+        
+        // If we came back with a different user (different email), that's a problem
+        if (user.email !== originalEmail) {
+          toast({
+            title: t.linkDifferentEmail,
+            variant: 'destructive',
+          });
+          // Sign out and redirect to auth so they can sign back in
+          await supabase.auth.signOut();
+          navigate('/auth');
+        } else {
+          // Same email - linking succeeded
+          const providerName = linkAttempt.provider === 'google' ? 'Google' : 'Apple';
+          toast({
+            title: linkAttempt.provider === 'google' ? t.googleLinkSuccess : t.appleLinkSuccess,
+          });
+          refreshAuthUser();
+        }
+      } catch {
+        // ignore parsing errors
+      }
+    };
+    
+    checkLinkAttempt();
+  }, [user]);
+
+  const handleExportData = async () => {
+    if (!user) return;
+    setExportLoading(true);
+    
+    try {
+      // Fetch all user data in parallel
+      const [
+        { data: readingProgress },
+        { data: bookmarks },
+        { data: hadithBookmarks },
+        { data: duaBookmarks },
+        { data: lastViewedSurah },
+        { data: userSettings },
+        { data: ayahInteractions },
+        { data: zakatData },
+        { data: profileData },
+      ] = await Promise.all([
+        supabase.from('reading_progress').select('*').eq('user_id', user.id),
+        supabase.from('bookmarks').select('*').eq('user_id', user.id),
+        supabase.from('hadith_bookmarks').select('*').eq('user_id', user.id),
+        supabase.from('dua_bookmarks').select('*').eq('user_id', user.id),
+        supabase.from('last_viewed_surah').select('*').eq('user_id', user.id),
+        supabase.from('user_settings').select('*').eq('user_id', user.id),
+        supabase.from('ayah_interactions').select('*').eq('user_id', user.id),
+        supabase.from('user_zakat_data').select('*').eq('user_id', user.id),
+        supabase.from('profiles').select('*').eq('user_id', user.id),
+      ]);
+      
+      const exportData = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        profile: profileData?.[0] || null,
+        settings: userSettings?.[0] || null,
+        readingProgress: readingProgress || [],
+        bookmarks: bookmarks || [],
+        hadithBookmarks: hadithBookmarks || [],
+        duaBookmarks: duaBookmarks || [],
+        lastViewedSurah: lastViewedSurah?.[0] || null,
+        ayahInteractions: ayahInteractions || [],
+        zakatData: zakatData?.[0] || null,
+      };
+      
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sirat-data-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({ title: t.exportSuccess });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({ title: t.error, variant: 'destructive' });
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleImportData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files?.[0]) return;
+    
+    const file = event.target.files[0];
+    setImportLoading(true);
+    
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+      
+      // Validate structure
+      if (!importData.version || importData.version !== 1) {
+        toast({ title: t.invalidFile, variant: 'destructive' });
+        return;
+      }
+      
+      // Import data
+      // Import profile (update existing)
+      if (importData.profile) {
+        const { id, user_id, created_at, ...profileFields } = importData.profile;
+        await supabase.from('profiles').update(profileFields).eq('user_id', user.id);
+      }
+      
+      // Import settings (update existing)
+      if (importData.settings) {
+        const { id, user_id, created_at, ...settingsFields } = importData.settings;
+        await supabase.from('user_settings').update(settingsFields).eq('user_id', user.id);
+      }
+      
+      // Import bookmarks
+      if (importData.bookmarks?.length > 0) {
+        for (const bookmark of importData.bookmarks) {
+          const { id, user_id, created_at, ...bookmarkFields } = bookmark;
+          await supabase.from('bookmarks').insert({ ...bookmarkFields, user_id: user.id });
+        }
+      }
+      
+      // Import hadith bookmarks
+      if (importData.hadithBookmarks?.length > 0) {
+        for (const bookmark of importData.hadithBookmarks) {
+          const { id, user_id, created_at, ...fields } = bookmark;
+          await supabase.from('hadith_bookmarks').insert({ ...fields, user_id: user.id });
+        }
+      }
+      
+      // Import dua bookmarks
+      if (importData.duaBookmarks?.length > 0) {
+        for (const bookmark of importData.duaBookmarks) {
+          const { id, user_id, created_at, ...fields } = bookmark;
+          await supabase.from('dua_bookmarks').insert({ ...fields, user_id: user.id });
+        }
+      }
+      
+      // Import reading progress
+      if (importData.readingProgress?.length > 0) {
+        for (const progress of importData.readingProgress) {
+          const { id, user_id, created_at, updated_at, ...fields } = progress;
+          await supabase.from('reading_progress').upsert(
+            { ...fields, user_id: user.id },
+            { onConflict: 'user_id,surah_number' }
+          );
+        }
+      }
+      
+      // Import last viewed surah
+      if (importData.lastViewedSurah) {
+        const { id, user_id, updated_at, ...fields } = importData.lastViewedSurah;
+        await supabase.from('last_viewed_surah').upsert(
+          { ...fields, user_id: user.id },
+          { onConflict: 'user_id' }
+        );
+      }
+      
+      // Import zakat data
+      if (importData.zakatData) {
+        const { id, user_id, created_at, updated_at, ...fields } = importData.zakatData;
+        await supabase.from('user_zakat_data').upsert(
+          { ...fields, user_id: user.id },
+          { onConflict: 'user_id' }
+        );
+      }
+      
+      toast({ title: t.importSuccess });
+      
+      // Reload profile and page data
+      await loadProfile();
+      window.location.reload();
+    } catch (error) {
+      console.error('Import error:', error);
+      toast({ title: t.importError, variant: 'destructive' });
+    } finally {
+      setImportLoading(false);
+      // Reset file input
+      event.target.value = '';
+    }
   };
 
   const handleClearQalamHistory = async () => {
@@ -736,32 +967,6 @@ const Account = () => {
     <div className="min-h-screen pb-20">
       <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
 
-        <AlertDialog
-          open={linkInfoOpen}
-          onOpenChange={(open) => {
-            setLinkInfoOpen(open);
-            if (!open) setLinkInfoProvider(null);
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t.linkDifferentEmailTitle}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t.linkDifferentEmailBody}
-                {linkInfoProvider ? (
-                  <span className="block mt-2">
-                    {settings.language === 'ar'
-                      ? `المزود: ${linkInfoProvider === 'google' ? 'Google' : 'Apple'}`
-                      : `Provider: ${linkInfoProvider === 'google' ? 'Google' : 'Apple'}`}
-                  </span>
-                ) : null}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction>{t.ok}</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
         
         {/* Header */}
         <div className="flex items-center gap-4 animate-fade-in">
@@ -964,10 +1169,10 @@ const Account = () => {
           <div className="glass-effect rounded-2xl border border-border/30 divide-y divide-border/30 overflow-hidden">
             {/* Google */}
             <button
-              onClick={hasGoogleLinked ? undefined : handleLinkGoogle}
-              disabled={hasGoogleLinked}
+              onClick={hasGoogleLinked || googleLinkLoading ? undefined : handleLinkGoogle}
+              disabled={hasGoogleLinked || googleLinkLoading}
               className={`w-full p-4 flex items-center justify-between ${
-                hasGoogleLinked 
+                hasGoogleLinked || googleLinkLoading
                   ? 'cursor-default' 
                   : 'hover:bg-accent/50 smooth-transition'
               }`}
@@ -982,7 +1187,9 @@ const Account = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                {hasGoogleLinked ? (
+                {googleLinkLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : hasGoogleLinked ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
                   <Link2 className="h-5 w-5 text-muted-foreground" />
@@ -992,10 +1199,10 @@ const Account = () => {
 
             {/* Apple */}
             <button
-              onClick={hasAppleLinked ? undefined : handleLinkApple}
-              disabled={hasAppleLinked}
+              onClick={hasAppleLinked || appleLinkLoading ? undefined : handleLinkApple}
+              disabled={hasAppleLinked || appleLinkLoading}
               className={`w-full p-4 flex items-center justify-between ${
-                hasAppleLinked 
+                hasAppleLinked || appleLinkLoading
                   ? 'cursor-default' 
                   : 'hover:bg-accent/50 smooth-transition'
               }`}
@@ -1010,7 +1217,9 @@ const Account = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                {hasAppleLinked ? (
+                {appleLinkLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : hasAppleLinked ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
                   <Link2 className="h-5 w-5 text-muted-foreground" />
@@ -1026,6 +1235,35 @@ const Account = () => {
             {t.dataSection}
           </h3>
           <div className="glass-effect rounded-2xl border border-border/30 divide-y divide-border/30 overflow-hidden">
+            {/* Export Data */}
+            <button 
+              onClick={handleExportData} 
+              disabled={exportLoading}
+              className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <Download className="h-5 w-5 text-blue-500" />
+                <span className="font-medium">{t.exportData}</span>
+              </div>
+              {exportLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            </button>
+
+            {/* Import Data */}
+            <label className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-3">
+                <Upload className="h-5 w-5 text-green-500" />
+                <span className="font-medium">{t.importData}</span>
+              </div>
+              {importLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportData}
+                disabled={importLoading}
+                className="hidden"
+              />
+            </label>
+
             {/* Clear Reading Data */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
