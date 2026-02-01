@@ -60,39 +60,22 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      // Detect if we're on a custom domain
-      const isCustomDomain = 
-        !window.location.hostname.includes('lovable.app') &&
-        !window.location.hostname.includes('lovableproject.com') &&
-        !window.location.hostname.includes('localhost');
+      // Always use Lovable Cloud managed OAuth (works across staging + custom domains)
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        // Send user back to the auth page; it will redirect to / once the session is set
+        redirect_uri: `${window.location.origin}/auth`,
+      });
 
-      if (isCustomDomain) {
-        // Bypass auth-bridge for custom domains
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.location.origin,
-            skipBrowserRedirect: true,
-          },
-        });
-
-        if (error) throw error;
-
-        // Redirect to OAuth URL
-        if (data?.url) {
-          window.location.href = data.url;
-        }
-      } else {
-        // For Lovable domains, use the managed solution
-        const { error } = await lovable.auth.signInWithOAuth("google", {
-          redirect_uri: window.location.origin,
-        });
-
-        if (error) throw error;
-      }
+      if (error) throw error;
     } catch (error: any) {
       console.error('Google sign-in error:', error);
-      toast.error(error.message || (settings.language === 'ar' ? 'حدث خطأ في تسجيل الدخول بجوجل' : 'Google sign-in failed'));
+      toast.error(
+        error.message ||
+          (settings.language === 'ar'
+            ? 'حدث خطأ في تسجيل الدخول بجوجل'
+            : 'Google sign-in failed')
+      );
+    } finally {
       setGoogleLoading(false);
     }
   };
