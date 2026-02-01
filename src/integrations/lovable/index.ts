@@ -2,8 +2,10 @@
 
 import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "../supabase/client";
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const lovableAuth = createLovableAuth({ oauthBrokerUrl: SUPABASE_URL });
+// Use the default Lovable OAuth broker route ("/~oauth/initiate").
+// Pointing this at the backend base URL will generate invalid paths like:
+// https://<project>.supabase.co/?provider=...
+const lovableAuth = createLovableAuth({});
 
 export const lovable = {
   auth: {
