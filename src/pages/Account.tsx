@@ -72,6 +72,15 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const AppleIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+    <path
+      d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 const Account = () => {
   const { settings } = useSettings();
   const { user } = useAuth();
@@ -93,10 +102,13 @@ const Account = () => {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [googleLinkLoading, setGoogleLinkLoading] = useState(false);
+  const [appleLinkLoading, setAppleLinkLoading] = useState(false);
 
-  // Check if user has Google identity linked
+  // Check if user has Google/Apple identity linked
   const hasGoogleLinked = user?.app_metadata?.providers?.includes('google') || 
     user?.identities?.some((identity: any) => identity.provider === 'google');
+  const hasAppleLinked = user?.app_metadata?.providers?.includes('apple') || 
+    user?.identities?.some((identity: any) => identity.provider === 'apple');
 
   useEffect(() => {
     if (user) {
@@ -212,6 +224,11 @@ const Account = () => {
       googleLinked: 'حساب جوجل مرتبط',
       googleLinkSuccess: 'تم ربط حساب جوجل بنجاح',
       googleLinkError: 'فشل في ربط حساب جوجل',
+      // Apple
+      linkApple: 'ربط حساب Apple',
+      appleLinked: 'حساب Apple مرتبط',
+      appleLinkSuccess: 'تم ربط حساب Apple بنجاح',
+      appleLinkError: 'فشل في ربط حساب Apple',
     },
     en: {
       title: 'My Account',
@@ -272,6 +289,11 @@ const Account = () => {
       googleLinked: 'Google Account Linked',
       googleLinkSuccess: 'Google account linked successfully',
       googleLinkError: 'Failed to link Google account',
+      // Apple
+      linkApple: 'Link Apple Account',
+      appleLinked: 'Apple Account Linked',
+      appleLinkSuccess: 'Apple account linked successfully',
+      appleLinkError: 'Failed to link Apple account',
     },
   };
 
@@ -471,6 +493,27 @@ const Account = () => {
         variant: 'destructive',
       });
       setGoogleLinkLoading(false);
+    }
+  };
+
+  const handleLinkApple = async () => {
+    setAppleLinkLoading(true);
+    try {
+      const { error } = await lovable.auth.signInWithOAuth("apple", {
+        redirect_uri: window.location.origin + '/account',
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      console.error('Apple link error:', error);
+      toast({
+        title: t.appleLinkError,
+        description: error.message,
+        variant: 'destructive',
+      });
+      setAppleLinkLoading(false);
     }
   };
 
@@ -896,7 +939,8 @@ const Account = () => {
           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
             {t.connectedAccounts}
           </h3>
-          <div className="glass-effect rounded-2xl border border-border/30 overflow-hidden">
+          <div className="glass-effect rounded-2xl border border-border/30 divide-y divide-border/30 overflow-hidden">
+            {/* Google */}
             <button
               onClick={hasGoogleLinked ? undefined : handleLinkGoogle}
               disabled={hasGoogleLinked || googleLinkLoading}
@@ -919,6 +963,36 @@ const Account = () => {
                 {googleLinkLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 ) : hasGoogleLinked ? (
+                  <Check className="h-5 w-5 text-green-500" />
+                ) : (
+                  <Link2 className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+            </button>
+
+            {/* Apple */}
+            <button
+              onClick={hasAppleLinked ? undefined : handleLinkApple}
+              disabled={hasAppleLinked || appleLinkLoading}
+              className={`w-full p-4 flex items-center justify-between ${
+                hasAppleLinked 
+                  ? 'cursor-default' 
+                  : 'hover:bg-accent/50 smooth-transition'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <AppleIcon />
+                <div className="text-left">
+                  <span className="font-medium block">Apple</span>
+                  {hasAppleLinked && (
+                    <span className="text-xs text-green-500">{t.appleLinked}</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center">
+                {appleLinkLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : hasAppleLinked ? (
                   <Check className="h-5 w-5 text-green-500" />
                 ) : (
                   <Link2 className="h-5 w-5 text-muted-foreground" />
