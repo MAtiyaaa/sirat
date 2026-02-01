@@ -156,14 +156,19 @@ const Account = () => {
     ar: {
       title: 'حسابي',
       subtitle: 'إدارة ملفك الشخصي وإعداداتك',
-      addPhoto: 'إضافة صورة',
-      changePhoto: 'تغيير الصورة',
-      joinedDate: 'انضم إلى صراط',
-      timesUsed: 'مرات الاستخدام هذا الشهر',
-      surahsRead: 'السور المقروءة',
-      daysOpenedThisYear: 'أيام فتح التطبيق هذا العام',
-      timesOpenedThisYear: 'مرات فتح التطبيق هذا العام',
-      actions: 'الإجراءات',
+      // Section headers
+      profileSection: 'الملف الشخصي',
+      accountSection: 'إعدادات الحساب',
+      connectedAccounts: 'الحسابات المرتبطة',
+      dataSection: 'إدارة البيانات',
+      dangerSection: 'منطقة الخطر',
+      // Stats
+      joinedDate: 'تاريخ الانضمام',
+      timesUsed: 'هذا الشهر',
+      surahsRead: 'سور مقروءة',
+      daysOpenedThisYear: 'أيام هذا العام',
+      timesOpenedThisYear: 'مرات هذا العام',
+      // Actions
       changeName: 'تغيير الاسم',
       changeEmail: 'تغيير البريد الإلكتروني',
       changePassword: 'تغيير كلمة المرور',
@@ -173,6 +178,7 @@ const Account = () => {
       clearAllData: 'مسح جميع البيانات',
       deleteAccount: 'حذف الحساب',
       signOut: 'تسجيل الخروج',
+      // Form fields
       firstName: 'الاسم الأول',
       lastName: 'اسم العائلة',
       email: 'البريد الإلكتروني',
@@ -182,6 +188,7 @@ const Account = () => {
       save: 'حفظ',
       cancel: 'إلغاء',
       confirm: 'تأكيد',
+      // Toast messages
       nameUpdated: 'تم تحديث الاسم بنجاح',
       emailUpdated: 'تم تحديث البريد الإلكتروني بنجاح',
       passwordUpdated: 'تم تحديث كلمة المرور بنجاح',
@@ -193,12 +200,14 @@ const Account = () => {
       passwordMismatch: 'كلمات المرور غير متطابقة',
       passwordRequired: 'كلمة المرور مطلوبة',
       emailTaken: 'البريد الإلكتروني مستخدم بالفعل',
+      // Warnings
       clearReadingWarning: 'سيؤدي هذا إلى مسح سجل القراءة وتقدمك.',
       clearAllWarning: 'سيؤدي هذا إلى مسح جميع بياناتك مع الاحتفاظ بحسابك.',
       deleteAccountWarning: 'سيؤدي هذا إلى حذف حسابك وجميع بياناتك بشكل دائم.',
       enterPasswordToDelete: 'أدخل كلمة المرور لتأكيد الحذف',
       signInRequired: 'يرجى تسجيل الدخول أولاً',
       signIn: 'تسجيل الدخول',
+      // Google
       linkGoogle: 'ربط حساب جوجل',
       googleLinked: 'حساب جوجل مرتبط',
       googleLinkSuccess: 'تم ربط حساب جوجل بنجاح',
@@ -207,14 +216,19 @@ const Account = () => {
     en: {
       title: 'My Account',
       subtitle: 'Manage your profile and preferences',
-      addPhoto: 'Add Photo',
-      changePhoto: 'Change Photo',
-      joinedDate: 'Joined Sirat',
-      timesUsed: 'Times Used This Month',
+      // Section headers
+      profileSection: 'Profile',
+      accountSection: 'Account Settings',
+      connectedAccounts: 'Connected Accounts',
+      dataSection: 'Data Management',
+      dangerSection: 'Danger Zone',
+      // Stats
+      joinedDate: 'Joined',
+      timesUsed: 'This Month',
       surahsRead: 'Surahs Read',
-      daysOpenedThisYear: 'Days Opened This Year',
-      timesOpenedThisYear: 'Times Opened This Year',
-      actions: 'Actions',
+      daysOpenedThisYear: 'Days This Year',
+      timesOpenedThisYear: 'Opens This Year',
+      // Actions
       changeName: 'Change Name',
       changeEmail: 'Change Email',
       changePassword: 'Change Password',
@@ -224,6 +238,7 @@ const Account = () => {
       clearAllData: 'Clear All Data',
       deleteAccount: 'Delete Account',
       signOut: 'Sign Out',
+      // Form fields
       firstName: 'First Name',
       lastName: 'Last Name',
       email: 'Email Address',
@@ -233,6 +248,7 @@ const Account = () => {
       save: 'Save',
       cancel: 'Cancel',
       confirm: 'Confirm',
+      // Toast messages
       nameUpdated: 'Name updated successfully',
       emailUpdated: 'Email updated successfully',
       passwordUpdated: 'Password updated successfully',
@@ -244,12 +260,14 @@ const Account = () => {
       passwordMismatch: 'Passwords do not match',
       passwordRequired: 'Password is required',
       emailTaken: 'Email is already taken',
+      // Warnings
       clearReadingWarning: 'This will clear your reading history and progress.',
       clearAllWarning: 'This will clear all your data but keep your account active.',
       deleteAccountWarning: 'This will permanently delete your account and all your data.',
       enterPasswordToDelete: 'Enter your password to confirm deletion',
       signInRequired: 'Please sign in first',
       signIn: 'Sign In',
+      // Google
       linkGoogle: 'Link Google Account',
       googleLinked: 'Google Account Linked',
       googleLinkSuccess: 'Google account linked successfully',
@@ -678,10 +696,10 @@ const Account = () => {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="container max-w-2xl mx-auto px-4 py-6 space-y-8">
+      <div className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
         
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+        <div className="flex items-center gap-4 animate-fade-in">
           <Button
             variant="ghost"
             size="icon"
@@ -693,351 +711,365 @@ const Account = () => {
           </Button>
           <h1 className="text-3xl font-bold">{t.title}</h1>
         </div>
-        
-        {/* Profile Header - Centered */}
-        <div className="text-center space-y-6 animate-fade-in">
-          {/* Avatar */}
-          <div className="relative inline-block">
-            <Avatar className="w-32 h-32 border-4 border-primary/20 shadow-xl">
+
+        {/* Profile Card */}
+        <div className="glass-effect rounded-2xl p-6 border border-border/30 animate-fade-in">
+          <div className="flex items-center gap-4">
+            <Avatar className="w-20 h-20 border-4 border-primary/20 shadow-lg">
               <AvatarImage src={profile?.avatar_url} />
-              <AvatarFallback className="bg-primary/10 text-primary text-4xl font-bold">
+              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
                 {(profile?.full_name || user.email)?.[0]?.toUpperCase() || '?'}
               </AvatarFallback>
             </Avatar>
-          </div>
-
-          {/* Name */}
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold">{profile?.full_name || user.email}</h1>
-            {profile?.full_name && <p className="text-xs text-muted-foreground">{user.email}</p>}
-          </div>
-
-          {/* Stats Row */}
-          <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
-            <div className="glass-effect rounded-2xl p-4 border border-border/30">
-              <Calendar className="h-5 w-5 text-primary mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground mb-1">{t.joinedDate}</p>
-              <p className="text-sm font-bold">{joinedDate.split(',')[0]}</p>
-            </div>
-            <div className="glass-effect rounded-2xl p-4 border border-border/30">
-              <Activity className="h-5 w-5 text-primary mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground mb-1">{t.timesUsed}</p>
-              <p className="text-sm font-bold">{stats.timesOpenedThisMonth}</p>
-            </div>
-            <div className="glass-effect rounded-2xl p-4 border border-border/30">
-              <BookOpen className="h-5 w-5 text-primary mx-auto mb-2" />
-              <p className="text-xs text-muted-foreground mb-1">{t.surahsRead}</p>
-              <p className="text-sm font-bold">{stats.surahsRead}</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-xl font-bold truncate">{profile?.full_name || user.email}</h2>
+              {profile?.full_name && (
+                <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                {t.joinedDate} {joinedDate}
+              </p>
             </div>
           </div>
 
-          {/* Streaks */}
-          <div className="space-y-2 max-w-md mx-auto">
-            <div className="glass-effect rounded-2xl p-4 border border-border/30 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Flame className="h-5 w-5 text-orange-500" />
-                <span className="text-sm">{t.daysOpenedThisYear}</span>
-              </div>
-              <span className="text-xl font-bold text-primary">{stats.daysOpenedThisYear}</span>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-4 gap-2 mt-6 pt-6 border-t border-border/30">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{stats.timesOpenedThisMonth}</p>
+              <p className="text-xs text-muted-foreground">{t.timesUsed}</p>
             </div>
-            <div className="glass-effect rounded-2xl p-4 border border-border/30 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Activity className="h-5 w-5 text-blue-500" />
-                <span className="text-sm">{t.timesOpenedThisYear}</span>
-              </div>
-              <span className="text-xl font-bold text-primary">{stats.timesOpenedThisYear}</span>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{stats.surahsRead}</p>
+              <p className="text-xs text-muted-foreground">{t.surahsRead}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{stats.daysOpenedThisYear}</p>
+              <p className="text-xs text-muted-foreground">{t.daysOpenedThisYear}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{stats.timesOpenedThisYear}</p>
+              <p className="text-xs text-muted-foreground">{t.timesOpenedThisYear}</p>
             </div>
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Account Settings Section */}
         <div className="space-y-3 animate-fade-in">
-          <h2 className="text-lg font-semibold px-2">{t.actions}</h2>
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
+            {t.accountSection}
+          </h3>
+          <div className="glass-effect rounded-2xl border border-border/30 divide-y divide-border/30 overflow-hidden">
+            {/* Change Name */}
+            <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+              <DialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Edit className="h-5 w-5 text-primary" />
+                    <span className="font-medium">{t.changeName}</span>
+                  </div>
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t.changeName}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>{t.firstName}</Label>
+                    <Input
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder={t.firstName}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.lastName}</Label>
+                    <Input
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder={t.lastName}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowNameDialog(false)}>
+                    {t.cancel}
+                  </Button>
+                  <Button onClick={handleUpdateName} disabled={isLoading}>
+                    {t.save}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
-          {/* Change Name */}
-          <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
-            <DialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Edit className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t.changeName}</span>
+            {/* Change Email */}
+            <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+              <DialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-primary" />
+                    <span className="font-medium">{t.changeEmail}</span>
+                  </div>
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t.changeEmail}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>{t.email}</Label>
+                    <Input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder={user.email || ''}
+                    />
+                  </div>
                 </div>
-              </button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t.changeName}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>{t.firstName}</Label>
-                  <Input
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder={t.firstName}
-                  />
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+                    {t.cancel}
+                  </Button>
+                  <Button onClick={handleUpdateEmail} disabled={isLoading}>
+                    {t.save}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Change Password */}
+            <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+              <DialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Lock className="h-5 w-5 text-primary" />
+                    <span className="font-medium">{t.changePassword}</span>
+                  </div>
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t.changePassword}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>{t.currentPassword}</Label>
+                    <Input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.newPassword}</Label>
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t.confirmPassword}</Label>
+                    <Input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>{t.lastName}</Label>
-                  <Input
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder={t.lastName}
-                  />
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+                    {t.cancel}
+                  </Button>
+                  <Button onClick={handleUpdatePassword} disabled={isLoading}>
+                    {t.save}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Connected Accounts Section */}
+        <div className="space-y-3 animate-fade-in">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
+            {t.connectedAccounts}
+          </h3>
+          <div className="glass-effect rounded-2xl border border-border/30 overflow-hidden">
+            <button
+              onClick={hasGoogleLinked ? undefined : handleLinkGoogle}
+              disabled={hasGoogleLinked || googleLinkLoading}
+              className={`w-full p-4 flex items-center justify-between ${
+                hasGoogleLinked 
+                  ? 'cursor-default' 
+                  : 'hover:bg-accent/50 smooth-transition'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <GoogleIcon />
+                <div className="text-left">
+                  <span className="font-medium block">Google</span>
+                  {hasGoogleLinked && (
+                    <span className="text-xs text-green-500">{t.googleLinked}</span>
+                  )}
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowNameDialog(false)}>
-                  {t.cancel}
-                </Button>
-                <Button onClick={handleUpdateName} disabled={isLoading}>
-                  {t.save}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          {/* Change Email */}
-          <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-            <DialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t.changeEmail}</span>
-                </div>
-              </button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t.changeEmail}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>{t.email}</Label>
-                  <Input
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder={user.email || ''}
-                  />
-                </div>
+              <div className="flex items-center">
+                {googleLinkLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : hasGoogleLinked ? (
+                  <Check className="h-5 w-5 text-green-500" />
+                ) : (
+                  <Link2 className="h-5 w-5 text-muted-foreground" />
+                )}
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
-                  {t.cancel}
-                </Button>
-                <Button onClick={handleUpdateEmail} disabled={isLoading}>
-                  {t.save}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            </button>
+          </div>
+        </div>
 
-          {/* Change Password */}
-          <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-            <DialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Lock className="h-5 w-5 text-primary" />
-                  <span className="font-medium">{t.changePassword}</span>
-                </div>
-              </button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t.changePassword}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>{t.currentPassword}</Label>
-                  <Input
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.newPassword}</Label>
-                  <Input
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t.confirmPassword}</Label>
-                  <Input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
-                  {t.cancel}
-                </Button>
-                <Button onClick={handleUpdatePassword} disabled={isLoading}>
-                  {t.save}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+        {/* Data Management Section */}
+        <div className="space-y-3 animate-fade-in">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider px-1">
+            {t.dataSection}
+          </h3>
+          <div className="glass-effect rounded-2xl border border-border/30 divide-y divide-border/30 overflow-hidden">
+            {/* Clear Reading Data */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <RotateCcw className="h-5 w-5 text-orange-500" />
+                    <span className="font-medium">{t.clearReadingData}</span>
+                  </div>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.clearReadingData}</AlertDialogTitle>
+                  <AlertDialogDescription>{t.clearReadingWarning}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearReadingData} disabled={isLoading}>
+                    {t.confirm}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
-          {/* Link Google Account */}
-          <button
-            onClick={hasGoogleLinked ? undefined : handleLinkGoogle}
-            disabled={hasGoogleLinked || googleLinkLoading}
-            className={`w-full glass-effect rounded-2xl p-4 border smooth-transition flex items-center justify-between ${
-              hasGoogleLinked 
-                ? 'border-green-500/30 bg-green-500/5 cursor-default' 
-                : 'border-border/30 hover:border-primary/30'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <GoogleIcon />
-              <span className="font-medium">
-                {hasGoogleLinked ? t.googleLinked : t.linkGoogle}
-              </span>
-            </div>
-            <div className="flex items-center">
-              {googleLinkLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : hasGoogleLinked ? (
-                <Check className="h-5 w-5 text-green-500" />
-              ) : (
-                <Link2 className="h-5 w-5 text-muted-foreground" />
-              )}
-            </div>
-          </button>
+            {/* Clear Qalam History */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="h-5 w-5 text-purple-500" />
+                    <span className="font-medium">{t.clearQalamHistory}</span>
+                  </div>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.clearQalamHistory}</AlertDialogTitle>
+                  <AlertDialogDescription>{t.clearQalamHistoryWarning}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearQalamHistory} disabled={isLoading}>
+                    {t.confirm}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
-          {/* Clear Reading Data */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-orange-500/30 smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <RotateCcw className="h-5 w-5 text-orange-500" />
-                  <span className="font-medium">{t.clearReadingData}</span>
-                </div>
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.clearReadingData}</AlertDialogTitle>
-                <AlertDialogDescription>{t.clearReadingWarning}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearReadingData} disabled={isLoading}>
-                  {t.confirm}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            {/* Clear All Data */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-accent/50 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <span className="font-medium">{t.clearAllData}</span>
+                  </div>
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t.clearAllData}</AlertDialogTitle>
+                  <AlertDialogDescription>{t.clearAllWarning}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleClearAllData}
+                    disabled={isLoading}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    {t.confirm}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
 
-          {/* Clear Qalam History */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-purple-500/30 smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Trash2 className="h-5 w-5 text-purple-500" />
-                  <span className="font-medium">{t.clearQalamHistory}</span>
+        {/* Danger Zone Section */}
+        <div className="space-y-3 animate-fade-in">
+          <h3 className="text-sm font-medium text-destructive uppercase tracking-wider px-1">
+            {t.dangerSection}
+          </h3>
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 overflow-hidden">
+            <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+              <DialogTrigger asChild>
+                <button className="w-full p-4 hover:bg-destructive/10 smooth-transition flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="h-5 w-5 text-destructive" />
+                    <span className="font-medium text-destructive">{t.deleteAccount}</span>
+                  </div>
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="text-destructive">{t.deleteAccount}</DialogTitle>
+                  <DialogDescription>{t.deleteAccountWarning}</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>{t.enterPasswordToDelete}</Label>
+                    <Input
+                      type="password"
+                      value={deleteAccountPassword}
+                      onChange={(e) => setDeleteAccountPassword(e.target.value)}
+                      placeholder={t.currentPassword}
+                    />
+                  </div>
                 </div>
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.clearQalamHistory}</AlertDialogTitle>
-                <AlertDialogDescription>{t.clearQalamHistoryWarning}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleClearQalamHistory} disabled={isLoading}>
-                  {t.confirm}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                    {t.cancel}
+                  </Button>
+                  <Button
+                    onClick={handleDeleteAccount}
+                    disabled={isLoading}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    {t.deleteAccount}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
 
-          {/* Clear All Data */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-destructive/30 smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                  <span className="font-medium">{t.clearAllData}</span>
-                </div>
-              </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t.clearAllData}</AlertDialogTitle>
-                <AlertDialogDescription>{t.clearAllWarning}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleClearAllData}
-                  disabled={isLoading}
-                  className="bg-destructive hover:bg-destructive/90"
-                >
-                  {t.confirm}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-
-          {/* Delete Account */}
-          <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-            <DialogTrigger asChild>
-              <button className="w-full glass-effect rounded-2xl p-4 border border-destructive/50 bg-destructive/5 hover:border-destructive smooth-transition flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Trash2 className="h-5 w-5 text-destructive" />
-                  <span className="font-medium text-destructive">{t.deleteAccount}</span>
-                </div>
-              </button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="text-destructive">{t.deleteAccount}</DialogTitle>
-                <DialogDescription>{t.deleteAccountWarning}</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>{t.enterPasswordToDelete}</Label>
-                  <Input
-                    type="password"
-                    value={deleteAccountPassword}
-                    onChange={(e) => setDeleteAccountPassword(e.target.value)}
-                    placeholder={t.currentPassword}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-                  {t.cancel}
-                </Button>
-                <Button
-                  onClick={handleDeleteAccount}
-                  disabled={isLoading}
-                  className="bg-destructive hover:bg-destructive/90"
-                >
-                  {t.deleteAccount}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          {/* Sign Out */}
-          <button
+        {/* Sign Out Button */}
+        <div className="pt-4 animate-fade-in">
+          <Button
             onClick={handleSignOut}
-            className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between"
+            variant="outline"
+            className="w-full h-12"
           >
-            <div className="flex items-center gap-3">
-              <LogOut className="h-5 w-5 text-primary" />
-              <span className="font-medium">{t.signOut}</span>
-            </div>
-          </button>
+            <LogOut className="h-5 w-5 mr-2" />
+            {t.signOut}
+          </Button>
         </div>
       </div>
     </div>
