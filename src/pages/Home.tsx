@@ -15,8 +15,10 @@ import {
   Settings as SettingsIcon,
   Moon,
   History,
-  Calculator
+  Calculator,
+  Clock
 } from 'lucide-react';
+import RamadanBanner, { isRamadan } from '@/components/RamadanBanner';
 import { useSettings } from '@/contexts/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -253,7 +255,11 @@ const Home = () => {
   const [user, setUser] = React.useState<any>(null);
   const [surahOfDay, setSurahOfDay] = useState<any>(null);
   const [continueReading, setContinueReading] = useState<any>(null);
+  const [homePrayerTimes, setHomePrayerTimes] = useState<any>(null);
+  const [prayerTimesLoading, setPrayerTimesLoading] = useState(true);
+  const [selectedPrayerIndex, setSelectedPrayerIndex] = useState(0);
   const quoteOfDay = getQuoteOfTheDay();
+  const showRamadan = isRamadan();
 
   useEffect(() => {
     // Fetch Surah of the Day
@@ -278,6 +284,37 @@ const Home = () => {
 
     fetchSurahOfDay();
   }, []);
+
+  // Fetch prayer times for home carousel
+  useEffect(() => {
+    const fetchHomePrayer = async () => {
+      setPrayerTimesLoading(true);
+      try {
+        let latitude: number, longitude: number;
+        if (settings.prayerTimeRegion) {
+          [latitude, longitude] = settings.prayerTimeRegion.split(',').map(Number);
+        } else {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          });
+          latitude = position.coords.latitude;
+          longitude = position.coords.longitude;
+        }
+        const response = await fetch(
+          `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`
+        );
+        const data = await response.json();
+        if (data.code === 200) {
+          setHomePrayerTimes(data.data.timings);
+        }
+      } catch {
+        setHomePrayerTimes({ Fajr: '05:49', Dhuhr: '12:33', Asr: '15:47', Maghrib: '18:13', Isha: '19:17' });
+      } finally {
+        setPrayerTimesLoading(false);
+      }
+    };
+    fetchHomePrayer();
+  }, [settings.prayerTimeRegion]);
 
   useEffect(() => {
     const loadContinueReading = async () => {
@@ -464,6 +501,42 @@ const Home = () => {
             </p>
           </div>
         </div>
+
+        {/* Ramadan Banner */}
+        {showRamadan && <RamadanBanner variant="home" />}
+
+        {/* Prayer Times Carousel */}
+        {(() => {
+          const prayerList = homePrayerTimes ? [
+            { name: settings.language === 'ar' ? 'الفجر' : 'Fajr', time: homePrayerTimes.Fajr, icon: '🌙' },
+            { name: settings.language === 'ar' ? 'الظهر' : 'Dhuhr', time: homePrayerTimes.Dhuhr, icon: '☀️' },
+            { name: settings.language === 'ar' ? 'العصر' : 'Asr', time: homePrayerTimes.Asr, icon: '🌤️' },
+            { name: settings.language === 'ar' ? 'المغرب' : 'Maghrib', time: homePrayerTimes.Maghrib, icon: '🌅' },
+            { name: settings.language === 'ar' ? 'العشاء' : 'Isha', time: homePrayerTimes.Isha, icon: '🌑' },
+          ] : [];
+
+          return !prayerTimesLoading && homePrayerTimes ? (
+            <div className="animate-fade-in -mt-4">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide snap-x snap-mandatory">
+                {prayerList.map((p, i) => (
+                  <div
+                    key={p.name}
+                    onClick={() => setSelectedPrayerIndex(i)}
+                    className={`flex-shrink-0 snap-center glass-effect rounded-2xl p-3 text-center cursor-pointer smooth-transition border min-w-[72px] ${
+                      selectedPrayerIndex === i
+                        ? 'border-primary/40 bg-primary/10 scale-105'
+                        : 'border-border/20 hover:border-border/40'
+                    }`}
+                  >
+                    <span className="text-lg">{p.icon}</span>
+                    <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">{p.name}</p>
+                    <p className="text-sm font-bold text-foreground">{p.time}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null;
+        })()}
 
         {/* Sign In Banner for Guests */}
         {!user && (
