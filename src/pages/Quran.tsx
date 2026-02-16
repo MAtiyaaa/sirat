@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import RamadanQuranPlan from '@/components/RamadanQuranPlan';
+import { isRamadan } from '@/components/RamadanBanner';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -793,6 +795,13 @@ const Quran = () => {
             </div>
             <Progress value={overallProgress} className="h-2" />
           </div>
+        </div>
+      )}
+
+      {/* Finish Quran in Ramadan */}
+      {isRamadan() && (
+        <div className="px-4 mb-6 max-w-2xl mx-auto">
+          <RamadanQuranPlan />
         </div>
       )}
 

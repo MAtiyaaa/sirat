@@ -16,7 +16,10 @@ import {
   Moon,
   History,
   Calculator,
-  Clock
+  Clock,
+  Sun,
+  CloudSun,
+  Sunset
 } from 'lucide-react';
 import RamadanBanner, { isRamadan } from '@/components/RamadanBanner';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -495,9 +498,9 @@ const Home = () => {
             
             {/* Subtitle */}
             <p className="text-base text-muted-foreground font-light tracking-wide">
-              {settings.language === 'ar' 
-                ? 'اقرأ. تدبّر. تذكّر.'
-                : 'Read. Reflect. Remember.'}
+               {showRamadan
+                ? (settings.language === 'ar' ? 'رمضان كريم' : 'Ramadan Kareem')
+                : (settings.language === 'ar' ? 'اقرأ. تدبّر. تذكّر.' : 'Read. Reflect. Remember.')}
             </p>
           </div>
         </div>
@@ -508,11 +511,11 @@ const Home = () => {
         {/* Prayer Times Carousel */}
         {(() => {
           const prayerList = homePrayerTimes ? [
-            { name: settings.language === 'ar' ? 'الفجر' : 'Fajr', time: homePrayerTimes.Fajr, icon: '🌙' },
-            { name: settings.language === 'ar' ? 'الظهر' : 'Dhuhr', time: homePrayerTimes.Dhuhr, icon: '☀️' },
-            { name: settings.language === 'ar' ? 'العصر' : 'Asr', time: homePrayerTimes.Asr, icon: '🌤️' },
-            { name: settings.language === 'ar' ? 'المغرب' : 'Maghrib', time: homePrayerTimes.Maghrib, icon: '🌅' },
-            { name: settings.language === 'ar' ? 'العشاء' : 'Isha', time: homePrayerTimes.Isha, icon: '🌑' },
+            { name: settings.language === 'ar' ? 'الفجر' : 'Fajr', time: homePrayerTimes.Fajr, iconName: 'fajr' as const },
+            { name: settings.language === 'ar' ? 'الظهر' : 'Dhuhr', time: homePrayerTimes.Dhuhr, iconName: 'dhuhr' as const },
+            { name: settings.language === 'ar' ? 'العصر' : 'Asr', time: homePrayerTimes.Asr, iconName: 'asr' as const },
+            { name: settings.language === 'ar' ? 'المغرب' : 'Maghrib', time: homePrayerTimes.Maghrib, iconName: 'maghrib' as const },
+            { name: settings.language === 'ar' ? 'العشاء' : 'Isha', time: homePrayerTimes.Isha, iconName: 'isha' as const },
           ] : [];
 
           return !prayerTimesLoading && homePrayerTimes ? (
@@ -528,7 +531,11 @@ const Home = () => {
                         : 'border-border/20 hover:border-border/40'
                     }`}
                   >
-                    <span className="text-lg">{p.icon}</span>
+                    {p.iconName === 'fajr' && <Moon className="h-4 w-4 text-blue-400" />}
+                    {p.iconName === 'dhuhr' && <Sun className="h-4 w-4 text-amber-500" />}
+                    {p.iconName === 'asr' && <CloudSun className="h-4 w-4 text-orange-400" />}
+                    {p.iconName === 'maghrib' && <Sunset className="h-4 w-4 text-rose-400" />}
+                    {p.iconName === 'isha' && <Moon className="h-4 w-4 text-indigo-400" />}
                     <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">{p.name}</p>
                     <p className="text-sm font-bold text-foreground">{p.time}</p>
                   </div>

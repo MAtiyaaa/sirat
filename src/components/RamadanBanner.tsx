@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { Moon, Sun, Sunrise, Sunset, Clock } from 'lucide-react';
+import { Moon, Sunrise, Sunset, Clock, Lamp, Timer } from 'lucide-react';
 
-// Ramadan 1447: Feb 18 – March 19, 2026 (Eid is March 20)
-// Show until end of March 20 (user said remove on 21st)
-const RAMADAN_START = new Date(2026, 1, 18); // Feb 18
-const RAMADAN_END = new Date(2026, 2, 21);   // March 21 (exclusive)
+// Show Ramadan UI from now until March 21, 2026
+// Actual fasting: Feb 28 – March 19, 2026 (Eid is March 20)
+const RAMADAN_DISPLAY_END = new Date(2026, 2, 21); // March 21 (exclusive)
+const RAMADAN_FAST_START = new Date(2026, 1, 28);   // Feb 28
+const RAMADAN_FAST_END = new Date(2026, 2, 20);     // March 20 (Eid day, no fasting)
 
 export const isRamadan = () => {
   const now = new Date();
-  return now >= RAMADAN_START && now < RAMADAN_END;
+  return now < RAMADAN_DISPLAY_END;
+};
+
+export const isFastingPeriod = () => {
+  const now = new Date();
+  return now >= RAMADAN_FAST_START && now < RAMADAN_FAST_END;
 };
 
 interface PrayerTimesData {
@@ -22,10 +28,28 @@ interface RamadanBannerProps {
   prayerTimes?: { Fajr: string; Maghrib: string } | null;
 }
 
+const getCountdown = (targetTime: string, label: string) => {
+  const now = new Date();
+  const [h, m] = targetTime.split(':').map(Number);
+  const target = new Date(now);
+  target.setHours(h, m, 0, 0);
+  
+  if (target <= now) {
+    target.setDate(target.getDate() + 1);
+  }
+  
+  const diff = target.getTime() - now.getTime();
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  return { hours, minutes, label };
+};
+
 const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: RamadanBannerProps) => {
   const { settings } = useSettings();
   const [times, setTimes] = useState<PrayerTimesData | null>(externalTimes || null);
   const [loading, setLoading] = useState(!externalTimes);
+  const [countdown, setCountdown] = useState<{ hours: number; minutes: number; label: string } | null>(null);
 
   useEffect(() => {
     if (externalTimes) {
@@ -35,6 +59,31 @@ const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: Ramadan
     }
     fetchTimes();
   }, [externalTimes, settings.prayerTimeRegion]);
+
+  useEffect(() => {
+    if (!times || !isFastingPeriod()) return;
+    
+    const update = () => {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const [fH, fM] = times.Fajr.split(':').map(Number);
+      const [mH, mM] = times.Maghrib.split(':').map(Number);
+      const fajrMin = fH * 60 + fM;
+      const maghribMin = mH * 60 + mM;
+      
+      if (currentMinutes < fajrMin) {
+        setCountdown(getCountdown(times.Fajr, settings.language === 'ar' ? 'السحور' : 'Suhoor'));
+      } else if (currentMinutes < maghribMin) {
+        setCountdown(getCountdown(times.Maghrib, settings.language === 'ar' ? 'الإفطار' : 'Iftar'));
+      } else {
+        setCountdown(getCountdown(times.Fajr, settings.language === 'ar' ? 'السحور' : 'Suhoor'));
+      }
+    };
+    
+    update();
+    const interval = setInterval(update, 30000);
+    return () => clearInterval(interval);
+  }, [times, settings.language]);
 
   const fetchTimes = async () => {
     try {
@@ -56,7 +105,6 @@ const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: Ramadan
         setTimes({ Fajr: data.data.timings.Fajr, Maghrib: data.data.timings.Maghrib });
       }
     } catch {
-      // Fallback Dubai times
       setTimes({ Fajr: '05:49', Maghrib: '18:13' });
     } finally {
       setLoading(false);
@@ -67,90 +115,102 @@ const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: Ramadan
 
   return (
     <div className="relative overflow-hidden rounded-3xl animate-fade-in">
-      {/* Background with warm Ramadan colors */}
-      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/15 via-primary/10 to-purple-600/15" />
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-primary/5 to-amber-600/10" />
       
-      {/* Floating lantern decorations */}
+      {/* Decorative elements - Lucide icons only */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Lantern left */}
-        <div className="absolute top-2 left-6 flex flex-col items-center animate-pulse" style={{ animationDuration: '3s' }}>
-          <div className="w-px h-4 bg-amber-400/40" />
-          <div className="text-2xl">🏮</div>
+        <div className="absolute top-3 left-6 animate-pulse" style={{ animationDuration: '3s' }}>
+          <Lamp className="h-5 w-5 text-amber-500/30" />
         </div>
-        {/* Lantern right */}
-        <div className="absolute top-2 right-6 flex flex-col items-center animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-          <div className="w-px h-4 bg-amber-400/40" />
-          <div className="text-2xl">🏮</div>
+        <div className="absolute top-3 right-6 animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }}>
+          <Lamp className="h-5 w-5 text-amber-500/30" />
         </div>
-        {/* Stars */}
-        <div className="absolute top-3 left-1/4 text-amber-400/30 text-xs animate-pulse" style={{ animationDuration: '2s' }}>✦</div>
-        <div className="absolute top-5 right-1/3 text-amber-400/20 text-sm animate-pulse" style={{ animationDuration: '3s', animationDelay: '0.5s' }}>✧</div>
-        <div className="absolute top-2 left-1/2 text-amber-400/25 text-xs animate-pulse" style={{ animationDuration: '2.5s', animationDelay: '1s' }}>✦</div>
-        {/* Light string across top */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
+        <div className="absolute top-2 left-1/4 animate-pulse" style={{ animationDuration: '2.5s' }}>
+          <Moon className="h-3 w-3 text-amber-400/20" />
+        </div>
+        <div className="absolute top-4 right-1/3 animate-pulse" style={{ animationDuration: '3s', animationDelay: '0.5s' }}>
+          <Moon className="h-2.5 w-2.5 text-amber-400/15 scale-x-[-1]" />
+        </div>
+        {/* Top light strip */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-400/30 to-transparent" />
         {/* Glow orbs */}
-        <div className="absolute -top-10 left-1/3 w-32 h-32 bg-amber-400/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-10 right-1/4 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute -top-10 left-1/3 w-32 h-32 bg-amber-400/8 rounded-full blur-3xl" />
+        <div className="absolute -bottom-10 right-1/4 w-40 h-40 bg-amber-500/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative glass-effect border border-amber-500/20 p-6 md:p-8">
-        {/* Ramadan Kareem Header */}
-        <div className="text-center mb-5">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <Moon className="h-5 w-5 text-amber-500" />
-            <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">
+      <div className="relative glass-effect border border-amber-500/15 p-5 md:p-6">
+        {/* Header */}
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 mb-1.5">
+            <Moon className="h-4 w-4 text-amber-500" />
+            <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">
               {settings.language === 'ar' ? 'شهر رمضان المبارك' : 'Blessed Month'}
             </span>
-            <Moon className="h-5 w-5 text-amber-500 scale-x-[-1]" />
+            <Moon className="h-4 w-4 text-amber-500 scale-x-[-1]" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 bg-clip-text text-transparent arabic-regal">
+          <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 bg-clip-text text-transparent">
             {settings.language === 'ar' ? 'رمضان كريم' : 'Ramadan Kareem'}
           </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {settings.language === 'ar' ? 'كل عام وأنتم بخير' : 'May this month bring you blessings'}
-          </p>
         </div>
+
+        {/* Countdown - sleek tiny */}
+        {countdown && isFastingPeriod() && (
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+              <Timer className="h-3 w-3 text-amber-500" />
+              <span className="text-xs font-semibold text-amber-500">
+                {countdown.label}
+              </span>
+              <span className="text-xs font-bold text-foreground">
+                {countdown.hours}h {countdown.minutes}m
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Suhoor & Iftar Times */}
         {loading ? (
-          <div className="flex items-center justify-center py-4">
-            <Clock className="h-5 w-5 animate-spin text-amber-500" />
+          <div className="flex items-center justify-center py-3">
+            <Clock className="h-4 w-4 animate-spin text-amber-500" />
           </div>
-        ) : times ? (
-          <div className="grid grid-cols-2 gap-3">
+        ) : times && isFastingPeriod() ? (
+          <div className="grid grid-cols-2 gap-2.5">
             {/* Suhoor */}
-            <div className="relative overflow-hidden rounded-2xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 p-4 text-center">
-              <div className="absolute top-1 right-2 text-blue-400/20 text-lg">☽</div>
+            <div className="rounded-2xl border border-blue-400/15 bg-blue-500/5 p-3 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
-                <Sunrise className="h-4 w-4 text-blue-400" />
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
+                <Sunrise className="h-3.5 w-3.5 text-blue-400" />
+                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
                   {settings.language === 'ar' ? 'السحور' : 'Suhoor'}
                 </span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-foreground">
+              <div className="text-xl md:text-2xl font-bold text-foreground">
                 {times.Fajr}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {settings.language === 'ar' ? 'توقف الأكل قبل أذان الفجر' : 'Stop eating before Fajr'}
+              <p className="text-[9px] text-muted-foreground mt-0.5">
+                {settings.language === 'ar' ? 'قبل أذان الفجر' : 'Before Fajr'}
               </p>
             </div>
             {/* Iftar */}
-            <div className="relative overflow-hidden rounded-2xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-4 text-center">
-              <div className="absolute top-1 right-2 text-amber-400/20 text-lg">☀</div>
+            <div className="rounded-2xl border border-amber-400/15 bg-amber-500/5 p-3 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
-                <Sunset className="h-4 w-4 text-amber-500" />
-                <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">
+                <Sunset className="h-3.5 w-3.5 text-amber-500" />
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">
                   {settings.language === 'ar' ? 'الإفطار' : 'Iftar'}
                 </span>
               </div>
-              <div className="text-2xl md:text-3xl font-bold text-foreground">
+              <div className="text-xl md:text-2xl font-bold text-foreground">
                 {times.Maghrib}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {settings.language === 'ar' ? 'وقت الإفطار عند أذان المغرب' : 'Break fast at Maghrib'}
+              <p className="text-[9px] text-muted-foreground mt-0.5">
+                {settings.language === 'ar' ? 'عند أذان المغرب' : 'At Maghrib'}
               </p>
             </div>
           </div>
+        ) : !isFastingPeriod() ? (
+          <p className="text-center text-xs text-muted-foreground">
+            {settings.language === 'ar' ? 'رمضان يبدأ قريبًا إن شاء الله' : 'Ramadan is coming soon, In Sha Allah'}
+          </p>
         ) : null}
       </div>
     </div>
