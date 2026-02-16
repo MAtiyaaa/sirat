@@ -5,7 +5,7 @@ import { Moon, Sunrise, Sunset, Clock, Lamp, Timer } from 'lucide-react';
 // Show Ramadan UI from now until March 21, 2026
 // Actual fasting: Feb 28 – March 19, 2026 (Eid is March 20)
 const RAMADAN_DISPLAY_END = new Date(2026, 2, 21); // March 21 (exclusive)
-const RAMADAN_FAST_START = new Date(2026, 1, 15);   // Feb 28
+const RAMADAN_FAST_START = new Date(2026, 1, 18);   // Feb 28
 const RAMADAN_FAST_END = new Date(2026, 2, 20);     // March 20 (Eid day, no fasting)
 
 export const isRamadan = () => {
