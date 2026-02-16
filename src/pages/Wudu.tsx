@@ -10,6 +10,7 @@ import WuduStepsCard from "@/components/prayer/WuduStepsCard";
 import HijriCalendarCard from "@/components/prayer/HijriCalendarCard";
 import IslamicEventsCard from "@/components/prayer/IslamicEventsCard";
 import QiblaCard from "@/components/prayer/QiblaCard";
+import RamadanBanner, { isRamadan } from "@/components/RamadanBanner";
 
 interface PrayerTimes {
   Fajr: string;
@@ -169,6 +170,12 @@ const Wudu = () => {
 
   return (
     <div className="space-y-6 md:space-y-8">
+      {/* Ramadan Banner with Suhoor/Iftar at top */}
+      {isRamadan() && prayerTimes && (
+        <RamadanBanner variant="prayer" prayerTimes={{ Fajr: prayerTimes.Fajr, Maghrib: prayerTimes.Maghrib }} />
+      )}
+      {isRamadan() && !prayerTimes && <RamadanBanner variant="prayer" />}
+
       {/* Hero Section */}
       <PrayerHero nextPrayer={nextPrayer} location={location} loading={loading} />
 
