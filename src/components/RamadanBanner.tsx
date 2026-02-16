@@ -207,11 +207,31 @@ const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: Ramadan
               </p>
             </div>
           </div>
-        ) : !isFastingPeriod() ? (
-          <p className="text-center text-xs text-muted-foreground">
-            {settings.language === 'ar' ? 'رمضان يبدأ قريبًا إن شاء الله' : 'Ramadan is coming soon, In Sha Allah'}
-          </p>
-        ) : null}
+) : !isFastingPeriod() ? (
+  (() => {
+    const now = new Date();
+    const diff = RAMADAN_FAST_START.getTime() - now.getTime();
+
+    // If we're past the start moment, don't show anything here
+    if (diff <= 0) return null;
+
+    const totalMinutes = Math.floor(diff / (1000 * 60));
+    const days = Math.floor(totalMinutes / (60 * 24));
+    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const minutes = totalMinutes % 60;
+
+    return (
+      <div className="mt-4 flex items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 to-purple-600/10 px-4 py-3 text-center">
+        <Timer className="h-4 w-4 text-amber-500" />
+        <div className="text-sm font-semibold text-foreground">
+          {settings.language === 'ar'
+            ? `متبقي على رمضان: ${days} يوم ${hours} ساعة ${minutes} دقيقة`
+            : `Ramadan starts in: ${days}d ${hours}h ${minutes}m`}
+        </div>
+      </div>
+    );
+  })()
+) : null}
       </div>
     </div>
   );
