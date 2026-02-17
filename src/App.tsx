@@ -10,6 +10,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Quran from "./pages/Quran";
 import SurahDetail from "./pages/SurahDetail";
+import JuzDetail from "./pages/JuzDetail";
 import Auth from "./pages/Auth";
 import Info from "./pages/Info";
 import Duas from "./pages/Duas";
@@ -87,6 +88,7 @@ const App = () => (
                   <Route path="/" element={<Home />} />
                   <Route path="/quran" element={<Quran />} />
                   <Route path="/quran/:surahNumber" element={<SurahDetail />} />
+                  <Route path="/quran/juz/:juzNumber" element={<JuzDetail />} />
                   <Route path="/qalam" element={<Qalam />} />
                   <Route path="/chat-history" element={<ChatHistory />} />
                   <Route path="/info" element={<Info />} />

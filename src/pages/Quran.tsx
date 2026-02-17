@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { fetchSurahs, Surah, getFirstAyahOfPage, clearSurahsCache } from '@/lib/quran-api';
 import { getPageRangeDisplay, getJuzDisplay, toArabicNumerals, SURAH_JUZ } from '@/lib/surah-pages';
+import { JUZ_BOUNDARIES } from '@/lib/juz-data';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
@@ -189,6 +190,87 @@ const Quran = () => {
     });
     return grouped;
   }, [filteredSurahs]);
+
+  // Compute Juz cards for Juz display mode
+  const juzCards = useMemo(() => {
+    if (settings.quranDisplayMode !== 'juz' || surahs.length === 0) return [];
+    
+    return JUZ_BOUNDARIES.map(boundary => {
+      const juzSurahs: (Surah & { startAyah: number; endAyah: number })[] = [];
+      
+      for (let s = boundary.start.surah; s <= boundary.end.surah; s++) {
+        const surah = surahs.find(su => su.number === s);
+        if (surah) {
+          juzSurahs.push({
+            ...surah,
+            startAyah: s === boundary.start.surah ? boundary.start.ayah : 1,
+            endAyah: s === boundary.end.surah ? boundary.end.ayah : surah.numberOfAyahs,
+          });
+        }
+      }
+      
+      let totalAyahs = 0;
+      let readAyahs = 0;
+      juzSurahs.forEach(s => {
+        const juzAyahsCount = s.endAyah - s.startAyah + 1;
+        totalAyahs += juzAyahsCount;
+        const userProgress = progress[s.number] || 0;
+        const readInJuz = Math.max(0, Math.min(userProgress, s.endAyah) - s.startAyah + 1);
+        readAyahs += Math.max(0, readInJuz);
+      });
+      
+      return {
+        juz: boundary.juz,
+        surahs: juzSurahs,
+        totalAyahs,
+        readAyahs,
+        progressPercent: totalAyahs > 0 ? (readAyahs / totalAyahs) * 100 : 0,
+      };
+    });
+  }, [settings.quranDisplayMode, surahs, progress]);
+
+  const renderJuzCard = (juzInfo: typeof juzCards[0]) => {
+    const { juz, surahs: juzSurahs, totalAyahs, readAyahs, progressPercent } = juzInfo;
+    const uniqueNames = [...new Set(juzSurahs.map(s => isArabic ? s.name : s.englishName))];
+    
+    return (
+      <Link key={juz} to={`/quran/juz/${juz}`} className="block animate-fade-in">
+        <div className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border border-border/30 hover:border-primary/30 backdrop-blur-xl">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
+              <span className="text-primary font-bold">
+                {isArabic ? toArabicNumerals(juz) : juz}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold leading-tight">
+                {isArabic ? `الجزء ${toArabicNumerals(juz)}` : `Juz ${juz}`}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                {uniqueNames.join(' \u2022 ')}
+              </p>
+              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                <span>{isArabic ? `${toArabicNumerals(totalAyahs)} آية` : `${totalAyahs} ayahs`}</span>
+              </div>
+            </div>
+          </div>
+          {progressPercent > 0 && (
+            <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-medium">
+                  {isArabic 
+                    ? `${toArabicNumerals(readAyahs)} من ${toArabicNumerals(totalAyahs)} آية`
+                    : `${readAyahs} of ${totalAyahs} ayahs`}
+                </span>
+                <span className="text-primary font-semibold">{progressPercent.toFixed(0)}%</span>
+              </div>
+              <Progress value={progressPercent} className="h-1.5" />
+            </div>
+          )}
+        </div>
+      </Link>
+    );
+  };
 
   const loadSurahs = async (clearCache = false) => {
     setLoading(true);
@@ -404,13 +486,16 @@ const Quran = () => {
       toast.error(isArabic ? 'رقم الجزء غير صالح' : 'Invalid juz number');
       return;
     }
-    // Find first surah of the juz
-    const firstSurahOfJuz = Object.entries(SURAH_JUZ).find(([_, juz]) => juz === juzNum);
-    if (firstSurahOfJuz) {
-      navigate(`/quran/${firstSurahOfJuz[0]}`);
-      setQuickNavOpen(false);
-      setJuzInput('');
+    if (settings.quranDisplayMode === 'juz') {
+      navigate(`/quran/juz/${juzNum}`);
+    } else {
+      const firstSurahOfJuz = Object.entries(SURAH_JUZ).find(([_, juz]) => juz === juzNum);
+      if (firstSurahOfJuz) {
+        navigate(`/quran/${firstSurahOfJuz[0]}`);
+      }
     }
+    setQuickNavOpen(false);
+    setJuzInput('');
   };
 
   const toggleJuzExpanded = (juz: number) => {
@@ -648,17 +733,6 @@ const Quran = () => {
               {isArabic ? tab.labelAr : tab.labelEn}
             </button>
           ))}
-          <button
-            onClick={() => setGroupByJuz(!groupByJuz)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap smooth-transition flex items-center gap-2 ${
-              groupByJuz
-                ? 'bg-primary text-primary-foreground shadow-md'
-                : 'glass-effect border border-border/30 hover:border-primary/30 text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Layers className="h-4 w-4" />
-            {isArabic ? 'تجميع حسب الجزء' : 'Group by Juz'}
-          </button>
         </div>
       </div>
 
@@ -714,7 +788,12 @@ const Quran = () => {
             <div 
               className="glass-effect rounded-2xl p-5 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.01] smooth-transition max-w-2xl mx-auto"
               onClick={() => {
-                if (displayProgress > 0) {
+                if (settings.quranDisplayMode === 'juz') {
+                  const juz = JUZ_BOUNDARIES.find(b => 
+                    displaySurah.number >= b.start.surah && displaySurah.number <= b.end.surah
+                  );
+                  if (juz) navigate(`/quran/juz/${juz.juz}`);
+                } else if (displayProgress > 0) {
                   navigate(`/quran/${displaySurah.number}?ayah=${displayProgress}`);
                 } else {
                   navigate(`/quran/${displaySurah.number}`);
@@ -805,47 +884,21 @@ const Quran = () => {
         </div>
       )}
 
-      {/* Surah List */}
+      {/* Main List */}
       <div className="space-y-3 px-4 max-w-2xl mx-auto">
-        {groupByJuz ? (
-          // Grouped by Juz
-          Object.entries(surahsByJuz)
-            .filter(([_, surahs]) => surahs.length > 0)
-            .map(([juz, juzSurahs]) => (
-              <Collapsible
-                key={juz}
-                open={expandedJuz.has(parseInt(juz))}
-                onOpenChange={() => toggleJuzExpanded(parseInt(juz))}
-              >
-                <CollapsibleTrigger asChild>
-                  <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                        <Layers className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="font-semibold">
-                          {isArabic ? `الجزء ${toArabicNumerals(parseInt(juz))}` : `Juz ${juz}`}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {isArabic ? `${toArabicNumerals(juzSurahs.length)} سورة` : `${juzSurahs.length} surahs`}
-                        </p>
-                      </div>
-                    </div>
-                    {expandedJuz.has(parseInt(juz)) ? (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    )}
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="mt-3 space-y-3">
-                  {juzSurahs.map((surah, index) => renderSurahCard(surah, index))}
-                </CollapsibleContent>
-              </Collapsible>
-            ))
+        {settings.quranDisplayMode === 'juz' ? (
+          juzCards
+            .filter(juz => {
+              if (!searchTerm.trim()) return true;
+              const num = parseInt(searchTerm);
+              if (!isNaN(num)) return juz.juz === num;
+              const term = searchTerm.toLowerCase();
+              return juz.surahs.some(s => 
+                s.englishName.toLowerCase().includes(term) || s.name.includes(searchTerm)
+              );
+            })
+            .map(juzInfo => renderJuzCard(juzInfo))
         ) : (
-          // Flat list
           filteredSurahs.map((surah, index) => renderSurahCard(surah, index))
         )}
       </div>

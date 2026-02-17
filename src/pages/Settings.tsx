@@ -160,6 +160,12 @@ const Settings = () => {
         click: 'عند النقر',
         under: 'تحت كل كلمة',
       },
+      displayMode: 'طريقة العرض',
+      displayModes: {
+        surah: 'بالسور',
+        juz: 'بالأجزاء',
+        'surah-juz-markers': 'سور مع علامات الأجزاء',
+      },
       mode: 'الوضع',
       color: 'اللون',
       modes: {
@@ -236,6 +242,12 @@ const Settings = () => {
         off: 'Off',
         click: 'On Click',
         under: 'Under Each Word',
+      },
+      displayMode: 'Display Mode',
+      displayModes: {
+        surah: 'By Surah',
+        juz: 'By Juz',
+        'surah-juz-markers': 'Surah + Juz Markers',
       },
       mode: 'Mode',
       color: 'Color',
@@ -489,6 +501,20 @@ const Settings = () => {
                 <SelectItem value="off">{t.wordByWordModes.off}</SelectItem>
                 <SelectItem value="click">{t.wordByWordModes.click}</SelectItem>
                 <SelectItem value="under">{t.wordByWordModes.under}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="h-px bg-border" />
+          <div className="flex items-center justify-between">
+            <Label className="font-medium">{(t as any).displayMode}</Label>
+            <Select value={settings.quranDisplayMode} onValueChange={(value: any) => updateSettings({ quranDisplayMode: value })}>
+              <SelectTrigger className={isRTL ? 'w-52' : 'w-48'}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="surah">{(t as any).displayModes?.surah}</SelectItem>
+                <SelectItem value="juz">{(t as any).displayModes?.juz}</SelectItem>
+                <SelectItem value="surah-juz-markers">{(t as any).displayModes?.['surah-juz-markers']}</SelectItem>
               </SelectContent>
             </Select>
           </div>

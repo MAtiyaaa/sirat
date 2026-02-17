@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '@/contexts/SettingsContext';
 import { 
@@ -38,6 +38,8 @@ import AyahChatDialog from '@/components/AyahChatDialog';
 import { toast } from 'sonner';
 import { useAudio } from '@/contexts/AudioContext';
 import DOMPurify from 'dompurify';
+import { getJuzBoundariesInSurah } from '@/lib/juz-data';
+import { toArabicNumerals } from '@/lib/surah-pages';
 
 const SurahDetail = () => {
   const { surahNumber } = useParams<{ surahNumber: string }>();
@@ -68,6 +70,11 @@ const SurahDetail = () => {
   const [nextSurahData, setNextSurahData] = useState<any>(null);
   const [nextSurahProgress, setNextSurahProgress] = useState<number>(0);
   const [ayahPages, setAyahPages] = useState<Record<number, number>>({});
+
+  const juzBoundariesInSurah = useMemo(() => {
+    if (!surahData || settings.quranDisplayMode !== 'surah-juz-markers') return [];
+    return getJuzBoundariesInSurah(surahData.number, surahData.numberOfAyahs);
+  }, [surahData, settings.quranDisplayMode]);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -985,14 +992,27 @@ const SurahDetail = () => {
             
             return arabicText.includes(search) || translationText.includes(search);
           })
-          .map((ayah: any, index: number) => (
-          <div
-            key={ayah.number}
-            data-ayah={ayah.numberInSurah}
-            className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
-              playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
-            }`}
-          >
+          .map((ayah: any, index: number) => {
+            const juzMarker = juzBoundariesInSurah.find(b => b.ayah === ayah.numberInSurah);
+            return (
+              <React.Fragment key={ayah.number}>
+                {juzMarker && (
+                  <div className="flex items-center gap-3 py-3">
+                    <div className="flex-1 h-px bg-destructive/30" />
+                    <span className="text-xs font-bold text-destructive px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20 whitespace-nowrap">
+                      {settings.language === 'ar'
+                        ? `نهاية الجزء ${toArabicNumerals(juzMarker.juzEnding)} — بداية الجزء ${toArabicNumerals(juzMarker.juzStarting)}`
+                        : `End of Juz ${juzMarker.juzEnding} — Start of Juz ${juzMarker.juzStarting}`}
+                    </span>
+                    <div className="flex-1 h-px bg-destructive/30" />
+                  </div>
+                )}
+                <div
+                  data-ayah={ayah.numberInSurah}
+                  className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
+                    playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
+                  }`}
+                >
             {/* Ayah Number & Play */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -1197,8 +1217,10 @@ const SurahDetail = () => {
                 </CollapsibleContent>
               </Collapsible>
             )}
-          </div>
-        ))}
+              </div>
+              </React.Fragment>
+            );
+          })}
       </div>
       
       {/* Next Surah Navigation */}
