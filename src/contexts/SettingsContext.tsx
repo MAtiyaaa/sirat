@@ -7,6 +7,7 @@ export type ThemeColor = 'blue' | 'green' | 'gold' | 'pink' | 'red';
 export type FontType = 'quran' | 'amiri' | 'scheherazade' | 'lateef' | 'noto-naskh' | 'normal';
 export type ReadingTrackingMode = 'auto' | 'scroll' | 'bookmark' | 'reciting' | 'click';
 export type WordByWordMode = 'off' | 'click' | 'under';
+export type QuranDisplayMode = 'surah' | 'juz' | 'surah-juz-markers';
 
 interface Settings {
   language: Language;
@@ -20,6 +21,7 @@ interface Settings {
   prayerTimeRegion: string | null;
   readingTrackingMode: ReadingTrackingMode;
   wordByWordMode: WordByWordMode;
+  quranDisplayMode: QuranDisplayMode;
 }
 
 interface SettingsContextType {
@@ -39,6 +41,7 @@ const defaultSettings: Settings = {
   prayerTimeRegion: null,
   readingTrackingMode: 'auto',
   wordByWordMode: 'off',
+  quranDisplayMode: 'surah',
 };
 
 // Load settings from localStorage immediately (synchronously) for instant availability
@@ -146,6 +149,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               wordByWordMode: typeof data.word_by_word_display === 'boolean' 
                 ? (data.word_by_word_display ? 'under' : 'click') 
                 : (data.word_by_word_display as WordByWordMode) || defaultSettings.wordByWordMode,
+              quranDisplayMode: defaultSettings.quranDisplayMode,
             };
             console.log('[Settings] Setting state to DB settings:', dbSettings);
             setSettings(dbSettings);
