@@ -202,9 +202,16 @@ const Settings = () => {
         cairo: 'القاهرة',
         riyadh: 'الرياض',
         dubai: 'دبي',
+        sharjah: 'الشارقة',
+        abuDhabi: 'أبوظبي',
+        ajman: 'عجمان',
+        alAin: 'العين',
+        jeddah: 'جدة',
         istanbul: 'إسطنبول',
         london: 'لندن',
         newYork: 'نيويورك',
+        kualaLumpur: 'كوالالمبور',
+        jakarta: 'جاكرتا',
       },
     },
     en: {
@@ -285,9 +292,16 @@ const Settings = () => {
         cairo: 'Cairo',
         riyadh: 'Riyadh',
         dubai: 'Dubai',
+        sharjah: 'Sharjah',
+        abuDhabi: 'Abu Dhabi',
+        ajman: 'Ajman',
+        alAin: 'Al Ain',
+        jeddah: 'Jeddah',
         istanbul: 'Istanbul',
         london: 'London',
         newYork: 'New York',
+        kualaLumpur: 'Kuala Lumpur',
+        jakarta: 'Jakarta',
       },
     },
   };
@@ -554,7 +568,19 @@ const Settings = () => {
                 <SelectItem value="auto">{t.regions.auto}</SelectItem>
                 <SelectItem value="21.4225,39.8262">{t.regions.mecca}</SelectItem>
                 <SelectItem value="24.4672,39.6111">{t.regions.medina}</SelectItem>
+                <SelectItem value="21.5433,39.1728">{t.regions.jeddah}</SelectItem>
+                <SelectItem value="24.7136,46.6753">{t.regions.riyadh}</SelectItem>
+                <SelectItem value="25.2048,55.2708">{t.regions.dubai}</SelectItem>
+                <SelectItem value="25.3463,55.4209">{t.regions.sharjah}</SelectItem>
+                <SelectItem value="24.4539,54.3773">{t.regions.abuDhabi}</SelectItem>
+                <SelectItem value="25.4052,55.5136">{t.regions.ajman}</SelectItem>
+                <SelectItem value="24.2075,55.7447">{t.regions.alAin}</SelectItem>
                 <SelectItem value="30.0444,31.2357">{t.regions.cairo}</SelectItem>
+                <SelectItem value="41.0082,28.9784">{t.regions.istanbul}</SelectItem>
+                <SelectItem value="51.5074,-0.1278">{t.regions.london}</SelectItem>
+                <SelectItem value="40.7128,-74.0060">{t.regions.newYork}</SelectItem>
+                <SelectItem value="3.139,101.6869">{t.regions.kualaLumpur}</SelectItem>
+                <SelectItem value="-6.2088,106.8456">{t.regions.jakarta}</SelectItem>
               </SelectContent>
             </Select>
           </div>

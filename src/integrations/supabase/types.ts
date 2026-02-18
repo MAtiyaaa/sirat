@@ -296,6 +296,7 @@ export type Database = {
           id: string
           language: string | null
           prayer_time_region: string | null
+          quran_display_mode: string | null
           reading_tracking_mode: string | null
           tafsir_enabled: boolean | null
           tafsir_source: string | null
@@ -314,6 +315,7 @@ export type Database = {
           id?: string
           language?: string | null
           prayer_time_region?: string | null
+          quran_display_mode?: string | null
           reading_tracking_mode?: string | null
           tafsir_enabled?: boolean | null
           tafsir_source?: string | null
@@ -332,6 +334,7 @@ export type Database = {
           id?: string
           language?: string | null
           prayer_time_region?: string | null
+          quran_display_mode?: string | null
           reading_tracking_mode?: string | null
           tafsir_enabled?: boolean | null
           tafsir_source?: string | null

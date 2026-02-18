@@ -72,11 +72,11 @@ const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: Ramadan
       const maghribMin = mH * 60 + mM;
       
       if (currentMinutes < fajrMin) {
-        setCountdown(getCountdown(times.Fajr, settings.language === 'ar' ? 'السحور' : 'Suhoor'));
+        setCountdown(getCountdown(times.Fajr, settings.language === 'ar' ? 'الفجر' : 'Fajr'));
       } else if (currentMinutes < maghribMin) {
         setCountdown(getCountdown(times.Maghrib, settings.language === 'ar' ? 'الإفطار' : 'Iftar'));
       } else {
-        setCountdown(getCountdown(times.Fajr, settings.language === 'ar' ? 'السحور' : 'Suhoor'));
+        setCountdown(getCountdown(times.Fajr, settings.language === 'ar' ? 'الفجر' : 'Fajr'));
       }
     };
     
@@ -181,14 +181,14 @@ const RamadanBanner = ({ variant = 'home', prayerTimes: externalTimes }: Ramadan
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <Sunrise className="h-3.5 w-3.5 text-blue-400" />
                 <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
-                  {settings.language === 'ar' ? 'السحور' : 'Suhoor'}
+                  {settings.language === 'ar' ? 'الفجر' : 'Fajr'}
                 </span>
               </div>
               <div className="text-xl md:text-2xl font-bold text-foreground">
                 {times.Fajr}
               </div>
               <p className="text-[9px] text-muted-foreground mt-0.5">
-                {settings.language === 'ar' ? 'قبل أذان الفجر' : 'Before Fajr'}
+                {settings.language === 'ar' ? 'وقت الإمساك' : 'Stop eating'}
               </p>
             </div>
             {/* Iftar */}

@@ -149,7 +149,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               wordByWordMode: typeof data.word_by_word_display === 'boolean' 
                 ? (data.word_by_word_display ? 'under' : 'click') 
                 : (data.word_by_word_display as WordByWordMode) || defaultSettings.wordByWordMode,
-              quranDisplayMode: defaultSettings.quranDisplayMode,
+              quranDisplayMode: (data.quran_display_mode as QuranDisplayMode) || defaultSettings.quranDisplayMode,
             };
             console.log('[Settings] Setting state to DB settings:', dbSettings);
             setSettings(dbSettings);
@@ -259,6 +259,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         prayer_time_region: settings.prayerTimeRegion,
         reading_tracking_mode: settings.readingTrackingMode,
         word_by_word_display: settings.wordByWordMode as string,
+        quran_display_mode: settings.quranDisplayMode,
       } as any;
       
       console.log('[Settings] Upserting data:', settingsData);
