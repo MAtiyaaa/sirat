@@ -52,6 +52,7 @@ const RamadanQuranPlan = () => {
   const isArabic = settings.language === 'ar';
   const [progress, setProgress] = useState<Record<number, number>>({});
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     loadProgress();
@@ -113,117 +114,124 @@ const RamadanQuranPlan = () => {
   if (!isRamadan()) return null;
 
   return (
-    <div className="space-y-4">
-      {/* Header Card */}
-      <div className="glass-effect rounded-2xl p-5 border border-amber-500/15 bg-gradient-to-br from-amber-500/5 to-primary/5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
-              <BookOpen className="h-5 w-5 text-white" />
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <div className="glass-effect rounded-2xl border border-amber-500/15 bg-gradient-to-br from-amber-500/5 to-primary/5">
+        <CollapsibleTrigger asChild>
+          <button className="w-full p-5 text-left">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg">
+                  <BookOpen className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm">
+                    {isArabic ? 'ختم القرآن في رمضان' : 'Finish Quran in Ramadan'}
+                  </h3>
+                  <p className="text-[10px] text-muted-foreground">
+                    {isArabic ? 'جزء واحد كل يوم' : '1 Juz per day'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                  statusInfo.status === 'ahead' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
+                  statusInfo.status === 'on-track' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                  'bg-orange-500/10 text-orange-500 border border-orange-500/20'
+                }`}>
+                  {statusInfo.status === 'ahead' && <TrendingUp className="h-3 w-3 inline mr-1" />}
+                  {statusInfo.status === 'behind' && <AlertTriangle className="h-3 w-3 inline mr-1" />}
+                  {statusInfo.label}
+                </div>
+                <span className="font-semibold text-sm text-primary">{overallPercent.toFixed(0)}%</span>
+                <ChevronDown className={`h-4 w-4 text-muted-foreground smooth-transition ${isOpen ? 'rotate-180' : ''}`} />
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-sm">
-                {isArabic ? 'ختم القرآن في رمضان' : 'Finish Quran in Ramadan'}
-              </h3>
-              <p className="text-[10px] text-muted-foreground">
-                {isArabic ? 'جزء واحد كل يوم' : '1 Juz per day'}
-              </p>
+            
+            {/* Progress bar always visible */}
+            <div className="mt-3">
+              <Progress value={overallPercent} className="h-1.5" />
+              {today > 0 && (
+                <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+                  {isArabic ? `اليوم ${toArabicNumerals(today)} من رمضان` : `Day ${today} of Ramadan`}
+                </p>
+              )}
             </div>
-          </div>
-          <div className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-            statusInfo.status === 'ahead' ? 'bg-green-500/10 text-green-500 border border-green-500/20' :
-            statusInfo.status === 'on-track' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
-            'bg-orange-500/10 text-orange-500 border border-orange-500/20'
-          }`}>
-            {statusInfo.status === 'ahead' && <TrendingUp className="h-3 w-3 inline mr-1" />}
-            {statusInfo.status === 'behind' && <AlertTriangle className="h-3 w-3 inline mr-1" />}
-            {statusInfo.label}
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between text-xs mb-2">
-          <span className="text-muted-foreground">
-            {isArabic ? `${toArabicNumerals(completedDays)} من ${toArabicNumerals(30)} جزء` : `${completedDays} of 30 Juz`}
-          </span>
-          <span className="font-semibold text-primary">{overallPercent.toFixed(0)}%</span>
-        </div>
-        <Progress value={overallPercent} className="h-1.5" />
-        
-        {today > 0 && (
-          <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            {isArabic ? `اليوم ${toArabicNumerals(today)} من رمضان` : `Day ${today} of Ramadan`}
-          </p>
-        )}
-      </div>
+          </button>
+        </CollapsibleTrigger>
 
-      {/* Days Grid */}
-      <div className="grid grid-cols-6 gap-1.5">
-        {dayStatus.map(({ day, completed, partial }) => {
-          const isToday = day === today;
-          return (
-            <button
-              key={day}
-              onClick={() => setExpandedDay(expandedDay === day ? null : day)}
-              className={`relative rounded-xl p-2 text-center text-xs font-semibold smooth-transition border ${
-                completed
-                  ? 'bg-green-500/10 border-green-500/20 text-green-600'
-                  : isToday
-                  ? 'bg-primary/10 border-primary/30 text-primary ring-1 ring-primary/30'
-                  : partial
-                  ? 'bg-amber-500/10 border-amber-500/15 text-amber-600'
-                  : 'glass-effect border-border/20 text-muted-foreground'
-              }`}
-            >
-              {completed && <CheckCircle className="h-2.5 w-2.5 absolute top-0.5 right-0.5 text-green-500" />}
-              {isArabic ? toArabicNumerals(day) : day}
-            </button>
-          );
-        })}
-      </div>
+        <CollapsibleContent>
+          <div className="px-5 pb-5 space-y-4">
+            {/* Days Grid */}
+            <div className="grid grid-cols-6 gap-1.5">
+              {dayStatus.map(({ day, completed, partial }) => {
+                const isToday = day === today;
+                return (
+                  <button
+                    key={day}
+                    onClick={() => setExpandedDay(expandedDay === day ? null : day)}
+                    className={`relative rounded-xl p-2 text-center text-xs font-semibold smooth-transition border ${
+                      completed
+                        ? 'bg-green-500/10 border-green-500/20 text-green-600'
+                        : isToday
+                        ? 'bg-primary/10 border-primary/30 text-primary ring-1 ring-primary/30'
+                        : partial
+                        ? 'bg-amber-500/10 border-amber-500/15 text-amber-600'
+                        : 'glass-effect border-border/20 text-muted-foreground'
+                    }`}
+                  >
+                    {completed && <CheckCircle className="h-2.5 w-2.5 absolute top-0.5 right-0.5 text-green-500" />}
+                    {isArabic ? toArabicNumerals(day) : day}
+                  </button>
+                );
+              })}
+            </div>
 
-      {/* Expanded Day Detail */}
-      {expandedDay && JUZ_SURAH_MAP[expandedDay] && (
-        <div className="glass-effect rounded-2xl p-4 border border-border/30 animate-fade-in">
-          <h4 className="text-sm font-bold mb-3">
-            {isArabic ? `الجزء ${toArabicNumerals(expandedDay)}` : `Juz ${expandedDay}`}
-            {expandedDay === today && (
-              <span className="text-[10px] text-primary font-normal ml-2">
-                {isArabic ? '(اليوم)' : '(Today)'}
-              </span>
+            {/* Expanded Day Detail */}
+            {expandedDay && JUZ_SURAH_MAP[expandedDay] && (
+              <div className="glass-effect rounded-2xl p-4 border border-border/30 animate-fade-in">
+                <h4 className="text-sm font-bold mb-3">
+                  {isArabic ? `الجزء ${toArabicNumerals(expandedDay)}` : `Juz ${expandedDay}`}
+                  {expandedDay === today && (
+                    <span className="text-[10px] text-primary font-normal ml-2">
+                      {isArabic ? '(اليوم)' : '(Today)'}
+                    </span>
+                  )}
+                </h4>
+                <div className="space-y-2">
+                  {JUZ_SURAH_MAP[expandedDay].surahs.map(s => {
+                    const p = progress[s.number] || 0;
+                    const pct = s.ayahs > 0 ? Math.min((p / s.ayahs) * 100, 100) : 0;
+                    return (
+                      <Link
+                        key={`${expandedDay}-${s.number}`}
+                        to={`/quran/${s.number}`}
+                        className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/5 smooth-transition"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
+                          {isArabic ? toArabicNumerals(s.number) : s.number}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {isArabic ? s.nameAr : s.nameEn}
+                          </p>
+                          {s.ayahs > 0 && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <Progress value={pct} className="h-1 flex-1" />
+                              <span className="text-[10px] text-muted-foreground w-8 text-right">{pct.toFixed(0)}%</span>
+                            </div>
+                          )}
+                        </div>
+                        {pct >= 100 && <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             )}
-          </h4>
-          <div className="space-y-2">
-            {JUZ_SURAH_MAP[expandedDay].surahs.map(s => {
-              const p = progress[s.number] || 0;
-              const pct = s.ayahs > 0 ? Math.min((p / s.ayahs) * 100, 100) : 0;
-              return (
-                <Link
-                  key={`${expandedDay}-${s.number}`}
-                  to={`/quran/${s.number}`}
-                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/5 smooth-transition"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-bold text-primary flex-shrink-0">
-                    {isArabic ? toArabicNumerals(s.number) : s.number}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {isArabic ? s.nameAr : s.nameEn}
-                    </p>
-                    {s.ayahs > 0 && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <Progress value={pct} className="h-1 flex-1" />
-                        <span className="text-[10px] text-muted-foreground w-8 text-right">{pct.toFixed(0)}%</span>
-                      </div>
-                    )}
-                  </div>
-                  {pct >= 100 && <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />}
-                </Link>
-              );
-            })}
           </div>
-        </div>
-      )}
-    </div>
+        </CollapsibleContent>
+      </div>
+    </Collapsible>
   );
 };
 
