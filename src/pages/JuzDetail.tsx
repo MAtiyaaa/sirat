@@ -21,14 +21,7 @@ import { useAudio } from '@/contexts/AudioContext';
 import DOMPurify from 'dompurify';
 
 const QURAN_COM_BASE = 'https://api.quran.com/api/v4';
-
-const TRANSLATION_MAP: Record<string, number> = {
-  'en.sahih': 20,
-  'en.pickthall': 19,
-  'ar.muyassar': 161,
-  'transliteration': 57,
-  'en.transliteration': 57,
-};
+const ALQURAN_BASE = 'https://api.alquran.cloud/v1';
 
 interface JuzVerse {
   verseKey: string;
@@ -110,22 +103,23 @@ const JuzDetail = () => {
     setLoading(true);
 
     try {
-      // Fetch Arabic text
+      // Fetch Arabic text from quran.com
       const arabicRes = await fetch(`${QURAN_COM_BASE}/quran/verses/uthmani?juz_number=${juzNum}`);
       if (!arabicRes.ok) throw new Error('Failed to fetch Arabic');
       const arabicData = await arabicRes.json();
 
-      // Fetch translation if enabled
+      // Fetch translation using alquran.cloud (supports edition codes like ar.muyassar natively)
       let translationTexts: string[] = [];
       if (settings.translationEnabled) {
-        const translationId = TRANSLATION_MAP[settings.translationSource] || 20;
         try {
-          const transRes = await fetch(`${QURAN_COM_BASE}/quran/translations/${translationId}?juz_number=${juzNum}`);
+          const transRes = await fetch(`${ALQURAN_BASE}/juz/${juzNum}/${settings.translationSource}`);
           if (transRes.ok) {
             const transData = await transRes.json();
-            translationTexts = (transData.translations || []).map((t: any) =>
-              (t.text || '').replace(/<[^>]*>/g, '').replace(/\[\d+\]/g, '').trim()
-            );
+            if (transData.data && transData.data.ayahs) {
+              translationTexts = transData.data.ayahs.map((a: any) =>
+                (a.text || '').replace(/<[^>]*>/g, '').replace(/\[\d+\]/g, '').trim()
+              );
+            }
           }
         } catch (e) {
           console.error('Translation fetch failed:', e);
@@ -248,6 +242,24 @@ const JuzDetail = () => {
       console.error('Word-by-word error:', e);
     }
   };
+
+  // Auto-load word-by-word data for 'under' mode
+  useEffect(() => {
+    if (settings.wordByWordMode !== 'under' || verses.length === 0) return;
+    
+    // Load in batches to avoid overwhelming the API
+    const loadBatch = async () => {
+      for (const verse of verses) {
+        const key = `${verse.surahNumber}:${verse.ayahNumber}`;
+        if (!wordData[key]) {
+          await loadWordByWordForAyah(verse.surahNumber, verse.ayahNumber);
+          // Small delay between requests
+          await new Promise(r => setTimeout(r, 50));
+        }
+      }
+    };
+    loadBatch();
+  }, [verses, settings.wordByWordMode]);
 
   const handleWordClick = (key: string, wordIndex: number) => {
     const fullKey = `${key}-${wordIndex}`;
