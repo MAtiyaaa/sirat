@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 /* UAE Dirham Symbol Font */
 @font-face {
   font-family: 'UAESymbol';
@@ -19,24 +15,24 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Base Light Theme with Blue */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 15%;
+    /* Rich & Immersive Light Theme */
+    --background: 30 20% 98%;
+    --foreground: 20 25% 10%;
     
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
+    --card: 30 15% 97%;
+    --card-foreground: 20 25% 10%;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    --popover: 30 15% 97%;
+    --popover-foreground: 20 25% 10%;
     
     --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 240 10% 15%;
+    --secondary: 30 15% 93%;
+    --secondary-foreground: 20 25% 10%;
     
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 30 10% 93%;
+    --muted-foreground: 20 10% 45%;
     
     --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
@@ -44,45 +40,51 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
     --ring: 221 83% 53%;
     
     --radius: 1rem;
     
-    /* Glass effects */
-    --glass-bg: 0 0% 100% / 0.7;
-    --glass-border: 0 0% 100% / 0.18;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    /* Rich glass effects with warmth */
+    --glass-bg: 30 20% 99% / 0.75;
+    --glass-border: 30 30% 70% / 0.2;
+    
+    /* Warm accent tokens */
+    --warm-glow: 35 80% 55%;
+    --warm-subtle: 35 40% 92%;
+    --islamic-gold: 43 85% 55%;
+    --islamic-emerald: 160 60% 40%;
+    
+    --sidebar-background: 30 15% 97%;
+    --sidebar-foreground: 20 15% 26%;
+    --sidebar-primary: 20 20% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 30 12% 94%;
+    --sidebar-accent-foreground: 20 20% 10%;
+    --sidebar-border: 30 15% 88%;
+    --sidebar-ring: 221 83% 53%;
   }
 
   .dark {
-    /* Dark Theme with Blue */
-    --background: 240 10% 8%;
-    --foreground: 0 0% 98%;
+    /* Rich & Immersive Dark Theme */
+    --background: 20 15% 7%;
+    --foreground: 30 15% 95%;
     
-    --card: 240 10% 12%;
-    --card-foreground: 0 0% 98%;
+    --card: 20 12% 11%;
+    --card-foreground: 30 15% 95%;
     
-    --popover: 240 10% 12%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 20 12% 11%;
+    --popover-foreground: 30 15% 95%;
     
     --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 240 10% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 20 10% 18%;
+    --secondary-foreground: 30 15% 95%;
     
-    --muted: 240 10% 20%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 20 10% 18%;
+    --muted-foreground: 30 10% 60%;
     
     --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
@@ -90,19 +92,25 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
+    --border: 20 10% 18%;
+    --input: 20 10% 18%;
     --ring: 221 83% 53%;
     
-    --glass-bg: 240 10% 12% / 0.7;
-    --glass-border: 0 0% 100% / 0.1;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --glass-bg: 20 12% 10% / 0.8;
+    --glass-border: 30 20% 30% / 0.15;
+    
+    --warm-glow: 35 80% 55%;
+    --warm-subtle: 20 15% 15%;
+    --islamic-gold: 43 85% 60%;
+    --islamic-emerald: 160 55% 45%;
+    
+    --sidebar-background: 20 12% 9%;
+    --sidebar-foreground: 30 10% 90%;
+    --sidebar-primary: 221 76% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-accent: 20 8% 14%;
+    --sidebar-accent-foreground: 30 10% 90%;
+    --sidebar-border: 20 8% 14%;
     --sidebar-ring: 221 83% 53%;
   }
   
@@ -112,7 +120,6 @@ All colors MUST be HSL.
     --accent: 145 63% 42%;
     --ring: 145 63% 42%;
   }
-  
   .dark.green {
     --primary: 145 63% 49%;
     --accent: 145 63% 49%;
@@ -125,7 +132,6 @@ All colors MUST be HSL.
     --accent: 43 74% 49%;
     --ring: 43 74% 49%;
   }
-  
   .dark.gold {
     --primary: 43 74% 55%;
     --accent: 43 74% 55%;
@@ -138,7 +144,6 @@ All colors MUST be HSL.
     --accent: 340 82% 67%;
     --ring: 340 82% 67%;
   }
-  
   .dark.pink {
     --primary: 340 82% 67%;
     --accent: 340 82% 67%;
@@ -151,7 +156,6 @@ All colors MUST be HSL.
     --accent: 0 72% 51%;
     --ring: 0 72% 51%;
   }
-  
   .dark.red {
     --primary: 0 72% 58%;
     --accent: 0 72% 58%;
@@ -172,29 +176,23 @@ All colors MUST be HSL.
   .quran-font {
     font-family: 'Amiri', 'Traditional Arabic', serif;
   }
-  
   .amiri-font {
     font-family: 'Amiri', 'Traditional Arabic', serif;
   }
-  
   .scheherazade-font {
     font-family: 'Scheherazade New', 'Traditional Arabic', serif;
   }
-  
   .lateef-font {
     font-family: 'Lateef', 'Traditional Arabic', serif;
   }
-  
   .noto-naskh-font {
     font-family: 'Noto Naskh Arabic', 'Traditional Arabic', serif;
   }
-  
   .arabic-regal {
     font-family: 'Tajawal', 'SF Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
-  
   .ios-26-style {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
     font-weight: 600;
@@ -205,9 +203,20 @@ All colors MUST be HSL.
 @layer utilities {
   .glass-effect {
     background: hsl(var(--glass-bg));
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
     border: 1px solid hsl(var(--glass-border));
+  }
+  
+  .glass-card {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: 
+      0 4px 24px -4px hsl(var(--primary) / 0.06),
+      0 1px 3px -1px hsl(20 10% 20% / 0.08),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.06);
   }
   
   .smooth-transition {
@@ -217,6 +226,27 @@ All colors MUST be HSL.
   .apple-shadow {
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1),
                 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .rich-shadow {
+    box-shadow: 
+      0 20px 60px -15px hsl(20 20% 20% / 0.12),
+      0 8px 24px -8px hsl(20 20% 20% / 0.08),
+      0 2px 6px -2px hsl(20 20% 20% / 0.06);
+  }
+  
+  .golden-glow {
+    box-shadow: 
+      0 0 20px -4px hsl(var(--islamic-gold) / 0.25),
+      0 0 8px -2px hsl(var(--islamic-gold) / 0.15);
+  }
+
+  .islamic-pattern-bg {
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000' stroke-opacity='0.03' stroke-width='0.5'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3Cpath d='M40 10L70 40L40 70L10 40Z'/%3E%3Cpath d='M40 20L60 40L40 60L20 40Z'/%3E%3Ccircle cx='40' cy='40' r='8'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  .dark .islamic-pattern-bg {
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='0.03' stroke-width='0.5'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3Cpath d='M40 10L70 40L40 70L10 40Z'/%3E%3Cpath d='M40 20L60 40L40 60L20 40Z'/%3E%3Ccircle cx='40' cy='40' r='8'/%3E%3C/g%3E%3C/svg%3E");
   }
 
   @keyframes fade-in {
@@ -229,8 +259,40 @@ All colors MUST be HSL.
       transform: translateY(0);
     }
   }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
 
   .animate-fade-in {
     animation: fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) backwards;
   }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+  
+  .animate-glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+  
+  /* Scrollbar styling */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
