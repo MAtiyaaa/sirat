@@ -234,35 +234,36 @@ const Quran = () => {
     const uniqueNames = [...new Set(juzSurahs.map(s => isArabic ? s.name : s.englishName))];
     
     return (
-      <Link key={juz} to={`/quran/juz/${juz}`} className="block animate-fade-in">
-        <div className="glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border border-border/30 hover:border-primary/30 backdrop-blur-xl">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
-              <span className="text-primary font-bold">
+      <Link key={juz} to={`/quran/juz/${juz}`} className="block animate-fade-in group">
+        <div className="glass-card-elevated rounded-2xl p-5 smooth-transition hover-lift hover:border-primary/25 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/3 rounded-full blur-2xl opacity-0 group-hover:opacity-100 smooth-transition" />
+          <div className="flex items-start gap-4 relative">
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/8 flex items-center justify-center border border-primary/10 group-hover:scale-105 smooth-spring">
+              <span className="text-primary font-bold text-sm">
                 {isArabic ? toArabicNumerals(juz) : juz}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold leading-tight">
+              <h3 className="text-lg font-bold leading-tight">
                 {isArabic ? `الجزء ${toArabicNumerals(juz)}` : `Juz ${juz}`}
               </h3>
               <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                 {uniqueNames.join(' \u2022 ')}
               </p>
-              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                <span>{isArabic ? `${toArabicNumerals(totalAyahs)} آية` : `${totalAyahs} ayahs`}</span>
+              <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
+                <span className="font-medium">{isArabic ? `${toArabicNumerals(totalAyahs)} آية` : `${totalAyahs} ayahs`}</span>
               </div>
             </div>
           </div>
           {progressPercent > 0 && (
-            <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
+            <div className="mt-4 pt-3 border-t border-border/20 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground font-medium">
                   {isArabic 
                     ? `${toArabicNumerals(readAyahs)} من ${toArabicNumerals(totalAyahs)} آية`
                     : `${readAyahs} of ${totalAyahs} ayahs`}
                 </span>
-                <span className="text-primary font-semibold">{progressPercent.toFixed(0)}%</span>
+                <span className="text-primary font-bold">{progressPercent.toFixed(0)}%</span>
               </div>
               <Progress value={progressPercent} className="h-1.5" />
             </div>
@@ -520,23 +521,24 @@ const Quran = () => {
       <Link
         key={surah.number}
         to={`/quran/${surah.number}`}
-        className="block animate-fade-in"
-        style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+        className="block animate-fade-in group"
+        style={{ animationDelay: `${Math.min(index * 25, 250)}ms` }}
       >
-        <div className={`glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border ${isBookmarked ? 'border-primary/40 bg-primary/5' : 'border-border/30'} hover:border-primary/30 backdrop-blur-xl`}>
-          <div className="flex items-start gap-4">
-            {/* Surah Number Badge */}
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
-              <span className="text-primary font-bold">
+        <div className={`glass-card-elevated rounded-2xl p-5 smooth-transition hover-lift relative overflow-hidden ${isBookmarked ? 'border-primary/30 bg-primary/3' : ''} hover:border-primary/25`}>
+          {isBookmarked && (
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl" />
+          )}
+          <div className="flex items-start gap-4 relative">
+            <div className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/8 flex items-center justify-center border border-primary/10 group-hover:scale-105 smooth-spring ${surahProgressPercent >= 100 ? 'from-islamic-emerald/20 to-islamic-emerald/8 border-islamic-emerald/15' : ''}`}>
+              <span className={`font-bold text-sm tabular-nums ${surahProgressPercent >= 100 ? 'text-islamic-emerald' : 'text-primary'}`}>
                 {isArabic ? toArabicNumerals(surah.number) : surah.number}
               </span>
             </div>
 
-            {/* Surah Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <div>
-                  <h3 className={`text-lg font-semibold leading-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+                  <h3 className={`text-lg font-bold leading-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
                     {isArabic ? surah.name : surah.englishName}
                   </h3>
                   {!isArabic && (
@@ -544,13 +546,12 @@ const Quran = () => {
                   )}
                 </div>
                 
-                {/* Action Buttons */}
                 <div className="flex items-center gap-0.5 flex-shrink-0">
                   {playingSurah === surah.number && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 rounded-full hover:bg-primary/10"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -568,40 +569,36 @@ const Quran = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 rounded-full hover:bg-destructive/10"
                       onClick={(e) => handleResetClick(surah.number, e)}
                     >
-                      <RotateCcw className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                      <RotateCcw className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive smooth-transition" />
                     </Button>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 rounded-full hover:bg-primary/10"
                     onClick={(e) => toggleSurahBookmark(surah.number, e)}
                   >
-                    <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
+                    <Bookmark className={`h-4 w-4 smooth-transition ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                   </Button>
                 </div>
               </div>
               
-              {/* Translation - Only for English */}
               {!isArabic && (
                 <p className="text-xs text-muted-foreground mb-2">{surah.englishNameTranslation}</p>
               )}
               
-              {/* Meta Info */}
               <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                {/* Verse Count */}
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 font-medium">
                   {isArabic 
                     ? `${toArabicNumerals(surah.numberOfAyahs)} آية`
                     : `${surah.numberOfAyahs} verses`}
                 </span>
                 
-                <span className="text-border">•</span>
+                <span className="text-border/60">•</span>
                 
-                {/* Revelation Type with Icon */}
                 <span className="flex items-center gap-1">
                   {isMeccan ? (
                     <Building2 className="h-3 w-3" />
@@ -613,14 +610,12 @@ const Quran = () => {
                     : surah.revelationType}
                 </span>
                 
-                <span className="text-border">•</span>
+                <span className="text-border/60">•</span>
                 
-                {/* Page Range */}
                 <span>{getPageRangeDisplay(surah.number, settings.language)}</span>
                 
-                <span className="text-border">•</span>
+                <span className="text-border/60">•</span>
                 
-                {/* Juz */}
                 <span className="flex items-center gap-1">
                   <Layers className="h-3 w-3" />
                   {getJuzDisplay(surah.number, settings.language)}
@@ -629,16 +624,15 @@ const Quran = () => {
             </div>
           </div>
 
-          {/* Progress Bar */}
           {surahProgressPercent > 0 && (
-            <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
+            <div className="mt-4 pt-3 border-t border-border/20 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground font-medium">
                   {isArabic 
                     ? `الآية ${toArabicNumerals(surahProgress)} من ${toArabicNumerals(surah.numberOfAyahs)}`
                     : `Ayah ${surahProgress} of ${surah.numberOfAyahs}`}
                 </span>
-                <span className="text-primary font-semibold">{surahProgressPercent.toFixed(0)}%</span>
+                <span className="text-primary font-bold">{surahProgressPercent.toFixed(0)}%</span>
               </div>
               <Progress value={surahProgressPercent} className="h-1.5" />
             </div>
@@ -655,79 +649,74 @@ const Quran = () => {
   return (
     <div className="min-h-screen pb-8">
       {/* Hero Section */}
-      <div className="relative pt-12 pb-8 px-4 animate-fade-in">
-        {/* Decorative Islamic Pattern Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <pattern id="islamic-pattern-quran" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M10 0 L20 10 L10 20 L0 10 Z M10 5 L15 10 L10 15 L5 10 Z" fill="currentColor"/>
-            </pattern>
-            <rect width="100" height="100" fill="url(#islamic-pattern-quran)" />
-          </svg>
-        </div>
+      <div className="relative pt-10 pb-6 px-4 animate-fade-in">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none islamic-pattern-subtle opacity-40" />
 
-        {/* Gradient Orbs */}
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-        <div className="absolute top-0 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+        <div className="absolute -top-8 left-1/4 w-72 h-72 bg-primary/8 rounded-full blur-3xl animate-glow-breathe" />
+        <div className="absolute -top-4 right-1/4 w-56 h-56 bg-islamic-emerald/6 rounded-full blur-3xl animate-glow-breathe" style={{ animationDelay: '2s' }} />
 
         <div className="relative text-center space-y-4 max-w-2xl mx-auto">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 backdrop-blur-sm">
-            <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-            <span className="text-xs font-semibold text-primary tracking-wider">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card-elevated animate-text-reveal">
+            <Sparkles className="h-3.5 w-3.5 text-primary animate-glow-pulse" />
+            <span className="text-xs font-bold text-primary tracking-widest uppercase">
               {isArabic ? '١١٤ سورة' : '114 Surahs'}
             </span>
           </div>
 
-          {/* Main Title */}
-          <div className="relative">
-            <h1 className="text-6xl md:text-7xl font-bold tracking-tight relative z-10">
+          <div className="relative animate-text-reveal" style={{ animationDelay: '100ms' }}>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight relative z-10 ios-26-style">
               <span className={`bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm ${isArabic ? 'arabic-regal' : ''}`} style={{ lineHeight: '1.2' }}>
                 {isArabic ? 'القرآن الكريم' : 'The Holy Quran'}
               </span>
             </h1>
-            <div className="absolute inset-0 blur-2xl opacity-20 bg-gradient-to-r from-primary/50 via-emerald-500/50 to-primary/50 -z-10" />
+            <div className="absolute inset-0 blur-3xl opacity-15 bg-gradient-to-r from-primary/40 via-islamic-emerald/30 to-primary/40 -z-10" />
           </div>
 
-          {/* Subtitle */}
-          <p className="text-base text-muted-foreground font-light tracking-wide">
+          <p className="text-sm text-muted-foreground font-light tracking-wide animate-text-reveal" style={{ animationDelay: '200ms' }}>
             {isArabic ? 'اختر سورة للقراءة والتدبر' : 'Select a surah to read and reflect'}
           </p>
         </div>
       </div>
 
       {/* Search Bar */}
-      <div className="px-4 mb-4">
+      <div className="px-4 mb-4 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
         <div className="relative max-w-2xl mx-auto">
-          <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'}`} />
+          <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground/60 ${isArabic ? 'right-4' : 'left-4'}`} />
+          {searchTerm && (
+            <button 
+              onClick={() => setSearchTerm('')}
+              className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hover:text-foreground smooth-transition ${isArabic ? 'left-4' : 'right-4'}`}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={isArabic ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search surah name or page number (1-604)...'}
-            className={`h-14 rounded-2xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
+            className={`h-13 rounded-2xl glass-card-elevated border-border/30 hover:border-primary/20 focus:border-primary/40 smooth-transition text-base ${isArabic ? 'pr-12 text-right' : 'pl-12'} ${searchTerm ? (isArabic ? 'pl-10' : 'pr-10') : ''}`}
             dir={isArabic ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="px-4 mb-4">
-        <div className="flex gap-2 overflow-x-auto pb-2 max-w-2xl mx-auto scrollbar-hide">
+      <div className="px-4 mb-5 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+        <div className="flex gap-2 overflow-x-auto pb-1 max-w-2xl mx-auto scrollbar-hide">
           {filterTabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => {
-                // Toggle off if clicking the same filter (except 'all')
                 if (activeFilter === tab.key && tab.key !== 'all') {
                   setActiveFilter('all');
                 } else {
                   setActiveFilter(tab.key);
                 }
               }}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap smooth-transition ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap smooth-transition ${
                 activeFilter === tab.key
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'glass-effect border border-border/30 hover:border-primary/30 text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground primary-glow'
+                  : 'glass-card border-border/20 hover:border-primary/20 text-muted-foreground hover:text-foreground'
               }`}
             >
               {isArabic ? tab.labelAr : tab.labelEn}
@@ -784,9 +773,9 @@ const Quran = () => {
         const displayProgress = progress[displaySurah.number] || 0;
         
         return (
-          <div className="px-4 mb-6">
+          <div className="px-4 mb-6 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
             <div 
-              className="glass-effect rounded-2xl p-5 border border-primary/30 apple-shadow cursor-pointer hover:scale-[1.01] smooth-transition max-w-2xl mx-auto"
+              className="glass-card-elevated rounded-2xl p-5 border-primary/20 cursor-pointer hover-lift smooth-transition max-w-2xl mx-auto relative overflow-hidden group"
               onClick={() => {
                 if (settings.quranDisplayMode === 'juz') {
                   const juz = JUZ_BOUNDARIES.find(b => 
@@ -800,15 +789,16 @@ const Quran = () => {
                 }
               }}
             >
-              <div className="flex items-center justify-between gap-4">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl" />
+              <div className="flex items-center justify-between gap-4 relative">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
-                    <span className="text-primary-foreground font-bold">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center icon-badge group-hover:scale-105 smooth-spring">
+                    <span className="text-primary-foreground font-bold relative z-10 text-sm">
                       {isArabic ? toArabicNumerals(displaySurah.number) : displaySurah.number}
                     </span>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-0.5 font-medium">
+                    <p className="text-2xs font-bold text-primary mb-0.5 uppercase tracking-widest">
                       {isArabic ? 'متابعة القراءة' : 'Continue Reading'}
                     </p>
                     <h3 className={`text-xl font-bold ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
@@ -824,7 +814,7 @@ const Quran = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-10 w-10"
+                      className="h-10 w-10 rounded-full"
                       onClick={(e) => {
                         e.stopPropagation();
                         isPlaying ? pauseSurah() : resumeSurah();
@@ -837,18 +827,20 @@ const Quran = () => {
                       )}
                     </Button>
                   )}
-                  <BookOpen className="h-6 w-6 text-primary" />
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 smooth-transition">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                  </div>
                 </div>
               </div>
               {displayProgress > 0 && (
-                <div className="mt-4 pt-3 border-t border-border/30">
+                <div className="mt-4 pt-3 border-t border-border/20">
                   <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground font-medium">
                       {isArabic 
                         ? `الآية ${toArabicNumerals(displayProgress)} من ${toArabicNumerals(displaySurah.numberOfAyahs)}`
                         : `Ayah ${displayProgress} of ${displaySurah.numberOfAyahs}`}
                     </span>
-                    <span className="text-primary font-semibold">
+                    <span className="text-primary font-bold">
                       {((displayProgress / displaySurah.numberOfAyahs) * 100).toFixed(0)}%
                     </span>
                   </div>
@@ -862,10 +854,11 @@ const Quran = () => {
 
       {/* Overall Progress */}
       {overallProgress > 0 && (
-        <div className="px-4 mb-6">
-          <div className="glass-effect rounded-2xl p-5 border border-border/30 apple-shadow max-w-2xl mx-auto backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold">
+        <div className="px-4 mb-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+          <div className="glass-card-elevated rounded-2xl p-5 max-w-2xl mx-auto relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-primary/3 via-transparent to-islamic-emerald/3" />
+            <div className="flex items-center justify-between mb-3 relative">
+              <span className="text-sm font-bold">
                 {isArabic ? 'التقدم الإجمالي' : 'Overall Progress'}
               </span>
               <span className="text-2xl font-bold bg-gradient-to-br from-primary to-primary/70 bg-clip-text text-transparent">
@@ -885,7 +878,7 @@ const Quran = () => {
       )}
 
       {/* Main List */}
-      <div className="space-y-3 px-4 max-w-2xl mx-auto">
+      <div className="space-y-3 px-4 max-w-2xl mx-auto" style={{ animationDelay: '300ms' }}>
         {settings.quranDisplayMode === 'juz' ? (
           juzCards
             .filter(juz => {
@@ -906,7 +899,7 @@ const Quran = () => {
       {/* Floating Quick Navigate Button */}
       <button
         onClick={() => setQuickNavOpen(true)}
-        className="fixed bottom-24 right-4 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg flex items-center justify-center hover:scale-110 smooth-transition z-50"
+        className="fixed bottom-[6.5rem] right-4 w-11 h-11 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground primary-glow flex items-center justify-center hover:scale-110 active:scale-95 smooth-spring z-50"
       >
         <Navigation className="h-4 w-4" />
       </button>

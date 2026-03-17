@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Star } from 'lucide-react';
 import { z } from 'zod';
 
 const GoogleIcon = () => (
@@ -114,7 +114,6 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Validate input
       const validation = authSchema.safeParse({
         email: email.trim(),
         password,
@@ -167,28 +166,39 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">
+    <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4 relative">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none islamic-pattern-subtle opacity-30" />
+      <div className="absolute top-20 left-1/4 w-72 h-72 bg-primary/6 rounded-full blur-3xl animate-glow-breathe" />
+      <div className="absolute bottom-20 right-1/4 w-56 h-56 bg-islamic-gold/5 rounded-full blur-3xl animate-glow-breathe" style={{ animationDelay: '2s' }} />
+
+      <div className="w-full max-w-md space-y-8 relative animate-fade-in-up">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card-elevated mb-2">
+            <Star className="h-3 w-3 text-islamic-gold" />
+            <span className="text-xs font-semibold text-foreground/70 tracking-wider">بسم الله</span>
+            <Star className="h-3 w-3 text-islamic-gold" />
+          </div>
+          <h1 className="text-3xl font-bold ios-26-style">
             {isSignUp 
               ? (settings.language === 'ar' ? 'إنشاء حساب' : 'Create Account')
-              : (settings.language === 'ar' ? 'تسجيل الدخول' : 'Sign In')}
+              : (settings.language === 'ar' ? 'تسجيل الدخول' : 'Welcome Back')}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {isSignUp
               ? (settings.language === 'ar' ? 'أنشئ حسابًا جديدًا للمتابعة' : 'Create a new account to continue')
               : (settings.language === 'ar' ? 'سجل الدخول إلى حسابك' : 'Sign in to your account')}
           </p>
         </div>
 
-        <div className="glass-effect rounded-2xl p-6 space-y-6">
+        <div className="glass-card-elevated rounded-3xl p-7 space-y-6 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           {/* Social Sign In Buttons */}
           <div className="space-y-3">
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 text-base font-medium gap-3 border-2 hover:bg-accent/50 transition-all"
+              className="w-full h-13 text-base font-semibold gap-3 rounded-2xl border-2 hover:bg-accent/50 smooth-transition hover-lift"
               onClick={handleGoogleSignIn}
               disabled={googleLoading || appleLoading || loading}
             >
@@ -207,7 +217,7 @@ const Auth = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 text-base font-medium gap-3 border-2 hover:bg-accent/50 transition-all"
+              className="w-full h-13 text-base font-semibold gap-3 rounded-2xl border-2 hover:bg-accent/50 smooth-transition hover-lift"
               onClick={handleAppleSignIn}
               disabled={googleLoading || appleLoading || loading}
             >
@@ -227,10 +237,10 @@ const Auth = () => {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
+              <div className="w-full ornamental-divider" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
+              <span className="bg-card px-4 text-muted-foreground font-semibold tracking-wider">
                 {settings.language === 'ar' ? 'أو' : 'or'}
               </span>
             </div>
@@ -238,86 +248,86 @@ const Auth = () => {
 
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {isSignUp && (
-              <>
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">
+                  <Label htmlFor="firstName" className="text-xs font-semibold">
                     {settings.language === 'ar' ? 'الاسم الأول' : 'First Name'}
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                     <Input
                       id="firstName"
                       type="text"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      placeholder={settings.language === 'ar' ? 'أدخل اسمك الأول' : 'Enter your first name'}
-                      className="pl-10"
+                      placeholder={settings.language === 'ar' ? 'الاسم' : 'First'}
+                      className="pl-10 h-12 rounded-xl"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">
+                  <Label htmlFor="lastName" className="text-xs font-semibold">
                     {settings.language === 'ar' ? 'اسم العائلة' : 'Last Name'}
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                     <Input
                       id="lastName"
                       type="text"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      placeholder={settings.language === 'ar' ? 'أدخل اسم العائلة' : 'Enter your last name'}
-                      className="pl-10"
+                      placeholder={settings.language === 'ar' ? 'العائلة' : 'Last'}
+                      className="pl-10 h-12 rounded-xl"
                     />
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">
+              <Label htmlFor="email" className="text-xs font-semibold">
                 {settings.language === 'ar' ? 'البريد الإلكتروني' : 'Email'}
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={settings.language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
-                  className="pl-10"
+                  className="pl-10 h-12 rounded-xl"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">
+              <Label htmlFor="password" className="text-xs font-semibold">
                 {settings.language === 'ar' ? 'كلمة المرور' : 'Password'}
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={settings.language === 'ar' ? 'أدخل كلمة المرور' : 'Enter your password'}
-                  className="pl-10"
+                  className="pl-10 h-12 rounded-xl"
                   required
                   minLength={6}
                 />
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading || googleLoading || appleLoading}>
+            <Button type="submit" className="w-full h-13 text-base font-semibold rounded-2xl primary-glow smooth-transition" disabled={loading || googleLoading || appleLoading}>
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 isSignUp 
-                  ? (settings.language === 'ar' ? 'إنشاء حساب' : 'Sign Up')
+                  ? (settings.language === 'ar' ? 'إنشاء حساب' : 'Create Account')
                   : (settings.language === 'ar' ? 'تسجيل الدخول' : 'Sign In')
               )}
             </Button>
@@ -327,7 +337,7 @@ const Auth = () => {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:underline"
+              className="text-primary hover:underline font-medium smooth-transition"
             >
               {isSignUp
                 ? (settings.language === 'ar' ? 'لديك حساب بالفعل؟ تسجيل الدخول' : 'Already have an account? Sign In')
