@@ -314,59 +314,61 @@ const Settings = () => {
     <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen pb-20">
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+        <div className="flex items-center gap-4 mb-2 animate-fade-in">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="shrink-0"
+            className="shrink-0 rounded-full hover:bg-primary/10"
             aria-label={t.back}
           >
             <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
           </Button>
-          <h1 className="text-3xl font-bold">{t.title}</h1>
+          <div>
+            <h1 className="text-2xl font-bold ios-26-style">{t.title}</h1>
+          </div>
         </div>
 
       {/* Account */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.account}</h2>
+      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+        <h2 className="section-heading px-2">{t.account}</h2>
         <div className="space-y-2">
           {user ? (
             <>
               <Link to="/account">
-                <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between group">
+                <button className="w-full glass-card-elevated rounded-2xl p-4 hover:border-primary/25 smooth-transition flex items-center justify-between group hover-lift">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 smooth-transition">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center group-hover:scale-105 smooth-spring border border-primary/10">
                       <User className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="font-medium truncate">{t.myAccount}</span>
+                    <span className="font-semibold truncate">{t.myAccount}</span>
                   </div>
-                  <ArrowLeft className={`h-4 w-4 text-muted-foreground ${isRTL ? '' : 'rotate-180'} shrink-0`} />
+                  <ArrowLeft className={`h-4 w-4 text-muted-foreground/40 ${isRTL ? '' : 'rotate-180'} shrink-0 group-hover:text-primary smooth-transition`} />
                 </button>
               </Link>
               <Link to="/chat-history">
-                <button className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-primary/30 smooth-transition flex items-center justify-between group">
+                <button className="w-full glass-card-elevated rounded-2xl p-4 hover:border-purple-500/25 smooth-transition flex items-center justify-between group hover-lift">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 smooth-transition">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/15 to-purple-500/5 flex items-center justify-center group-hover:scale-105 smooth-spring border border-purple-500/10">
                       <MessageSquare className="h-5 w-5 text-purple-500" />
                     </div>
-                    <span className="font-medium truncate">{t.chatHistory}</span>
+                    <span className="font-semibold truncate">{t.chatHistory}</span>
                   </div>
-                  <ArrowLeft className={`h-4 w-4 text-muted-foreground ${isRTL ? '' : 'rotate-180'} shrink-0`} />
+                  <ArrowLeft className={`h-4 w-4 text-muted-foreground/40 ${isRTL ? '' : 'rotate-180'} shrink-0 group-hover:text-purple-500 smooth-transition`} />
                 </button>
               </Link>
               <button
                 onClick={handleSignOut}
-                className="w-full glass-effect rounded-2xl p-4 border border-border/30 hover:border-destructive/30 smooth-transition flex items-center gap-3"
+                className="w-full glass-card-elevated rounded-2xl p-4 hover:border-destructive/25 smooth-transition flex items-center gap-3 group hover-lift"
               >
-                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-destructive/15 to-destructive/5 flex items-center justify-center border border-destructive/10 group-hover:scale-105 smooth-spring">
                   <LogOut className="h-5 w-5 text-destructive" />
                 </div>
-                <span className="font-medium text-destructive truncate">{t.signOut}</span>
+                <span className="font-semibold text-destructive truncate">{t.signOut}</span>
               </button>
             </>
           ) : (
-            <Button onClick={() => navigate('/auth')} className="w-full h-14 text-base">
+            <Button onClick={() => navigate('/auth')} className="w-full h-14 text-base font-semibold rounded-2xl primary-glow">
               {t.signIn}
             </Button>
           )}
@@ -374,13 +376,13 @@ const Settings = () => {
       </div>
 
       {/* Appearance */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.appearance}</h2>
-        <div className="glass-effect rounded-2xl p-5 border border-border/30 space-y-4">
+      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+        <h2 className="section-heading px-2">{t.appearance}</h2>
+        <div className="glass-card-elevated rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.language}</Label>
+            <Label className="font-semibold text-sm">{t.language}</Label>
             <Select value={settings.language} onValueChange={(value: 'ar' | 'en') => updateSettings({ language: value })}>
-              <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
+              <SelectTrigger className={`${isRTL ? 'w-40' : 'w-32'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -389,11 +391,11 @@ const Settings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.mode}</Label>
+            <Label className="font-semibold text-sm">{t.mode}</Label>
             <Select value={settings.themeMode} onValueChange={(value: any) => updateSettings({ themeMode: value })}>
-              <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
+              <SelectTrigger className={`${isRTL ? 'w-40' : 'w-32'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -403,11 +405,11 @@ const Settings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.color}</Label>
+            <Label className="font-semibold text-sm">{t.color}</Label>
             <Select value={settings.themeColor} onValueChange={(value: any) => updateSettings({ themeColor: value })}>
-              <SelectTrigger className={isRTL ? 'w-40' : 'w-32'}>
+              <SelectTrigger className={`${isRTL ? 'w-40' : 'w-32'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -423,21 +425,21 @@ const Settings = () => {
       </div>
 
       {/* Quran */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.quran}</h2>
-        <div className="glass-effect rounded-2xl p-5 border border-border/30 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <Label className="font-medium">{t.autoLock}</Label>
-              <p className="text-xs text-muted-foreground mt-1">{t.autoLockDesc}</p>
+      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+        <h2 className="section-heading px-2">{t.quran}</h2>
+        <div className="glass-card-elevated rounded-2xl p-5 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <Label className="font-semibold text-sm">{t.autoLock}</Label>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{t.autoLockDesc}</p>
             </div>
             <Switch checked={autoLock} onCheckedChange={toggleAutoLock} />
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.fontType}</Label>
+            <Label className="font-semibold text-sm">{t.fontType}</Label>
             <Select value={settings.fontType} onValueChange={(value: any) => updateSettings({ fontType: value })}>
-              <SelectTrigger className={isRTL ? 'w-44' : 'w-32'}>
+              <SelectTrigger className={`${isRTL ? 'w-44' : 'w-32'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -450,15 +452,15 @@ const Settings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="font-medium">{t.translationSource}</Label>
+              <Label className="font-semibold text-sm">{t.translationSource}</Label>
               <Switch checked={settings.translationEnabled} onCheckedChange={(checked) => updateSettings({ translationEnabled: checked })} />
             </div>
             {settings.translationEnabled && (
               <Select value={settings.translationSource} onValueChange={(value) => updateSettings({ translationSource: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -470,15 +472,15 @@ const Settings = () => {
               </Select>
             )}
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="font-medium">{t.tafsirSource}</Label>
+              <Label className="font-semibold text-sm">{t.tafsirSource}</Label>
               <Switch checked={settings.tafsirEnabled} onCheckedChange={(checked) => updateSettings({ tafsirEnabled: checked })} />
             </div>
             {settings.tafsirEnabled && (
               <Select value={settings.tafsirSource} onValueChange={(value) => updateSettings({ tafsirSource: value })}>
-                <SelectTrigger>
+                <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -488,11 +490,11 @@ const Settings = () => {
               </Select>
             )}
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.trackingMode}</Label>
+            <Label className="font-semibold text-sm">{t.trackingMode}</Label>
             <Select value={settings.readingTrackingMode} onValueChange={(value: any) => updateSettings({ readingTrackingMode: value })}>
-              <SelectTrigger className={isRTL ? 'w-44' : 'w-32'}>
+              <SelectTrigger className={`${isRTL ? 'w-44' : 'w-32'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -504,11 +506,11 @@ const Settings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.wordByWord}</Label>
+            <Label className="font-semibold text-sm">{t.wordByWord}</Label>
             <Select value={settings.wordByWordMode} onValueChange={(value: any) => updateSettings({ wordByWordMode: value })}>
-              <SelectTrigger className={isRTL ? 'w-44' : 'w-40'}>
+              <SelectTrigger className={`${isRTL ? 'w-44' : 'w-40'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -518,11 +520,11 @@ const Settings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{(t as any).displayMode}</Label>
+            <Label className="font-semibold text-sm">{(t as any).displayMode}</Label>
             <Select value={settings.quranDisplayMode} onValueChange={(value: any) => updateSettings({ quranDisplayMode: value })}>
-              <SelectTrigger className={isRTL ? 'w-52' : 'w-48'}>
+              <SelectTrigger className={`${isRTL ? 'w-52' : 'w-48'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -532,11 +534,11 @@ const Settings = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="h-px bg-border" />
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <Label className="font-medium">{t.clearCache}</Label>
-              <p className="text-xs text-muted-foreground mt-1">{t.clearCacheDesc}</p>
+          <div className="h-px bg-border/50" />
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <Label className="font-semibold text-sm">{t.clearCache}</Label>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{t.clearCacheDesc}</p>
             </div>
             <Button
               variant="outline"
@@ -545,9 +547,9 @@ const Settings = () => {
                 clearSurahsCache();
                 toast.success(t.cacheCleared);
               }}
-              className="gap-2"
+              className="gap-2 rounded-xl shrink-0"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
               {t.clearCache}
             </Button>
           </div>
@@ -555,13 +557,13 @@ const Settings = () => {
       </div>
 
       {/* Prayer */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">{t.prayer}</h2>
-        <div className="glass-effect rounded-2xl p-5 border border-border/30">
+      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+        <h2 className="section-heading px-2">{t.prayer}</h2>
+        <div className="glass-card-elevated rounded-2xl p-5">
           <div className="flex items-center justify-between">
-            <Label className="font-medium">{t.prayerRegion}</Label>
+            <Label className="font-semibold text-sm">{t.prayerRegion}</Label>
             <Select value={settings.prayerTimeRegion || 'auto'} onValueChange={(value) => updateSettings({ prayerTimeRegion: value === 'auto' ? null : value })}>
-              <SelectTrigger className={isRTL ? 'w-44' : 'w-32'}>
+              <SelectTrigger className={`${isRTL ? 'w-44' : 'w-32'} rounded-xl`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -589,16 +591,16 @@ const Settings = () => {
 
       {/* Reset */}
       {user && (
-        <div className="glass-effect rounded-2xl p-5 border border-destructive/30">
+        <div className="glass-card-elevated rounded-2xl p-5 border-destructive/20 animate-fade-in-up" style={{ animationDelay: '250ms' }}>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="w-full flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <button className="w-full flex items-center gap-3 group">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-destructive/15 to-destructive/5 flex items-center justify-center border border-destructive/10 group-hover:scale-105 smooth-spring">
                   <RotateCcw className="h-5 w-5 text-destructive" />
                 </div>
                 <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'} min-w-0`}>
-                  <p className="font-medium text-destructive">{t.resetProgress}</p>
-                  <p className="text-xs text-muted-foreground">{t.resetWarning}</p>
+                  <p className="font-semibold text-sm text-destructive">{t.resetProgress}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{t.resetWarning}</p>
                 </div>
               </button>
             </AlertDialogTrigger>
@@ -619,8 +621,8 @@ const Settings = () => {
       )}
 
       {/* Network Status */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground px-2">
+      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+        <h2 className="section-heading px-2">
           {settings.language === 'ar' ? 'حالة الاتصال' : 'Network Status'}
         </h2>
         <NetworkStatusIndicator />

@@ -1,8 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Book, Heart, Users, Sparkles, Cloud, Flame, ArrowLeft, MapPin } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Book, Heart, Users, Sparkles, Cloud, Flame, ArrowLeft, MapPin, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const StoriesAndNames = () => {
@@ -12,7 +11,7 @@ const StoriesAndNames = () => {
 
   const content = {
     title: isArabic ? "تعليم" : "Education",
-    back: isArabic ? "رجوع" : "Back",
+    subtitle: isArabic ? "اكتشف ثراء التراث الإسلامي" : "Discover the richness of Islamic heritage",
     cards: [
       {
         icon: Book,
@@ -21,9 +20,8 @@ const StoriesAndNames = () => {
         descAr: "تعلم من قصص الأنبياء والرسل",
         descEn: "Learn from the stories of prophets and messengers",
         link: "/prophet-stories",
-        gradient: "from-purple-500/20 via-pink-400/20 to-rose-500/20",
-        iconBg: "bg-purple-500/10",
-        iconColor: "text-purple-600 dark:text-purple-400",
+        gradient: "from-purple-500 to-pink-500",
+        accentBg: "bg-purple-500/8",
       },
       {
         icon: Book,
@@ -32,9 +30,8 @@ const StoriesAndNames = () => {
         descAr: "محطات التاريخ الإسلامي عبر العصور",
         descEn: "Key phases of Islamic history through the ages",
         link: "/islamichistory",
-        gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20",
-        iconBg: "bg-emerald-500/10",
-        iconColor: "text-emerald-600 dark:text-emerald-400",
+        gradient: "from-emerald-500 to-teal-500",
+        accentBg: "bg-emerald-500/8",
       },
       {
         icon: MapPin,
@@ -43,9 +40,8 @@ const StoriesAndNames = () => {
         descAr: "المدينتان المقدستان في الإسلام",
         descEn: "The Holy Cities of Islam",
         link: "/holy-cities",
-        gradient: "from-cyan-500/20 via-blue-400/20 to-indigo-500/20",
-        iconBg: "bg-cyan-500/10",
-        iconColor: "text-cyan-600 dark:text-cyan-400",
+        gradient: "from-cyan-500 to-blue-500",
+        accentBg: "bg-cyan-500/8",
       },
       {
         icon: Heart,
@@ -54,9 +50,8 @@ const StoriesAndNames = () => {
         descAr: "الأسماء الحسنى ومعانيها",
         descEn: "The beautiful names and their meanings",
         link: "/names-of-allah",
-        gradient: "from-emerald-500/20 via-teal-400/20 to-cyan-500/20",
-        iconBg: "bg-emerald-500/10",
-        iconColor: "text-emerald-600 dark:text-emerald-400",
+        gradient: "from-emerald-500 to-green-500",
+        accentBg: "bg-emerald-500/8",
       },
       {
         icon: Sparkles,
@@ -65,9 +60,8 @@ const StoriesAndNames = () => {
         descAr: "أسماء وألقاب النبي صلى الله عليه وسلم",
         descEn: "Names and titles of Prophet Muhammad ﷺ",
         link: "/names-of-muhammad",
-        gradient: "from-amber-500/20 via-orange-400/20 to-yellow-500/20",
-        iconBg: "bg-amber-500/10",
-        iconColor: "text-amber-600 dark:text-amber-400",
+        gradient: "from-amber-500 to-orange-500",
+        accentBg: "bg-amber-500/8",
       },
       {
         icon: Users,
@@ -76,9 +70,8 @@ const StoriesAndNames = () => {
         descAr: "تعرف على الملائكة ومهامهم",
         descEn: "Learn about angels and their duties",
         link: "/angels",
-        gradient: "from-blue-500/20 via-indigo-400/20 to-violet-500/20",
-        iconBg: "bg-blue-500/10",
-        iconColor: "text-blue-600 dark:text-blue-400",
+        gradient: "from-blue-500 to-indigo-500",
+        accentBg: "bg-blue-500/8",
       },
       {
         icon: Cloud,
@@ -87,9 +80,8 @@ const StoriesAndNames = () => {
         descAr: "درجات الجنة ونعيمها",
         descEn: "Doors of Paradise and its blessings",
         link: "/heaven-levels",
-        gradient: "from-green-500/20 via-emerald-400/20 to-teal-500/20",
-        iconBg: "bg-green-500/10",
-        iconColor: "text-green-600 dark:text-green-400",
+        gradient: "from-green-500 to-emerald-500",
+        accentBg: "bg-green-500/8",
       },
       {
         icon: Flame,
@@ -98,9 +90,8 @@ const StoriesAndNames = () => {
         descAr: "دركات النار وعذابها",
         descEn: "Levels of Hellfire and its punishment",
         link: "/hell-levels",
-        gradient: "from-red-500/20 via-orange-400/20 to-rose-500/20",
-        iconBg: "bg-red-500/10",
-        iconColor: "text-red-600 dark:text-red-400",
+        gradient: "from-red-500 to-orange-500",
+        accentBg: "bg-red-500/8",
       },
     ],
   };
@@ -108,45 +99,47 @@ const StoriesAndNames = () => {
   return (
     <div className="min-h-screen pb-20">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-2 animate-fade-in">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0 rounded-full hover:bg-primary/10">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-3xl font-bold">{content.title}</h1>
+          <div>
+            <h1 className="text-2xl font-bold ios-26-style">{content.title}</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{content.subtitle}</p>
+          </div>
         </div>
 
-        <div className="grid gap-4">
+        {/* Cards Grid */}
+        <div className="grid gap-3">
           {content.cards.map((card, index) => {
             const Icon = card.icon;
             return (
-              <div key={index} onClick={() => navigate(card.link)} className="cursor-pointer group">
-                <div className="relative overflow-hidden">
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${card.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
-                  />
+              <div 
+                key={index} 
+                onClick={() => navigate(card.link)} 
+                className="cursor-pointer group animate-fade-in-up"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="glass-card-elevated rounded-2xl p-5 hover:border-primary/20 smooth-transition hover-lift relative overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-32 h-32 ${card.accentBg} rounded-full blur-3xl opacity-0 group-hover:opacity-100 smooth-transition`} />
+                  
+                  <div className="flex items-center gap-4 relative">
+                    <div className={`flex-shrink-0 w-13 h-13 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center icon-badge group-hover:scale-105 smooth-spring`}>
+                      <Icon className="h-6 w-6 text-white relative z-10 drop-shadow-sm" />
+                    </div>
 
-                  <Card className="relative glass-effect border border-border/30 hover:border-primary/30 smooth-transition backdrop-blur-xl p-6">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`flex-shrink-0 w-14 h-14 rounded-xl ${card.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}
-                      >
-                        <Icon className={`h-7 w-7 ${card.iconColor}`} />
-                      </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base mb-0.5">{isArabic ? card.titleAr : card.titleEn}</h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{isArabic ? card.descAr : card.descEn}</p>
+                    </div>
 
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg mb-1">{isArabic ? card.titleAr : card.titleEn}</h3>
-                        <p className="text-sm text-muted-foreground">{isArabic ? card.descAr : card.descEn}</p>
-                      </div>
-
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-primary/8 flex items-center justify-center group-hover:bg-primary/15 smooth-transition">
+                        <ChevronRight className="w-4 h-4 text-primary/60 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition" />
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 </div>
               </div>
             );

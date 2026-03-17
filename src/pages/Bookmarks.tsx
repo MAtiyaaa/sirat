@@ -154,8 +154,8 @@ const Bookmarks = () => {
     return (
       <div className="min-h-screen pb-20">
         <div className="max-w-2xl mx-auto p-6">
-          <div className="text-center glass-effect rounded-3xl p-16 border border-border/50">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+          <div className="text-center glass-card-elevated rounded-3xl p-16 animate-fade-in-up">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mx-auto mb-6 border border-primary/10">
               <Bookmark className="h-10 w-10 text-primary" />
             </div>
             <h3 className="text-xl font-semibold mb-2">
@@ -181,24 +181,24 @@ const Bookmarks = () => {
     <div className="min-h-screen pb-20">
       <div className="max-w-2xl mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-2 animate-fade-in">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
-            className="shrink-0"
+            className="shrink-0 rounded-full hover:bg-primary/10"
             aria-label={settings.language === 'ar' ? 'رجوع' : 'Back'}
           >
             <ArrowLeft className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
           </Button>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl font-bold ios-26-style">
             {settings.language === 'ar' ? 'المحفوظات' : 'Bookmarks'}
           </h1>
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="ayahs" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 glass-effect">
+        <Tabs defaultValue="ayahs" className="w-full animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <TabsList className="grid w-full grid-cols-4 glass-card-elevated h-12">
             <TabsTrigger value="ayahs" className="text-xs sm:text-sm">
               {settings.language === 'ar' ? `آيات (${ayahBookmarks.length})` : `Ayahs (${ayahBookmarks.length})`}
             </TabsTrigger>

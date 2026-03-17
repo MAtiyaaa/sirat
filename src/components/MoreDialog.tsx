@@ -39,29 +39,30 @@ const MoreDialog = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl smooth-transition text-muted-foreground hover:text-foreground">
-          <MoreHorizontal className="h-6 w-6" />
-          <span className="text-[10px] font-medium">{t.more}</span>
+        <button className="flex flex-col items-center gap-1 px-5 py-2 rounded-2xl smooth-transition text-muted-foreground hover:text-foreground active:scale-95">
+          <MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={2} />
+          <span className="text-[10px] font-medium leading-tight">{t.more}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-52 p-2 glass-card backdrop-blur-2xl border-border/30 shadow-2xl"
+        className="w-56 p-2 glass-card-elevated backdrop-blur-3xl border-border/30 shadow-2xl"
         align="center"
         side="top"
-        sideOffset={8}
+        sideOffset={12}
       >
         <div className="space-y-0.5">
-          {menuItems.map((item) => (
+          {menuItems.map((item, i) => (
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/8 smooth-transition text-left group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/8 smooth-transition text-left group animate-fade-in"
+              style={{ animationDelay: `${i * 25}ms` }}
             >
-              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0`}>
-                <item.icon className="h-3.5 w-3.5 text-white" />
+              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 icon-badge group-hover:scale-105 smooth-spring`}>
+                <item.icon className="h-3.5 w-3.5 text-white relative z-10" />
               </div>
-              <span className="text-sm font-medium flex-1">{item.label}</span>
-              <ChevronRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary/60 smooth-transition" />
+              <span className="text-sm font-semibold flex-1">{item.label}</span>
+              <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:text-primary/50 group-hover:translate-x-0.5 smooth-transition" />
             </button>
           ))}
         </div>

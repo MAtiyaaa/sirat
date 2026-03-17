@@ -336,22 +336,25 @@ export const IslamicFactsLoader = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 px-6">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-10 px-6">
       <div className="relative">
-        <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-        <Loader2 className="h-12 w-12 animate-spin text-primary relative z-10" />
+        <div className="absolute inset-0 bg-primary/15 blur-3xl rounded-full animate-glow-breathe scale-150" />
+        <div className="relative w-16 h-16 flex items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary relative z-10" />
+          <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-glow-pulse" />
+        </div>
       </div>
       
-      <div className="max-w-2xl text-center space-y-4 animate-fade-in">
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <span className="text-sm font-semibold text-primary tracking-wide uppercase">
+      <div className="max-w-xl text-center space-y-5 animate-fade-in-up">
+        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-card-elevated">
+          <Sparkles className="h-4 w-4 text-primary animate-glow-pulse" />
+          <span className="text-xs font-bold text-primary tracking-widest uppercase">
             {settings.language === 'ar' ? 'هل تعلم؟' : 'Did You Know?'}
           </span>
         </div>
         
-        <p className={`text-lg md:text-xl text-foreground/90 leading-relaxed ${
-          settings.language === 'ar' ? 'font-arabic' : ''
+        <p className={`text-lg md:text-xl text-foreground/85 leading-relaxed font-medium ${
+          settings.language === 'ar' ? 'font-arabic text-xl md:text-2xl' : ''
         }`}>
           {settings.language === 'ar' ? currentFact.ar : currentFact.en}
         </p>
