@@ -17,29 +17,30 @@ const QuickAccessGrid = () => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">
+      <h2 className="text-xl font-bold ios-26-style">
         {settings.language === 'ar' ? 'الوصول السريع' : 'Quick Access'}
       </h2>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {quickLinks.map((link) => {
+        {quickLinks.map((link, index) => {
           const Icon = link.icon;
           
           return (
             <Link
               key={link.to}
               to={link.to}
-              className="group relative overflow-hidden rounded-2xl smooth-transition hover:scale-[1.03]"
+              className="group relative overflow-hidden rounded-2xl interactive-scale animate-stagger-in"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="glass-card p-4 text-center smooth-transition group-hover:border-primary/20 relative overflow-hidden">
+              <div className="glass-card-elevated p-4 text-center smooth-transition group-hover:border-primary/20 relative overflow-hidden card-shine">
                 {/* Warm accent glow */}
-                <div className={`absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br ${link.gradient} opacity-0 group-hover:opacity-15 rounded-full blur-xl smooth-transition`} />
+                <div className={`absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br ${link.gradient} opacity-0 group-hover:opacity-15 rounded-full blur-xl smooth-transition`} />
                 
-                <div className={`w-11 h-11 mx-auto rounded-xl bg-gradient-to-br ${link.gradient} flex items-center justify-center mb-3 group-hover:scale-110 smooth-transition shadow-lg`}>
+                <div className={`w-12 h-12 mx-auto rounded-xl bg-gradient-to-br ${link.gradient} flex items-center justify-center mb-3 group-hover:scale-110 spring-transition shadow-elevation-2`}>
                   <Icon className="h-5 w-5 text-white drop-shadow-sm" />
                 </div>
-                <p className="font-semibold text-sm mb-0.5">{link.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{link.description}</p>
+                <p className="font-bold text-sm mb-0.5">{link.title}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{link.description}</p>
               </div>
             </Link>
           );

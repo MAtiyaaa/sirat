@@ -65,18 +65,15 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
   const Icon = config.icon;
 
   return (
-    <Link to={config.link} className="block group my-2 animate-fade-in">
-      <div className="glass-card rounded-2xl p-4 hover:border-primary/25 smooth-transition relative overflow-hidden group-hover:rich-shadow">
-        {/* Subtle accent glow on hover */}
-        <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 smooth-transition ${config.accentColor.split(' ')[0]}`} />
-        
+    <Link to={config.link} className="block group my-2 animate-stagger-in">
+      <div className="glass-card-elevated rounded-2xl p-4 hover:border-primary/20 smooth-transition relative overflow-hidden interactive-card card-shine">
         <div className="flex items-center gap-4 relative">
-          <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${config.iconGradient} flex items-center justify-center group-hover:scale-105 smooth-transition shadow-lg`}>
+          <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${config.iconGradient} flex items-center justify-center group-hover:scale-110 spring-transition shadow-elevation-2`}>
             <Icon className="h-5 w-5 text-white drop-shadow-sm" />
           </div>
           
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-sm mb-0.5 truncate">
+            <h4 className="font-bold text-sm mb-0.5 truncate">
               {config.title}
             </h4>
             <p className="text-xs text-muted-foreground truncate">
@@ -84,7 +81,9 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
             </p>
           </div>
           
-          <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition flex-shrink-0" />
+          <div className="w-7 h-7 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 smooth-transition flex-shrink-0">
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition" />
+          </div>
         </div>
       </div>
     </Link>

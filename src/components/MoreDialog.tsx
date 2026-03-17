@@ -20,12 +20,12 @@ const MoreDialog = () => {
   const t = content[settings.language];
 
   const menuItems = [
-    { icon: BookOpen, label: t.hadith, path: '/hadith', gradient: 'from-green-500 to-emerald-500' },
-    { icon: Hand, label: t.duas, path: '/duas', gradient: 'from-purple-500 to-pink-500' },
-    { icon: Scroll, label: t.stories, path: '/education', gradient: 'from-indigo-500 to-purple-500' },
+    { icon: BookOpen, label: t.hadith, path: '/hadith', gradient: 'from-emerald-500 to-teal-500' },
+    { icon: Hand, label: t.duas, path: '/duas', gradient: 'from-violet-500 to-purple-500' },
+    { icon: Scroll, label: t.stories, path: '/education', gradient: 'from-indigo-500 to-violet-500' },
     { icon: CircleDot, label: t.tasbih, path: '/tasbih', gradient: 'from-teal-500 to-cyan-500' },
     { icon: Calculator, label: t.zakat, path: '/zakat', gradient: 'from-amber-500 to-yellow-500' },
-    { icon: MapPin, label: t.mosque, path: '/mosquelocator', gradient: 'from-violet-500 to-purple-500' },
+    { icon: MapPin, label: t.mosque, path: '/mosquelocator', gradient: 'from-fuchsia-500 to-purple-500' },
     { icon: Bookmark, label: t.bookmarks, path: '/bookmarks', gradient: 'from-rose-500 to-pink-500' },
     { icon: User, label: t.account, path: '/account', gradient: 'from-blue-500 to-cyan-500' },
     { icon: SettingsIcon, label: t.settings, path: '/settings', gradient: 'from-slate-500 to-zinc-500' },
@@ -39,29 +39,30 @@ const MoreDialog = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl smooth-transition text-muted-foreground hover:text-foreground">
-          <MoreHorizontal className="h-6 w-6" />
-          <span className="text-[10px] font-medium">{t.more}</span>
+        <button className="flex flex-col items-center gap-1 px-5 py-2 rounded-2xl smooth-transition text-muted-foreground hover:text-foreground interactive-press">
+          <MoreHorizontal className="h-[22px] w-[22px]" strokeWidth={2} />
+          <span className="text-[10px] font-medium leading-none">{t.more}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-52 p-2 glass-card backdrop-blur-2xl border-border/30 shadow-2xl"
+        className="w-56 p-2 glass-card-elevated backdrop-blur-2xl border-border/20 shadow-2xl"
         align="center"
         side="top"
-        sideOffset={8}
+        sideOffset={10}
       >
         <div className="space-y-0.5">
-          {menuItems.map((item) => (
+          {menuItems.map((item, index) => (
             <button
               key={item.path}
               onClick={() => handleNavigation(item.path)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/8 smooth-transition text-left group"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-primary/8 smooth-transition text-left group animate-stagger-in"
+              style={{ animationDelay: `${index * 30}ms` }}
             >
-              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0`}>
-                <item.icon className="h-3.5 w-3.5 text-white" />
+              <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 group-hover:scale-110 spring-transition shadow-sm`}>
+                <item.icon className="h-3.5 w-3.5 text-white drop-shadow-sm" />
               </div>
               <span className="text-sm font-medium flex-1">{item.label}</span>
-              <ChevronRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-primary/60 smooth-transition" />
+              <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:text-primary/60 group-hover:translate-x-0.5 smooth-transition" />
             </button>
           ))}
         </div>

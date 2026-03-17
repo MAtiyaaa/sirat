@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, Eye, ChevronUp, X } from 'lucide-react';
+import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, Eye, ChevronUp, X, Volume2 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -92,52 +92,73 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background islamic-pattern-bg">
-      <main className="container mx-auto px-4 py-6 max-w-4xl pb-24 md:pb-20">
+      <main className="container mx-auto px-4 py-6 max-w-4xl pb-28 md:pb-24">
         {children}
       </main>
 
-      {/* Minimized Player */}
+      {/* Minimized Player - Floating Pill */}
       {playingSurah && isPlayerMinimized && (
         <button
           onClick={() => setIsPlayerMinimized(false)}
-          className="fixed bottom-20 left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground rich-shadow flex items-center justify-center z-50 animate-pulse"
+          className="fixed bottom-24 left-4 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-primary text-primary-foreground shadow-glow-md animate-fade-in-scale interactive-press"
         >
-          <ChevronUp className="h-5 w-5" />
+          <Volume2 className="h-4 w-4 animate-pulse" />
+          <span className="text-xs font-semibold">
+            {settings.language === 'ar' ? `سورة ${playingSurah}` : `Surah ${playingSurah}`}
+          </span>
+          <ChevronUp className="h-3.5 w-3.5 opacity-60" />
         </button>
       )}
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50">
-        {/* Frosted glass background with rich blur */}
-        <div className="glass-effect border-t border-border/50 backdrop-blur-2xl">
+        <div className="glass-nav">
           <div className="container mx-auto max-w-4xl">
             {/* Global Play Controls */}
             {playingSurah && !isPlayerMinimized && (
-              <div className="border-b border-border/30 py-2.5 px-4">
-                <div className="flex items-center justify-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => setIsPlayerMinimized(true)} className="rounded-full w-8 h-8 hover:bg-destructive/10" title="Minimize">
+              <div className="border-b border-border/20 py-3 px-4 animate-fade-in-down">
+                <div className="flex items-center justify-center gap-2.5">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setIsPlayerMinimized(true)} 
+                    className="rounded-full w-8 h-8 hover:bg-destructive/10 text-muted-foreground"
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                   {isInQuranPage && (
-                    <Button variant={isLocked ? "default" : "outline"} size="icon" onClick={() => setIsLocked(!isLocked)} className="rounded-full w-10 h-10" title={isLocked ? 'Unlock' : 'Lock'}>
+                    <Button 
+                      variant={isLocked ? "default" : "outline"} 
+                      size="icon" 
+                      onClick={() => setIsLocked(!isLocked)} 
+                      className="rounded-full w-10 h-10"
+                    >
                       {isLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
                     </Button>
                   )}
-                  <Button variant="outline" size="icon" onClick={handleGoToAyah} className="rounded-full w-10 h-10" title="Go to Ayah">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={handleGoToAyah} 
+                    className="rounded-full w-10 h-10"
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button onClick={isPlaying ? pauseSurah : resumeSurah} className="rounded-full w-12 h-12 rich-shadow" title={isPlaying ? 'Pause' : 'Play'}>
+                  <Button 
+                    onClick={isPlaying ? pauseSurah : resumeSurah} 
+                    className="rounded-full w-12 h-12 shadow-glow-md"
+                  >
                     {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                   </Button>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs font-medium text-muted-foreground ml-1">
                     {settings.language === 'ar' ? `سورة ${playingSurah} - آية ${playingAyah || 1}` : `Surah ${playingSurah} - Ayah ${playingAyah || 1}`}
                   </span>
                 </div>
               </div>
             )}
             
-            {/* Navigation Tabs - Enhanced */}
-            <div className="flex justify-around items-center py-1.5">
+            {/* Navigation Tabs */}
+            <div className="flex justify-around items-center py-2 px-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isQuranTab = item.path === '/quran';
@@ -151,18 +172,23 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     key={item.path}
                     to={item.path}
                     onClick={isQuranTab ? handleQuranClick : undefined}
-                    className={`flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl smooth-transition relative ${
+                    className={`flex flex-col items-center gap-1 px-5 py-2 rounded-2xl smooth-transition relative ${
                       isActive 
-                        ? 'text-primary' 
+                        ? 'nav-pill-active' 
                         : 'text-muted-foreground hover:text-foreground'
-                    } ${isHome ? 'scale-110' : ''}`}
+                    }`}
                   >
-                    {/* Active indicator dot */}
+                    {/* Active indicator */}
                     {isActive && (
-                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-primary" />
+                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-1 rounded-full bg-primary animate-scale-bounce" />
                     )}
-                    <Icon className={`${isHome ? 'h-7 w-7' : 'h-6 w-6'} smooth-transition ${isActive ? 'drop-shadow-sm' : ''}`} />
-                    <span className={`text-[10px] font-medium ${isActive ? 'font-semibold' : ''}`}>
+                    <Icon 
+                      className={`${isHome ? 'h-7 w-7' : 'h-[22px] w-[22px]'} smooth-transition ${
+                        isActive ? 'drop-shadow-sm' : ''
+                      }`} 
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
+                    <span className={`text-[10px] leading-none ${isActive ? 'font-bold' : 'font-medium'}`}>
                       {item.label[settings.language]}
                     </span>
                   </Link>
