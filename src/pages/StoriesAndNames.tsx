@@ -8,7 +8,6 @@ import {
   Sparkles,
   Cloud,
   Flame,
-  ArrowLeft,
   MapPin,
   ChevronRight,
   GraduationCap,
@@ -16,7 +15,13 @@ import {
   Compass,
   Star,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  PageContainer,
+  PageHeader,
+  PageSection,
+  QuickActionsRow,
+  type QuickAction,
+} from "@/components/PageTemplate";
 
 type EduItem = {
   icon: any;
@@ -155,27 +160,51 @@ const StoriesAndNames = () => {
 
   const totalCount = sections.reduce((s, sec) => s + sec.items.length, 0);
 
+  const quickActions: QuickAction[] = [
+    {
+      icon: Book,
+      label: isArabic ? "قصص الأنبياء" : "Prophets",
+      onClick: () => navigate("/prophet-stories"),
+      gradient: "from-purple-500 to-pink-500",
+      ariaLabel: isArabic ? "قصص الأنبياء" : "Prophet Stories",
+    },
+    {
+      icon: Heart,
+      label: isArabic ? "أسماء الله" : "99 Names",
+      onClick: () => navigate("/names-of-allah"),
+      gradient: "from-rose-500 to-pink-500",
+      ariaLabel: isArabic ? "أسماء الله الحسنى" : "Names of Allah",
+    },
+    {
+      icon: GraduationCap,
+      label: isArabic ? "التاريخ" : "History",
+      onClick: () => navigate("/islamichistory"),
+      gradient: "from-emerald-500 to-teal-500",
+      ariaLabel: isArabic ? "التاريخ الإسلامي" : "Islamic History",
+    },
+    {
+      icon: MapPin,
+      label: isArabic ? "المدن" : "Cities",
+      onClick: () => navigate("/holy-cities"),
+      gradient: "from-cyan-500 to-blue-500",
+      ariaLabel: isArabic ? "المدن المقدسة" : "Holy Cities",
+    },
+  ];
+
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-2xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="shrink-0 rounded-xl"
-            aria-label={isArabic ? "رجوع" : "Back"}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1">
-            <p className="section-label">{isArabic ? "اعرف دينك" : "Knowledge Hub"}</p>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {isArabic ? "تعليم" : "Education"}
-            </h1>
-          </div>
-        </div>
+    <PageContainer>
+      <PageHeader
+        eyebrow={isArabic ? "اعرف دينك" : "Knowledge Hub"}
+        title={isArabic ? "تعليم" : "Education"}
+        subtitle={
+          isArabic
+            ? `${totalCount} موضوعًا في ${sections.length} أقسام`
+            : `${totalCount} topics across ${sections.length} categories`
+        }
+      />
+
+      {/* Persistent Quick Actions */}
+      <QuickActionsRow actions={quickActions} />
 
         {/* Hero summary */}
         <div className="relative overflow-hidden premium-card rounded-3xl p-6 islamic-pattern-bg animate-fade-in">
@@ -200,80 +229,74 @@ const StoriesAndNames = () => {
           </div>
         </div>
 
-        {/* Sections */}
-        {sections.map((section, sIdx) => {
-          const SectionIcon = section.icon;
-          return (
-            <section
-              key={section.id}
-              className="space-y-3 animate-fade-in"
-              style={{ animationDelay: `${100 + sIdx * 80}ms` }}
-            >
-              {/* Section header */}
-              <div className="flex items-center gap-3 px-1">
-                <div
-                  className={`w-8 h-8 rounded-lg bg-gradient-to-br ${section.accent} flex items-center justify-center shadow-sm`}
-                >
-                  <SectionIcon className="h-4 w-4 text-white" strokeWidth={2.4} />
-                </div>
-                <div className="flex-1">
-                  <p className="section-label leading-none mb-1">
-                    {isArabic ? section.labelAr : section.labelEn}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground/70">
-                    {section.items.length}{" "}
-                    {isArabic
-                      ? section.items.length === 1
-                        ? "موضوع"
-                        : "مواضيع"
-                      : section.items.length === 1
-                      ? "topic"
-                      : "topics"}
-                  </p>
-                </div>
-                <div className="ornate-divider flex-1 max-w-[100px]" />
-              </div>
-
-              {/* Items */}
-              <div className="grid gap-3">
-                {section.items.map((card) => {
-                  const Icon = card.icon;
-                  return (
-                    <button
-                      key={card.link}
-                      onClick={() => navigate(card.link)}
-                      className="text-left press-tile group"
-                    >
-                      <div className="glass-card rounded-2xl p-4 hover:border-primary/30 smooth-transition relative overflow-hidden">
+      {/* Sections */}
+      {sections.map((section, sIdx) => {
+        const itemCountLabel = `${section.items.length} ${
+          isArabic
+            ? section.items.length === 1
+              ? "موضوع"
+              : "مواضيع"
+            : section.items.length === 1
+            ? "topic"
+            : "topics"
+        }`;
+        return (
+          <PageSection
+            key={section.id}
+            icon={section.icon}
+            label={isArabic ? section.labelAr : section.labelEn}
+            hint={itemCountLabel}
+            accent={section.accent}
+            delay={100 + sIdx * 80}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              {section.items.map((card) => {
+                const Icon = card.icon;
+                const titleText = isArabic ? card.titleAr : card.titleEn;
+                return (
+                  <button
+                    key={card.link}
+                    onClick={() => navigate(card.link)}
+                    aria-label={titleText}
+                    className="text-left press-tile group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
+                  >
+                    <div className="glass-card rounded-2xl p-4 hover:border-primary/30 smooth-transition relative overflow-hidden h-full">
+                      <div
+                        className={`absolute -top-10 -right-10 w-28 h-28 rounded-full bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-15 blur-2xl smooth-transition`}
+                        aria-hidden="true"
+                      />
+                      <div className="flex items-center gap-4 relative">
                         <div
-                          className={`absolute -top-10 -right-10 w-28 h-28 rounded-full bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-15 blur-2xl smooth-transition`}
-                        />
-                        <div className="flex items-center gap-4 relative">
-                          <div
-                            className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 smooth-transition`}
-                          >
-                            <Icon className="h-5 w-5 text-white drop-shadow-sm" strokeWidth={2.2} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-[15px] leading-tight">
-                              {isArabic ? card.titleAr : card.titleEn}
-                            </h3>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                              {isArabic ? card.descAr : card.descEn}
-                            </p>
-                          </div>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition flex-shrink-0" />
+                          className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-lg group-hover:scale-105 smooth-transition`}
+                          aria-hidden="true"
+                        >
+                          <Icon
+                            className="h-5 w-5 text-white drop-shadow-sm"
+                            strokeWidth={2.2}
+                          />
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-[15px] leading-tight">
+                            {titleText}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {isArabic ? card.descAr : card.descEn}
+                          </p>
+                        </div>
+                        <ChevronRight
+                          className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition flex-shrink-0"
+                          aria-hidden="true"
+                        />
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
-      </div>
-    </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </PageSection>
+        );
+      })}
+    </PageContainer>
   );
 };
 
