@@ -65,13 +65,17 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
   const Icon = config.icon;
 
   return (
-    <Link to={config.link} className="block group my-2 animate-fade-in">
+    <Link
+      to={config.link}
+      aria-label={`${config.title} — ${config.description}`}
+      className="block group my-2 animate-fade-in rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+    >
       <div className="glass-card rounded-2xl p-4 hover:border-primary/25 smooth-transition relative overflow-hidden group-hover:rich-shadow">
         {/* Subtle accent glow on hover */}
-        <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 smooth-transition ${config.accentColor.split(' ')[0]}`} />
+        <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 smooth-transition ${config.accentColor.split(' ')[0]}`} aria-hidden="true" />
         
         <div className="flex items-center gap-4 relative">
-          <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${config.iconGradient} flex items-center justify-center group-hover:scale-105 smooth-transition shadow-lg`}>
+          <div className={`flex-shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br ${config.iconGradient} flex items-center justify-center group-hover:scale-105 smooth-transition shadow-lg`} aria-hidden="true">
             <Icon className="h-5 w-5 text-white drop-shadow-sm" />
           </div>
           
@@ -84,7 +88,7 @@ const NavigationCard: React.FC<NavigationCardProps> = ({ type, data }) => {
             </p>
           </div>
           
-          <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition flex-shrink-0" />
+          <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 smooth-transition flex-shrink-0" aria-hidden="true" />
         </div>
       </div>
     </Link>
