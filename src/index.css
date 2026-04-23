@@ -249,6 +249,47 @@
     background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='0.03' stroke-width='0.5'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3Cpath d='M40 10L70 40L40 70L10 40Z'/%3E%3Cpath d='M40 20L60 40L40 60L20 40Z'/%3E%3Ccircle cx='40' cy='40' r='8'/%3E%3C/g%3E%3C/svg%3E");
   }
 
+  /* Section header — refined typographic label used across pages */
+  .section-label {
+    @apply text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground/80;
+  }
+
+  /* Ornate divider used between major sections */
+  .ornate-divider {
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--islamic-gold) / 0.4),
+      hsl(var(--primary) / 0.3),
+      hsl(var(--islamic-gold) / 0.4),
+      transparent
+    );
+    height: 1px;
+  }
+
+  /* Premium card variant — used for hero/feature cards */
+  .premium-card {
+    background: hsl(var(--glass-bg));
+    backdrop-filter: blur(32px) saturate(220%);
+    -webkit-backdrop-filter: blur(32px) saturate(220%);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow:
+      0 30px 80px -30px hsl(var(--primary) / 0.18),
+      0 12px 40px -12px hsl(20 20% 20% / 0.12),
+      0 2px 6px -2px hsl(20 20% 20% / 0.06),
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.08);
+  }
+
+  /* Hairline ring used to add definition to icon tiles */
+  .ring-hairline {
+    box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.6);
+  }
+
+  /* Press effect for interactive tiles */
+  .press-tile {
+    @apply smooth-transition active:scale-[0.97];
+  }
+
   @keyframes fade-in {
     from {
       opacity: 0;
