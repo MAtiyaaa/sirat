@@ -145,7 +145,7 @@ export const QuickActionsRow: React.FC<QuickActionsRowProps> = ({
 }) => (
   <div
     className={cn(
-      "flex gap-2.5 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none snap-x snap-mandatory",
+      "flex gap-2.5 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory",
       className
     )}
     role="toolbar"
