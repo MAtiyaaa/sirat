@@ -100,30 +100,42 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {playingSurah && isPlayerMinimized && (
         <button
           onClick={() => setIsPlayerMinimized(false)}
-          className="fixed bottom-24 left-4 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rich-shadow flex items-center justify-center z-50 animate-glow-pulse hover:scale-110 smooth-transition"
-          aria-label="Show player"
+          className="fixed bottom-24 left-4 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rich-shadow flex items-center justify-center z-50 animate-glow-pulse hover:scale-110 smooth-transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          aria-label={settings.language === 'ar' ? 'إظهار المشغل' : 'Show audio player'}
         >
           {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
         </button>
       )}
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50"
+        aria-label={settings.language === 'ar' ? 'القائمة الرئيسية' : 'Main navigation'}
+      >
         {/* Frosted glass background with rich blur */}
         <div className="glass-effect border-t border-border/50 backdrop-blur-2xl">
           <div className="container mx-auto max-w-4xl">
             {/* Global Play Controls */}
             {playingSurah && !isPlayerMinimized && (
-              <div className="border-b border-border/30 px-3 py-2.5">
+              <div
+                className="border-b border-border/30 px-3 py-2.5"
+                role="region"
+                aria-label={settings.language === 'ar' ? 'مشغل القرآن' : 'Quran audio player'}
+              >
                 <div className="flex items-center gap-2.5">
                   {/* Now playing info */}
                   <button
                     onClick={handleGoToAyah}
-                    className="flex items-center gap-2.5 flex-1 min-w-0 text-left rounded-xl px-2 py-1.5 hover:bg-primary/8 smooth-transition group"
+                    className="flex items-center gap-2.5 flex-1 min-w-0 text-left rounded-xl px-2 py-1.5 hover:bg-primary/8 smooth-transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                    aria-label={
+                      settings.language === 'ar'
+                        ? `الذهاب إلى سورة ${playingSurah} آية ${playingAyah || 1}`
+                        : `Jump to Surah ${playingSurah}, Ayah ${playingAyah || 1}`
+                    }
                   >
                     <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center rich-shadow flex-shrink-0">
                       {isPlaying && (
-                        <div className="absolute inset-0 rounded-xl bg-primary/40 blur-md animate-glow-pulse" />
+                        <div className="absolute inset-0 rounded-xl bg-primary/40 blur-md animate-glow-pulse" aria-hidden="true" />
                       )}
                       <Book className="h-4 w-4 text-primary-foreground relative z-10" />
                     </div>
@@ -144,16 +156,27 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         variant={isLocked ? "default" : "ghost"}
                         size="icon"
                         onClick={() => setIsLocked(!isLocked)}
-                        className="rounded-full w-9 h-9"
+                        className="rounded-full w-9 h-9 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                         title={isLocked ? 'Unlock' : 'Lock'}
+                        aria-label={
+                          settings.language === 'ar'
+                            ? isLocked ? 'إلغاء قفل التمرير' : 'قفل التمرير'
+                            : isLocked ? 'Unlock auto-scroll' : 'Lock auto-scroll'
+                        }
+                        aria-pressed={isLocked}
                       >
                         {isLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
                       </Button>
                     )}
                     <Button
                       onClick={isPlaying ? pauseSurah : resumeSurah}
-                      className="rounded-full w-11 h-11 rich-shadow bg-gradient-to-br from-primary to-primary/80"
+                      className="rounded-full w-11 h-11 rich-shadow bg-gradient-to-br from-primary to-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       title={isPlaying ? 'Pause' : 'Play'}
+                      aria-label={
+                        settings.language === 'ar'
+                          ? isPlaying ? 'إيقاف مؤقت' : 'تشغيل'
+                          : isPlaying ? 'Pause recitation' : 'Resume recitation'
+                      }
                     >
                       {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
                     </Button>
@@ -161,8 +184,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                       variant="ghost"
                       size="icon"
                       onClick={() => setIsPlayerMinimized(true)}
-                      className="rounded-full w-9 h-9 text-muted-foreground hover:text-foreground"
+                      className="rounded-full w-9 h-9 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       title="Minimize"
+                      aria-label={settings.language === 'ar' ? 'تصغير المشغل' : 'Minimize player'}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -186,7 +210,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     key={item.path}
                     to={item.path}
                     onClick={isQuranTab ? handleQuranClick : undefined}
-                    className={`flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl smooth-transition relative ${
+                    aria-label={item.label[settings.language]}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl smooth-transition relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                       isActive 
                         ? 'text-primary' 
                         : 'text-muted-foreground hover:text-foreground'
@@ -194,9 +220,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                   >
                     {/* Active indicator dot */}
                     {isActive && (
-                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-primary" />
+                      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-primary" aria-hidden="true" />
                     )}
-                    <Icon className={`${isHome ? 'h-7 w-7' : 'h-6 w-6'} smooth-transition ${isActive ? 'drop-shadow-sm' : ''}`} />
+                    <Icon
+                      className={`${isHome ? 'h-7 w-7' : 'h-6 w-6'} smooth-transition ${isActive ? 'drop-shadow-sm' : ''}`}
+                      aria-hidden="true"
+                    />
                     <span className={`text-[10px] font-medium ${isActive ? 'font-semibold' : ''}`}>
                       {item.label[settings.language]}
                     </span>
