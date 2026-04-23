@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Loader2, Compass, Calendar, Droplets, Sparkles } from "lucide-react";
+import { QuickActionsRow, type QuickAction } from "@/components/PageTemplate";
 
 // New modular components
 import PrayerHero from "@/components/prayer/PrayerHero";
@@ -31,6 +33,7 @@ interface HijriDate {
 
 const Wudu = () => {
   const { settings } = useSettings();
+  const navigate = useNavigate();
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [location, setLocation] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -179,6 +182,52 @@ const Wudu = () => {
       {/* Hero Section */}
       <PrayerHero nextPrayer={nextPrayer} location={location} loading={loading} />
 
+      {/* Persistent Quick Actions */}
+      <QuickActionsRow
+        actions={[
+          {
+            icon: Compass,
+            label: settings.language === "ar" ? "القبلة" : "Qibla",
+            onClick: () => {
+              document
+                .getElementById("qibla-section")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            },
+            gradient: "from-emerald-500 to-teal-500",
+            ariaLabel: settings.language === "ar" ? "اتجاه القبلة" : "Qibla direction",
+          },
+          {
+            icon: Droplets,
+            label: settings.language === "ar" ? "الوضوء" : "Wudu",
+            onClick: () => {
+              document
+                .getElementById("wudu-steps-section")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            },
+            gradient: "from-cyan-500 to-blue-500",
+            ariaLabel: settings.language === "ar" ? "خطوات الوضوء" : "Wudu steps",
+          },
+          {
+            icon: Calendar,
+            label: settings.language === "ar" ? "التقويم" : "Hijri",
+            onClick: () => {
+              document
+                .getElementById("hijri-section")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            },
+            gradient: "from-amber-500 to-orange-500",
+            ariaLabel: settings.language === "ar" ? "التقويم الهجري" : "Hijri calendar",
+          },
+          {
+            icon: Sparkles,
+            label: settings.language === "ar" ? "التسبيح" : "Tasbih",
+            onClick: () => navigate("/tasbih"),
+            gradient: "from-purple-500 to-pink-500",
+            ariaLabel: settings.language === "ar" ? "السبحة" : "Tasbih counter",
+          },
+        ]}
+      />
+
       {/* Prayer Times Grid */}
       <div className="space-y-4">
         <h2 className="text-xl font-bold">
@@ -195,10 +244,16 @@ const Wudu = () => {
 
       {/* Collapsible Sections */}
       <div className="space-y-4">
-        <QiblaCard prayerTimeRegion={settings.prayerTimeRegion} />
-        <HijriCalendarCard hijriDate={hijriDate} prayerTimeRegion={settings.prayerTimeRegion} />
+        <div id="qibla-section" className="scroll-mt-24">
+          <QiblaCard prayerTimeRegion={settings.prayerTimeRegion} />
+        </div>
+        <div id="hijri-section" className="scroll-mt-24">
+          <HijriCalendarCard hijriDate={hijriDate} prayerTimeRegion={settings.prayerTimeRegion} />
+        </div>
         <IslamicEventsCard suhurTime={suhurTime} iftarTime={iftarTime} prayerTimeRegion={settings.prayerTimeRegion} />
-        <WuduStepsCard />
+        <div id="wudu-steps-section" className="scroll-mt-24">
+          <WuduStepsCard />
+        </div>
       </div>
 
       {/* Quick Access - Last */}
