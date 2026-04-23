@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, Eye, ChevronUp, X } from 'lucide-react';
+import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, X } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { supabase } from '@/integrations/supabase/client';
