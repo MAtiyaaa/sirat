@@ -17,29 +17,33 @@ const QuickAccessGrid = () => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">
-        {settings.language === 'ar' ? 'الوصول السريع' : 'Quick Access'}
-      </h2>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="flex items-center gap-3 px-1">
+        <p className="section-label">
+          {settings.language === 'ar' ? 'الوصول السريع' : 'Quick Access'}
+        </p>
+        <div className="ornate-divider flex-1" />
+      </div>
+
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {quickLinks.map((link) => {
           const Icon = link.icon;
-          
+
           return (
             <Link
               key={link.to}
               to={link.to}
-              className="group relative overflow-hidden rounded-2xl smooth-transition hover:scale-[1.03]"
+              className="group relative overflow-hidden rounded-2xl press-tile"
             >
-              <div className="glass-card p-4 text-center smooth-transition group-hover:border-primary/20 relative overflow-hidden">
+              <div className="glass-card p-3.5 text-center smooth-transition group-hover:border-primary/25 relative overflow-hidden h-full">
                 {/* Warm accent glow */}
-                <div className={`absolute -top-6 -right-6 w-16 h-16 bg-gradient-to-br ${link.gradient} opacity-0 group-hover:opacity-15 rounded-full blur-xl smooth-transition`} />
-                
-                <div className={`w-11 h-11 mx-auto rounded-xl bg-gradient-to-br ${link.gradient} flex items-center justify-center mb-3 group-hover:scale-110 smooth-transition shadow-lg`}>
-                  <Icon className="h-5 w-5 text-white drop-shadow-sm" />
+                <div className={`absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br ${link.gradient} opacity-0 group-hover:opacity-20 rounded-full blur-2xl smooth-transition`} />
+
+                <div className={`w-11 h-11 mx-auto rounded-2xl bg-gradient-to-br ${link.gradient} flex items-center justify-center mb-2.5 group-hover:scale-110 smooth-transition shadow-lg relative overflow-hidden`}>
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent" />
+                  <Icon className="h-5 w-5 text-white drop-shadow-sm relative z-10" strokeWidth={2.2} />
                 </div>
-                <p className="font-semibold text-sm mb-0.5">{link.title}</p>
-                <p className="text-xs text-muted-foreground truncate">{link.description}</p>
+                <p className="font-semibold text-[13px] leading-tight mb-0.5">{link.title}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{link.description}</p>
               </div>
             </Link>
           );

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, Eye, ChevronUp, X } from 'lucide-react';
+import { Book, Moon, Home, MessageSquare, Play, Pause, Lock, LockOpen, X } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAudio } from '@/contexts/AudioContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -100,9 +100,10 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       {playingSurah && isPlayerMinimized && (
         <button
           onClick={() => setIsPlayerMinimized(false)}
-          className="fixed bottom-20 left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground rich-shadow flex items-center justify-center z-50 animate-pulse"
+          className="fixed bottom-24 left-4 w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rich-shadow flex items-center justify-center z-50 animate-glow-pulse hover:scale-110 smooth-transition"
+          aria-label="Show player"
         >
-          <ChevronUp className="h-5 w-5" />
+          {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
         </button>
       )}
 
@@ -113,25 +114,59 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           <div className="container mx-auto max-w-4xl">
             {/* Global Play Controls */}
             {playingSurah && !isPlayerMinimized && (
-              <div className="border-b border-border/30 py-2.5 px-4">
-                <div className="flex items-center justify-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => setIsPlayerMinimized(true)} className="rounded-full w-8 h-8 hover:bg-destructive/10" title="Minimize">
-                    <X className="h-4 w-4" />
-                  </Button>
-                  {isInQuranPage && (
-                    <Button variant={isLocked ? "default" : "outline"} size="icon" onClick={() => setIsLocked(!isLocked)} className="rounded-full w-10 h-10" title={isLocked ? 'Unlock' : 'Lock'}>
-                      {isLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
+              <div className="border-b border-border/30 px-3 py-2.5">
+                <div className="flex items-center gap-2.5">
+                  {/* Now playing info */}
+                  <button
+                    onClick={handleGoToAyah}
+                    className="flex items-center gap-2.5 flex-1 min-w-0 text-left rounded-xl px-2 py-1.5 hover:bg-primary/8 smooth-transition group"
+                  >
+                    <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center rich-shadow flex-shrink-0">
+                      {isPlaying && (
+                        <div className="absolute inset-0 rounded-xl bg-primary/40 blur-md animate-glow-pulse" />
+                      )}
+                      <Book className="h-4 w-4 text-primary-foreground relative z-10" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-wider leading-none">
+                        {settings.language === 'ar' ? 'يُتلى الآن' : 'Now Reciting'}
+                      </p>
+                      <p className="text-xs font-semibold truncate mt-0.5">
+                        {settings.language === 'ar' ? `سورة ${playingSurah} • آية ${playingAyah || 1}` : `Surah ${playingSurah} • Ayah ${playingAyah || 1}`}
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Controls */}
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {isInQuranPage && (
+                      <Button
+                        variant={isLocked ? "default" : "ghost"}
+                        size="icon"
+                        onClick={() => setIsLocked(!isLocked)}
+                        className="rounded-full w-9 h-9"
+                        title={isLocked ? 'Unlock' : 'Lock'}
+                      >
+                        {isLocked ? <Lock className="h-4 w-4" /> : <LockOpen className="h-4 w-4" />}
+                      </Button>
+                    )}
+                    <Button
+                      onClick={isPlaying ? pauseSurah : resumeSurah}
+                      className="rounded-full w-11 h-11 rich-shadow bg-gradient-to-br from-primary to-primary/80"
+                      title={isPlaying ? 'Pause' : 'Play'}
+                    >
+                      {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
                     </Button>
-                  )}
-                  <Button variant="outline" size="icon" onClick={handleGoToAyah} className="rounded-full w-10 h-10" title="Go to Ayah">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button onClick={isPlaying ? pauseSurah : resumeSurah} className="rounded-full w-12 h-12 rich-shadow" title={isPlaying ? 'Pause' : 'Play'}>
-                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                  </Button>
-                  <span className="text-xs text-muted-foreground">
-                    {settings.language === 'ar' ? `سورة ${playingSurah} - آية ${playingAyah || 1}` : `Surah ${playingSurah} - Ayah ${playingAyah || 1}`}
-                  </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsPlayerMinimized(true)}
+                      className="rounded-full w-9 h-9 text-muted-foreground hover:text-foreground"
+                      title="Minimize"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
