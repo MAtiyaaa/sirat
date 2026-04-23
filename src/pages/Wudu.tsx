@@ -199,7 +199,11 @@ const Wudu = () => {
           {
             icon: Droplets,
             label: settings.language === "ar" ? "الوضوء" : "Wudu",
-            onClick: () => navigate("/wudu-steps"),
+            onClick: () => {
+              document
+                .getElementById("wudu-steps-section")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            },
             gradient: "from-cyan-500 to-blue-500",
             ariaLabel: settings.language === "ar" ? "خطوات الوضوء" : "Wudu steps",
           },
@@ -247,7 +251,9 @@ const Wudu = () => {
           <HijriCalendarCard hijriDate={hijriDate} prayerTimeRegion={settings.prayerTimeRegion} />
         </div>
         <IslamicEventsCard suhurTime={suhurTime} iftarTime={iftarTime} prayerTimeRegion={settings.prayerTimeRegion} />
-        <WuduStepsCard />
+        <div id="wudu-steps-section" className="scroll-mt-24">
+          <WuduStepsCard />
+        </div>
       </div>
 
       {/* Quick Access - Last */}
