@@ -297,7 +297,13 @@ const Home = () => {
 
         {/* Quick Access Cards - Rich Depth */}
         {(surahOfDay || continueReading) && (
-          <div className="space-y-3">
+          <div className="space-y-3 animate-fade-in" style={{ animationDelay: '180ms' }}>
+            <div className="flex items-center gap-3 px-1">
+              <p className="section-label">
+                {settings.language === 'ar' ? 'متابعة' : 'For You'}
+              </p>
+              <div className="ornate-divider flex-1" />
+            </div>
             {surahOfDay && (
               <Link to={`/quran/${surahOfDay.number}`} className="block group animate-fade-in" style={{ animationDelay: '200ms' }}>
                 <div className="glass-card rounded-2xl p-4 hover:border-primary/30 smooth-transition relative overflow-hidden">
@@ -382,9 +388,15 @@ const Home = () => {
         </div>
 
         {/* App Grid - Rich Icons with depth */}
-        <div className="animate-fade-in" style={{ animationDelay: '350ms' }}>
-          <div className="grid grid-cols-4 gap-5 pt-2 pb-4">
-            {appBoxes.map((app, index) => {
+        <div className="animate-fade-in space-y-3" style={{ animationDelay: '350ms' }}>
+          <div className="flex items-center gap-3 px-1">
+            <p className="section-label">
+              {settings.language === 'ar' ? 'كل التطبيقات' : 'All Apps'}
+            </p>
+            <div className="ornate-divider flex-1" />
+          </div>
+          <div className="grid grid-cols-4 gap-5 pb-2">
+            {appBoxes.map((app) => {
               const Icon = app.icon;
               return (
                 <Link
@@ -408,24 +420,32 @@ const Home = () => {
         </div>
 
         {/* Stats - Rich Glass Cards */}
-        <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: '400ms' }}>
-          {[
-            { value: '114', label: settings.language === 'ar' ? 'سورة' : 'Surahs' },
-            { value: '6,236', label: settings.language === 'ar' ? 'آية' : 'Verses' },
-            { value: '30', label: settings.language === 'ar' ? 'جزء' : 'Juz' }
-          ].map((stat, i) => (
-            <div 
-              key={i} 
-              className="text-center glass-card rounded-2xl p-4 hover:scale-[1.02] smooth-transition"
-            >
-              <div className="text-2xl font-bold bg-gradient-to-br from-primary via-primary to-primary/70 bg-clip-text text-transparent mb-1">
-                {stat.value}
+        <div className="space-y-3 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <div className="flex items-center gap-3 px-1">
+            <p className="section-label">
+              {settings.language === 'ar' ? 'القرآن بالأرقام' : 'Quran in Numbers'}
+            </p>
+            <div className="ornate-divider flex-1" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { value: '114', label: settings.language === 'ar' ? 'سورة' : 'Surahs' },
+              { value: '6,236', label: settings.language === 'ar' ? 'آية' : 'Verses' },
+              { value: '30', label: settings.language === 'ar' ? 'جزء' : 'Juz' }
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className="text-center glass-card rounded-2xl p-4 hover:scale-[1.02] smooth-transition"
+              >
+                <div className="text-2xl font-bold bg-gradient-to-br from-primary via-primary to-primary/70 bg-clip-text text-transparent mb-1">
+                  {stat.value}
+                </div>
+                <div className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">
+                  {stat.label}
+                </div>
               </div>
-              <div className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">
-                {stat.label}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
