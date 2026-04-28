@@ -653,9 +653,9 @@ const Quran = () => {
   }
 
   return (
-    <div className="min-h-screen pb-8">
+    <div className="min-h-screen pb-8 overflow-x-hidden">
       {/* Hero Section */}
-      <div className="relative pt-12 pb-8 px-4 animate-fade-in">
+      <div className="relative pt-8 sm:pt-12 pb-6 sm:pb-8 px-4 animate-fade-in">
         {/* Decorative Islamic Pattern Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -670,18 +670,18 @@ const Quran = () => {
         <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
         <div className="absolute top-0 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
 
-        <div className="relative text-center space-y-4 max-w-2xl mx-auto">
+        <div className="relative text-center space-y-3 sm:space-y-4 max-w-2xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 sm:py-2 rounded-full glass-card border-primary/20">
             <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-            <span className="text-xs font-semibold text-primary tracking-wider">
+            <span className="text-[11px] sm:text-xs font-bold text-primary tracking-wider uppercase">
               {isArabic ? '١١٤ سورة' : '114 Surahs'}
             </span>
           </div>
 
           {/* Main Title */}
           <div className="relative">
-            <h1 className="text-6xl md:text-7xl font-bold tracking-tight relative z-10">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight relative z-10 px-2">
               <span className={`bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm ${isArabic ? 'arabic-regal' : ''}`} style={{ lineHeight: '1.2' }}>
                 {isArabic ? 'القرآن الكريم' : 'The Holy Quran'}
               </span>
@@ -690,7 +690,7 @@ const Quran = () => {
           </div>
 
           {/* Subtitle */}
-          <p className="text-base text-muted-foreground font-light tracking-wide">
+          <p className="text-sm sm:text-base text-muted-foreground font-light tracking-wide italic">
             {isArabic ? 'اختر سورة للقراءة والتدبر' : 'Select a surah to read and reflect'}
           </p>
         </div>
