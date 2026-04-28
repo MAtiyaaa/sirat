@@ -361,31 +361,36 @@ const Home = () => {
 
         {/* Quote of the Day - Immersive */}
         <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <div className="relative overflow-hidden rounded-2xl glass-card p-7 islamic-pattern-bg">
+          <div className="relative overflow-hidden rounded-3xl premium-card p-5 sm:p-7 islamic-pattern-bg">
             {/* Warm glow accents */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-islamic-gold/8 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-primary/8 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-islamic-gold/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
             
-            <div className="relative space-y-4 text-center">
+            <div className="relative space-y-3 sm:space-y-4 text-center">
+              <p className="section-label text-islamic-gold/80">
+                {settings.language === 'ar' ? 'آية اليوم' : 'Verse of the Day'}
+              </p>
               {/* Ornamental divider */}
               <div className="flex items-center justify-center gap-3">
-                <div className="h-px w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
+                <div className="h-px w-10 sm:w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
                 <Star className="h-4 w-4 text-islamic-gold animate-glow-pulse" />
-                <div className="h-px w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
+                <div className="h-px w-10 sm:w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
               </div>
               
-              <p className={`text-lg md:text-xl font-semibold leading-relaxed ${settings.language === 'ar' ? 'arabic-regal text-2xl' : ''}`}>
+              <p className={`leading-relaxed break-words ${settings.language === 'ar' ? 'quran-font text-2xl sm:text-3xl text-foreground' : 'text-base sm:text-lg md:text-xl font-semibold italic text-foreground/90'}`} dir={settings.language === 'ar' ? 'rtl' : 'ltr'}>
                 {settings.language === 'ar' ? quoteOfDay.ar : quoteOfDay.en}
               </p>
               
-              <p className="text-xs text-muted-foreground font-medium tracking-wide">
-                {formatReference(quoteOfDay.reference, settings.language)}
-              </p>
+              <div className="flex justify-center">
+                <span className="inline-block text-[10px] sm:text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-islamic-gold/10 text-islamic-gold border border-islamic-gold/20">
+                  {formatReference(quoteOfDay.reference, settings.language)}
+                </span>
+              </div>
               
               <div className="flex items-center justify-center gap-3">
-                <div className="h-px w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
+                <div className="h-px w-10 sm:w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
                 <Star className="h-3 w-3 text-islamic-gold/40" />
-                <div className="h-px w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
+                <div className="h-px w-10 sm:w-12 bg-gradient-to-r from-transparent via-islamic-gold/40 to-transparent" />
               </div>
             </div>
           </div>
