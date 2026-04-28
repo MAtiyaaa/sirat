@@ -1,9 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useSettings } from "@/contexts/SettingsContext";
-import { ArrowLeft, Sparkles, BookOpen, Star } from "lucide-react";
+import { Sparkles, BookOpen, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { PageContainer, PageHeader, PageSection } from "@/components/PageTemplate";
 
 /* -------------------------------------------
    Types
@@ -83,164 +83,159 @@ const NamesOfMuhammad: React.FC = () => {
   const ar = settings.language === "ar";
 
   const content = {
-    title: ar ? "أسماء النبي محمد ﷺ" : "Names of Prophet Muhammad ﷺ",
-    back: ar ? "رجوع" : "Back",
+    title: ar ? "ألقاب النبي ﷺ" : "Titles of the Prophet ﷺ",
+    eyebrow: ar ? "أسماؤه المباركة" : "His Blessed Names",
     intro: ar
-      ? "أسماء وألقاب خاتم الأنبياء والمرسلين صلى الله عليه وسلم"
-      : "Names and titles of the Final Prophet and Messenger ﷺ",
-    detailsLabel: ar ? "التفاصيل" : "Details",
+      ? "ألقاب وأسماء خاتم الأنبياء والمرسلين صلى الله عليه وسلم"
+      : "The names and titles of the Final Messenger ﷺ",
+    detailsLabel: ar ? "التفاصيل" : "About this title",
     meaningLabel: ar ? "المعنى" : "Meaning",
-    referencesLabel: ar ? "المراجع" : "References",
+    referencesLabel: ar ? "المراجع" : "Sources",
+    back: ar ? "رجوع للقائمة" : "Back to all titles",
   };
 
   const [selected, setSelected] = React.useState<number | null>(null);
+  const Chev = ar ? ChevronLeft : ChevronRight;
+
+  if (selected !== null) {
+    const n = NAMES[selected];
+    const tone = toneFor(selected);
+    return (
+      <PageContainer>
+        <PageHeader
+          eyebrow={content.eyebrow}
+          title={n.en}
+          subtitle={n.meaning}
+          showBack
+          backTo={undefined as any}
+          right={
+            <button
+              onClick={() => setSelected(null)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-full glass-card hover:border-primary/40 smooth-transition focus-ring"
+            >
+              {content.back}
+            </button>
+          }
+        />
+
+        {/* Hero medallion */}
+        <div className="relative overflow-hidden rounded-3xl">
+          <div className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} blur-2xl opacity-70`} aria-hidden="true" />
+          <div className="absolute inset-0 islamic-pattern-bg opacity-40" aria-hidden="true" />
+          <div className="relative premium-card rounded-3xl p-7 md:p-10 text-center">
+            <div className="relative w-20 h-20 mx-auto mb-5">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-islamic-gold/40 to-primary/30 blur-xl animate-glow-pulse" aria-hidden="true" />
+              <div className={`relative w-full h-full rounded-full ${tone.iconBg} flex items-center justify-center border border-islamic-gold/30`}>
+                <Star className={`h-9 w-9 ${tone.iconColor}`} strokeWidth={1.6} />
+              </div>
+            </div>
+            <p className="section-label mb-2">{content.eyebrow}</p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-3 quran-font text-primary leading-tight" dir="rtl">{n.ar}</h2>
+            <div className="ornate-divider max-w-[120px] mx-auto mb-3" aria-hidden="true" />
+            <p className="text-base font-semibold">{n.en}</p>
+            <p className="text-sm text-muted-foreground mt-1">{n.meaning}</p>
+          </div>
+        </div>
+
+        <PageSection icon={BookOpen} label={content.detailsLabel} accent="from-primary to-islamic-gold">
+          <div className="glass-card rounded-2xl p-5">
+            <p className={`text-sm leading-relaxed ${ar ? "text-right" : ""} break-words`} dir={ar ? "rtl" : "ltr"}>
+              {ar ? n.detailsAr : n.detailsEn}
+            </p>
+          </div>
+        </PageSection>
+
+        {n.references?.length > 0 && (
+          <PageSection icon={Sparkles} label={content.referencesLabel} accent="from-islamic-gold to-amber-500">
+            <div className="space-y-2.5">
+              {n.references.map((ref, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    if (ref.source === "Quran") {
+                      const surahNum = ref.ref.split(":")[0];
+                      navigate(`/quran/${surahNum}`);
+                    }
+                  }}
+                  className="press-tile w-full glass-card rounded-2xl p-4 text-left border-border/40 hover:border-primary/40 smooth-transition focus-ring"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary mb-2">
+                        {ref.source} · {ref.ref}
+                      </span>
+                      <p className="quran-font text-base text-foreground/90 leading-relaxed mb-1.5 break-words" dir="rtl">
+                        {ref.textAr}
+                      </p>
+                      <p className="text-xs text-muted-foreground italic break-words">
+                        "{ref.textEn}"
+                      </p>
+                    </div>
+                    {ref.source === "Quran" && (
+                      <Chev className="h-4 w-4 text-muted-foreground shrink-0 mt-1" aria-hidden="true" />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </PageSection>
+        )}
+      </PageContainer>
+    );
+  }
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* Header */}
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => (selected !== null ? setSelected(null) : navigate(-1))}
-            aria-label={content.back}
-            className="shrink-0 neomorph hover:neomorph-pressed"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <h1 className="text-3xl font-bold">{content.title}</h1>
-          </div>
-        </div>
+    <PageContainer>
+      <PageHeader
+        eyebrow={content.eyebrow}
+        title={content.title}
+        subtitle={content.intro}
+      />
 
-        {!selected && (
-          <p className={`text-muted-foreground text-center mb-6 ${ar ? "arabic-regal" : ""}`}>
-            {content.intro}
+      {/* Hero count card */}
+      <div className="relative overflow-hidden rounded-3xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-islamic-gold/15 to-orange-500/20 blur-2xl" aria-hidden="true" />
+        <div className="absolute inset-0 islamic-pattern-bg opacity-50" aria-hidden="true" />
+        <div className="relative premium-card rounded-3xl p-6 text-center">
+          <Sparkles className="h-6 w-6 text-islamic-gold mx-auto mb-2 animate-glow-pulse" />
+          <p className="text-3xl font-bold bg-gradient-to-r from-islamic-gold via-amber-500 to-islamic-gold bg-clip-text text-transparent">
+            {NAMES.length}
           </p>
-        )}
+          <p className="section-label mt-1">
+            {ar ? "لقباً مباركاً" : "Blessed Titles"}
+          </p>
+        </div>
       </div>
 
-      {/* LIST VIEW (vertical cards like Empires) */}
-      {selected === null && (
-        <div className="max-w-2xl mx-auto px-6">
-          <div className="grid gap-4">
-            {NAMES.map((n, idx) => {
-              const tone = toneFor(idx);
-              return (
-                <div
-                  key={`${n.en}-${idx}`}
-                  onClick={() => setSelected(idx)}
-                  className="cursor-pointer group"
-                >
-                  <div className="relative overflow-hidden">
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 smooth-transition`}
-                    />
-                    <Card className="relative neomorph hover:neomorph-inset smooth-transition backdrop-blur-xl p-6">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`flex-shrink-0 w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center group-hover:scale-105 smooth-transition`}
-                        >
-                          <Star className={`h-7 w-7 ${tone.iconColor}`} />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-lg mb-1 text-primary">{n.ar}</h3>
-                          <p className="text-sm font-medium">{n.en}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {content.meaningLabel}: {n.meaning}
-                          </p>
-                        </div>
-
-                        <div className="flex-shrink-0">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
+      <PageSection icon={Star} label={ar ? "كل الألقاب" : "All Titles"} accent="from-amber-500 to-orange-500">
+        <div className="grid gap-3">
+          {NAMES.map((n, idx) => {
+            const tone = toneFor(idx);
+            return (
+              <button
+                key={`${n.en}-${idx}`}
+                onClick={() => setSelected(idx)}
+                className="press-tile group text-left glass-card rounded-2xl p-4 border-border/40 hover:border-primary/30 smooth-transition focus-ring animate-fade-in"
+                style={{ animationDelay: `${idx * 25}ms` }}
+                dir={ar ? "rtl" : "ltr"}
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className={`shrink-0 w-12 h-12 rounded-xl ${tone.iconBg} flex items-center justify-center border border-border/50 group-hover:scale-105 smooth-transition`} aria-hidden="true">
+                    <Star className={`h-6 w-6 ${tone.iconColor}`} strokeWidth={1.8} />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="quran-font text-lg font-bold text-primary leading-tight mb-0.5 break-words">{n.ar}</h3>
+                    <p className="text-sm font-semibold break-words">{n.en}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 break-words line-clamp-1">{n.meaning}</p>
+                  </div>
+                  <Chev className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
                 </div>
-              );
-            })}
-          </div>
+              </button>
+            );
+          })}
         </div>
-      )}
-
-      {/* DETAIL VIEW (page-like, no routing) */}
-      {selected !== null && (() => {
-        const n = NAMES[selected];
-        const tone = toneFor(selected);
-        return (
-          <div className="max-w-2xl mx-auto px-6">
-            {/* Accent header */}
-            <div className="relative overflow-hidden mb-6">
-              <div className={`absolute inset-0 bg-gradient-to-br ${tone.gradient} rounded-3xl blur-2xl opacity-70`} />
-              <Card className="relative neomorph smooth-transition backdrop-blur-xl p-6 rounded-3xl">
-                <div className="flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-xl ${tone.iconBg} flex items-center justify-center`}>
-                    <Star className={`h-7 w-7 ${tone.iconColor}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-2xl font-semibold mb-1 text-primary">{n.ar}</h2>
-                    <p className="text-sm text-muted-foreground">{n.en}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {content.meaningLabel}: {n.meaning}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-
-            {/* Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6">
-              <Card className="neomorph backdrop-blur-xl p-5 rounded-2xl">
-                <div className="text-xs uppercase text-muted-foreground mb-2 flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  {content.detailsLabel}
-                </div>
-                <div className={`text-sm ${ar ? "text-right arabic-regal" : ""}`}>
-                  {ar ? n.detailsAr : n.detailsEn}
-                </div>
-              </Card>
-            </div>
-
-            {/* References */}
-            {n.references?.length > 0 && (
-              <div className="grid gap-3 mb-10">
-                <h3 className="font-semibold text-primary">{content.referencesLabel}</h3>
-                {n.references.map((ref, i) => (
-                  <Button
-                    key={i}
-                    variant="outline"
-                    className="w-full neomorph hover:neomorph-pressed justify-start h-auto py-3"
-                    onClick={() => {
-                      if (ref.source === "Quran") {
-                        const surahNum = ref.ref.split(":")[0];
-                        navigate(`/quran/${surahNum}`);
-                      }
-                    }}
-                  >
-                    <div className="flex flex-col gap-1 w-full text-left">
-                      <div className="font-semibold text-sm text-primary">
-                        {ref.source} {ref.ref}
-                      </div>
-                      <div className={`text-xs text-muted-foreground ${ar ? "text-right arabic-regal" : ""}`}>
-                        {ar ? ref.textAr : ref.textEn}
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      })()}
-    </div>
+      </PageSection>
+    </PageContainer>
   );
 };
 

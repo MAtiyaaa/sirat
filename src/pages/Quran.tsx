@@ -523,24 +523,27 @@ const Quran = () => {
         className="block animate-fade-in"
         style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
       >
-        <div className={`glass-effect rounded-2xl p-5 smooth-transition hover:scale-[1.01] apple-shadow hover:shadow-xl border ${isBookmarked ? 'border-primary/40 bg-primary/5' : 'border-border/30'} hover:border-primary/30 backdrop-blur-xl`}>
-          <div className="flex items-start gap-4">
-            {/* Surah Number Badge */}
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-md">
-              <span className="text-primary font-bold">
-                {isArabic ? toArabicNumerals(surah.number) : surah.number}
-              </span>
+        <div className={`glass-card rounded-2xl p-4 sm:p-5 smooth-transition hover:scale-[1.01] press-tile ${isBookmarked ? 'border-primary/40 bg-primary/5' : ''} hover:border-primary/30`}>
+          <div className="flex items-start gap-3 sm:gap-4">
+            {/* Surah Number Medallion */}
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-islamic-gold/20 blur-md rounded-xl" aria-hidden="true" />
+              <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 shadow-md">
+                <span className="text-primary font-bold tabular-nums">
+                  {isArabic ? toArabicNumerals(surah.number) : surah.number}
+                </span>
+              </div>
             </div>
 
             {/* Surah Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-1.5">
-                <div>
-                  <h3 className={`text-lg font-semibold leading-tight ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
+                <div className="min-w-0 flex-1">
+                  <h3 className={`text-base sm:text-lg font-bold leading-tight break-words ${settings.fontType === 'quran' ? 'quran-font' : ''}`}>
                     {isArabic ? surah.name : surah.englishName}
                   </h3>
                   {!isArabic && (
-                    <p className="text-sm text-muted-foreground mt-0.5">{surah.name}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5 quran-font break-words">{surah.name}</p>
                   )}
                 </div>
                 
@@ -579,6 +582,7 @@ const Quran = () => {
                     size="icon"
                     className="h-8 w-8"
                     onClick={(e) => toggleSurahBookmark(surah.number, e)}
+                    aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
                   >
                     <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                   </Button>
@@ -587,43 +591,26 @@ const Quran = () => {
               
               {/* Translation - Only for English */}
               {!isArabic && (
-                <p className="text-xs text-muted-foreground mb-2">{surah.englishNameTranslation}</p>
+                <p className="text-xs text-muted-foreground mb-2 italic break-words">{surah.englishNameTranslation}</p>
               )}
               
-              {/* Meta Info */}
-              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                {/* Verse Count */}
-                <span className="flex items-center gap-1">
-                  {isArabic 
+              {/* Meta chips — wrap nicely on mobile */}
+              <div className="flex items-center gap-1.5 flex-wrap text-[10px] sm:text-xs">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground font-medium">
+                  {isArabic
                     ? `${toArabicNumerals(surah.numberOfAyahs)} آية`
                     : `${surah.numberOfAyahs} verses`}
                 </span>
-                
-                <span className="text-border">•</span>
-                
-                {/* Revelation Type with Icon */}
-                <span className="flex items-center gap-1">
-                  {isMeccan ? (
-                    <Building2 className="h-3 w-3" />
-                  ) : (
-                    <TreePalm className="h-3 w-3" />
-                  )}
-                  {isArabic 
-                    ? (isMeccan ? 'مكية' : 'مدنية')
-                    : surah.revelationType}
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium ${isMeccan ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'}`}>
+                  {isMeccan ? <Building2 className="h-3 w-3" /> : <TreePalm className="h-3 w-3" />}
+                  {isArabic ? (isMeccan ? 'مكية' : 'مدنية') : surah.revelationType}
                 </span>
-                
-                <span className="text-border">•</span>
-                
-                {/* Page Range */}
-                <span>{getPageRangeDisplay(surah.number, settings.language)}</span>
-                
-                <span className="text-border">•</span>
-                
-                {/* Juz */}
-                <span className="flex items-center gap-1">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
                   <Layers className="h-3 w-3" />
                   {getJuzDisplay(surah.number, settings.language)}
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/60 text-muted-foreground font-medium">
+                  {getPageRangeDisplay(surah.number, settings.language)}
                 </span>
               </div>
             </div>
@@ -653,9 +640,9 @@ const Quran = () => {
   }
 
   return (
-    <div className="min-h-screen pb-8">
+    <div className="min-h-screen pb-8 overflow-x-hidden">
       {/* Hero Section */}
-      <div className="relative pt-12 pb-8 px-4 animate-fade-in">
+      <div className="relative pt-8 sm:pt-12 pb-6 sm:pb-8 px-4 animate-fade-in">
         {/* Decorative Islamic Pattern Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -670,18 +657,18 @@ const Quran = () => {
         <div className="absolute top-0 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
         <div className="absolute top-0 right-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
 
-        <div className="relative text-center space-y-4 max-w-2xl mx-auto">
+        <div className="relative text-center space-y-3 sm:space-y-4 max-w-2xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border border-primary/20 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 sm:py-2 rounded-full glass-card border-primary/20">
             <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-            <span className="text-xs font-semibold text-primary tracking-wider">
+            <span className="text-[11px] sm:text-xs font-bold text-primary tracking-wider uppercase">
               {isArabic ? '١١٤ سورة' : '114 Surahs'}
             </span>
           </div>
 
           {/* Main Title */}
           <div className="relative">
-            <h1 className="text-6xl md:text-7xl font-bold tracking-tight relative z-10">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight relative z-10 px-2">
               <span className={`bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-sm ${isArabic ? 'arabic-regal' : ''}`} style={{ lineHeight: '1.2' }}>
                 {isArabic ? 'القرآن الكريم' : 'The Holy Quran'}
               </span>
@@ -690,7 +677,7 @@ const Quran = () => {
           </div>
 
           {/* Subtitle */}
-          <p className="text-base text-muted-foreground font-light tracking-wide">
+          <p className="text-sm sm:text-base text-muted-foreground font-light tracking-wide italic">
             {isArabic ? 'اختر سورة للقراءة والتدبر' : 'Select a surah to read and reflect'}
           </p>
         </div>
@@ -699,14 +686,18 @@ const Quran = () => {
       {/* Search Bar */}
       <div className="px-4 mb-4">
         <div className="relative max-w-2xl mx-auto">
-          <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'}`} />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={isArabic ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search surah name or page number (1-604)...'}
-            className={`h-14 rounded-2xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
-            dir={isArabic ? 'rtl' : 'ltr'}
-          />
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-islamic-gold/15 to-primary/15 rounded-3xl blur-md opacity-50" aria-hidden="true" />
+          <div className="relative">
+            <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'} pointer-events-none`} />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={isArabic ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search surah or page (1-604)...'}
+              className={`h-12 sm:h-14 rounded-2xl glass-card border-border/40 hover:border-primary/30 focus-visible:border-primary/50 smooth-transition text-sm sm:text-base shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
+              dir={isArabic ? 'rtl' : 'ltr'}
+              aria-label={isArabic ? 'بحث' : 'Search'}
+            />
+          </div>
         </div>
       </div>
 

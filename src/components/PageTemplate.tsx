@@ -145,7 +145,7 @@ export const QuickActionsRow: React.FC<QuickActionsRowProps> = ({
 }) => (
   <div
     className={cn(
-      "flex gap-2.5 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory",
+      "flex gap-2.5 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1",
       className
     )}
     role="toolbar"
@@ -160,7 +160,7 @@ export const QuickActionsRow: React.FC<QuickActionsRowProps> = ({
           aria-label={action.ariaLabel || action.label}
           className="press-tile snap-start group flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
         >
-          <div className="glass-card rounded-2xl px-3.5 py-2.5 flex items-center gap-2.5 hover:border-primary/30 smooth-transition min-w-[120px]">
+          <div className="glass-card rounded-2xl px-3 py-2.5 flex items-center gap-2 hover:border-primary/30 smooth-transition min-w-[104px]">
             <div
               className={cn(
                 "w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center shadow-sm group-hover:scale-105 smooth-transition",

@@ -865,7 +865,7 @@ const SurahDetail = () => {
       </Button>
 
       {/* Header */}
-      <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
+      <div className="glass-card rounded-3xl p-5 sm:p-6 md:p-8">
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
@@ -997,27 +997,32 @@ const SurahDetail = () => {
             return (
               <React.Fragment key={ayah.number}>
                 {juzMarker && (
-                  <div className="flex items-center gap-3 py-3">
-                    <div className="flex-1 h-px bg-destructive/30" />
-                    <span className="text-xs font-bold text-destructive px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20 whitespace-nowrap">
+                  <div className="flex items-center gap-2 sm:gap-3 py-3">
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-islamic-gold/40 to-islamic-gold/40 min-w-[20px]" />
+                    <span className="text-[10px] sm:text-xs font-bold text-islamic-gold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-islamic-gold/10 border border-islamic-gold/30 text-center break-words max-w-[70%]">
                       {settings.language === 'ar'
-                        ? `نهاية الجزء ${toArabicNumerals(juzMarker.juzEnding)} — بداية الجزء ${toArabicNumerals(juzMarker.juzStarting)}`
-                        : `End of Juz ${juzMarker.juzEnding} — Start of Juz ${juzMarker.juzStarting}`}
+                        ? `جزء ${toArabicNumerals(juzMarker.juzEnding)} ← ${toArabicNumerals(juzMarker.juzStarting)}`
+                        : `Juz ${juzMarker.juzEnding} → ${juzMarker.juzStarting}`}
                     </span>
-                    <div className="flex-1 h-px bg-destructive/30" />
+                    <div className="flex-1 h-px bg-gradient-to-l from-transparent via-islamic-gold/40 to-islamic-gold/40 min-w-[20px]" />
                   </div>
                 )}
                 <div
                   data-ayah={ayah.numberInSurah}
-                  className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
-                    playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
+                  className={`glass-card rounded-2xl p-4 sm:p-6 space-y-4 smooth-transition ${
+                    playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah
+                      ? 'ring-2 ring-primary bg-primary/5 shadow-[0_0_30px_-10px_hsl(var(--primary)/0.4)]'
+                      : 'hover:border-primary/20'
                   }`}
                 >
             {/* Ayah Number & Play */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-bold">{ayah.numberInSurah}</span>
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-islamic-gold/40 to-primary/30 blur-md rounded-full" aria-hidden="true" />
+                  <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-islamic-gold/20 to-primary/15 flex items-center justify-center border border-islamic-gold/30 shadow-sm">
+                    <span className="text-primary font-bold text-sm tabular-nums">{ayah.numberInSurah}</span>
+                  </div>
                 </div>
                 {searchTerm && (
                   <Button

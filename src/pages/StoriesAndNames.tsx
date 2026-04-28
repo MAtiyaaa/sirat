@@ -66,10 +66,10 @@ const StoriesAndNames = () => {
         },
         {
           icon: Sparkles,
-          titleAr: "أسماء النبي محمد",
-          titleEn: "Names of Muhammad ﷺ",
+          titleAr: "ألقاب النبي ﷺ",
+          titleEn: "Titles of the Prophet ﷺ",
           descAr: "أسماء وألقاب النبي صلى الله عليه وسلم",
-          descEn: "Names and titles of the Prophet",
+          descEn: "The blessed names and titles of the Final Messenger ﷺ",
           link: "/names-of-muhammad",
           gradient: "from-amber-500 to-orange-500",
         },
