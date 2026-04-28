@@ -686,14 +686,18 @@ const Quran = () => {
       {/* Search Bar */}
       <div className="px-4 mb-4">
         <div className="relative max-w-2xl mx-auto">
-          <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'}`} />
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder={isArabic ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search surah name or page number (1-604)...'}
-            className={`h-14 rounded-2xl glass-effect border-border/30 hover:border-primary/30 smooth-transition text-base backdrop-blur-xl shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
-            dir={isArabic ? 'rtl' : 'ltr'}
-          />
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/15 via-islamic-gold/15 to-primary/15 rounded-3xl blur-md opacity-50" aria-hidden="true" />
+          <div className="relative">
+            <Search className={`absolute top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground ${isArabic ? 'right-4' : 'left-4'} pointer-events-none`} />
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder={isArabic ? 'ابحث عن سورة أو رقم الصفحة...' : 'Search surah or page (1-604)...'}
+              className={`h-12 sm:h-14 rounded-2xl glass-card border-border/40 hover:border-primary/30 focus-visible:border-primary/50 smooth-transition text-sm sm:text-base shadow-lg ${isArabic ? 'pr-12 text-right' : 'pl-12'}`}
+              dir={isArabic ? 'rtl' : 'ltr'}
+              aria-label={isArabic ? 'بحث' : 'Search'}
+            />
+          </div>
         </div>
       </div>
 
