@@ -1009,8 +1009,10 @@ const SurahDetail = () => {
                 )}
                 <div
                   data-ayah={ayah.numberInSurah}
-                  className={`glass-effect rounded-2xl p-6 space-y-4 smooth-transition ${
-                    playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah ? 'ring-2 ring-primary bg-primary/5' : ''
+                  className={`glass-card rounded-2xl p-4 sm:p-6 space-y-4 smooth-transition ${
+                    playingSurah === parseInt(surahNumber!) && globalPlayingAyah === ayah.numberInSurah
+                      ? 'ring-2 ring-primary bg-primary/5 shadow-[0_0_30px_-10px_hsl(var(--primary)/0.4)]'
+                      : 'hover:border-primary/20'
                   }`}
                 >
             {/* Ayah Number & Play */}
