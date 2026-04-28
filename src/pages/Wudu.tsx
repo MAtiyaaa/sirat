@@ -172,7 +172,7 @@ const Wudu = () => {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 md:space-y-8 overflow-x-hidden">
       {/* Ramadan Banner with Suhoor/Iftar at top */}
       {isRamadan() && prayerTimes && (
         <RamadanBanner variant="prayer" prayerTimes={{ Fajr: prayerTimes.Fajr, Maghrib: prayerTimes.Maghrib }} />
@@ -229,10 +229,16 @@ const Wudu = () => {
       />
 
       {/* Prayer Times Grid */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold">
-          {settings.language === "ar" ? "أوقات الصلاة" : "Prayer Times"}
-        </h2>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3 px-1">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-islamic-gold flex items-center justify-center shadow-sm" aria-hidden="true">
+            <Sparkles className="h-4 w-4 text-white" strokeWidth={2.4} />
+          </div>
+          <h2 className="text-base font-bold tracking-tight">
+            {settings.language === "ar" ? "أوقات الصلاة" : "Prayer Times"}
+          </h2>
+          <div className="ornate-divider flex-1 max-w-[120px]" aria-hidden="true" />
+        </div>
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
