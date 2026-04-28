@@ -997,14 +997,14 @@ const SurahDetail = () => {
             return (
               <React.Fragment key={ayah.number}>
                 {juzMarker && (
-                  <div className="flex items-center gap-3 py-3">
-                    <div className="flex-1 h-px bg-destructive/30" />
-                    <span className="text-xs font-bold text-destructive px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20 whitespace-nowrap">
+                  <div className="flex items-center gap-2 sm:gap-3 py-3">
+                    <div className="flex-1 h-px bg-gradient-to-r from-transparent via-islamic-gold/40 to-islamic-gold/40 min-w-[20px]" />
+                    <span className="text-[10px] sm:text-xs font-bold text-islamic-gold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-islamic-gold/10 border border-islamic-gold/30 text-center break-words max-w-[70%]">
                       {settings.language === 'ar'
-                        ? `نهاية الجزء ${toArabicNumerals(juzMarker.juzEnding)} — بداية الجزء ${toArabicNumerals(juzMarker.juzStarting)}`
-                        : `End of Juz ${juzMarker.juzEnding} — Start of Juz ${juzMarker.juzStarting}`}
+                        ? `جزء ${toArabicNumerals(juzMarker.juzEnding)} ← ${toArabicNumerals(juzMarker.juzStarting)}`
+                        : `Juz ${juzMarker.juzEnding} → ${juzMarker.juzStarting}`}
                     </span>
-                    <div className="flex-1 h-px bg-destructive/30" />
+                    <div className="flex-1 h-px bg-gradient-to-l from-transparent via-islamic-gold/40 to-islamic-gold/40 min-w-[20px]" />
                   </div>
                 )}
                 <div
