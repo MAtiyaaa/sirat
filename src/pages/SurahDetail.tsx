@@ -865,7 +865,7 @@ const SurahDetail = () => {
       </Button>
 
       {/* Header */}
-      <div className="glass-effect rounded-3xl p-6 md:p-8 border border-border/50 backdrop-blur-xl">
+      <div className="glass-card rounded-3xl p-5 sm:p-6 md:p-8">
         <div className="space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
