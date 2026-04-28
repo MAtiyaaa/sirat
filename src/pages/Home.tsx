@@ -195,31 +195,32 @@ const Home = () => {
   ] : [];
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] pb-8">
-      <div className="w-full max-w-4xl mx-auto px-4 space-y-8">
+    <div className="min-h-[calc(100vh-8rem)] pb-8 overflow-x-hidden">
+      <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 space-y-7 md:space-y-8">
         
         {/* Hero Section - Rich & Immersive */}
-        <div className="relative pt-10 pb-6 animate-fade-in">
+        <div className="relative pt-8 sm:pt-10 pb-4 sm:pb-6 animate-fade-in">
           {/* Layered background with Islamic pattern */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none islamic-pattern-bg opacity-60" />
           
           {/* Warm gradient orbs */}
-          <div className="absolute -top-12 left-1/4 w-72 h-72 bg-primary/8 rounded-full blur-3xl animate-glow-pulse" />
-          <div className="absolute -top-8 right-1/4 w-56 h-56 bg-islamic-gold/6 rounded-full blur-3xl animate-glow-pulse" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute -top-12 left-1/4 w-72 h-72 bg-primary/8 rounded-full blur-3xl animate-glow-pulse pointer-events-none" />
+          <div className="absolute -top-8 right-1/4 w-56 h-56 bg-islamic-gold/8 rounded-full blur-3xl animate-glow-pulse pointer-events-none" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-islamic-emerald/5 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative text-center space-y-5">
+          <div className="relative text-center space-y-4 sm:space-y-5">
             {/* Bismillah Badge */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass-card">
-              <Star className="h-3.5 w-3.5 text-islamic-gold" />
-              <span className="text-xs font-semibold text-foreground/80 tracking-wider">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full glass-card border-islamic-gold/20">
+              <Star className="h-3.5 w-3.5 text-islamic-gold animate-glow-pulse" />
+              <span className="text-[11px] sm:text-xs font-semibold text-foreground/80 tracking-wider quran-font">
                 بسم الله الرحمن الرحيم
               </span>
-              <Star className="h-3.5 w-3.5 text-islamic-gold" />
+              <Star className="h-3.5 w-3.5 text-islamic-gold animate-glow-pulse" style={{ animationDelay: '1s' }} />
             </div>
             
             {/* Main Title */}
             <div className="relative">
-              <h1 className="text-7xl md:text-8xl font-bold tracking-tight ios-26-style relative z-10">
+              <h1 className="text-6xl sm:text-7xl md:text-8xl font-bold tracking-tight ios-26-style relative z-10 px-2">
                 {settings.language === 'ar' ? (
                   <span className="bg-gradient-to-br from-foreground via-primary to-foreground bg-clip-text text-transparent arabic-regal drop-shadow-sm" style={{ lineHeight: '1.1' }}>
                     صراط
@@ -230,11 +231,11 @@ const Home = () => {
                   </span>
                 )}
               </h1>
-              <div className="absolute inset-0 blur-3xl opacity-15 bg-gradient-to-r from-primary/40 via-islamic-gold/30 to-primary/40 -z-10" />
+              <div className="absolute inset-0 blur-3xl opacity-20 bg-gradient-to-r from-primary/40 via-islamic-gold/30 to-primary/40 -z-10" />
             </div>
             
             {/* Subtitle */}
-            <p className="text-base text-muted-foreground font-light tracking-wide">
+            <p className="text-sm sm:text-base text-muted-foreground font-light tracking-wide italic">
                {showRamadan
                 ? (settings.language === 'ar' ? 'رمضان كريم' : 'Ramadan Kareem')
                 : (settings.language === 'ar' ? 'اقرأ. تدبّر. تذكّر.' : 'Read. Reflect. Remember.')}
@@ -245,24 +246,27 @@ const Home = () => {
         {/* Ramadan Banner */}
         {showRamadan && <RamadanBanner variant="home" />}
 
-        {/* Prayer Times - Immersive Glass Strip */}
+        {/* Prayer Times — refined mobile glass strip */}
         {!prayerTimesLoading && homePrayerTimes && (
-          <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <div className="glass-card rounded-2xl p-1.5">
-              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-                {prayerList.map((p) => (
-                  <div
-                    key={p.name}
-                    className="flex-1 min-w-[64px] rounded-xl p-2.5 text-center smooth-transition hover:bg-primary/8"
-                  >
-                    <div className="flex justify-center mb-1">{prayerIcons[p.iconName]}</div>
-                    <p className="text-[10px] font-semibold text-muted-foreground">{p.name}</p>
-                    <p className="text-sm font-bold text-foreground">{p.time}</p>
-                  </div>
-                ))}
+          <Link to="/prayer" className="block animate-fade-in group" style={{ animationDelay: '100ms' }}>
+            <div className="relative overflow-hidden rounded-2xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-islamic-gold/8 to-primary/5 blur-xl opacity-70 group-hover:opacity-100 smooth-transition" aria-hidden="true" />
+              <div className="relative glass-card rounded-2xl p-2 group-hover:border-primary/30 smooth-transition">
+                <div className="flex gap-1 sm:gap-1.5">
+                  {prayerList.map((p) => (
+                    <div
+                      key={p.name}
+                      className="flex-1 min-w-0 rounded-xl p-2 sm:p-2.5 text-center smooth-transition hover:bg-primary/8"
+                    >
+                      <div className="flex justify-center mb-1">{prayerIcons[p.iconName]}</div>
+                      <p className="text-[9px] sm:text-[10px] font-bold text-muted-foreground tracking-wider truncate">{p.name}</p>
+                      <p className="text-xs sm:text-sm font-bold text-foreground tabular-nums">{p.time}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         )}
 
         {/* Sign In Banner */}
