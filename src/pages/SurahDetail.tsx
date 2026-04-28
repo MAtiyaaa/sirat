@@ -1018,8 +1018,11 @@ const SurahDetail = () => {
             {/* Ayah Number & Play */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-bold">{ayah.numberInSurah}</span>
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-islamic-gold/40 to-primary/30 blur-md rounded-full" aria-hidden="true" />
+                  <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-islamic-gold/20 to-primary/15 flex items-center justify-center border border-islamic-gold/30 shadow-sm">
+                    <span className="text-primary font-bold text-sm tabular-nums">{ayah.numberInSurah}</span>
+                  </div>
                 </div>
                 {searchTerm && (
                   <Button
