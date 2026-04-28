@@ -733,27 +733,32 @@ const Qalam = () => {
             </button>
           </div>
         )}
-        <div className="glass-effect rounded-2xl p-2 md:p-3 flex gap-2 mb-4 md:mb-0 sticky bottom-0 bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg">
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !isLoading && handleSend()}
-            placeholder={
-              isPrivateMode 
-                ? (settings.language === 'ar' ? 'محادثة خاصة - لن يتم الحفظ...' : 'Private chat - not saved...')
-                : (settings.language === 'ar' ? 'اكتب سؤالك هنا...' : 'Type your question here...')
-            }
-            className="border-0 bg-transparent focus-visible:ring-0 text-sm md:text-base"
-            disabled={isLoading}
-          />
-          <Button
-            onClick={handleSend}
-            size="icon"
-            className="rounded-xl h-8 w-8 md:h-9 md:w-9 shrink-0"
-            disabled={isLoading || !input.trim()}
-          >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
-          </Button>
+        <div className="relative sticky bottom-0 mb-4 md:mb-0">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-islamic-gold/20 to-primary/20 rounded-3xl blur-lg opacity-60" aria-hidden="true" />
+          <div className="relative glass-card rounded-2xl p-2 md:p-2.5 flex items-center gap-2 border-primary/20 shadow-lg">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && !isLoading && handleSend()}
+              placeholder={
+                isPrivateMode
+                  ? (settings.language === 'ar' ? 'محادثة خاصة - لن يتم الحفظ...' : 'Private chat — not saved...')
+                  : (settings.language === 'ar' ? 'اسأل قلم أي شيء...' : 'Ask Qalam anything...')
+              }
+              className="border-0 bg-transparent focus-visible:ring-0 text-sm md:text-base placeholder:text-muted-foreground/60"
+              disabled={isLoading}
+              aria-label={settings.language === 'ar' ? 'سؤالك' : 'Your question'}
+            />
+            <Button
+              onClick={handleSend}
+              size="icon"
+              className="rounded-xl h-9 w-9 md:h-10 md:w-10 shrink-0 bg-gradient-to-br from-primary to-primary/80 hover:from-primary hover:to-islamic-gold smooth-transition shadow-md"
+              disabled={isLoading || !input.trim()}
+              aria-label={settings.language === 'ar' ? 'إرسال' : 'Send'}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
