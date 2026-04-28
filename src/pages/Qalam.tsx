@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown, ArrowLeft, Lock, LockOpen } from 'lucide-react';
+import { SendHorizontal, Sparkles, Loader2, Trash2, Plus, History, ArrowDown, ArrowLeft, Lock, LockOpen, Building2, BookOpen, Users, Clock, Star, Hand, Compass } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
@@ -490,18 +490,21 @@ const Qalam = () => {
       )}
       
       <div className="text-center py-2 pt-12 md:pt-14">
-        <div className="flex items-center justify-center gap-3 mb-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass-effect border border-border/30">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-              <Sparkles className="h-3 w-3 text-white" />
+        <div className="flex items-center justify-center gap-3 mb-1.5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card border-primary/20">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/40 rounded-full blur-md animate-glow-pulse" aria-hidden="true" />
+              <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-primary via-primary/80 to-islamic-gold flex items-center justify-center">
+                <Sparkles className="h-3 w-3 text-white" />
+              </div>
             </div>
-            <span className="text-xs font-semibold">
+            <span className="text-xs font-bold tracking-wide">
               {settings.language === 'ar' ? 'قلم' : 'Qalam'}
             </span>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground px-4">
-          {settings.language === 'ar' 
+        <p className="text-[11px] text-muted-foreground px-4">
+          {settings.language === 'ar'
             ? 'اسأل عن الإسلام والقرآن والحديث'
             : 'Ask about Islam, Quran, and Hadith'}
         </p>
@@ -514,38 +517,88 @@ const Qalam = () => {
         className="flex-1 overflow-y-auto space-y-4 mb-4"
       >
         {messages.length === 0 ? (
-          <div className="text-center py-12 px-4">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-primary/10 flex items-center justify-center mx-auto mb-6 animate-pulse">
-              <Sparkles className="h-12 w-12 text-primary" />
+          <div className="text-center py-8 md:py-12 px-3 animate-fade-in">
+            {/* Ornamental hero */}
+            <div className="relative w-28 h-28 mx-auto mb-6">
+              <div className="absolute inset-0 bg-gradient-to-br from-islamic-gold/30 via-primary/25 to-islamic-emerald/20 rounded-[2rem] blur-2xl animate-glow-pulse" aria-hidden="true" />
+              <div className="absolute inset-2 rounded-[1.75rem] islamic-pattern-bg opacity-60" aria-hidden="true" />
+              <div className="relative w-full h-full rounded-[2rem] glass-card border-primary/20 flex items-center justify-center">
+                <div className="absolute inset-3 rounded-3xl border border-islamic-gold/30" aria-hidden="true" />
+                <Sparkles className="h-12 w-12 text-primary" strokeWidth={1.6} />
+              </div>
             </div>
-            <h3 className="text-xl font-semibold mb-2">
-              {settings.language === 'ar'
-                ? 'مرحباً بك في قلم'
-                : 'Welcome to Qalam'}
+
+            <p className="section-label mb-2">
+              {settings.language === 'ar' ? 'مساعدك الإسلامي' : 'Your Islamic Companion'}
+            </p>
+            <h3 className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
+              {settings.language === 'ar' ? 'مرحباً بك في قلم' : 'Welcome to Qalam'}
             </h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto px-2 leading-relaxed">
               {settings.language === 'ar'
                 ? 'اطرح أي سؤال عن الإسلام وسأساعدك بإجابات مفصلة ومصادر موثوقة'
-                : 'Ask me anything about Islam and I\'ll help with detailed answers and trusted sources'}
+                : 'Ask me anything about Islam and I\'ll respond with detailed answers and trusted sources'}
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
+
+            <div className="ornate-divider max-w-[180px] mx-auto mb-6" aria-hidden="true" />
+
+            <p className="section-label mb-3">
+              {settings.language === 'ar' ? 'جرّب أن تسأل' : 'Try asking'}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-2xl mx-auto">
               {[
-                { q: settings.language === 'ar' ? 'ما هي أركان الإسلام؟' : 'What are the pillars of Islam?', icon: '🕌' },
-                { q: settings.language === 'ar' ? 'اشرح لي سورة الفاتحة' : 'Explain Surah Al-Fatiha', icon: '📖' },
-                { q: settings.language === 'ar' ? 'من هم الخلفاء الراشدون؟' : 'Who were the Rashidun Caliphs?', icon: '👥' },
-                { q: settings.language === 'ar' ? 'ما هي أوقات الصلاة؟' : 'What are the prayer times?', icon: '⏰' },
-              ].map((example, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setInput(example.q)}
-                  className="glass-effect rounded-2xl p-4 text-left hover:border-primary/30 border border-border/30 smooth-transition group"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl group-hover:scale-110 smooth-transition">{example.icon}</span>
-                    <span className="text-sm">{example.q}</span>
-                  </div>
-                </button>
-              ))}
+                {
+                  q: settings.language === 'ar' ? 'ما هي أركان الإسلام؟' : 'What are the pillars of Islam?',
+                  icon: Building2,
+                  gradient: 'from-emerald-500 to-teal-600',
+                },
+                {
+                  q: settings.language === 'ar' ? 'اشرح لي سورة الفاتحة' : 'Explain Surah Al-Fatiha',
+                  icon: BookOpen,
+                  gradient: 'from-blue-500 to-indigo-600',
+                },
+                {
+                  q: settings.language === 'ar' ? 'من هم الخلفاء الراشدون؟' : 'Who were the Rashidun Caliphs?',
+                  icon: Users,
+                  gradient: 'from-amber-500 to-orange-600',
+                },
+                {
+                  q: settings.language === 'ar' ? 'ما هي أوقات الصلاة؟' : 'What are the prayer times?',
+                  icon: Clock,
+                  gradient: 'from-violet-500 to-purple-600',
+                },
+                {
+                  q: settings.language === 'ar' ? 'كيف أتوضأ؟' : 'How do I perform Wudu?',
+                  icon: Hand,
+                  gradient: 'from-cyan-500 to-sky-600',
+                },
+                {
+                  q: settings.language === 'ar' ? 'أين القبلة؟' : 'Where is the Qibla?',
+                  icon: Compass,
+                  gradient: 'from-rose-500 to-pink-600',
+                },
+              ].map((example, idx) => {
+                const Icon = example.icon;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setInput(example.q)}
+                    className="press-tile glass-card rounded-2xl p-3.5 text-left border-border/40 hover:border-primary/40 smooth-transition group focus-ring animate-fade-in"
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                    dir={settings.language === 'ar' ? 'rtl' : 'ltr'}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br ${example.gradient} flex items-center justify-center shadow-md group-hover:scale-105 smooth-transition`} aria-hidden="true">
+                        <Icon className="h-5 w-5 text-white" strokeWidth={2.2} />
+                      </div>
+                      <span className="text-sm font-medium leading-snug break-words min-w-0 flex-1">
+                        {example.q}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : (
