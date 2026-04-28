@@ -399,22 +399,23 @@ const Home = () => {
             </p>
             <div className="ornate-divider flex-1" />
           </div>
-          <div className="grid grid-cols-4 gap-5 pb-2">
+          <div className="grid grid-cols-4 gap-3 sm:gap-4 pb-2">
             {appBoxes.map((app) => {
               const Icon = app.icon;
               return (
                 <Link
                   key={app.link}
                   to={app.link}
-                  className="flex flex-col items-center gap-2.5 group"
+                  className="flex flex-col items-center gap-2 group focus-ring rounded-xl py-1"
+                  aria-label={app.title[settings.language]}
                 >
                   {/* App icon with rich depth */}
-                  <div className={`w-[58px] h-[58px] rounded-[24%] bg-gradient-to-br ${app.gradient} flex items-center justify-center rich-shadow group-hover:scale-110 smooth-transition relative overflow-hidden group-active:scale-95`}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" />
-                    <div className="absolute inset-0 rounded-[24%] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.15)]" />
-                    <Icon className="h-7 w-7 text-white relative z-10 drop-shadow-sm" strokeWidth={2.2} />
+                  <div className={`w-[52px] h-[52px] sm:w-[58px] sm:h-[58px] rounded-[24%] bg-gradient-to-br ${app.gradient} flex items-center justify-center rich-shadow group-hover:scale-110 smooth-transition relative overflow-hidden group-active:scale-95`}>
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/25 to-transparent" aria-hidden="true" />
+                    <div className="absolute inset-0 rounded-[24%] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.15)]" aria-hidden="true" />
+                    <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white relative z-10 drop-shadow-sm" strokeWidth={2.2} />
                   </div>
-                  <span className="text-[11px] font-medium text-center leading-tight w-full truncate px-0.5">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-center leading-tight w-full break-words px-0.5">
                     {app.title[settings.language]}
                   </span>
                 </Link>
